@@ -1,0 +1,3 @@
+name: MineStore
+version: '${version}'
+main: me.chrommob.minestore.MineStore
