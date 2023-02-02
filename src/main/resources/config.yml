@@ -1,0 +1,4 @@
+command-mode: weblistener
+store-url: https://store.example.com
+secret-enabled: true
+secret-key: 1234567890
