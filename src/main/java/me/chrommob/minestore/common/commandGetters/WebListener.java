@@ -61,7 +61,15 @@ public class WebListener implements CommandGetter {
         public void run() {
             while (true) {
                 if (!running) {
-                    return;
+                    continue;
+                }
+                if (wasEmpty) {
+                    try {
+                        Thread.sleep(25000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
                 }
                 try {
                     GsonReponse response;
