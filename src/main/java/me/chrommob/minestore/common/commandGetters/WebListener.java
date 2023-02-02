@@ -89,7 +89,7 @@ public class WebListener implements CommandGetter {
                         }
                     }
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
                 try {
                     Thread.sleep(5000);
