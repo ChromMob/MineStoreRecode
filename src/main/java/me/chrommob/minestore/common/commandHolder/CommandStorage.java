@@ -3,16 +3,34 @@ package me.chrommob.minestore.common.commandHolder;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 public class CommandStorage {
-    private Map<String, String> commands;
-    public CommandStorage() {
-        commands = new ConcurrentHashMap<>();
+    private Map<String, List<String>> commands;
+
+    private void remove(String username) {
+        MineStoreCommon.getInstance().debug("Removing " + username + " from command storage");
+        commands.remove(username);
+        MineStoreCommon.getInstance().commandDumper().update(commands);
     }
 
+    private void add(String username, String command) {
+        MineStoreCommon.getInstance().debug("Adding " + command + " to " + username + " in command storage");
+        if (commands.containsKey(username)) {
+            commands.get(username).add(command);
+        } else {
+            commands.put(username, new ArrayList<>(Collections.singletonList(command)));
+        }
+        MineStoreCommon.getInstance().commandDumper().update(commands);
+    }
+
+    public void onPlayerJoin(String username) {
+        if (commands.containsKey(username)) {
+            MineStoreCommon.getInstance().debug("Executing commands for " + username);
+            commands.get(username).forEach(MineStoreCommon.getInstance().commandExecuter()::execute);
+            remove(username);
+        }
+    }
 
     public void listener(ParsedResponse command) {
         if (command.type() == ParsedResponse.TYPE.AUTH) {
@@ -31,10 +49,14 @@ public class CommandStorage {
             MineStoreCommon.getInstance().commandExecuter().execute(command);
             return;
         }
-        commands.put(username, command);
+        add(username, command);
     }
 
     private void handleOfflineCommand(String command) {
         MineStoreCommon.getInstance().commandExecuter().execute(command);
+    }
+
+    public void init() {
+        commands = MineStoreCommon.getInstance().commandDumper().load();
     }
 }

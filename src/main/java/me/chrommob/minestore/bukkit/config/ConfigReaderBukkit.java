@@ -4,11 +4,18 @@ import me.chrommob.minestore.bukkit.MineStoreBukkit;
 import me.chrommob.minestore.common.templates.ConfigReaderCommon;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.io.File;
+
 public class ConfigReaderBukkit implements ConfigReaderCommon {
     private final MineStoreBukkit plugin;
     private FileConfiguration config;
     public ConfigReaderBukkit(MineStoreBukkit plugin) {
         this.plugin = plugin;
+    }
+
+    @Override
+    public File dataFolder() {
+        return plugin.getDataFolder();
     }
 
     @Override
@@ -21,6 +28,7 @@ public class ConfigReaderBukkit implements ConfigReaderCommon {
     @Override
     public void reload() {
         plugin.reloadConfig();
+        config = plugin.getConfig();
     }
 
     @Override
@@ -41,5 +49,10 @@ public class ConfigReaderBukkit implements ConfigReaderCommon {
     @Override
     public String secretKey() {
         return config.getString("secret-key");
+    }
+
+    @Override
+    public boolean debug() {
+        return config.getBoolean("debug");
     }
 }

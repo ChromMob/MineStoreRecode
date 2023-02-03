@@ -1,3 +1,4 @@
+debug: false
 command-mode: weblistener
 store-url: https://store.example.com
 secret-enabled: true

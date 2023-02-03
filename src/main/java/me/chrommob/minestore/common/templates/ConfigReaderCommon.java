@@ -1,6 +1,10 @@
 package me.chrommob.minestore.common.templates;
 
+import java.io.File;
+
 public interface ConfigReaderCommon {
+    File dataFolder();
+
     public enum COMMAND_MODE {
         WEBLISTENER,
         WEBSOCKET
@@ -17,4 +21,6 @@ public interface ConfigReaderCommon {
     boolean secretEnabled();
 
     String secretKey();
+
+    boolean debug();
 }

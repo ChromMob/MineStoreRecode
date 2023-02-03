@@ -52,4 +52,12 @@ public class ParsedResponse {
     public String username() {
         return username;
     }
+
+    public int commandId() {
+        return commandId;
+    }
+
+    public String authId() {
+        return authId;
+    }
 }

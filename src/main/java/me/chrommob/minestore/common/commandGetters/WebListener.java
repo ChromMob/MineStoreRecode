@@ -12,6 +12,7 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 
 public class WebListener implements CommandGetter {
@@ -26,25 +27,30 @@ public class WebListener implements CommandGetter {
         configReader = mineStoreCommon.configReader();
     }
 
-    private URL url;
+    private URL queueUrl;
+    private URL executedUrl;
     @Override
     public boolean load() {
         running = false;
-        String finalUrl;
+        String finalQueueUrl;
+        String finalExecutedUrl;
         String storeUrl = configReader.storeUrl();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         if (configReader.secretEnabled()) {
-            finalUrl = storeUrl + "/servers/" + configReader.secretKey() + "/commands/queue";
+            finalQueueUrl = storeUrl + "/api/servers/" + configReader.secretKey() + "/commands/queue";
+            finalExecutedUrl = storeUrl + "/api/servers/" + configReader.secretKey() + "/commands/executed/";
         } else {
-            finalUrl = storeUrl + "/servers/commands/queue";
+            finalQueueUrl = storeUrl + "/api/servers/commands/queue";
+            finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
         }
         try {
-            url = new URL(finalUrl);
+            queueUrl = new URL(finalQueueUrl);
+            executedUrl = new URL(finalExecutedUrl);
         } catch (Exception e) {
             mineStoreCommon.log("Store URL is not a URL!");
-            e.printStackTrace();
+            MineStoreCommon.getInstance().debug(e);
             return false;
         }
         running = true;
@@ -60,20 +66,23 @@ public class WebListener implements CommandGetter {
         @Override
         public void run() {
             while (true) {
+                mineStoreCommon.debug("Running WebListener");
                 if (!running) {
-                    continue;
+                    return;
                 }
                 if (wasEmpty) {
                     try {
                         Thread.sleep(25000);
+                        wasEmpty = false;
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        MineStoreCommon.getInstance().debug(e);
                     }
                     continue;
                 }
                 try {
+                    ParsedResponse parsedResponse = null;
                     GsonReponse response;
-                    HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                    HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
                     InputStream in = urlConnection.getInputStream();
 
                     BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
@@ -82,23 +91,56 @@ public class WebListener implements CommandGetter {
                     while ((line = reader.readLine()) != null) {
                         try {
                             response = gson.fromJson(line, GsonReponse.class);
-                            ParsedResponse parsedResponse = parseGson(response);
+                            parsedResponse = parseGson(response);
                             mineStoreCommon.commandStorage().listener(parsedResponse);
                         } catch (JsonSyntaxException e) {
+                            mineStoreCommon.debug("Got empty response from server");
                             wasEmpty = true;
                         }
                     }
+                    reader.close();
+                    in.close();
+                    urlConnection.disconnect();
+                    if (!wasEmpty) {
+                        switch (parsedResponse.type()) {
+                            case COMMAND:
+                                mineStoreCommon.debug("Got command: " + parsedResponse.command() + " with id: " + parsedResponse.commandId());
+                                postCommand(parsedResponse);
+                                break;
+                            case AUTH:
+                                mineStoreCommon.debug("Got auth for player: " + parsedResponse.username() + " with id: " + parsedResponse.authId());
+                                break;
+                        }
+                    }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    MineStoreCommon.getInstance().debug(e);
                 }
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    MineStoreCommon.getInstance().debug(e);
                 }
             }
         }
     };
+
+    private void postCommand(ParsedResponse response) {
+        try {
+            URL url = new URL(executedUrl + String.valueOf(response.commandId()));
+            MineStoreCommon.getInstance().debug("Posting to: " + url);
+            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setDoOutput(true);
+            urlConnection.connect();
+            try (final OutputStream os = urlConnection.getOutputStream()) {
+                os.write(response.commandId());
+            }
+            urlConnection.getInputStream();
+            urlConnection.disconnect();
+        } catch (IOException e) {
+            MineStoreCommon.getInstance().debug(e);
+        }
+    }
 
     private ParsedResponse parseGson(GsonReponse response) {
         ParsedResponse.TYPE type;

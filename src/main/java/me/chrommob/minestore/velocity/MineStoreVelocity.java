@@ -1,0 +1,40 @@
+package me.chrommob.minestore.velocity;
+
+import co.aikar.commands.VelocityCommandManager;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ProxyServer;
+import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.velocity.config.ConfigReaderVelocity;
+import me.chrommob.minestore.velocity.events.VelocityPlayerJoin;
+import me.chrommob.minestore.velocity.logger.VelocityLogger;
+import me.chrommob.minestore.velocity.webCommand.CommandExecuterVelocity;
+
+import javax.inject.Inject;
+import java.nio.file.Path;
+import java.util.logging.Logger;
+
+@Plugin(id = "minestore", name = "MineStore", version = "0.1", description = "MineStore plugin for Velocity", authors = {"chrommob"})
+public class MineStoreVelocity {
+
+    @Inject
+    private Logger logger;
+    @Inject
+    private ProxyServer server;
+    @Inject
+    @DataDirectory
+    private Path dataPath;
+
+    @Subscribe
+    private void onProxyInitialization(ProxyInitializeEvent event) {
+        MineStoreCommon common = new MineStoreCommon();
+        common.registerLogger(new VelocityLogger(logger));
+        common.registerCommandExecuter(new CommandExecuterVelocity(server));
+        common.registerConfigReader(new ConfigReaderVelocity(dataPath));
+        common.registerPlayerJoinListener(new VelocityPlayerJoin(this, server));
+        common.registerCommandManager(new VelocityCommandManager(server, this));
+        common.init();
+    }
+}
