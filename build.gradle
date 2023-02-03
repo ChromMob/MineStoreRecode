@@ -40,7 +40,7 @@ dependencies {
     implementation('co.aikar:acf-bungee:0.5.1-SNAPSHOT')
     implementation('co.aikar:acf-velocity:0.5.1-SNAPSHOT')
     annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
-    implementation('co.aika:acf-sponge:0.5.1-SNAPSHOT')
+    implementation('co.aikar:acf-sponge:0.5.1-SNAPSHOT')
 
     implementation('com.google.code.gson:gson:2.8.6')
 
