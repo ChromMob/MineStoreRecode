@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.velocity.config;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.templates.ConfigReaderCommon;
+import me.chrommob.minestore.common.interfaces.ConfigReaderCommon;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;

@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.bungee.logger;
 
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
-import me.chrommob.minestore.common.templates.LoggerCommon;
+import me.chrommob.minestore.common.interfaces.LoggerCommon;
 
 public class LoggerBungee implements LoggerCommon {
     private final MineStoreBungee mineStoreBungee;

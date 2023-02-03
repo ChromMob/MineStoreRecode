@@ -2,7 +2,7 @@ package me.chrommob.minestore.platforms.bungee.config;
 
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.templates.ConfigReaderCommon;
+import me.chrommob.minestore.common.interfaces.ConfigReaderCommon;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-import static jdk.jfr.internal.SecuritySupport.getResourceAsStream;
 
 public class ConfigReaderBungee implements ConfigReaderCommon {
     private final MineStoreBungee mineStoreBungee;
@@ -36,7 +35,7 @@ public class ConfigReaderBungee implements ConfigReaderCommon {
         }
         configFile = new File(dataFolder(), "config.yml");
         if (!configFile.exists()) {
-            try (InputStream in = getResourceAsStream("config.yml")) {
+            try (InputStream in = mineStoreBungee.getResourceAsStream("config.yml")) {
                 Files.copy(in, configFile.toPath());
             } catch (IOException e) {
                 MineStoreCommon.getInstance().debug(e);

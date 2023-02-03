@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.sponge.events;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.templates.PlayerJoinListener;
+import me.chrommob.minestore.common.interfaces.PlayerJoinListener;
 import me.chrommob.minestore.platforms.sponge.MineStoreSponge;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;

@@ -4,7 +4,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.templates.PlayerJoinListener;
+import me.chrommob.minestore.common.interfaces.PlayerJoinListener;
 import me.chrommob.minestore.platforms.velocity.MineStoreVelocity;
 
 public class VelocityPlayerJoin implements PlayerJoinListener {

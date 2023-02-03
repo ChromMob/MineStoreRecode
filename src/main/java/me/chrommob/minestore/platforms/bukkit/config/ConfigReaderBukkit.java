@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.bukkit.config;
 
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
-import me.chrommob.minestore.common.templates.ConfigReaderCommon;
+import me.chrommob.minestore.common.interfaces.ConfigReaderCommon;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;

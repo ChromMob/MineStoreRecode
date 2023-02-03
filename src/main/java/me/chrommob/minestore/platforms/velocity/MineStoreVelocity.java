@@ -10,6 +10,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.velocity.config.ConfigReaderVelocity;
 import me.chrommob.minestore.platforms.velocity.events.VelocityPlayerJoin;
 import me.chrommob.minestore.platforms.velocity.logger.VelocityLogger;
+import me.chrommob.minestore.platforms.velocity.user.VelocityUserGetter;
 import me.chrommob.minestore.platforms.velocity.webCommand.CommandExecuterVelocity;
 
 import javax.inject.Inject;
@@ -31,10 +32,11 @@ public class MineStoreVelocity {
     private void onProxyInitialization(ProxyInitializeEvent event) {
         MineStoreCommon common = new MineStoreCommon();
         common.registerLogger(new VelocityLogger(logger));
+        common.registerUserGetter(new VelocityUserGetter(server));
+        common.registerCommandManager(new VelocityCommandManager(server, this));
         common.registerCommandExecuter(new CommandExecuterVelocity(server));
         common.registerConfigReader(new ConfigReaderVelocity(dataPath));
         common.registerPlayerJoinListener(new VelocityPlayerJoin(this, server));
-        common.registerCommandManager(new VelocityCommandManager(server, this));
         common.init();
     }
 }

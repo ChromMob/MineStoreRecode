@@ -5,8 +5,8 @@ import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
-import me.chrommob.minestore.common.templates.CommandGetter;
-import me.chrommob.minestore.common.templates.ConfigReaderCommon;
+import me.chrommob.minestore.common.interfaces.CommandGetter;
+import me.chrommob.minestore.common.interfaces.ConfigReaderCommon;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;

@@ -2,7 +2,7 @@ package me.chrommob.minestore.platforms.bukkit.events;
 
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.templates.PlayerJoinListener;
+import me.chrommob.minestore.common.interfaces.PlayerJoinListener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;

@@ -1,2 +1,2 @@
 name: MineStore
-main: me.chrommob.minestore.bungee.MineStoreBungee
+main: me.chrommob.minestore.platforms.bungee.MineStoreBungee

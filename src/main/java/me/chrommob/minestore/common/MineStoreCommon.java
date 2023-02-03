@@ -1,14 +1,14 @@
 package me.chrommob.minestore.common;
 
 import co.aikar.commands.CommandManager;
+import me.chrommob.minestore.common.command.AbstractUser;
 import me.chrommob.minestore.common.command.ReloadCommandCommon;
 import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
-import me.chrommob.minestore.common.templates.*;
+import me.chrommob.minestore.common.interfaces.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 public class MineStoreCommon {
@@ -43,6 +43,11 @@ public class MineStoreCommon {
         this.commandManager = commandManager;
     }
 
+    private UserGetter userGetter;
+    public void registerUserGetter(UserGetter userGetter) {
+        this.userGetter = userGetter;
+    }
+
     private CommandGetter commandGetter;
     private CommandStorage commandStorage;
     private CommandDumper commandDumper;
@@ -62,6 +67,14 @@ public class MineStoreCommon {
             return;
         }
         commandGetter.start();
+        commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
+            try {
+                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId()) : new AbstractUser(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        });
         commandManager.registerCommand(new ReloadCommandCommon());
     }
 
@@ -95,6 +108,10 @@ public class MineStoreCommon {
             log("CommandGetter is not registered.");
             return false;
         }
+        if (userGetter == null) {
+            log("UserGetter is not registered.");
+            return false;
+        }
         if (!commandGetter.load()) {
             log("Url is not configured correctly.");
             return false;
@@ -114,6 +131,10 @@ public class MineStoreCommon {
         return commandExecuterCommon;
     }
 
+    public UserGetter userGetter() {
+        return userGetter;
+    }
+
     public void log(String message) {
         logger.log(message);
     }
@@ -128,18 +149,6 @@ public class MineStoreCommon {
         }
     }
 
-    public CommandStorage commandStorage() {
-        return commandStorage;
-    }
-
-    public File dataFolder() {
-        return configReader.dataFolder();
-    }
-
-    public CommandDumper commandDumper() {
-        return commandDumper;
-    }
-
     public void debug(Exception e) {
         if (e.getMessage() != null) {
             debug(e.getMessage());
@@ -150,5 +159,17 @@ public class MineStoreCommon {
         if (e.getCause() != null){
             debug(e.getCause().toString());
         }
+    }
+
+    public CommandStorage commandStorage() {
+        return commandStorage;
+    }
+
+    public File dataFolder() {
+        return configReader.dataFolder();
+    }
+
+    public CommandDumper commandDumper() {
+        return commandDumper;
     }
 }

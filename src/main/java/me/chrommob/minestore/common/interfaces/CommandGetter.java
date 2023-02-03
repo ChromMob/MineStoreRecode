@@ -1,4 +1,4 @@
-package me.chrommob.minestore.common.templates;
+package me.chrommob.minestore.common.interfaces;
 
 public interface CommandGetter {
     boolean load();
