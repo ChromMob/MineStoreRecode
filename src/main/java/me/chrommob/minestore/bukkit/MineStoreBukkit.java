@@ -19,10 +19,8 @@ public final class MineStoreBukkit extends JavaPlugin {
         MineStoreCommon.getInstance().registerCommandExecuter(new CommandExecuterBukkit(this));
         MineStoreCommon.getInstance().registerConfigReader(new ConfigReaderBukkit(this));
         MineStoreCommon.getInstance().registerPlayerJoinListener(new BukkitPlayerJoin(this));
+        MineStoreCommon.getInstance().registerCommandManager(new PaperCommandManager(this));
         MineStoreCommon.getInstance().init();
-
-        PaperCommandManager manager = new PaperCommandManager(this);
-        manager.registerCommand(new ReloadCommandCommon());
     }
 
     @Override

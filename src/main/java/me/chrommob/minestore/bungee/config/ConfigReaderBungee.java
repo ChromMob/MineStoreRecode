@@ -1,6 +1,7 @@
 package me.chrommob.minestore.bungee.config;
 
 import me.chrommob.minestore.bungee.MineStoreBungee;
+import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.templates.ConfigReaderCommon;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -38,7 +39,7 @@ public class ConfigReaderBungee implements ConfigReaderCommon {
             try (InputStream in = getResourceAsStream("config.yml")) {
                 Files.copy(in, configFile.toPath());
             } catch (IOException e) {
-                e.printStackTrace();
+                MineStoreCommon.getInstance().debug(e);
             }
         }
         try {

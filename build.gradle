@@ -24,18 +24,26 @@ repositories {
         name = "aikar-repo"
         url = "https://repo.aikar.co/content/groups/aikar/"
     }
+    maven {
+        name = "sponge-repo"
+        url = "https://repo.spongepowered.org/repository/maven-public/"
+    }
 }
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
     compileOnly 'com.velocitypowered:velocity-api:3.1.1'
     compileOnly 'net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT'
+    compileOnly 'org.spongepowered:spongeapi:7.4.0'
 
-    annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
-    implementation('com.google.code.gson:gson:2.8.6')
     implementation('co.aikar:acf-paper:0.5.1-SNAPSHOT')
     implementation('co.aikar:acf-bungee:0.5.1-SNAPSHOT')
     implementation('co.aikar:acf-velocity:0.5.1-SNAPSHOT')
+    annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
+    implementation('co.aika:acf-sponge:0.5.1-SNAPSHOT')
+
+    implementation('com.google.code.gson:gson:2.8.6')
+
 }
 
 def targetJavaVersion = 8

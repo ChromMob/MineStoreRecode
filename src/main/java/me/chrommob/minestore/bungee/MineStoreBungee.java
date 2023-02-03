@@ -13,9 +13,9 @@ public class MineStoreBungee extends Plugin {
     @Override
     public void onEnable() {
         MineStoreCommon common = new MineStoreCommon();
+        common.registerLogger(new LoggerBungee(this));
         common.registerConfigReader(new ConfigReaderBungee(this));
         common.registerCommandExecuter(new CommandExecuterBungee(this));
-        common.registerLogger(new LoggerBungee(this));
         common.registerPlayerJoinListener(new PlayerJoinListenerBungee(this));
         common.registerCommandManager(new BungeeCommandManager(this));
         common.init();
