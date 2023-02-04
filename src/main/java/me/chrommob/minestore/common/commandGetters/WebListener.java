@@ -66,7 +66,6 @@ public class WebListener implements CommandGetter {
         @Override
         public void run() {
             while (true) {
-                mineStoreCommon.debug("Running WebListener");
                 if (!running) {
                     return;
                 }
@@ -79,6 +78,7 @@ public class WebListener implements CommandGetter {
                     }
                     continue;
                 }
+                mineStoreCommon.debug("[WebListener] Running...");
                 try {
                     ParsedResponse parsedResponse = null;
                     GsonReponse response;
@@ -92,11 +92,14 @@ public class WebListener implements CommandGetter {
                         try {
                             response = gson.fromJson(line, GsonReponse.class);
                             parsedResponse = parseGson(response);
-                            mineStoreCommon.commandStorage().listener(parsedResponse);
                         } catch (JsonSyntaxException e) {
                             mineStoreCommon.debug("Got empty response from server");
                             wasEmpty = true;
                         }
+                    }
+                    if (parsedResponse.username() == null) {
+                        mineStoreCommon.debug("Got empty response from server");
+                        wasEmpty = true;
                     }
                     reader.close();
                     in.close();
@@ -104,13 +107,14 @@ public class WebListener implements CommandGetter {
                     if (!wasEmpty) {
                         switch (parsedResponse.type()) {
                             case COMMAND:
-                                mineStoreCommon.debug("Got command: " + parsedResponse.command() + " with id: " + parsedResponse.commandId());
-                                postCommand(parsedResponse);
+                                mineStoreCommon.commandStorage().listener(parsedResponse);
+                                mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\"" + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username() + " requires online: " + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE) ? "true" : "false"));
                                 break;
                             case AUTH:
                                 mineStoreCommon.debug("Got auth for player: " + parsedResponse.username() + " with id: " + parsedResponse.authId());
                                 break;
                         }
+                        post(parsedResponse);
                     }
                 } catch (IOException e) {
                     MineStoreCommon.getInstance().debug(e);
@@ -124,16 +128,17 @@ public class WebListener implements CommandGetter {
         }
     };
 
-    private void postCommand(ParsedResponse response) {
+    private void post(ParsedResponse response) {
         try {
-            URL url = new URL(executedUrl + String.valueOf(response.commandId()));
+            String id = String.valueOf(response.commandId());
+            URL url = new URL(executedUrl + id);
             MineStoreCommon.getInstance().debug("Posting to: " + url);
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
             urlConnection.setRequestMethod("POST");
             urlConnection.setDoOutput(true);
             urlConnection.connect();
             try (final OutputStream os = urlConnection.getOutputStream()) {
-                os.write(response.commandId());
+                os.write(id.getBytes());
             }
             urlConnection.getInputStream();
             urlConnection.disconnect();
@@ -156,9 +161,9 @@ public class WebListener implements CommandGetter {
             } else {
                 commandType = ParsedResponse.COMMAND_TYPE.OFFLINE;
             }
-            return new ParsedResponse(type, commandType, response.command(), response.username(), response.commandId());
+            return new ParsedResponse(type, commandType, response.command(), response.username(), response.requestId());
         } else {
-            return new ParsedResponse(type, response.username(), response.authId());
+            return new ParsedResponse(type, response.username(), response.authId(), response.requestId());
         }
     }
 }

@@ -12,7 +12,9 @@ public class CommandExecuterBungee implements CommandExecuterCommon {
 
     @Override
     public void execute(String command) {
-        mineStoreBungee.getProxy().getPluginManager().dispatchCommand(mineStoreBungee.getProxy().getConsole(), command);
+        mineStoreBungee.getProxy().getScheduler().schedule(mineStoreBungee, () -> {
+            mineStoreBungee.getProxy().getPluginManager().dispatchCommand(mineStoreBungee.getProxy().getConsole(), command);
+        }, 1, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
     @Override

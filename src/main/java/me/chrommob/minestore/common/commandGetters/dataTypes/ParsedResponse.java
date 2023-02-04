@@ -5,25 +5,25 @@ public class ParsedResponse {
     private final COMMAND_TYPE commandType;
     private final String command;
     private final String username;
-    private final int commandId;
+    private final int requestId;
     private final String authId;
 
 
-    public ParsedResponse(TYPE type, COMMAND_TYPE commandType, String command, String username, int commandId) {
+    public ParsedResponse(TYPE type, COMMAND_TYPE commandType, String command, String username, int requestId) {
         this.type = type;
         this.commandType = commandType;
         this.command = command;
         this.username = username;
-        this.commandId = commandId;
+        this.requestId = requestId;
         this.authId = null;
     }
 
-    public ParsedResponse(TYPE type, String username, String authId) {
+    public ParsedResponse(TYPE type, String username, String authId, int requestId) {
         this.type = type;
         this.commandType = null;
         this.command = null;
         this.username = username;
-        this.commandId = -1;
+        this.requestId = requestId;
         this.authId = authId;
     }
 
@@ -54,7 +54,7 @@ public class ParsedResponse {
     }
 
     public int commandId() {
-        return commandId;
+        return requestId;
     }
 
     public String authId() {

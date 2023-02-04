@@ -40,7 +40,7 @@ public class GsonReponse {
         return playerOnlineNeeded;
     }
 
-    public int commandId() {
+    public int requestId() {
         return id;
     }
 

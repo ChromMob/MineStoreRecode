@@ -33,9 +33,6 @@ public class CommandStorage {
     }
 
     public void listener(ParsedResponse command) {
-        if (command.type() == ParsedResponse.TYPE.AUTH) {
-            return;
-        }
         if (command.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE) {
             handleOnlineCommand(command.command(), command.username());
         } else {
