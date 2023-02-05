@@ -43,7 +43,17 @@ dependencies {
     implementation('co.aikar:acf-sponge:0.5.1-SNAPSHOT')
 
     implementation('com.google.code.gson:gson:2.8.6')
+    implementation "net.kyori:adventure-api:4.12.0"
+    implementation "net.kyori:adventure-platform-bungeecord:4.2.0"
+    implementation "net.kyori:adventure-platform-spongeapi:4.2.0"
+    implementation "net.kyori:adventure-platform-bukkit:4.2.0"
+    implementation "net.kyori:adventure-text-serializer-plain:4.12.0"
+}
 
+shadowJar {
+    relocate 'com.google.gson', 'me.chrommob.minestore.libs.com.google.gson'
+    relocate 'co.aikar', 'me.chrommob.minestore.libs.co.aikar'
+    relocate 'net.kyori', 'me.chrommob.minestore.libs.net.kyori'
 }
 
 def targetJavaVersion = 8

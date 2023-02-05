@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandDumper {
-    private File dumpedFile = new File(MineStoreCommon.getInstance().configReader().dataFolder(), "temp.yaml");
+    private File dumpedFile = new File(MineStoreCommon.getInstance().configFile().getParentFile(), "dumpedCommands.yml");
     private Yaml yaml = new Yaml();
 
     public CommandDumper() {

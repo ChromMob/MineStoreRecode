@@ -29,6 +29,11 @@ public class VelocityUser implements CommonUser {
     }
 
     @Override
+    public void sendMessage(Component message) {
+        player.sendMessage(message);
+    }
+
+    @Override
     public boolean hasPermission(String permission) {
         return player.hasPermission(permission);
     }

@@ -7,7 +7,6 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.platforms.velocity.config.ConfigReaderVelocity;
 import me.chrommob.minestore.platforms.velocity.events.VelocityPlayerJoin;
 import me.chrommob.minestore.platforms.velocity.logger.VelocityLogger;
 import me.chrommob.minestore.platforms.velocity.user.VelocityUserGetter;
@@ -35,7 +34,7 @@ public class MineStoreVelocity {
         common.registerUserGetter(new VelocityUserGetter(server));
         common.registerCommandManager(new VelocityCommandManager(server, this));
         common.registerCommandExecuter(new CommandExecuterVelocity(server));
-        common.registerConfigReader(new ConfigReaderVelocity(dataPath));
+        common.setConfigLocation(dataPath.resolve("config.yml").toFile());
         common.registerPlayerJoinListener(new VelocityPlayerJoin(this, server));
         common.init();
     }

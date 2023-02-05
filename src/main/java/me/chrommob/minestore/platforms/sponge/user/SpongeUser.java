@@ -1,6 +1,8 @@
 package me.chrommob.minestore.platforms.sponge.user;
 
 import me.chrommob.minestore.common.interfaces.CommonUser;
+import me.chrommob.minestore.platforms.sponge.MineStoreSponge;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
@@ -25,6 +27,11 @@ public class SpongeUser implements CommonUser {
     @Override
     public void sendMessage(String message) {
         player.sendMessage(Text.of(message));
+    }
+
+    @Override
+    public void sendMessage(Component message) {
+        MineStoreSponge.getInstance().adventure().player(player).sendMessage(message);
     }
 
     @Override

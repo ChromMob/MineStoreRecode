@@ -8,6 +8,8 @@ import me.chrommob.minestore.common.command.ReloadCommand;
 import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
+import me.chrommob.minestore.common.config.ConfigKey;
+import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.interfaces.*;
 
 import java.io.File;
@@ -21,9 +23,10 @@ public class MineStoreCommon {
         instance = this;
     }
 
-    private ConfigReaderCommon configReader;
-    public void registerConfigReader(ConfigReaderCommon configReader) {
-        this.configReader = configReader;
+    private ConfigReader configReader;
+    private File configFile;
+    public void setConfigLocation(File configFile) {
+        this.configFile = configFile;
     }
 
     private CommandExecuterCommon commandExecuterCommon;
@@ -56,17 +59,12 @@ public class MineStoreCommon {
     private CommandDumper commandDumper;
     private AuthHolder authHolder;
     public void init() {
+        configReader = new ConfigReader(configFile);
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
-        configReader.init();
         authHolder = new AuthHolder(this);
         commandStorage.init();
-        switch (configReader.commandMode()) {
-            case WEBLISTENER:
-                commandGetter = new WebListener(this);
-                break;
-            case WEBSOCKET:
-        }
+        commandGetter = new WebListener(this);
         if (!verify()) {
             log("Your plugin is not configured correctly. Please check your config.yml");
             return;
@@ -133,7 +131,7 @@ public class MineStoreCommon {
         return instance;
     }
 
-    public ConfigReaderCommon configReader() {
+    public ConfigReader configReader() {
         return configReader;
     }
 
@@ -150,11 +148,14 @@ public class MineStoreCommon {
     }
 
     public void debug(String message) {
-        if (configReader.debug()) {
-            try {
-                logger.log("[DEBUG] " + message);
-            } catch (Exception ignored) {
-                System.out.println("[DEBUG] " + message);
+        if ((boolean) configReader.get(ConfigKey.DEBUG)) {
+            String[] lines = message.split(", ");
+            for (String line : lines) {
+                try {
+                    logger.log("[DEBUG] " + line);
+                } catch (Exception ignored) {
+                    System.out.println("[DEBUG] " + line);
+                }
             }
         }
     }
@@ -175,15 +176,15 @@ public class MineStoreCommon {
         return commandStorage;
     }
 
-    public File dataFolder() {
-        return configReader.dataFolder();
-    }
-
     public CommandDumper commandDumper() {
         return commandDumper;
     }
 
     public AuthHolder authHolder() {
         return authHolder;
+    }
+
+    public File configFile() {
+        return configFile;
     }
 }

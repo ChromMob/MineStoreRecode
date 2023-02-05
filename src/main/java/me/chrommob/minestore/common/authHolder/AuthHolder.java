@@ -4,6 +4,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.AbstractUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
+import me.chrommob.minestore.common.config.ConfigKey;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.OutputStream;
@@ -18,9 +19,9 @@ public class AuthHolder {
     private String url;
 
     public AuthHolder(MineStoreCommon plugin) {
-        authTimeout = plugin.configReader().authTimeout() * 1000;
+        authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT);
         new Thread(removeAndPost).start();
-        String storeUrl = MineStoreCommon.getInstance().configReader().storeUrl();
+        String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }

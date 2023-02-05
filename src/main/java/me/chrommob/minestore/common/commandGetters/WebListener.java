@@ -5,6 +5,8 @@ import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
+import me.chrommob.minestore.common.config.ConfigKey;
+import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.interfaces.CommandGetter;
 import me.chrommob.minestore.common.interfaces.ConfigReaderCommon;
 
@@ -18,7 +20,7 @@ import java.net.URL;
 public class WebListener implements CommandGetter {
     private boolean running;
     private final MineStoreCommon mineStoreCommon;
-    private final ConfigReaderCommon configReader;
+    private final ConfigReader configReader;
     private boolean wasEmpty = false;
     private final Gson gson = new Gson();
     public WebListener(MineStoreCommon mineStoreCommon) {
@@ -34,13 +36,13 @@ public class WebListener implements CommandGetter {
         running = false;
         String finalQueueUrl;
         String finalExecutedUrl;
-        String storeUrl = configReader.storeUrl();
+        String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
-        if (configReader.secretEnabled()) {
-            finalQueueUrl = storeUrl + "/api/servers/" + configReader.secretKey() + "/commands/queue";
-            finalExecutedUrl = storeUrl + "/api/servers/" + configReader.secretKey() + "/commands/executed/";
+        if ((boolean) configReader.get(ConfigKey.SECRET_ENABLED)) {
+            finalQueueUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/queue";
+            finalExecutedUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/executed/";
         } else {
             finalQueueUrl = storeUrl + "/api/servers/commands/queue";
             finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
@@ -93,11 +95,10 @@ public class WebListener implements CommandGetter {
                             response = gson.fromJson(line, GsonReponse.class);
                             parsedResponse = parseGson(response);
                         } catch (JsonSyntaxException e) {
-                            mineStoreCommon.debug("Got empty response from server");
                             wasEmpty = true;
                         }
                     }
-                    if (parsedResponse.username() == null) {
+                    if (wasEmpty || parsedResponse == null || parsedResponse.username() == null) {
                         mineStoreCommon.debug("Got empty response from server");
                         wasEmpty = true;
                     }

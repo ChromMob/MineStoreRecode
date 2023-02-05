@@ -2,6 +2,7 @@ package me.chrommob.minestore.platforms.bukkit.user;
 
 import me.chrommob.minestore.common.interfaces.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -24,6 +25,11 @@ public class UserBukkit implements CommonUser {
     @Override
     public void sendMessage(String message) {
         player.sendMessage(message);
+    }
+
+    @Override
+    public void sendMessage(Component message) {
+        MineStoreBukkit.getInstance().adventure().player(player).sendMessage(message);
     }
 
     @Override
