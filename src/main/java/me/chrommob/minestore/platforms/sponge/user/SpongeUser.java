@@ -13,6 +13,10 @@ public class SpongeUser implements CommonUser {
         player = Sponge.getServer().getPlayer(uuid).get();
     }
 
+    public SpongeUser(String username) {
+        player = Sponge.getServer().getPlayer(username).get();
+    }
+
     @Override
     public String getName() {
         return player.getName();
@@ -26,5 +30,10 @@ public class SpongeUser implements CommonUser {
     @Override
     public boolean hasPermission(String permission) {
         return player.hasPermission(permission);
+    }
+
+    @Override
+    public boolean isOnline() {
+        return player != null && player.isOnline();
     }
 }

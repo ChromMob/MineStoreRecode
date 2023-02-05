@@ -16,4 +16,9 @@ public class BungeeUserGetter implements UserGetter {
     public CommonUser get(UUID uuid) {
         return new BungeeUser(mineStoreBungee.getProxy().getPlayer(uuid));
     }
+
+    @Override
+    public CommonUser get(String username) {
+        return new BungeeUser(mineStoreBungee.getProxy().getPlayer(username));
+    }
 }

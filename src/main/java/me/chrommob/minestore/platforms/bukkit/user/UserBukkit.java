@@ -12,6 +12,10 @@ public class UserBukkit implements CommonUser {
         player = mineStoreBukkit.getServer().getPlayer(uuid);
     }
 
+    public UserBukkit(String username, MineStoreBukkit mineStoreBukkit) {
+        player = mineStoreBukkit.getServer().getPlayer(username);
+    }
+
     @Override
     public String getName() {
         return player.getName();
@@ -25,5 +29,10 @@ public class UserBukkit implements CommonUser {
     @Override
     public boolean hasPermission(String permission) {
         return player.hasPermission(permission);
+    }
+
+    @Override
+    public boolean isOnline() {
+        return player != null && player.isOnline();
     }
 }

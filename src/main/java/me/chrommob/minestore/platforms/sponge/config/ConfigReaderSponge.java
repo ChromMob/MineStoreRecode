@@ -20,6 +20,7 @@ public class ConfigReaderSponge implements ConfigReaderCommon {
         defaultConfig.put("secret-enabled", true);
         defaultConfig.put("secret-key", 123456789);
         defaultConfig.put("debug", false);
+        defaultConfig.put("auth-timeout", 5*60);
     }
     private Map<String, Object> config = new LinkedHashMap<>();
 
@@ -93,5 +94,10 @@ public class ConfigReaderSponge implements ConfigReaderCommon {
     @Override
     public boolean debug() {
         return (boolean) config.get("debug");
+    }
+
+    @Override
+    public int authTimeout() {
+        return (int) config.get("auth-timeout");
     }
 }

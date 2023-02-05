@@ -4,4 +4,6 @@ import java.util.UUID;
 
 public interface UserGetter {
     CommonUser get(UUID uuid);
+
+    CommonUser get(String username);
 }

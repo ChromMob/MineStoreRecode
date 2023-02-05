@@ -10,4 +10,9 @@ public class SpongeUserGetter implements UserGetter {
     public CommonUser get(UUID uuid) {
         return new SpongeUser(uuid);
     }
+
+    @Override
+    public CommonUser get(String username) {
+        return new SpongeUser(username);
+    }
 }

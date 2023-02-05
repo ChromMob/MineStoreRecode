@@ -1,8 +1,10 @@
 package me.chrommob.minestore.common;
 
 import co.aikar.commands.CommandManager;
-import me.chrommob.minestore.common.command.AbstractUser;
-import me.chrommob.minestore.common.command.ReloadCommandCommon;
+import me.chrommob.minestore.common.authHolder.AuthHolder;
+import me.chrommob.minestore.common.command.AuthCommand;
+import me.chrommob.minestore.common.command.types.AbstractUser;
+import me.chrommob.minestore.common.command.ReloadCommand;
 import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
@@ -10,6 +12,7 @@ import me.chrommob.minestore.common.interfaces.*;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.UUID;
 
 public class MineStoreCommon {
     private static MineStoreCommon instance;
@@ -51,10 +54,12 @@ public class MineStoreCommon {
     private CommandGetter commandGetter;
     private CommandStorage commandStorage;
     private CommandDumper commandDumper;
+    private AuthHolder authHolder;
     public void init() {
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
         configReader.init();
+        authHolder = new AuthHolder(this);
         commandStorage.init();
         switch (configReader.commandMode()) {
             case WEBLISTENER:
@@ -67,15 +72,20 @@ public class MineStoreCommon {
             return;
         }
         commandGetter.start();
+        registerCommands();
+    }
+
+    private void registerCommands() {
         commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
             try {
-                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId()) : new AbstractUser(null);
+                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId()) : new AbstractUser((UUID) null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
         });
-        commandManager.registerCommand(new ReloadCommandCommon());
+        commandManager.registerCommand(new ReloadCommand());
+        commandManager.registerCommand(new AuthCommand());
     }
 
     public void reload() {
@@ -171,5 +181,9 @@ public class MineStoreCommon {
 
     public CommandDumper commandDumper() {
         return commandDumper;
+    }
+
+    public AuthHolder authHolder() {
+        return authHolder;
     }
 }

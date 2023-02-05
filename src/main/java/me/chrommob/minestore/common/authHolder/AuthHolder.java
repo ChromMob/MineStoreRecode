@@ -1,0 +1,114 @@
+package me.chrommob.minestore.common.authHolder;
+
+import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.command.types.AbstractUser;
+import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
+
+import javax.net.ssl.HttpsURLConnection;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class AuthHolder {
+    private int authTimeout;
+    private Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
+    private Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
+    private String url;
+
+    public AuthHolder(MineStoreCommon plugin) {
+        authTimeout = plugin.configReader().authTimeout() * 1000;
+        new Thread(removeAndPost).start();
+        String storeUrl = MineStoreCommon.getInstance().configReader().storeUrl();
+        if (storeUrl.endsWith("/")) {
+            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
+        }
+        url = storeUrl + "/api/game_auth/confirm/";
+    }
+
+    private Runnable removeAndPost = () -> {
+        while (true) {
+            if (authUsers.isEmpty() && toPost.isEmpty()) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                continue;
+            }
+
+            toPost.forEach((s, parsedResponse) -> {
+                postAuthCompleted(parsedResponse);
+                toPost.remove(s);
+            });
+
+            authUsers.forEach((s, authUser) -> {
+            /*
+            Remove the user from the authUsers map if the user is offline or the authTimeout has been reached.
+            This is to prevent memory leaks.
+             */
+                if (isExpired(authUser) || !authUser.user().isOnline()) {
+                    authUsers.remove(s);
+                }
+            });
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private void postAuthCompleted(ParsedResponse parsedResponse) {
+        MineStoreCommon.getInstance().debug("Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
+        try {
+            HttpsURLConnection urlConnection;
+            String link = url + parsedResponse.authId();
+            URL url = new URL(link);
+            urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            urlConnection.setDoOutput(true);
+            try (final OutputStream os = urlConnection.getOutputStream()) {
+                // get current time in milliseconds
+                os.write(5);
+            }
+            urlConnection.getInputStream();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private boolean isExpired(AuthUser authUser) {
+        return System.currentTimeMillis() - authUser.time() > authTimeout;
+    }
+
+    public void confirmAuth(AuthUser authUser) {
+        toPost.put(authUser.user().getName(), authUser.parsedResponse());
+        authUsers.remove(authUser.user().getName());
+    }
+
+    public AuthUser getAuthUser(String username) {
+        return authUsers.getOrDefault(username, null);
+    }
+
+    /*
+    This method is called when a user is authenticated.
+    If the user is already in the authUsers map, the time is updated else the user is added to the map.
+     */
+    public void listener(ParsedResponse parsedResponse) {
+        AbstractUser abstractUser = new AbstractUser(parsedResponse.username());
+        if (!abstractUser.user().isOnline() || abstractUser.user() instanceof CommonConsoleUser) {
+            return;
+        }
+        AuthUser authUser = authUsers.getOrDefault(parsedResponse.username(), null);
+        if (authUser == null) {
+            authUsers.put(parsedResponse.username(), new AuthUser(abstractUser.user(), parsedResponse, System.currentTimeMillis()));
+            abstractUser.user().sendMessage("[MineStore] Write /ms auth to authenticate!");
+        } else {
+            authUser.setTime(System.currentTimeMillis());
+        }
+    }
+}

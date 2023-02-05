@@ -16,4 +16,9 @@ public class BukkitUserGetter implements UserGetter {
     public CommonUser get(UUID uuid) {
         return new UserBukkit(uuid, mineStoreBukkit);
     }
+
+    @Override
+    public CommonUser get(String username) {
+        return new UserBukkit(username, mineStoreBukkit);
+    }
 }

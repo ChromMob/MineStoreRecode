@@ -77,4 +77,9 @@ public class ConfigReaderBungee implements ConfigReaderCommon {
     public boolean debug() {
         return config.getBoolean("debug");
     }
+
+    @Override
+    public int authTimeout() {
+        return config.getInt("auth-timeout");
+    }
 }

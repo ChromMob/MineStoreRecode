@@ -23,4 +23,9 @@ public class BungeeUser implements CommonUser {
     public boolean hasPermission(String permission) {
         return player.hasPermission(permission);
     }
+
+    @Override
+    public boolean isOnline() {
+        return player != null && player.isConnected();
+    }
 }

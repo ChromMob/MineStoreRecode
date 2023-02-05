@@ -23,4 +23,6 @@ public interface ConfigReaderCommon {
     String secretKey();
 
     boolean debug();
+
+    int authTimeout();
 }

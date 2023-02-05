@@ -16,4 +16,9 @@ public class VelocityUserGetter implements UserGetter {
     public CommonUser get(UUID uuid) {
         return new VelocityUser(uuid, server);
     }
+
+    @Override
+    public CommonUser get(String username) {
+        return new VelocityUser(username, server);
+    }
 }

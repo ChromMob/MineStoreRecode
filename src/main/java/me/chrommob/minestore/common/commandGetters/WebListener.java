@@ -112,6 +112,7 @@ public class WebListener implements CommandGetter {
                                 break;
                             case AUTH:
                                 mineStoreCommon.debug("Got auth for player: " + parsedResponse.username() + " with id: " + parsedResponse.authId());
+                                mineStoreCommon.authHolder().listener(parsedResponse);
                                 break;
                         }
                         post(parsedResponse);

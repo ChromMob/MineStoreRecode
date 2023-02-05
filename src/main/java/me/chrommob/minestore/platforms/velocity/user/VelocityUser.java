@@ -14,6 +14,10 @@ public class VelocityUser implements CommonUser {
         player = server.getPlayer(uuid).get();
     }
 
+    public VelocityUser(String username, ProxyServer server) {
+        player = server.getPlayer(username).get();
+    }
+
     @Override
     public String getName() {
         return player.getUsername();
@@ -27,5 +31,10 @@ public class VelocityUser implements CommonUser {
     @Override
     public boolean hasPermission(String permission) {
         return player.hasPermission(permission);
+    }
+
+    @Override
+    public boolean isOnline() {
+        return player != null && player.isActive();
     }
 }
