@@ -7,9 +7,11 @@ import java.util.logging.Logger;
 public class VelocityLogger implements LoggerCommon {
 
     private final Logger logger;
+
     public VelocityLogger(Logger logger) {
         this.logger = logger;
     }
+
     @Override
     public void log(String message) {
         logger.info(message);

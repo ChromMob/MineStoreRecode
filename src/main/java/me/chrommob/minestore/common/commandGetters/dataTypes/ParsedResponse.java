@@ -27,16 +27,6 @@ public class ParsedResponse {
         this.authId = authId;
     }
 
-    public enum TYPE {
-        AUTH,
-        COMMAND
-    }
-
-    public enum COMMAND_TYPE {
-        ONLINE,
-        OFFLINE
-    }
-
     public TYPE type() {
         return type;
     }
@@ -59,5 +49,15 @@ public class ParsedResponse {
 
     public String authId() {
         return authId;
+    }
+
+    public enum TYPE {
+        AUTH,
+        COMMAND
+    }
+
+    public enum COMMAND_TYPE {
+        ONLINE,
+        OFFLINE
     }
 }

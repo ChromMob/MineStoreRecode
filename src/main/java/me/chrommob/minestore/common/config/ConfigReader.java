@@ -7,15 +7,14 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class ConfigReader {
-    private Yaml yaml;
     private final File configFile;
+    private Yaml yaml;
     private Map<String, Object> configYaml = new LinkedHashMap<>();
+
     public ConfigReader(File configFile) {
         this.configFile = configFile;
         init();

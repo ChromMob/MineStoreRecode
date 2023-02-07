@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public class UserBukkit implements CommonUser {
     private final Player player;
+
     public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(uuid);
     }

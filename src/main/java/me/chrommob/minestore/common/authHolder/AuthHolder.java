@@ -17,17 +17,6 @@ public class AuthHolder {
     private Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
     private Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
     private String url;
-
-    public AuthHolder(MineStoreCommon plugin) {
-        authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT);
-        new Thread(removeAndPost).start();
-        String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
-        if (storeUrl.endsWith("/")) {
-            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
-        }
-        url = storeUrl + "/api/game_auth/confirm/";
-    }
-
     private Runnable removeAndPost = () -> {
         while (true) {
             if (authUsers.isEmpty() && toPost.isEmpty()) {
@@ -61,6 +50,16 @@ public class AuthHolder {
         }
     };
 
+    public AuthHolder(MineStoreCommon plugin) {
+        authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT);
+        new Thread(removeAndPost).start();
+        String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
+        if (storeUrl.endsWith("/")) {
+            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
+        }
+        url = storeUrl + "/api/game_auth/confirm/";
+    }
+
     private void postAuthCompleted(ParsedResponse parsedResponse) {
         MineStoreCommon.getInstance().debug("Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
         try {
@@ -77,7 +76,7 @@ public class AuthHolder {
                 os.write(5);
             }
             urlConnection.getInputStream();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

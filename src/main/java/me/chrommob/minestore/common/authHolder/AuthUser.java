@@ -8,6 +8,7 @@ public class AuthUser {
     private final CommonUser user;
     private final ParsedResponse parsedResponse;
     private long time;
+
     public AuthUser(CommonUser user, ParsedResponse parsedResponse, long time) {
         this.user = user;
         this.parsedResponse = parsedResponse;

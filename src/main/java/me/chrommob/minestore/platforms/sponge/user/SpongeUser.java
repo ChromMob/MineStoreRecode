@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public class SpongeUser implements CommonUser {
     private final Player player;
+
     public SpongeUser(UUID uuid) {
         player = Sponge.getServer().getPlayer(uuid).get();
     }

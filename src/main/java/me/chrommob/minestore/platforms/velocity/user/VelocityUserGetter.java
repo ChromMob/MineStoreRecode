@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public class VelocityUserGetter implements UserGetter {
     private final ProxyServer server;
+
     public VelocityUserGetter(ProxyServer server) {
         this.server = server;
     }

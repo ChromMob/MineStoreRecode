@@ -5,9 +5,11 @@ import me.chrommob.minestore.common.interfaces.CommandExecuterCommon;
 
 public class CommandExecuterVelocity implements CommandExecuterCommon {
     private final ProxyServer server;
+
     public CommandExecuterVelocity(ProxyServer server) {
         this.server = server;
     }
+
     @Override
     public void execute(String command) {
         server.getCommandManager().executeAsync(server.getConsoleCommandSource(), command);

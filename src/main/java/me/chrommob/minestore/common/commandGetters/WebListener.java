@@ -8,7 +8,6 @@ import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.interfaces.CommandGetter;
-import me.chrommob.minestore.common.interfaces.ConfigReaderCommon;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -18,52 +17,13 @@ import java.io.OutputStream;
 import java.net.URL;
 
 public class WebListener implements CommandGetter {
-    private boolean running;
     private final MineStoreCommon mineStoreCommon;
     private final ConfigReader configReader;
-    private boolean wasEmpty = false;
     private final Gson gson = new Gson();
-    public WebListener(MineStoreCommon mineStoreCommon) {
-        running = false;
-        this.mineStoreCommon = mineStoreCommon;
-        configReader = mineStoreCommon.configReader();
-    }
-
+    private boolean running;
+    private boolean wasEmpty = false;
     private URL queueUrl;
     private URL executedUrl;
-    @Override
-    public boolean load() {
-        running = false;
-        String finalQueueUrl;
-        String finalExecutedUrl;
-        String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
-        if (storeUrl.endsWith("/")) {
-            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
-        }
-        if ((boolean) configReader.get(ConfigKey.SECRET_ENABLED)) {
-            finalQueueUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/queue";
-            finalExecutedUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/executed/";
-        } else {
-            finalQueueUrl = storeUrl + "/api/servers/commands/queue";
-            finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
-        }
-        try {
-            queueUrl = new URL(finalQueueUrl);
-            executedUrl = new URL(finalExecutedUrl);
-        } catch (Exception e) {
-            mineStoreCommon.log("Store URL is not a URL!");
-            MineStoreCommon.getInstance().debug(e);
-            return false;
-        }
-        running = true;
-        return true;
-    }
-
-    @Override
-    public void start() {
-        new Thread(runnable).start();
-    }
-
     public Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -129,6 +89,45 @@ public class WebListener implements CommandGetter {
             }
         }
     };
+
+    public WebListener(MineStoreCommon mineStoreCommon) {
+        running = false;
+        this.mineStoreCommon = mineStoreCommon;
+        configReader = mineStoreCommon.configReader();
+    }
+
+    @Override
+    public boolean load() {
+        running = false;
+        String finalQueueUrl;
+        String finalExecutedUrl;
+        String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
+        if (storeUrl.endsWith("/")) {
+            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
+        }
+        if ((boolean) configReader.get(ConfigKey.SECRET_ENABLED)) {
+            finalQueueUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/queue";
+            finalExecutedUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/executed/";
+        } else {
+            finalQueueUrl = storeUrl + "/api/servers/commands/queue";
+            finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
+        }
+        try {
+            queueUrl = new URL(finalQueueUrl);
+            executedUrl = new URL(finalExecutedUrl);
+        } catch (Exception e) {
+            mineStoreCommon.log("Store URL is not a URL!");
+            MineStoreCommon.getInstance().debug(e);
+            return false;
+        }
+        running = true;
+        return true;
+    }
+
+    @Override
+    public void start() {
+        new Thread(runnable).start();
+    }
 
     private void post(ParsedResponse response) {
         try {

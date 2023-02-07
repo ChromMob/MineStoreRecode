@@ -1,10 +1,11 @@
 package me.chrommob.minestore.platforms.bungee.webCommand;
 
-import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 import me.chrommob.minestore.common.interfaces.CommandExecuterCommon;
+import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 
 public class CommandExecuterBungee implements CommandExecuterCommon {
     private final MineStoreBungee mineStoreBungee;
+
     public CommandExecuterBungee(MineStoreBungee mineStoreBungee) {
         this.mineStoreBungee = mineStoreBungee;
     }

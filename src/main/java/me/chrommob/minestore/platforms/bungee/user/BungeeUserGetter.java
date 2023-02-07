@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public class BungeeUserGetter implements UserGetter {
     private final MineStoreBungee mineStoreBungee;
+
     public BungeeUserGetter(MineStoreBungee mineStoreBungee) {
         this.mineStoreBungee = mineStoreBungee;
     }

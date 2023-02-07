@@ -3,7 +3,10 @@ package me.chrommob.minestore.common.commandHolder;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class CommandStorage {
     private Map<String, List<String>> commands;

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public class BukkitUserGetter implements UserGetter {
     private final MineStoreBukkit mineStoreBukkit;
+
     public BukkitUserGetter(MineStoreBukkit mineStoreBukkit) {
         this.mineStoreBukkit = mineStoreBukkit;
     }

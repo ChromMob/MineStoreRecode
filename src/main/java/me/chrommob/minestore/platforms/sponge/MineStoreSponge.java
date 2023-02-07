@@ -1,8 +1,9 @@
 package me.chrommob.minestore.platforms.sponge;
+
 import co.aikar.commands.SpongeCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.platforms.sponge.logger.SpongeLogger;
 import me.chrommob.minestore.platforms.sponge.events.SpongePlayerJoin;
+import me.chrommob.minestore.platforms.sponge.logger.SpongeLogger;
 import me.chrommob.minestore.platforms.sponge.user.SpongeUserGetter;
 import me.chrommob.minestore.platforms.sponge.webCommand.CommandExecuterSponge;
 import net.kyori.adventure.platform.spongeapi.SpongeAudiences;
@@ -21,20 +22,20 @@ import java.nio.file.Path;
 @Plugin(id = "minestore", name = "MineStore", version = "0.1", description = "MineStore")
 public class MineStoreSponge {
 
+    private static MineStoreSponge instance;
     @Inject
     private Logger logger;
-
     @Inject
     @DefaultConfig(sharedRoot = true)
     private Path defaultConfig;
-
     @Inject
     private PluginContainer pluginContainer;
-
     @Inject
     private SpongeAudiences adventure;
 
-    private static MineStoreSponge instance;
+    public static MineStoreSponge getInstance() {
+        return instance;
+    }
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
@@ -51,9 +52,5 @@ public class MineStoreSponge {
 
     public @NonNull SpongeAudiences adventure() {
         return this.adventure;
-    }
-
-    public static MineStoreSponge getInstance() {
-        return instance;
     }
 }

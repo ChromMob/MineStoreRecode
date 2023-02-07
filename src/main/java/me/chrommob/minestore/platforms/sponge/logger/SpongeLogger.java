@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 
 public class SpongeLogger implements LoggerCommon {
     private final Logger logger;
+
     public SpongeLogger(Logger logger) {
         this.logger = logger;
     }

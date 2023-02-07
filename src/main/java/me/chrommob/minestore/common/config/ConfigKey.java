@@ -12,6 +12,7 @@ public enum ConfigKey {
     AUTH_FAILURE_MESSAGE(new Configuration("auth.failure-message", "<dark_red>You have failed to log in to our store!</dark_red>"));
 
     private final Configuration configuration;
+
     ConfigKey(Configuration configuration) {
         this.configuration = configuration;
     }

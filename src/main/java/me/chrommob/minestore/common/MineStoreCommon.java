@@ -3,8 +3,8 @@ package me.chrommob.minestore.common;
 import co.aikar.commands.CommandManager;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.AuthCommand;
-import me.chrommob.minestore.common.command.types.AbstractUser;
 import me.chrommob.minestore.common.command.ReloadCommand;
+import me.chrommob.minestore.common.command.types.AbstractUser;
 import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
@@ -18,46 +18,50 @@ import java.util.UUID;
 
 public class MineStoreCommon {
     private static MineStoreCommon instance;
+    private ConfigReader configReader;
+    private File configFile;
+    private CommandExecuterCommon commandExecuterCommon;
+    private LoggerCommon logger;
+    private PlayerJoinListener playerJoinListener;
+    private CommandManager commandManager;
+    private UserGetter userGetter;
+    private CommandGetter commandGetter;
+    private CommandStorage commandStorage;
+    private CommandDumper commandDumper;
+    private AuthHolder authHolder;
 
     public MineStoreCommon() {
         instance = this;
     }
 
-    private ConfigReader configReader;
-    private File configFile;
+    public static MineStoreCommon getInstance() {
+        return instance;
+    }
+
     public void setConfigLocation(File configFile) {
         this.configFile = configFile;
     }
 
-    private CommandExecuterCommon commandExecuterCommon;
     public void registerCommandExecuter(CommandExecuterCommon commandExecuter) {
         this.commandExecuterCommon = commandExecuter;
     }
 
-    private LoggerCommon logger;
     public void registerLogger(LoggerCommon logger) {
         this.logger = logger;
     }
 
-    private PlayerJoinListener playerJoinListener;
     public void registerPlayerJoinListener(PlayerJoinListener playerJoinListener) {
         this.playerJoinListener = playerJoinListener;
     }
 
-    private CommandManager commandManager;
     public void registerCommandManager(CommandManager commandManager) {
         this.commandManager = commandManager;
     }
 
-    private UserGetter userGetter;
     public void registerUserGetter(UserGetter userGetter) {
         this.userGetter = userGetter;
     }
 
-    private CommandGetter commandGetter;
-    private CommandStorage commandStorage;
-    private CommandDumper commandDumper;
-    private AuthHolder authHolder;
     public void init() {
         configReader = new ConfigReader(configFile);
         commandDumper = new CommandDumper();
@@ -127,10 +131,6 @@ public class MineStoreCommon {
         return true;
     }
 
-    public static MineStoreCommon getInstance() {
-        return instance;
-    }
-
     public ConfigReader configReader() {
         return configReader;
     }
@@ -167,7 +167,7 @@ public class MineStoreCommon {
         if (e.getStackTrace() != null) {
             debug(Arrays.toString(e.getStackTrace()));
         }
-        if (e.getCause() != null){
+        if (e.getCause() != null) {
             debug(e.getCause().toString());
         }
     }
