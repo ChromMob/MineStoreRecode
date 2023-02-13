@@ -72,21 +72,18 @@ public class GuiData {
         thread.start();
     }
 
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            while (true) {
-                if (!running) {
-                    return;
-                }
-                if (!load()) {
-                    MineStoreCommon.getInstance().debug("[GuiData] Error loading data!");
-                }
-                try {
-                    Thread.sleep(1000 * 60 * 5);
-                } catch (InterruptedException e) {
-                    MineStoreCommon.getInstance().debug(e);
-                }
+    private Runnable runnable = () -> {
+        while (true) {
+            if (!running) {
+                return;
+            }
+            if (!load()) {
+                MineStoreCommon.getInstance().debug("[GuiData] Error loading data!");
+            }
+            try {
+                Thread.sleep(1000 * 60 * 5);
+            } catch (InterruptedException e) {
+                MineStoreCommon.getInstance().debug(e);
             }
         }
     };
