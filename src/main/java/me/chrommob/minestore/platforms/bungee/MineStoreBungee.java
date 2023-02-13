@@ -23,6 +23,7 @@ public class MineStoreBungee extends Plugin {
 
     @Override
     public void onEnable() {
+        instance = this;
         this.adventure = BungeeAudiences.create(this);
         MineStoreCommon common = new MineStoreCommon();
         common.registerLogger(new LoggerBungee(this));

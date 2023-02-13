@@ -33,10 +33,6 @@ public class MineStoreSponge {
     @Inject
     private SpongeAudiences adventure;
 
-    public static MineStoreSponge getInstance() {
-        return instance;
-    }
-
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
         instance = this;
@@ -48,6 +44,10 @@ public class MineStoreSponge {
         common.setConfigLocation(new File(defaultConfig.toFile(), "config.yml"));
         common.registerPlayerJoinListener(new SpongePlayerJoin(this));
         common.init();
+    }
+
+    public static MineStoreSponge getInstance() {
+        return instance;
     }
 
     public @NonNull SpongeAudiences adventure() {
