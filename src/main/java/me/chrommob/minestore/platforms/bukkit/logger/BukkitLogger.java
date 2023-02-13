@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.logger;
 
-import me.chrommob.minestore.common.interfaces.LoggerCommon;
+import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 
 public class BukkitLogger implements LoggerCommon {

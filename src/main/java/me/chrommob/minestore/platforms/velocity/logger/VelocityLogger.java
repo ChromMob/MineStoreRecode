@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.velocity.logger;
 
-import me.chrommob.minestore.common.interfaces.LoggerCommon;
+import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
 
 import java.util.logging.Logger;
 

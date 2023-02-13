@@ -1,8 +1,8 @@
 package me.chrommob.minestore.platforms.velocity.user;
 
 import com.velocitypowered.api.proxy.ProxyServer;
-import me.chrommob.minestore.common.interfaces.CommonUser;
-import me.chrommob.minestore.common.interfaces.UserGetter;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
+import me.chrommob.minestore.common.interfaces.user.UserGetter;
 
 import java.util.UUID;
 

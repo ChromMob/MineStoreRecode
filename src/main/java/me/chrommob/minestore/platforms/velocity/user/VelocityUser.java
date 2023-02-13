@@ -2,7 +2,7 @@ package me.chrommob.minestore.platforms.velocity.user;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import me.chrommob.minestore.common.interfaces.CommonUser;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 
 import java.util.UUID;

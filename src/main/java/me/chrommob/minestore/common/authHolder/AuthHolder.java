@@ -1,9 +1,9 @@
 package me.chrommob.minestore.common.authHolder;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.command.types.AbstractUser;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
+import me.chrommob.minestore.common.commandGetters.dataTypes.JsonRoot;
 import me.chrommob.minestore.common.config.ConfigKey;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class AuthHolder {
     private int authTimeout;
     private Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
-    private Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
+    private Map<String, JsonRoot> toPost = new ConcurrentHashMap<>();
     private String url;
     private Runnable removeAndPost = () -> {
         while (true) {
@@ -64,7 +64,7 @@ public final class AuthHolder {
         url = storeUrl + "/api/game_auth/confirm/";
     }
 
-    private void postAuthCompleted(ParsedResponse parsedResponse) {
+    private void postAuthCompleted(JsonRoot parsedResponse) {
         MineStoreCommon.getInstance().debug("Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
         try {
             HttpsURLConnection urlConnection;
@@ -102,7 +102,7 @@ public final class AuthHolder {
     This method is called when a user is authenticated.
     If the user is already in the authUsers map, the time is updated else the user is added to the map.
      */
-    public void listener(ParsedResponse parsedResponse) {
+    public void listener(JsonRoot parsedResponse) {
         AbstractUser abstractUser = new AbstractUser(parsedResponse.username());
         if (!abstractUser.user().isOnline() || abstractUser.user() instanceof CommonConsoleUser) {
             return;

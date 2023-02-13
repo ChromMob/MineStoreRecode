@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.velocity.webCommand;
 
 import com.velocitypowered.api.proxy.ProxyServer;
-import me.chrommob.minestore.common.interfaces.CommandExecuterCommon;
+import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 
 public class CommandExecuterVelocity implements CommandExecuterCommon {
     private final ProxyServer server;

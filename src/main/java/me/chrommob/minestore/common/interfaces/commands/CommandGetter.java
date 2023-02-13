@@ -1,4 +1,4 @@
-package me.chrommob.minestore.common.interfaces;
+package me.chrommob.minestore.common.interfaces.commands;
 
 public interface CommandGetter {
     boolean load();

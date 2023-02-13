@@ -4,14 +4,19 @@ import co.aikar.commands.CommandManager;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.AuthCommand;
 import me.chrommob.minestore.common.command.ReloadCommand;
-import me.chrommob.minestore.common.command.types.AbstractUser;
+import me.chrommob.minestore.common.command.StoreCommand;
+import me.chrommob.minestore.common.interfaces.event.PlayerJoinListener;
+import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
-import me.chrommob.minestore.common.interfaces.*;
-import net.kyori.adventure.text.Component;
+import me.chrommob.minestore.common.gui.GuiData;
+import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
+import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
+import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
@@ -32,6 +37,7 @@ public class MineStoreCommon {
     private CommandStorage commandStorage;
     private CommandDumper commandDumper;
     private AuthHolder authHolder;
+    private GuiData guiData;
 
     public MineStoreCommon() {
         instance = this;
@@ -73,14 +79,17 @@ public class MineStoreCommon {
         authHolder = new AuthHolder(this);
         commandStorage.init();
         commandGetter = new WebListener(this);
+        guiData = new GuiData();
         if (!verify()) {
             log("Your plugin is not configured correctly. Please check your config.yml");
             return;
         }
+        guiData.start();
         commandGetter.start();
         registerCommands();
     }
 
+    private boolean storeEnabled = false;
     private void registerCommands() {
         commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
             try {
@@ -92,6 +101,10 @@ public class MineStoreCommon {
         });
         commandManager.registerCommand(new ReloadCommand());
         commandManager.registerCommand(new AuthCommand());
+        if (configReader.get(ConfigKey.STORE_COMMAND).equals(true)) {
+            storeEnabled = true;
+            commandManager.registerCommand(new StoreCommand());
+        }
     }
 
     public void reload() {
@@ -101,6 +114,10 @@ public class MineStoreCommon {
             log("Config reloaded.");
         }
         commandGetter.start();
+        if (!storeEnabled && configReader.get(ConfigKey.STORE_COMMAND).equals(true)) {
+            storeEnabled = true;
+            commandManager.registerCommand(new StoreCommand());
+        }
     }
 
     private boolean verify() {
@@ -126,6 +143,10 @@ public class MineStoreCommon {
         }
         if (userGetter == null) {
             log("UserGetter is not registered.");
+            return false;
+        }
+        if (!guiData.load()) {
+            log("GuiData is not configured correctly.");
             return false;
         }
         if (!commandGetter.load()) {

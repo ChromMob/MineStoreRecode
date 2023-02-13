@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.sponge.user;
 
-import me.chrommob.minestore.common.interfaces.CommonUser;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.sponge.MineStoreSponge;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;

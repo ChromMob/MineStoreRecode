@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.bungee.events;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.PlayerJoinListener;
+import me.chrommob.minestore.common.interfaces.event.PlayerJoinListener;
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;

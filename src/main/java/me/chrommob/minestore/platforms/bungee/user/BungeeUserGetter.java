@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.bungee.user;
 
-import me.chrommob.minestore.common.interfaces.CommonUser;
-import me.chrommob.minestore.common.interfaces.UserGetter;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
+import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 
 import java.util.UUID;

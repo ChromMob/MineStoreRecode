@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.bungee.user;
 
-import me.chrommob.minestore.common.interfaces.CommonUser;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.TextComponent;

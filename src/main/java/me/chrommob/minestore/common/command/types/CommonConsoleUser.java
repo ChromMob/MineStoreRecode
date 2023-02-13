@@ -1,7 +1,7 @@
 package me.chrommob.minestore.common.command.types;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.CommonUser;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 

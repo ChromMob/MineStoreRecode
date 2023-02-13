@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.webCommand;
 
-import me.chrommob.minestore.common.interfaces.CommandExecuterCommon;
+import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 
 public class CommandExecuterBukkit implements CommandExecuterCommon {

@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.sponge.webCommand;
 
-import me.chrommob.minestore.common.interfaces.CommandExecuterCommon;
+import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 import org.spongepowered.api.Sponge;
 
 public class CommandExecuterSponge implements CommandExecuterCommon {

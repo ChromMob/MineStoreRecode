@@ -5,10 +5,10 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.authHolder.AuthUser;
-import me.chrommob.minestore.common.command.types.AbstractUser;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.interfaces.CommonUser;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 @CommandAlias("minestore|ms")
 public class AuthCommand extends BaseCommand {

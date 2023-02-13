@@ -4,8 +4,8 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.command.types.AbstractUser;
-import me.chrommob.minestore.common.interfaces.CommonUser;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 

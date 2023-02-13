@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
-import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
+import me.chrommob.minestore.common.commandGetters.dataTypes.JsonRoot;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
-import me.chrommob.minestore.common.interfaces.CommandGetter;
+import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -42,7 +42,7 @@ public class WebListener implements CommandGetter {
                 }
                 mineStoreCommon.debug("[WebListener] Running...");
                 try {
-                    ParsedResponse parsedResponse = null;
+                    JsonRoot parsedResponse = null;
                     GsonReponse response;
                     HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
                     InputStream in = urlConnection.getInputStream();
@@ -69,7 +69,7 @@ public class WebListener implements CommandGetter {
                         switch (parsedResponse.type()) {
                             case COMMAND:
                                 mineStoreCommon.commandStorage().listener(parsedResponse);
-                                mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\"" + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username() + " requires online: " + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE) ? "true" : "false"));
+                                mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\"" + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username() + " requires online: " + (parsedResponse.commandType().equals(JsonRoot.COMMAND_TYPE.ONLINE) ? "true" : "false"));
                                 break;
                             case AUTH:
                                 mineStoreCommon.debug("Got auth for player: " + parsedResponse.username() + " with id: " + parsedResponse.authId());
@@ -120,6 +120,16 @@ public class WebListener implements CommandGetter {
             MineStoreCommon.getInstance().debug(e);
             return false;
         }
+        try {
+            HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+            urlConnection.disconnect();
+        } catch (IOException e) {
+            mineStoreCommon.log("Store URL is not a valid URL!");
+            MineStoreCommon.getInstance().debug(e);
+            return false;
+        }
         running = true;
         return true;
     }
@@ -129,7 +139,7 @@ public class WebListener implements CommandGetter {
         new Thread(runnable).start();
     }
 
-    private void post(ParsedResponse response) {
+    private void post(JsonRoot response) {
         try {
             String id = String.valueOf(response.commandId());
             URL url = new URL(executedUrl + id);
@@ -148,23 +158,23 @@ public class WebListener implements CommandGetter {
         }
     }
 
-    private ParsedResponse parseGson(GsonReponse response) {
-        ParsedResponse.TYPE type;
+    private JsonRoot parseGson(GsonReponse response) {
+        JsonRoot.TYPE type;
         if (response.getType() != null) {
-            type = ParsedResponse.TYPE.AUTH;
+            type = JsonRoot.TYPE.AUTH;
         } else {
-            type = ParsedResponse.TYPE.COMMAND;
+            type = JsonRoot.TYPE.COMMAND;
         }
-        if (type == ParsedResponse.TYPE.COMMAND) {
-            ParsedResponse.COMMAND_TYPE commandType;
+        if (type == JsonRoot.TYPE.COMMAND) {
+            JsonRoot.COMMAND_TYPE commandType;
             if (response.isPlayerOnlineNeeded()) {
-                commandType = ParsedResponse.COMMAND_TYPE.ONLINE;
+                commandType = JsonRoot.COMMAND_TYPE.ONLINE;
             } else {
-                commandType = ParsedResponse.COMMAND_TYPE.OFFLINE;
+                commandType = JsonRoot.COMMAND_TYPE.OFFLINE;
             }
-            return new ParsedResponse(type, commandType, response.command(), response.username(), response.requestId());
+            return new JsonRoot(type, commandType, response.command(), response.username(), response.requestId());
         } else {
-            return new ParsedResponse(type, response.username(), response.authId(), response.requestId());
+            return new JsonRoot(type, response.username(), response.authId(), response.requestId());
         }
     }
 }
