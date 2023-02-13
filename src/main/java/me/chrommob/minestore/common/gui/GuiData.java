@@ -18,8 +18,10 @@ public class GuiData {
     private Gson gson = new Gson();
 
     private GuiInfo guiInfo = new GuiInfo();
+    private boolean running = false;
 
     public boolean load() {
+        running = false;
         boolean error = false;
         ConfigReader configReader = MineStoreCommon.getInstance().configReader();
         String finalUrl;
@@ -61,6 +63,7 @@ public class GuiData {
             jsonRoot = null;
             return false;
         }
+        running = true;
         return true;
     }
 
@@ -73,11 +76,14 @@ public class GuiData {
         @Override
         public void run() {
             while (true) {
+                if (!running) {
+                    return;
+                }
                 if (!load()) {
                     MineStoreCommon.getInstance().debug("[GuiData] Error loading data!");
                 }
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(1000 * 60 * 5);
                 } catch (InterruptedException e) {
                     MineStoreCommon.getInstance().debug(e);
                 }

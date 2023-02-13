@@ -112,8 +112,12 @@ public class MineStoreCommon {
         configReader.reload();
         if (commandGetter.load()) {
             log("Config reloaded.");
+            commandGetter.start();
         }
-        commandGetter.start();
+        if (guiData.load()) {
+            log("GuiData reloaded.");
+            guiData.start();
+        }
         if (!storeEnabled && configReader.get(ConfigKey.STORE_COMMAND).equals(true)) {
             storeEnabled = true;
             commandManager.registerCommand(new StoreCommand());
