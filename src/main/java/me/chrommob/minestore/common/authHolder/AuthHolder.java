@@ -39,6 +39,10 @@ public final class AuthHolder {
             This is to prevent memory leaks.
              */
                 if (isExpired(authUser) || !authUser.user().isOnline()) {
+                    MineStoreCommon.getInstance().debug("Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
+                    if (authUser.user().isOnline()) {
+                        authUser.user().sendMessage((MineStoreCommon.getInstance().miniMessage()).deserialize((String)MineStoreCommon.getInstance().configReader().get(ConfigKey.AUTH_TIMEOUT_MESSAGE)));
+                    }
                     authUsers.remove(s);
                 }
             });
@@ -51,7 +55,7 @@ public final class AuthHolder {
     };
 
     public AuthHolder(MineStoreCommon plugin) {
-        authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT);
+        authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT) * 1000;
         new Thread(removeAndPost).start();
         String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
@@ -106,7 +110,6 @@ public final class AuthHolder {
         AuthUser authUser = authUsers.getOrDefault(parsedResponse.username(), null);
         if (authUser == null) {
             authUsers.put(parsedResponse.username(), new AuthUser(abstractUser.user(), parsedResponse, System.currentTimeMillis()));
-            abstractUser.user().sendMessage("[MineStore] Write /ms auth to authenticate!");
         } else {
             authUser.setTime(System.currentTimeMillis());
         }

@@ -2,7 +2,9 @@ package me.chrommob.minestore.common.authHolder;
 
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
+import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.CommonUser;
+import net.kyori.adventure.text.Component;
 
 public class AuthUser {
     private final CommonUser user;
@@ -13,6 +15,7 @@ public class AuthUser {
         this.user = user;
         this.parsedResponse = parsedResponse;
         this.time = time;
+        user.sendMessage(MineStoreCommon.getInstance().miniMessage().deserialize((String)MineStoreCommon.getInstance().configReader().get(ConfigKey.AUTH_INIT_MESSAGE)));
     }
 
     public long time() {

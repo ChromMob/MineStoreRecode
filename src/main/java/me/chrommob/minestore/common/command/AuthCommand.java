@@ -7,6 +7,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.authHolder.AuthUser;
 import me.chrommob.minestore.common.command.types.AbstractUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.CommonUser;
 
 @CommandAlias("minestore|ms")
@@ -22,10 +23,10 @@ public class AuthCommand extends BaseCommand {
         }
         AuthUser authUser = MineStoreCommon.getInstance().authHolder().getAuthUser(user.getName());
         if (authUser == null) {
-            user.sendMessage("[MineStore] You don't have any pending authentication!");
+            user.sendMessage((MineStoreCommon.getInstance().miniMessage()).deserialize((String)MineStoreCommon.getInstance().configReader().get(ConfigKey.AUTH_FAILURE_MESSAGE)));
             return;
         }
         authUser.confirmAuth();
-        user.sendMessage("[MineStore] You are now authenticated!");
+        user.sendMessage((MineStoreCommon.getInstance().miniMessage()).deserialize((String)MineStoreCommon.getInstance().configReader().get(ConfigKey.AUTH_SUCCESS_MESSAGE)));
     }
 }

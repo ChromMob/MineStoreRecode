@@ -75,19 +75,20 @@ public class ConfigReader {
         } catch (Exception e) {
             MineStoreCommon.getInstance().debug(e);
         }
-//        Set<String> keys = new HashSet<>();
-//        for (ConfigKey key : ConfigKey.values()) {
-//            Configuration configuration = key.getConfiguration();
-//            keys.add(configuration.getLocation());
-//            if (!configYaml.containsKey(configuration.getLocation())) {
-//                configYaml.put(configuration.getLocation(), configuration.getDefaultValue());
-//            }
-//        }
-//        for (String key : new HashSet<>(configYaml.keySet())) {
-//            if (!keys.contains(key)) {
-//                configYaml.remove(key);
-//            }
-//        }
+        for (final ConfigKey key : ConfigKey.values()) {
+            final Configuration configuration = key.getConfiguration();
+            final String location = configuration.getLocation();
+            final String[] split = location.split("\\.");
+            if (split.length > 1) {
+                final String parent = split[0];
+                configYaml.putIfAbsent(parent, new LinkedHashMap());
+                final Map<String, Object> map = (Map<String, Object>) this.configYaml.get(parent);
+                map.putIfAbsent(split[1], configuration.getDefaultValue());
+            }
+            else if (!configYaml.containsKey(location)) {
+                configYaml.put(location, configuration.getDefaultValue());
+            }
+        }
         saveDefaultConfig();
     }
 
@@ -98,8 +99,7 @@ public class ConfigReader {
             String[] split = location.split("\\.");
             String parent = split[0];
             return ((Map<String, Object>) configYaml.get(parent)).get(split[1]);
-        } else {
-            return configYaml.get(location);
         }
+        return configYaml.get(location);
     }
 }

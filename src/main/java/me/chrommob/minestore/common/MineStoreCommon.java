@@ -11,6 +11,8 @@ import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.interfaces.*;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
 import java.util.Arrays;
@@ -24,6 +26,7 @@ public class MineStoreCommon {
     private LoggerCommon logger;
     private PlayerJoinListener playerJoinListener;
     private CommandManager commandManager;
+    private MiniMessage miniMessage;
     private UserGetter userGetter;
     private CommandGetter commandGetter;
     private CommandStorage commandStorage;
@@ -63,6 +66,7 @@ public class MineStoreCommon {
     }
 
     public void init() {
+        miniMessage = MiniMessage.miniMessage();
         configReader = new ConfigReader(configFile);
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
@@ -186,5 +190,9 @@ public class MineStoreCommon {
 
     public File configFile() {
         return configFile;
+    }
+
+    public MiniMessage miniMessage() {
+        return miniMessage;
     }
 }
