@@ -17,10 +17,6 @@ public class MineStoreBungee extends Plugin {
     private static MineStoreBungee instance;
     private BungeeAudiences adventure;
 
-    public static MineStoreBungee getInstance() {
-        return instance;
-    }
-
     @Override
     public void onEnable() {
         instance = this;
@@ -41,6 +37,10 @@ public class MineStoreBungee extends Plugin {
             this.adventure.close();
             this.adventure = null;
         }
+    }
+
+    public static MineStoreBungee getInstance() {
+        return instance;
     }
 
     public @NonNull BungeeAudiences adventure() {

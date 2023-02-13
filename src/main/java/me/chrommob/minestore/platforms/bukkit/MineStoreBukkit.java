@@ -14,10 +14,6 @@ public final class MineStoreBukkit extends JavaPlugin {
     private static MineStoreBukkit instance;
     private BukkitAudiences adventure;
 
-    public static MineStoreBukkit getInstance() {
-        return instance;
-    }
-
     public @NonNull BukkitAudiences adventure() {
         if (this.adventure == null) {
             throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
@@ -27,6 +23,7 @@ public final class MineStoreBukkit extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        instance = this;
         this.adventure = BukkitAudiences.create(this);
         MineStoreCommon common = new MineStoreCommon();
         // Plugin startup logic
@@ -37,6 +34,10 @@ public final class MineStoreBukkit extends JavaPlugin {
         common.registerPlayerJoinListener(new BukkitPlayerJoin(this));
         common.registerCommandManager(new PaperCommandManager(this));
         common.init();
+    }
+
+    public static MineStoreBukkit getInstance() {
+        return instance;
     }
 
     @Override

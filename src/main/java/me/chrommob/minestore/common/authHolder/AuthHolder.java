@@ -12,7 +12,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AuthHolder {
+public final class AuthHolder {
     private int authTimeout;
     private Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
     private Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
