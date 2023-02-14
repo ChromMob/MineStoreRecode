@@ -2,7 +2,7 @@ package me.chrommob.minestore.platforms.bungee;
 
 import co.aikar.commands.BungeeCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.platforms.bungee.events.PlayerJoinListenerBungee;
+import me.chrommob.minestore.platforms.bungee.events.PlayerEventListenerBungee;
 import me.chrommob.minestore.platforms.bungee.logger.LoggerBungee;
 import me.chrommob.minestore.platforms.bungee.user.BungeeUserGetter;
 import me.chrommob.minestore.platforms.bungee.webCommand.CommandExecuterBungee;
@@ -26,7 +26,7 @@ public class MineStoreBungee extends Plugin {
         common.registerUserGetter(new BungeeUserGetter(this));
         common.setConfigLocation(new File(getDataFolder(), "config.yml"));
         common.registerCommandExecuter(new CommandExecuterBungee(this));
-        common.registerPlayerJoinListener(new PlayerJoinListenerBungee(this));
+        common.registerPlayerJoinListener(new PlayerEventListenerBungee(this));
         common.registerCommandManager(new BungeeCommandManager(this));
         common.init();
     }

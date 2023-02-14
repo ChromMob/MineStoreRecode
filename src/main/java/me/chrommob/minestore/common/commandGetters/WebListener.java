@@ -27,10 +27,7 @@ public class WebListener implements CommandGetter {
     public Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            while (true) {
-                if (!running) {
-                    return;
-                }
+            while (running) {
                 if (wasEmpty) {
                     try {
                         Thread.sleep(25000);

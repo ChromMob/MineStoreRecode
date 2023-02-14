@@ -2,7 +2,7 @@ package me.chrommob.minestore.platforms.bukkit;
 
 import co.aikar.commands.PaperCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.platforms.bukkit.events.BukkitPlayerJoin;
+import me.chrommob.minestore.platforms.bukkit.events.BukkitPlayerEvent;
 import me.chrommob.minestore.platforms.bukkit.logger.BukkitLogger;
 import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
 import me.chrommob.minestore.platforms.bukkit.webCommand.CommandExecuterBukkit;
@@ -31,7 +31,7 @@ public final class MineStoreBukkit extends JavaPlugin {
         common.registerUserGetter(new BukkitUserGetter(this));
         common.registerCommandExecuter(new CommandExecuterBukkit(this));
         common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());
-        common.registerPlayerJoinListener(new BukkitPlayerJoin(this));
+        common.registerPlayerJoinListener(new BukkitPlayerEvent(this));
         common.registerCommandManager(new PaperCommandManager(this));
         common.init();
     }

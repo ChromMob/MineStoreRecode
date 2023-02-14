@@ -1,4 +1,4 @@
 package me.chrommob.minestore.common.interfaces.event;
 
-public interface PlayerJoinListener {
+public interface PlayerEventListener {
 }

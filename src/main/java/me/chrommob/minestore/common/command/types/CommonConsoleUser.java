@@ -5,6 +5,8 @@ import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
+import java.util.UUID;
+
 public class CommonConsoleUser implements CommonUser {
     @Override
     public String getName() {
@@ -29,5 +31,30 @@ public class CommonConsoleUser implements CommonUser {
     @Override
     public boolean isOnline() {
         return true;
+    }
+
+    @Override
+    public UUID getUUID() {
+        return UUID.randomUUID();
+    }
+
+    @Override
+    public String getPrefix() {
+        return "";
+    }
+
+    @Override
+    public String getSuffix() {
+        return "";
+    }
+
+    @Override
+    public double getBalance() {
+        return 0;
+    }
+
+    @Override
+    public String getGroup() {
+        return "";
     }
 }

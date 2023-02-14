@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.gui;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
@@ -10,10 +11,12 @@ import me.chrommob.minestore.common.config.ConfigReader;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.URL;
+import java.util.List;
 
 public class GuiData {
-    private JsonRoot jsonRoot;
+    private List<JsonRoot> jsonRoot;
     private URL packageURL;
     private Gson gson = new Gson();
 
@@ -22,17 +25,16 @@ public class GuiData {
 
     public boolean load() {
         running = false;
-        boolean error = false;
         ConfigReader configReader = MineStoreCommon.getInstance().configReader();
         String finalUrl;
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
-        if ((boolean) configReader.get(ConfigKey.SECRET_ENABLED)) {
-            finalUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/gui/packages_new";
+        if ((boolean) configReader.get(ConfigKey.API_ENABLED)) {
+            finalUrl = storeUrl + "/api/" + configReader.get(ConfigKey.API_KEY) + "/gui/packages_new";
         } else {
-            finalUrl = storeUrl + "/api/servers/gui/packages_new";
+            finalUrl = storeUrl + "/api/gui/packages_new";
         }
         try {
             packageURL = new URL(finalUrl);
@@ -41,6 +43,7 @@ public class GuiData {
             return false;
         }
         try {
+            MineStoreCommon.getInstance().debug("[GuiData] Loading data from " + finalUrl);
             HttpsURLConnection urlConnection = (HttpsURLConnection) packageURL.openConnection();
             InputStream in = urlConnection.getInputStream();
 
@@ -49,18 +52,16 @@ public class GuiData {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
-                    jsonRoot = gson.fromJson(line, JsonRoot.class);
+                    Type listType = new TypeToken<List<JsonRoot>>() {}.getType();
+                    jsonRoot = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
                     MineStoreCommon.getInstance().debug(e);
-                    error = true;
+                    jsonRoot = null;
+                    return false;
                 }
             }
         } catch (Exception e) {
             MineStoreCommon.getInstance().debug(e);
-            return false;
-        }
-        if (error) {
-            jsonRoot = null;
             return false;
         }
         running = true;
@@ -73,10 +74,7 @@ public class GuiData {
     }
 
     private Runnable runnable = () -> {
-        while (true) {
-            if (!running) {
-                return;
-            }
+        while (running) {
             if (!load()) {
                 MineStoreCommon.getInstance().debug("[GuiData] Error loading data!");
             }
@@ -88,7 +86,7 @@ public class GuiData {
         }
     };
 
-    public JsonRoot jsonRoot() {
+    public List<JsonRoot> jsonRoot() {
         return jsonRoot;
     }
 }

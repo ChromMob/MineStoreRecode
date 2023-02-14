@@ -49,12 +49,17 @@ dependencies {
     implementation "net.kyori:adventure-platform-bukkit:4.2.0"
     implementation "net.kyori:adventure-text-serializer-plain:4.12.0"
     implementation "net.kyori:adventure-text-minimessage:4.12.0"
+
+    implementation 'com.zaxxer:HikariCP:4.0.3'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
+    implementation 'mysql:mysql-connector-java:8.0.32'
 }
 
 shadowJar {
     relocate 'com.google.gson', 'me.chrommob.minestore.libs.com.google.gson'
     relocate 'co.aikar', 'me.chrommob.minestore.libs.co.aikar'
     relocate 'net.kyori', 'me.chrommob.minestore.libs.net.kyori'
+    relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
 }
 
 def targetJavaVersion = 8

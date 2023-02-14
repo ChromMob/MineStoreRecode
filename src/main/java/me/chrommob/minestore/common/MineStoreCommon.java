@@ -5,7 +5,8 @@ import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.AuthCommand;
 import me.chrommob.minestore.common.command.ReloadCommand;
 import me.chrommob.minestore.common.command.StoreCommand;
-import me.chrommob.minestore.common.interfaces.event.PlayerJoinListener;
+import me.chrommob.minestore.common.db.DatabaseManager;
+import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
 import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.commandGetters.WebListener;
@@ -29,7 +30,8 @@ public class MineStoreCommon {
     private File configFile;
     private CommandExecuterCommon commandExecuterCommon;
     private LoggerCommon logger;
-    private PlayerJoinListener playerJoinListener;
+    private PlayerEventListener playerEventListener;
+    private DatabaseManager databaseManager;
     private CommandManager commandManager;
     private MiniMessage miniMessage;
     private UserGetter userGetter;
@@ -59,8 +61,8 @@ public class MineStoreCommon {
         this.logger = logger;
     }
 
-    public void registerPlayerJoinListener(PlayerJoinListener playerJoinListener) {
-        this.playerJoinListener = playerJoinListener;
+    public void registerPlayerJoinListener(PlayerEventListener playerEventListener) {
+        this.playerEventListener = playerEventListener;
     }
 
     public void registerCommandManager(CommandManager commandManager) {
@@ -80,9 +82,15 @@ public class MineStoreCommon {
         commandStorage.init();
         commandGetter = new WebListener(this);
         guiData = new GuiData();
+        if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+            databaseManager = new DatabaseManager(this);
+        }
         if (!verify()) {
             log("Your plugin is not configured correctly. Please check your config.yml");
             return;
+        }
+        if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+            databaseManager.start();
         }
         guiData.start();
         commandGetter.start();
@@ -101,7 +109,7 @@ public class MineStoreCommon {
         });
         commandManager.registerCommand(new ReloadCommand());
         commandManager.registerCommand(new AuthCommand());
-        if (configReader.get(ConfigKey.STORE_COMMAND).equals(true)) {
+        if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             storeEnabled = true;
             commandManager.registerCommand(new StoreCommand());
         }
@@ -118,9 +126,25 @@ public class MineStoreCommon {
             log("GuiData reloaded.");
             guiData.start();
         }
-        if (!storeEnabled && configReader.get(ConfigKey.STORE_COMMAND).equals(true)) {
+        if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             storeEnabled = true;
             commandManager.registerCommand(new StoreCommand());
+        }
+        if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+            if (databaseManager == null) {
+                databaseManager = new DatabaseManager(this);
+                if (!databaseManager().load()) {
+                    log("Failed to initialize database.");
+                    return;
+                }
+                databaseManager.start();
+            } else {
+                if (!databaseManager().load()) {
+                    log("Failed to reload database.");
+                    return;
+                }
+                databaseManager.start();
+            }
         }
     }
 
@@ -156,6 +180,14 @@ public class MineStoreCommon {
         if (!commandGetter.load()) {
             log("Url is not configured correctly.");
             return false;
+        }
+        if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+            if (databaseManager == null) {
+                log("DatabaseManager is not registered.");
+            }
+            if (!databaseManager.load()) {
+                log("Database is not configured correctly.");
+            }
         }
         return true;
     }
@@ -201,6 +233,19 @@ public class MineStoreCommon {
         }
     }
 
+    public void onPlayerJoin(String name) {
+        commandStorage.onPlayerJoin(name);
+        if (databaseManager != null) {
+            databaseManager.onPlayerJoin(name);
+        }
+    }
+
+    public void onPlayerQuit(String name) {
+        if (databaseManager != null) {
+            databaseManager.onPlayerQuit(name);
+        }
+    }
+
     public CommandStorage commandStorage() {
         return commandStorage;
     }
@@ -219,5 +264,9 @@ public class MineStoreCommon {
 
     public MiniMessage miniMessage() {
         return miniMessage;
+    }
+
+    public DatabaseManager databaseManager() {
+        return databaseManager;
     }
 }

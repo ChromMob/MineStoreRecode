@@ -42,4 +42,29 @@ public class UserBukkit implements CommonUser {
     public boolean isOnline() {
         return player != null && player.isOnline();
     }
+
+    @Override
+    public UUID getUUID() {
+        return player.getUniqueId();
+    }
+
+    @Override
+    public String getPrefix() {
+        return "";
+    }
+
+    @Override
+    public String getSuffix() {
+        return "";
+    }
+
+    @Override
+    public double getBalance() {
+        return 0;
+    }
+
+    @Override
+    public String getGroup() {
+        return "";
+    }
 }
