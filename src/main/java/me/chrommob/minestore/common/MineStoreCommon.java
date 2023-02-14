@@ -8,6 +8,8 @@ import me.chrommob.minestore.common.command.StoreCommand;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
 import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
+import me.chrommob.minestore.common.interfaces.playerInfo.PlayerInfoProvider;
+import me.chrommob.minestore.common.interfaces.playerInfo.implementation.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
@@ -40,6 +42,7 @@ public class MineStoreCommon {
     private CommandDumper commandDumper;
     private AuthHolder authHolder;
     private GuiData guiData;
+    private PlayerInfoProvider playerInfoProvider;
 
     public MineStoreCommon() {
         instance = this;
@@ -71,6 +74,10 @@ public class MineStoreCommon {
 
     public void registerUserGetter(UserGetter userGetter) {
         this.userGetter = userGetter;
+    }
+
+    public void registerPlayerInfoProvider(PlayerInfoProvider playerInfoProvider) {
+        this.playerInfoProvider = playerInfoProvider;
     }
 
     public void init() {
@@ -184,9 +191,20 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             if (databaseManager == null) {
                 log("DatabaseManager is not registered.");
+                return false;
             }
             if (!databaseManager.load()) {
                 log("Database is not configured correctly.");
+                return false;
+            }
+            if (playerInfoProvider == null) {
+                LuckPermsPlayerInfoProvider luckPermsPlayerInfoProvider = new LuckPermsPlayerInfoProvider();
+                if (luckPermsPlayerInfoProvider.isInstalled()) {
+                    playerInfoProvider = luckPermsPlayerInfoProvider;
+                } else {
+                    log("PlayerInfoProvider is not registered.");
+                    return false;
+                }
             }
         }
         return true;
@@ -268,5 +286,9 @@ public class MineStoreCommon {
 
     public DatabaseManager databaseManager() {
         return databaseManager;
+    }
+
+    public PlayerInfoProvider playerInfoProvider() {
+        return playerInfoProvider;
     }
 }

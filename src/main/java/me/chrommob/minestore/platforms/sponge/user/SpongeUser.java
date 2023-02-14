@@ -9,7 +9,7 @@ import org.spongepowered.api.text.Text;
 
 import java.util.UUID;
 
-public class SpongeUser implements CommonUser {
+public class SpongeUser extends CommonUser {
     private final Player player;
 
     public SpongeUser(UUID uuid) {
@@ -48,25 +48,5 @@ public class SpongeUser implements CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
-    }
-
-    @Override
-    public String getPrefix() {
-        return "";
-    }
-
-    @Override
-    public String getSuffix() {
-        return "";
-    }
-
-    @Override
-    public double getBalance() {
-        return 0;
-    }
-
-    @Override
-    public String getGroup() {
-        return "";
     }
 }

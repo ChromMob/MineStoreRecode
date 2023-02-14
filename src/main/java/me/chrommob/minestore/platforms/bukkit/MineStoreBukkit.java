@@ -2,6 +2,7 @@ package me.chrommob.minestore.platforms.bukkit;
 
 import co.aikar.commands.PaperCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.platforms.bukkit.db.VaultPlayerInfoProvider;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitPlayerEvent;
 import me.chrommob.minestore.platforms.bukkit.logger.BukkitLogger;
 import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
@@ -28,6 +29,12 @@ public final class MineStoreBukkit extends JavaPlugin {
         MineStoreCommon common = new MineStoreCommon();
         // Plugin startup logic
         common.registerLogger(new BukkitLogger(this));
+        if (getServer().getPluginManager().getPlugin("Vault") != null) {
+            VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(this);
+            if (vaultPlayerInfoProvider.isInstalled()) {
+                common.registerPlayerInfoProvider(vaultPlayerInfoProvider);
+            }
+        }
         common.registerUserGetter(new BukkitUserGetter(this));
         common.registerCommandExecuter(new CommandExecuterBukkit(this));
         common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());

@@ -7,7 +7,7 @@ import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
 
-public class VelocityUser implements CommonUser {
+public class VelocityUser extends CommonUser {
     private final Player player;
 
     public VelocityUser(UUID uuid, ProxyServer server) {
@@ -46,25 +46,5 @@ public class VelocityUser implements CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
-    }
-
-    @Override
-    public String getPrefix() {
-        return "";
-    }
-
-    @Override
-    public String getSuffix() {
-        return "";
-    }
-
-    @Override
-    public double getBalance() {
-        return 0;
-    }
-
-    @Override
-    public String getGroup() {
-        return "";
     }
 }

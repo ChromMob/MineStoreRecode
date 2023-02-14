@@ -8,7 +8,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
-public class BungeeUser implements CommonUser {
+public class BungeeUser extends CommonUser {
     private final ProxiedPlayer player;
 
     public BungeeUser(ProxiedPlayer player) {
@@ -43,25 +43,5 @@ public class BungeeUser implements CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
-    }
-
-    @Override
-    public String getPrefix() {
-        return "";
-    }
-
-    @Override
-    public String getSuffix() {
-        return "";
-    }
-
-    @Override
-    public double getBalance() {
-        return 0;
-    }
-
-    @Override
-    public String getGroup() {
-        return "";
     }
 }

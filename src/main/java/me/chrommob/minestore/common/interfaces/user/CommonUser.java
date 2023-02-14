@@ -1,27 +1,38 @@
 package me.chrommob.minestore.common.interfaces.user;
 
+import me.chrommob.minestore.common.MineStoreCommon;
 import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
 
-public interface CommonUser {
-    String getName();
+public abstract class CommonUser {
+    public abstract String getName();
+    public abstract void sendMessage(String message);
 
-    void sendMessage(String message);
+    public abstract void sendMessage(Component message);
 
-    void sendMessage(Component message);
+    public abstract boolean hasPermission(String permission);
 
-    boolean hasPermission(String permission);
+    public abstract boolean isOnline();
 
-    boolean isOnline();
+    public abstract UUID getUUID();
 
-    UUID getUUID();
 
-    String getPrefix();
+    public String getPrefix() {
+        return MineStoreCommon.getInstance().playerInfoProvider().getPrefix(this);
+    }
 
-    String getSuffix();
+    public String getSuffix() {
+        return MineStoreCommon.getInstance().playerInfoProvider().getSuffix(this);
+    }
 
-    double getBalance();
 
-    String getGroup();
+    public double getBalance() {
+        return 0;
+    }
+
+
+    public String getGroup() {
+        return MineStoreCommon.getInstance().playerInfoProvider().getGroup(this);
+    }
 }

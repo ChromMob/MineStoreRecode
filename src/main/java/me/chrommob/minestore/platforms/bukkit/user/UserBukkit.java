@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class UserBukkit implements CommonUser {
+public class UserBukkit extends CommonUser {
     private final Player player;
 
     public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit) {
@@ -46,25 +46,5 @@ public class UserBukkit implements CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
-    }
-
-    @Override
-    public String getPrefix() {
-        return "";
-    }
-
-    @Override
-    public String getSuffix() {
-        return "";
-    }
-
-    @Override
-    public double getBalance() {
-        return 0;
-    }
-
-    @Override
-    public String getGroup() {
-        return "";
     }
 }

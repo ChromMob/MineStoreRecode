@@ -7,7 +7,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.util.UUID;
 
-public class CommonConsoleUser implements CommonUser {
+public class CommonConsoleUser extends CommonUser {
     @Override
     public String getName() {
         return "Console";
