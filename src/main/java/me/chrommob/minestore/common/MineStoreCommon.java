@@ -6,8 +6,11 @@ import me.chrommob.minestore.common.command.AuthCommand;
 import me.chrommob.minestore.common.command.ReloadCommand;
 import me.chrommob.minestore.common.command.StoreCommand;
 import me.chrommob.minestore.common.db.DatabaseManager;
+import me.chrommob.minestore.common.interfaces.economyInfo.DefaultPlayerEconomyProvider;
+import me.chrommob.minestore.common.interfaces.economyInfo.PlayerEconomyProvider;
 import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
 import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
+import me.chrommob.minestore.common.interfaces.playerInfo.DefaultPlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.playerInfo.PlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.playerInfo.implementation.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
@@ -19,6 +22,7 @@ import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.GuiData;
 import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
@@ -43,6 +47,7 @@ public class MineStoreCommon {
     private AuthHolder authHolder;
     private GuiData guiData;
     private PlayerInfoProvider playerInfoProvider;
+    private PlayerEconomyProvider playerEconomyProvider;
 
     public MineStoreCommon() {
         instance = this;
@@ -78,6 +83,10 @@ public class MineStoreCommon {
 
     public void registerPlayerInfoProvider(PlayerInfoProvider playerInfoProvider) {
         this.playerInfoProvider = playerInfoProvider;
+    }
+
+    public void registerPlayerEconomyProvider(PlayerEconomyProvider playerEconomyProvider) {
+        this.playerEconomyProvider = playerEconomyProvider;
     }
 
     public void init() {
@@ -203,8 +212,11 @@ public class MineStoreCommon {
                     playerInfoProvider = luckPermsPlayerInfoProvider;
                 } else {
                     log("PlayerInfoProvider is not registered.");
-                    return false;
+                    playerInfoProvider = new DefaultPlayerInfoProvider();
                 }
+            }
+            if (playerEconomyProvider == null) {
+                playerEconomyProvider = new DefaultPlayerEconomyProvider();
             }
         }
         return true;
@@ -290,5 +302,9 @@ public class MineStoreCommon {
 
     public PlayerInfoProvider playerInfoProvider() {
         return playerInfoProvider;
+    }
+
+    public PlayerEconomyProvider playerEconomyProvider() {
+        return playerEconomyProvider;
     }
 }

@@ -28,7 +28,7 @@ public abstract class CommonUser {
 
 
     public double getBalance() {
-        return 0;
+        return MineStoreCommon.getInstance().playerEconomyProvider().getBalance(this);
     }
 
 
