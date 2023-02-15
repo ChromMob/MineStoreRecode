@@ -29,6 +29,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class MineStoreCommon {
@@ -123,6 +125,13 @@ public class MineStoreCommon {
                 e.printStackTrace();
             }
             return null;
+        });
+        commandManager.getCommandCompletions().registerAsyncCompletion("configKeys", c -> {
+            Set<String> keys = new HashSet<>();
+            for (ConfigKey key : ConfigKey.values()) {
+                keys.add(key.name().toUpperCase());
+            }
+            return keys;
         });
         commandManager.registerCommand(new ReloadCommand());
         commandManager.registerCommand(new AuthCommand());

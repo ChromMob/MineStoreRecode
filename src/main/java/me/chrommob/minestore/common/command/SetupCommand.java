@@ -10,7 +10,6 @@ import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.checkerframework.checker.units.qual.C;
 
 @CommandAlias("minestore|ms")
 @CommandPermission("minestore.setup|ms.setup")
