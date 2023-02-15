@@ -66,7 +66,7 @@ public class SetupCommand extends BaseCommand {
             } else if (type == Character.class) {
                 plugin.configReader().set(configKey, value.charAt(0));
             } else {
-                commonUser.sendMessage(Component.text("Invalid value!").color(NamedTextColor.RED));
+                commonUser.sendMessage(Component.text("Value is not a valid type!").color(NamedTextColor.RED));
                 return;
             }
         } catch (Exception e) {
