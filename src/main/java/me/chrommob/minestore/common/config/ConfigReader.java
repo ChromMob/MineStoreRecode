@@ -102,4 +102,21 @@ public class ConfigReader {
         }
         return configYaml.get(location);
     }
+
+    public void set(ConfigKey key, Object value) {
+        Configuration configuration = key.getConfiguration();
+        String location = configuration.getLocation();
+        Class<?> type = configuration.getDefaultValue().getClass();
+        if (value.getClass() != type) {
+            MineStoreCommon.getInstance().debug("Invalid type for config value: " + location + " (expected " + type.getSimpleName() + ", got " + value.getClass().getSimpleName() + ")");
+        }
+        if (location.split("\\.").length > 1) {
+            String[] split = location.split("\\.");
+            String parent = split[0];
+            ((Map<String, Object>) configYaml.get(parent)).put(split[1], value);
+        } else {
+            configYaml.put(location, value);
+        }
+        saveDefaultConfig();
+    }
 }

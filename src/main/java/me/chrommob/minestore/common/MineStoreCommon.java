@@ -4,6 +4,7 @@ import co.aikar.commands.CommandManager;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.AuthCommand;
 import me.chrommob.minestore.common.command.ReloadCommand;
+import me.chrommob.minestore.common.command.SetupCommand;
 import me.chrommob.minestore.common.command.StoreCommand;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.interfaces.economyInfo.DefaultPlayerEconomyProvider;
@@ -125,6 +126,7 @@ public class MineStoreCommon {
         });
         commandManager.registerCommand(new ReloadCommand());
         commandManager.registerCommand(new AuthCommand());
+        commandManager.registerCommand(new SetupCommand(this));
         if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             storeEnabled = true;
             commandManager.registerCommand(new StoreCommand());
