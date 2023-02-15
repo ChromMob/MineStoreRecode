@@ -47,8 +47,29 @@ public class SetupCommand extends BaseCommand {
         //Cast value to the correct type
         Class<?> type = configKey.getConfiguration().getDefaultValue().getClass();
         try {
-            plugin.configReader().set(configKey, type.cast(value));
-        } catch (ClassCastException e) {
+            if (type == String.class) {
+                plugin.configReader().set(configKey, value);
+            } else if (type == Integer.class) {
+                plugin.configReader().set(configKey, Integer.parseInt(value));
+            } else if (type == Boolean.class) {
+                plugin.configReader().set(configKey, Boolean.parseBoolean(value));
+            } else if (type == Double.class) {
+                plugin.configReader().set(configKey, Double.parseDouble(value));
+            } else if (type == Float.class) {
+                plugin.configReader().set(configKey, Float.parseFloat(value));
+            } else if (type == Long.class) {
+                plugin.configReader().set(configKey, Long.parseLong(value));
+            } else if (type == Short.class) {
+                plugin.configReader().set(configKey, Short.parseShort(value));
+            } else if (type == Byte.class) {
+                plugin.configReader().set(configKey, Byte.parseByte(value));
+            } else if (type == Character.class) {
+                plugin.configReader().set(configKey, value.charAt(0));
+            } else {
+                commonUser.sendMessage(Component.text("Invalid value!").color(NamedTextColor.RED));
+                return;
+            }
+        } catch (Exception e) {
             commonUser.sendMessage(Component.text("Invalid value!").color(NamedTextColor.RED));
             return;
         }
