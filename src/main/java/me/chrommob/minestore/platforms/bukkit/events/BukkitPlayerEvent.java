@@ -6,6 +6,7 @@ import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class BukkitPlayerEvent implements Listener, PlayerEventListener {
     public BukkitPlayerEvent(MineStoreBukkit plugin) {
@@ -18,7 +19,7 @@ public class BukkitPlayerEvent implements Listener, PlayerEventListener {
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerJoinEvent event) {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         MineStoreCommon.getInstance().onPlayerQuit(event.getPlayer().getName());
     }
 }

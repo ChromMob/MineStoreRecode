@@ -9,6 +9,14 @@ import net.luckperms.api.LuckPermsProvider;
 public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
     private final LuckPerms luckPerms;
     public LuckPermsPlayerInfoProvider() {
+        try {
+            Class.forName("net.luckperms.api.LuckPermsProvider");
+        } catch (ClassNotFoundException e) {
+            MineStoreCommon.getInstance().debug("LuckPerms are not installed on this server.");
+            luckPerms = null;
+            return;
+        }
+
         LuckPerms luckPerms = null;
         try {
             luckPerms = LuckPermsProvider.get();

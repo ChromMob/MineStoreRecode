@@ -48,10 +48,12 @@ public class DatabaseManager {
     private Map<String, PlayerData> playerData = new ConcurrentHashMap<>();
     public void onPlayerJoin(String name) {
         playerData.put(name, new PlayerData(plugin.userGetter().get(name)));
+        plugin.debug("Added " + name + " to playerData");
     }
 
     public void onPlayerQuit(String name) {
         playerData.remove(name);
+        plugin.debug("Removed " + name + " from playerData");
     }
 
     public boolean load() {
