@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
-import me.chrommob.minestore.common.commandGetters.dataTypes.JsonRoot;
+import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
@@ -39,7 +39,7 @@ public class WebListener implements CommandGetter {
                 }
                 mineStoreCommon.debug("[WebListener] Running...");
                 try {
-                    JsonRoot parsedResponse = null;
+                    ParsedResponse parsedResponse = null;
                     GsonReponse response;
                     HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
                     InputStream in = urlConnection.getInputStream();
@@ -66,7 +66,7 @@ public class WebListener implements CommandGetter {
                         switch (parsedResponse.type()) {
                             case COMMAND:
                                 mineStoreCommon.commandStorage().listener(parsedResponse);
-                                mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\"" + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username() + " requires online: " + (parsedResponse.commandType().equals(JsonRoot.COMMAND_TYPE.ONLINE) ? "true" : "false"));
+                                mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\"" + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username() + " requires online: " + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE) ? "true" : "false"));
                                 break;
                             case AUTH:
                                 mineStoreCommon.debug("Got auth for player: " + parsedResponse.username() + " with id: " + parsedResponse.authId());
@@ -136,7 +136,7 @@ public class WebListener implements CommandGetter {
         new Thread(runnable).start();
     }
 
-    private void post(JsonRoot response) {
+    private void post(ParsedResponse response) {
         try {
             String id = String.valueOf(response.commandId());
             URL url = new URL(executedUrl + id);
@@ -155,23 +155,23 @@ public class WebListener implements CommandGetter {
         }
     }
 
-    private JsonRoot parseGson(GsonReponse response) {
-        JsonRoot.TYPE type;
+    private ParsedResponse parseGson(GsonReponse response) {
+        ParsedResponse.TYPE type;
         if (response.getType() != null) {
-            type = JsonRoot.TYPE.AUTH;
+            type = ParsedResponse.TYPE.AUTH;
         } else {
-            type = JsonRoot.TYPE.COMMAND;
+            type = ParsedResponse.TYPE.COMMAND;
         }
-        if (type == JsonRoot.TYPE.COMMAND) {
-            JsonRoot.COMMAND_TYPE commandType;
+        if (type == ParsedResponse.TYPE.COMMAND) {
+            ParsedResponse.COMMAND_TYPE commandType;
             if (response.isPlayerOnlineNeeded()) {
-                commandType = JsonRoot.COMMAND_TYPE.ONLINE;
+                commandType = ParsedResponse.COMMAND_TYPE.ONLINE;
             } else {
-                commandType = JsonRoot.COMMAND_TYPE.OFFLINE;
+                commandType = ParsedResponse.COMMAND_TYPE.OFFLINE;
             }
-            return new JsonRoot(type, commandType, response.command(), response.username(), response.requestId());
+            return new ParsedResponse(type, commandType, response.command(), response.username(), response.requestId());
         } else {
-            return new JsonRoot(type, response.username(), response.authId(), response.requestId());
+            return new ParsedResponse(type, response.username(), response.authId(), response.requestId());
         }
     }
 }

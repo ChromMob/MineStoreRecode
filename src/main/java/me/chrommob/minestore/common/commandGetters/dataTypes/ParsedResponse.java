@@ -1,6 +1,6 @@
 package me.chrommob.minestore.common.commandGetters.dataTypes;
 
-public class JsonRoot {
+public class ParsedResponse {
     private final TYPE type;
     private final COMMAND_TYPE commandType;
     private final String command;
@@ -9,7 +9,7 @@ public class JsonRoot {
     private final String authId;
 
 
-    public JsonRoot(TYPE type, COMMAND_TYPE commandType, String command, String username, int requestId) {
+    public ParsedResponse(TYPE type, COMMAND_TYPE commandType, String command, String username, int requestId) {
         this.type = type;
         this.commandType = commandType;
         this.command = command;
@@ -18,7 +18,7 @@ public class JsonRoot {
         this.authId = null;
     }
 
-    public JsonRoot(TYPE type, String username, String authId, int requestId) {
+    public ParsedResponse(TYPE type, String username, String authId, int requestId) {
         this.type = type;
         this.commandType = null;
         this.command = null;

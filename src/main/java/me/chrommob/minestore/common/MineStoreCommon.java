@@ -20,10 +20,9 @@ import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
-import me.chrommob.minestore.common.gui.GuiData;
+import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
@@ -62,6 +61,7 @@ public class MineStoreCommon {
 
     public void setConfigLocation(File configFile) {
         this.configFile = configFile;
+        configReader = new ConfigReader(configFile);
     }
 
     public void registerCommandExecuter(CommandExecuterCommon commandExecuter) {
@@ -94,7 +94,6 @@ public class MineStoreCommon {
 
     public void init() {
         miniMessage = MiniMessage.miniMessage();
-        configReader = new ConfigReader(configFile);
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
         authHolder = new AuthHolder(this);

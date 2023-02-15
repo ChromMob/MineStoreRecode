@@ -1,16 +1,16 @@
 package me.chrommob.minestore.common.authHolder;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.commandGetters.dataTypes.JsonRoot;
+import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 public class AuthUser {
     private final CommonUser user;
-    private final JsonRoot parsedResponse;
+    private final ParsedResponse parsedResponse;
     private long time;
 
-    public AuthUser(CommonUser user, JsonRoot parsedResponse, long time) {
+    public AuthUser(CommonUser user, ParsedResponse parsedResponse, long time) {
         this.user = user;
         this.parsedResponse = parsedResponse;
         this.time = time;
@@ -33,7 +33,7 @@ public class AuthUser {
         MineStoreCommon.getInstance().authHolder().confirmAuth(this);
     }
 
-    public JsonRoot parsedResponse() {
+    public ParsedResponse parsedResponse() {
         return parsedResponse;
     }
 }

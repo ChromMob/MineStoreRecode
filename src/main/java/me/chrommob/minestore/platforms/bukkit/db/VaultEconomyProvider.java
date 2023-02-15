@@ -18,8 +18,8 @@ public class VaultEconomyProvider implements PlayerEconomyProvider {
         try {
             RegisteredServiceProvider<Economy> rsp = mineStoreBukkit.getServer().getServicesManager().getRegistration(Economy.class);
             economy = rsp.getProvider();
-        } catch (IllegalStateException e) {
-            MineStoreCommon.getInstance().debug("Vault is not installed on this server.");
+        } catch (Exception e) {
+            MineStoreCommon.getInstance().log("No economy plugin is installed.");
         }
         this.economy = economy;
     }

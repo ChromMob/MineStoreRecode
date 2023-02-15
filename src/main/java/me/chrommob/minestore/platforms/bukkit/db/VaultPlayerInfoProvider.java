@@ -19,8 +19,8 @@ public class VaultPlayerInfoProvider implements PlayerInfoProvider {
         try {
             RegisteredServiceProvider<Chat> rsp = mineStoreBukkit.getServer().getServicesManager().getRegistration(Chat.class);
             chat = rsp.getProvider();
-        } catch (IllegalStateException e) {
-            MineStoreCommon.getInstance().debug("Vault is not installed on this server.");
+        } catch (Exception e) {
+            MineStoreCommon.getInstance().log("No chat plugin is installed.");
         }
         this.chat = chat;
     }

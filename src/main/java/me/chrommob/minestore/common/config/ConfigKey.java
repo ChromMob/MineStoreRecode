@@ -19,6 +19,16 @@ public enum ConfigKey
     STORE_ENABLED(new Configuration("store-command.enabled", false)),
     STORE_COMMAND_MESSAGE(new Configuration("store-command.message", "<dark_green>Visit our store <click:open_url:%store_url%><hover:show_text:'<gold>Click to open the store!'><bold><gold>here</gold></bold></hover></click>!</dark_green>")),
 
+    BUY_GUI_ENABLED(new Configuration("buy-gui.enabled", false)),
+    BUY_GUI_TITLE(new Configuration("buy-gui.title", "<gold>Buy a package!")),
+    BUY_GUI_BACK_ITEM(new Configuration("buy-gui.back.item", "BARRIER")),
+    BUY_GUI_BACK_ITEM_NAME(new Configuration("buy-gui.back.name", "<red>Back")),
+    BUY_GUI_BACK_ITEM_LORE(new Configuration("buy-gui.back.description", "<red>Go back to the previous menu!")),
+    BUY_GUI_ITEM_NAME(new Configuration("buy-gui.package.name", "<gold>%package%")),
+    BUY_GUI_ITEM_LORE(new Configuration("buy-gui.package.description", "<white>%description%")),
+    BUY_GUI_ITEM_PRICE(new Configuration("buy-gui.package.price", "<green>Price: </green><gold>%price%USD</gold>")),
+    BUY_GUI_MESSAGE(new Configuration("buy-gui.message", "<dark_green>To buy %package% click <click:open_url:%buy_url%><bold><gold>HERE</gold></bold></click>!")),
+
     MYSQL_ENABLED(new Configuration("mysql.enabled", false)),
     MYSQL_HOST(new Configuration("mysql.ip", "localhost")),
     MYSQL_PORT(new Configuration("mysql.port", 3306)),

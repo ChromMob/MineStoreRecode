@@ -1,7 +1,7 @@
 package me.chrommob.minestore.common.commandHolder;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.commandGetters.dataTypes.JsonRoot;
+import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,8 +35,8 @@ public class CommandStorage {
         }
     }
 
-    public void listener(JsonRoot command) {
-        if (command.commandType() == JsonRoot.COMMAND_TYPE.ONLINE) {
+    public void listener(ParsedResponse command) {
+        if (command.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE) {
             handleOnlineCommand(command.command(), command.username());
         } else {
             handleOfflineCommand(command.command());

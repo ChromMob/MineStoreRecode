@@ -30,6 +30,11 @@ public final class MineStoreBukkit extends JavaPlugin {
         MineStoreCommon common = new MineStoreCommon();
         // Plugin startup logic
         common.registerLogger(new BukkitLogger(this));
+        common.registerUserGetter(new BukkitUserGetter(this));
+        common.registerCommandExecuter(new CommandExecuterBukkit(this));
+        common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());
+        common.registerPlayerJoinListener(new BukkitPlayerEvent(this));
+        common.registerCommandManager(new PaperCommandManager(this));
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
             VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(this);
             if (vaultPlayerInfoProvider.isInstalled()) {
@@ -40,11 +45,6 @@ public final class MineStoreBukkit extends JavaPlugin {
                 common.registerPlayerEconomyProvider(vaultEconomyProvider);
             }
         }
-        common.registerUserGetter(new BukkitUserGetter(this));
-        common.registerCommandExecuter(new CommandExecuterBukkit(this));
-        common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());
-        common.registerPlayerJoinListener(new BukkitPlayerEvent(this));
-        common.registerCommandManager(new PaperCommandManager(this));
         common.init();
     }
 

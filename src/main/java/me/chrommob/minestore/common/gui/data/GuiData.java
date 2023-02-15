@@ -1,12 +1,13 @@
-package me.chrommob.minestore.common.gui;
+package me.chrommob.minestore.common.gui.data;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.commandGetters.dataTypes.JsonRoot;
+import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
+import me.chrommob.minestore.common.gui.GuiInfo;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -16,7 +17,7 @@ import java.net.URL;
 import java.util.List;
 
 public class GuiData {
-    private List<JsonRoot> jsonRoot;
+    private List<ParsedResponse> parsedResponse;
     private URL packageURL;
     private Gson gson = new Gson();
 
@@ -52,11 +53,11 @@ public class GuiData {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
-                    Type listType = new TypeToken<List<JsonRoot>>() {}.getType();
-                    jsonRoot = gson.fromJson(line, listType);
+                    Type listType = new TypeToken<List<ParsedResponse>>() {}.getType();
+                    parsedResponse = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
                     MineStoreCommon.getInstance().debug(e);
-                    jsonRoot = null;
+                    parsedResponse = null;
                     return false;
                 }
             }
@@ -86,7 +87,7 @@ public class GuiData {
         }
     };
 
-    public List<JsonRoot> jsonRoot() {
-        return jsonRoot;
+    public List<ParsedResponse> jsonRoot() {
+        return parsedResponse;
     }
 }
