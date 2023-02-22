@@ -2,103 +2,118 @@ package me.chrommob.minestore.common.gui;
 
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.gui.data.json.old.SubCategory;
+import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
+import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedPackage;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedSubCategory;
 import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GuiInfo {
-    public enum MENU_TYPE {
-        MAIN,
-        SUBCATEGORY,
-        PACKAGE
+    private final GuiData guiData;
+    public GuiInfo(GuiData guiData) {
+        this.guiData = guiData;
     }
+
+    public enum MENU_TYPE {
+        CATEGORIES,
+        SUBCATEGORIES,
+        PACKAGES
+    }
+
+    private CommonItem backItem;
 
     private Map<UUID, MENU_TYPE> menuType = new ConcurrentHashMap<>();
     private Map<UUID, Object> menuPage = new ConcurrentHashMap<>();
 
-    private void openInventory(CommonUser user, CommonItem item, boolean back) {
-        if (!menuType.containsKey(user.getUUID()) || item == null) {
-            menuType.put(user.getUUID(), MENU_TYPE.MAIN);
+    private void handleInventoryClick(MineStoreCommon plugin, CommonUser user, CommonItem item) {
+        if (item == null) {
+            menuPage.put(user.getUUID(), guiData.getParsedGui());
+            menuType.put(user.getUUID(), MENU_TYPE.CATEGORIES);
+            openMenu(plugin, user);
+            return;
         }
-        if (back)
-            switch (menuType.get(user.getUUID())) {
-                case MAIN:
-                case SUBCATEGORY:
-                    //Shouldn't happen on MAIN
-                    menuType.put(user.getUUID(), MENU_TYPE.MAIN);
-                    break;
-                case PACKAGE:
-                    menuType.put(user.getUUID(), MENU_TYPE.SUBCATEGORY);
-                    break;
+        if (item.equals(backItem)) {
+            if (menuType.get(user.getUUID()) == MENU_TYPE.SUBCATEGORIES) {
+                menuPage.put(user.getUUID(), guiData.getParsedGui());
+                menuType.put(user.getUUID(), MENU_TYPE.CATEGORIES);
+            } else if (menuType.get(user.getUUID()) == MENU_TYPE.PACKAGES) {
+                ParsedPackage parsedPackage = (ParsedPackage) menuPage.get(user.getUUID());
+                Object object = parsedPackage.getRoot();
+                if (object instanceof ParsedSubCategory) {
+                    menuPage.put(user.getUUID(), ((ParsedSubCategory) object).getRoot());
+                    menuType.put(user.getUUID(), MENU_TYPE.SUBCATEGORIES);
+                } else {
+                    menuPage.put(user.getUUID(), guiData.getParsedGui());
+                    menuType.put(user.getUUID(), MENU_TYPE.CATEGORIES);
+                }
             }
-        else {
-            switch (menuType.get(user.getUUID())) {
-                case MAIN:
-                    menuType.put(user.getUUID(), MENU_TYPE.SUBCATEGORY);
-                    break;
-                case SUBCATEGORY:
-                case PACKAGE:
-                    //Shouldn't happen on PACKAGE
-                    menuType.put(user.getUUID(), MENU_TYPE.PACKAGE);
-                    break;
-            }
+            openMenu(plugin, user);
+            return;
         }
         switch (menuType.get(user.getUUID())) {
-            case MAIN:
-                openInventory(user, MENU_TYPE.MAIN, back, item);
+            case CATEGORIES:
+                if (item.equals(backItem)) {
+                    return;
+                }
+                ParsedGui parsedGui = (ParsedGui) menuPage.get(user.getUUID());
+                ParsedCategory parsedCategory = parsedGui.getByItem(item);
+                if (parsedCategory.hasSubcategories()) {
+                    menuPage.put(user.getUUID(), parsedCategory);
+                    menuType.put(user.getUUID(), MENU_TYPE.SUBCATEGORIES);
+                } else {
+                    menuPage.put(user.getUUID(), parsedCategory);
+                    menuType.put(user.getUUID(), MENU_TYPE.PACKAGES);
+                }
+                openMenu(plugin, user);
                 break;
-            case SUBCATEGORY:
-                openInventory(user, MENU_TYPE.SUBCATEGORY, back, item);
+            case SUBCATEGORIES:
+                ParsedSubCategory parsedSubCategory = (ParsedSubCategory) ((ParsedCategory) menuPage.get(user.getUUID())).getByItem(item);
+                menuPage.put(user.getUUID(), parsedSubCategory);
+                menuType.put(user.getUUID(), MENU_TYPE.PACKAGES);
+                openMenu(plugin, user);
                 break;
-            case PACKAGE:
-                openInventory(user, MENU_TYPE.PACKAGE, back, item);
+            case PACKAGES:
+                if (item.equals(backItem)) {
+                    return;
+                }
+                ParsedPackage parsedPackage = (ParsedPackage) ((ParsedSubCategory) menuPage.get(user.getUUID())).getByItem(item);
+                String config = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_MESSAGE);
+                String url = MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL) + "/category/";
+                if (parsedPackage.getRoot() instanceof ParsedCategory) {
+                    url += ((ParsedCategory) parsedPackage.getRoot()).getUrl();
+                } else if (parsedPackage.getRoot() instanceof ParsedSubCategory) {
+                    url += ((ParsedSubCategory) parsedPackage.getRoot()).getUrl();
+                }
+                config = config.replace("%package%", parsedPackage.getName()).replace("%buy_url%", url);
+                user.sendMessage(config);
                 break;
         }
     }
 
-    public void openInventory(CommonUser user, MENU_TYPE menuType, boolean back, CommonItem item) {
-        switch (menuType) {
-            case MAIN:
-                //TODO
+    private void openMenu(MineStoreCommon plugin, CommonUser user) {
+        switch (menuType.get(user.getUUID())) {
+            case CATEGORIES:
+                ParsedGui parsedGui = (ParsedGui) menuPage.get(user.getUUID());
+                user.openInventory(parsedGui.getInventory());
                 break;
-            case SUBCATEGORY:
-                //TODO
+            case SUBCATEGORIES:
+                ParsedCategory parsedCategory = (ParsedCategory) menuPage.get(user.getUUID());
+                user.openInventory(parsedCategory.getInventory());
                 break;
-            case PACKAGE:
-                ParsedPackage pack = null;
-                ParsedSubCategory subCategory = null;
-                if (menuPage.get(user.getUUID()) instanceof ParsedSubCategory) {
-                    subCategory = (ParsedSubCategory) menuPage.get(user.getUUID());
-                    pack = subCategory.getByItem(item);
-                }
-                ParsedCategory category = null;
-                if (menuPage.get(user.getUUID()) instanceof ParsedCategory) {
-                    category = (ParsedCategory) menuPage.get(user.getUUID());
-                    pack = category.getByItem(item);
-                }
-                if (pack == null) {
-                    MineStoreCommon.getInstance().log("Error while opening package gui for " + user.getName() + "!");
-                    return;
-                }
-                pack = subCategory.getByItem(item);
-                String config = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_MESSAGE);
-                String url = MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL) + "/category/";
-                if (pack.getRoot() instanceof ParsedCategory) {
-                    url += category.getUrl();
-                } else if (pack.getRoot() instanceof ParsedSubCategory) {
-                    url += subCategory.getUrl();
-                }
-                config = config.replace("%package%", pack.getName()).replace("%buy_url%", url);
-                user.sendMessage(config);
+            case PACKAGES:
+                ParsedSubCategory parsedSubCategory = (ParsedSubCategory) menuPage.get(user.getUUID());
+                user.openInventory(parsedSubCategory.getInventory());
                 break;
         }
+    }
+
+    public CommonItem getBackItem() {
+        return backItem;
     }
 }

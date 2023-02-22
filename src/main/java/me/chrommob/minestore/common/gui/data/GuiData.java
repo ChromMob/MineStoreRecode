@@ -8,6 +8,9 @@ import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.GuiInfo;
+import me.chrommob.minestore.common.gui.data.json.old.Category;
+import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
+import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -17,11 +20,12 @@ import java.net.URL;
 import java.util.List;
 
 public class GuiData {
-    private List<ParsedResponse> parsedResponse;
+    private List<Category> parsedResponse;
     private URL packageURL;
     private Gson gson = new Gson();
 
-    private GuiInfo guiInfo = new GuiInfo();
+    private GuiInfo guiInfo = new GuiInfo(this);
+    private ParsedGui parsedGui;
     private boolean running = false;
 
     public boolean load() {
@@ -66,6 +70,7 @@ public class GuiData {
             return false;
         }
         running = true;
+        parsedGui = new ParsedGui(parsedResponse);
         return true;
     }
 
@@ -87,7 +92,7 @@ public class GuiData {
         }
     };
 
-    public List<ParsedResponse> jsonRoot() {
-        return parsedResponse;
+    public ParsedGui getParsedGui() {
+        return parsedGui;
     }
 }

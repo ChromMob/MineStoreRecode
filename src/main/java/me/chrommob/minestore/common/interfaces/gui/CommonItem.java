@@ -7,13 +7,23 @@ import java.util.List;
 public class CommonItem {
     private Component name;
     private List<Component> lore;
+    private String material;
 
-    public CommonItem(Component name, List<Component> lore) {
+    public CommonItem(Component name, String material, List<Component> lore) {
         this.name = name;
+        this.material = material;
         this.lore = lore;
     }
 
     public Component getName() {
         return name;
+    }
+
+    public List<Component> getLore() {
+        return lore;
+    }
+
+    public String getMaterial() {
+        return material;
     }
 }

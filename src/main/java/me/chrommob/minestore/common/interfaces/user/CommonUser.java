@@ -1,6 +1,7 @@
 package me.chrommob.minestore.common.interfaces.user;
 
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
@@ -17,6 +18,7 @@ public abstract class CommonUser {
 
     public abstract UUID getUUID();
 
+    public abstract void openInventory(CommonInventory inventory);
 
     public String getPrefix() {
         return MineStoreCommon.getInstance().playerInfoProvider().getPrefix(this);
@@ -35,4 +37,5 @@ public abstract class CommonUser {
     public String getGroup() {
         return MineStoreCommon.getInstance().playerInfoProvider().getGroup(this);
     }
+
 }

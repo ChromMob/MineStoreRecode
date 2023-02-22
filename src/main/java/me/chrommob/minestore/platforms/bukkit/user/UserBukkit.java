@@ -1,10 +1,20 @@
 package me.chrommob.minestore.platforms.bukkit.user;
 
+import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
+import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class UserBukkit extends CommonUser {
@@ -46,5 +56,24 @@ public class UserBukkit extends CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
+    }
+
+    @Override
+    public void openInventory(CommonInventory inventory) {
+        Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize());
+        List<ItemStack> bukkitItems = new ArrayList<>();
+        for (CommonItem item : inventory.getItems()) {
+            ItemStack bukkitItem = new ItemStack(Material.matchMaterial(item.getMaterial()));
+            ItemMeta bukkitItemMeta = bukkitItem.getItemMeta();
+            bukkitItemMeta.setDisplayName(item.getName().toString());
+            List<String> bukkitLore = new ArrayList<>();
+            for (Component lore : item.getLore()) {
+                bukkitLore.add(lore.toString());
+            }
+            bukkitItemMeta.setLore(bukkitLore);
+        }
+        //Convert List<ItemStack> to ItemStack[]
+        bukkitInventory.setContents(bukkitItems.toArray(new ItemStack[bukkitItems.size()]));
+        player.openInventory(bukkitInventory);
     }
 }
