@@ -2,6 +2,7 @@ package me.chrommob.minestore.platforms.velocity.user;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 
@@ -46,5 +47,10 @@ public class VelocityUser extends CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
+    }
+
+    @Override
+    public void openInventory(CommonInventory inventory) {
+        player.sendMessage(Component.text("Velocity not implemented yet"));
     }
 }

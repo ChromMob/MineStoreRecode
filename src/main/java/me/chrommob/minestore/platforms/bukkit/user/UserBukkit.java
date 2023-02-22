@@ -63,7 +63,14 @@ public class UserBukkit extends CommonUser {
         Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize());
         List<ItemStack> bukkitItems = new ArrayList<>();
         for (CommonItem item : inventory.getItems()) {
-            ItemStack bukkitItem = new ItemStack(Material.matchMaterial(item.getMaterial()));
+            Material material = null;
+            if (item.getMaterial() != null) {
+                material = Material.matchMaterial(item.getMaterial());
+            }
+            if (material == null) {
+                material = Material.BARRIER;
+            }
+            ItemStack bukkitItem = new ItemStack(material);
             ItemMeta bukkitItemMeta = bukkitItem.getItemMeta();
             bukkitItemMeta.setDisplayName(item.getName().toString());
             List<String> bukkitLore = new ArrayList<>();
@@ -73,7 +80,7 @@ public class UserBukkit extends CommonUser {
             bukkitItemMeta.setLore(bukkitLore);
         }
         //Convert List<ItemStack> to ItemStack[]
-        bukkitInventory.setContents(bukkitItems.toArray(new ItemStack[bukkitItems.size()]));
+        bukkitInventory.setContents(bukkitItems.toArray(new ItemStack[0]));
         player.openInventory(bukkitInventory);
     }
 }

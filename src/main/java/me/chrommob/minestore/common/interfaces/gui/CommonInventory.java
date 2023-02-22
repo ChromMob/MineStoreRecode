@@ -22,4 +22,8 @@ public class CommonInventory {
     public CommonItem[] getItems() {
         return items;
     }
+
+    public CommonItem getItem(int slot) {
+        return items[slot];
+    }
 }

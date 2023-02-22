@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.bungee.user;
 
+import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 import net.kyori.adventure.text.Component;
@@ -43,5 +44,10 @@ public class BungeeUser extends CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
+    }
+
+    @Override
+    public void openInventory(CommonInventory inventory) {
+        player.sendMessage(new TextComponent("Bungee not implemented yet"));
     }
 }

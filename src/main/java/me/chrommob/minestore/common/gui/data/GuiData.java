@@ -57,7 +57,7 @@ public class GuiData {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
-                    Type listType = new TypeToken<List<ParsedResponse>>() {}.getType();
+                    Type listType = new TypeToken<List<Category>>() {}.getType();
                     parsedResponse = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
                     MineStoreCommon.getInstance().debug(e);
@@ -94,5 +94,9 @@ public class GuiData {
 
     public ParsedGui getParsedGui() {
         return parsedGui;
+    }
+
+    public GuiInfo getGuiInfo() {
+        return guiInfo;
     }
 }

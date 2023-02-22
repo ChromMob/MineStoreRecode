@@ -2,10 +2,7 @@ package me.chrommob.minestore.common;
 
 import co.aikar.commands.CommandManager;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
-import me.chrommob.minestore.common.command.AuthCommand;
-import me.chrommob.minestore.common.command.ReloadCommand;
-import me.chrommob.minestore.common.command.SetupCommand;
-import me.chrommob.minestore.common.command.StoreCommand;
+import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.interfaces.economyInfo.DefaultPlayerEconomyProvider;
 import me.chrommob.minestore.common.interfaces.economyInfo.PlayerEconomyProvider;
@@ -116,6 +113,7 @@ public class MineStoreCommon {
     }
 
     private boolean storeEnabled = false;
+    private boolean buyEnabled = false;
     private void registerCommands() {
         commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
             try {
@@ -135,9 +133,13 @@ public class MineStoreCommon {
         commandManager.registerCommand(new ReloadCommand());
         commandManager.registerCommand(new AuthCommand());
         commandManager.registerCommand(new SetupCommand(this));
-        if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
+        if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             storeEnabled = true;
             commandManager.registerCommand(new StoreCommand());
+        }
+        if (!buyEnabled && configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
+            buyEnabled = true;
+            commandManager.registerCommand(new BuyCommand());
         }
     }
 
@@ -316,5 +318,9 @@ public class MineStoreCommon {
 
     public PlayerEconomyProvider playerEconomyProvider() {
         return playerEconomyProvider;
+    }
+
+    public GuiData guiData() {
+        return guiData;
     }
 }

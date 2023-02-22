@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.sponge.user;
 
+import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.sponge.MineStoreSponge;
 import net.kyori.adventure.text.Component;
@@ -48,5 +49,10 @@ public class SpongeUser extends CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
+    }
+
+    @Override
+    public void openInventory(CommonInventory inventory) {
+        player.sendMessage(Text.of("Sponge not implemented yet"));
     }
 }

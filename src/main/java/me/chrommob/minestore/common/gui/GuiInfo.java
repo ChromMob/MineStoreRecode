@@ -7,6 +7,7 @@ import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedPackage;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedSubCategory;
+import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
@@ -31,7 +32,7 @@ public class GuiInfo {
     private Map<UUID, MENU_TYPE> menuType = new ConcurrentHashMap<>();
     private Map<UUID, Object> menuPage = new ConcurrentHashMap<>();
 
-    private void handleInventoryClick(MineStoreCommon plugin, CommonUser user, CommonItem item) {
+    public void handleInventoryClick(MineStoreCommon plugin, CommonUser user, CommonItem item) {
         if (item == null) {
             menuPage.put(user.getUUID(), guiData.getParsedGui());
             menuType.put(user.getUUID(), MENU_TYPE.CATEGORIES);
@@ -111,6 +112,10 @@ public class GuiInfo {
                 user.openInventory(parsedSubCategory.getInventory());
                 break;
         }
+    }
+
+    private void formatInventory(CommonInventory inventory) {
+
     }
 
     public CommonItem getBackItem() {

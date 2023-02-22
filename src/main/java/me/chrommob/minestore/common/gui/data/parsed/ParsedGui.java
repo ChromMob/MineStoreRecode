@@ -27,6 +27,10 @@ public class ParsedGui {
     }
 
     public CommonInventory getInventory() {
-
+        CommonItem[] items = new CommonItem[this.categories.size()];
+        for (int i = 0; i < this.categories.size(); i++) {
+            items[i] = this.categories.get(i).getItem();
+        }
+        return new CommonInventory("§6§lMineStore", 54, items);
     }
 }

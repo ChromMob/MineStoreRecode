@@ -18,7 +18,7 @@ public class ParsedSubCategory {
     private String name;
     private String url;
     private String material;
-    private List<ParsedPackage> packages;
+    private List<ParsedPackage> packages = new ArrayList<>();
 
     public ParsedSubCategory(SubCategory subCategory, List<Package> packages, ParsedCategory root) {
         this.root = root;
@@ -59,6 +59,11 @@ public class ParsedSubCategory {
     }
 
     public CommonInventory getInventory() {
-        return null;
+        CommonItem[] items = new CommonItem[packages.size()];
+        for (int i = 0; i < packages.size(); i++) {
+            items[i] = packages.get(i).getItem();
+        }
+        CommonInventory inventory = new CommonInventory(this.name, 54, items);
+        return inventory;
     }
 }
