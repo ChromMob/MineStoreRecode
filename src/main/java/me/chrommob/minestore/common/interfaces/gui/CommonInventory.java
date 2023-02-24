@@ -3,6 +3,8 @@ package me.chrommob.minestore.common.interfaces.gui;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 public class CommonInventory {
     private Component title;
     private int size;
@@ -23,7 +25,7 @@ public class CommonInventory {
     }
 
     public CommonItem[] getItems() {
-        return items;
+        return Arrays.copyOf(items, items.length);
     }
 
     public CommonItem getItem(int slot) {
