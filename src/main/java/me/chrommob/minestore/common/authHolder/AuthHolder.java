@@ -83,7 +83,7 @@ public final class AuthHolder {
             }
             urlConnection.getInputStream();
         } catch (Exception e) {
-            e.printStackTrace();
+            MineStoreCommon.getInstance().debug("Error while posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
         }
     }
 

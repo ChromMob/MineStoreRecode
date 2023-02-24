@@ -174,20 +174,20 @@ public class DatabaseManager {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.debug(e);
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    plugin.debug(e);
                 }
             }
             if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    plugin.debug(e);
                 }
             }
         }
@@ -210,7 +210,7 @@ public class DatabaseManager {
             ps = conn.prepareStatement(createTable);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.debug(e);
         } finally {
             close(conn, ps, null);
         }
