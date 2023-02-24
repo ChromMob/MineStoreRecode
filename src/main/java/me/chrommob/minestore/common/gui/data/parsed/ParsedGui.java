@@ -1,9 +1,13 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
+import com.flowpowered.noise.module.combiner.Min;
+import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
 import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.gui.CommonItem;
+import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +35,6 @@ public class ParsedGui {
         for (int i = 0; i < this.categories.size(); i++) {
             items[i] = this.categories.get(i).getItem();
         }
-        return new CommonInventory("§6§lMineStore", 54, items);
+        return new CommonInventory(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_CATEGORY_TITLE)), 54, items);
     }
 }

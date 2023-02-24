@@ -17,13 +17,14 @@ public final class AuthHolder {
     private Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
     private Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
     private String url;
+    private Thread thread = null;
     private Runnable removeAndPost = () -> {
         while (true) {
             if (authUsers.isEmpty() && toPost.isEmpty()) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    break;
                 }
                 continue;
             }
@@ -49,14 +50,15 @@ public final class AuthHolder {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                break;
             }
         }
     };
 
     public AuthHolder(MineStoreCommon plugin) {
         authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT) * 1000;
-        new Thread(removeAndPost).start();
+        thread = new Thread(removeAndPost);
+        thread.start();
         String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
@@ -112,6 +114,12 @@ public final class AuthHolder {
             authUsers.put(parsedResponse.username(), new AuthUser(abstractUser.user(), parsedResponse, System.currentTimeMillis()));
         } else {
             authUser.setTime(System.currentTimeMillis());
+        }
+    }
+
+    public void stop() {
+        if (thread != null) {
+            thread.interrupt();
         }
     }
 }

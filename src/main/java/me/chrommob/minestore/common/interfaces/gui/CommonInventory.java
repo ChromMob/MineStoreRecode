@@ -1,17 +1,20 @@
 package me.chrommob.minestore.common.interfaces.gui;
 
+import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
+
 public class CommonInventory {
-    private String title;
+    private Component title;
     private int size;
     private CommonItem[] items;
 
-    public CommonInventory(String title, int size, CommonItem[] items) {
+    public CommonInventory(Component title, int size, CommonItem[] items) {
         this.title = title;
         this.size = size;
         this.items = items;
     }
 
-    public String getTitle() {
+    public @NotNull Component getTitle() {
         return title;
     }
 

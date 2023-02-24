@@ -63,7 +63,7 @@ public class ParsedSubCategory {
         for (int i = 0; i < packages.size(); i++) {
             items[i] = packages.get(i).getItem();
         }
-        CommonInventory inventory = new CommonInventory(this.name, 54, items);
+        CommonInventory inventory = new CommonInventory(MineStoreCommon.getInstance().miniMessage().deserialize(((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_PACKAGE_TITLE)).replace("%subcategory%", name)), 54, items);
         return inventory;
     }
 }

@@ -26,10 +26,9 @@ public class GuiData {
 
     private GuiInfo guiInfo = new GuiInfo(this);
     private ParsedGui parsedGui;
-    private boolean running = false;
+    private Thread thread = null;
 
     public boolean load() {
-        running = false;
         ConfigReader configReader = MineStoreCommon.getInstance().configReader();
         String finalUrl;
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
@@ -69,25 +68,33 @@ public class GuiData {
             MineStoreCommon.getInstance().debug(e);
             return false;
         }
-        running = true;
         parsedGui = new ParsedGui(parsedResponse);
         return true;
     }
 
     public void start() {
-        Thread thread = new Thread(runnable);
+        if (thread != null && thread.isAlive()) {
+            thread.interrupt();
+        }
+        thread = new Thread(runnable);
         thread.start();
     }
 
+    public void stop() {
+        if (thread != null && thread.isAlive()) {
+            thread.interrupt();
+        }
+    }
+
     private Runnable runnable = () -> {
-        while (running) {
+        while (true) {
             if (!load()) {
                 MineStoreCommon.getInstance().debug("[GuiData] Error loading data!");
             }
             try {
                 Thread.sleep(1000 * 60 * 5);
             } catch (InterruptedException e) {
-                MineStoreCommon.getInstance().debug(e);
+                break;
             }
         }
     };

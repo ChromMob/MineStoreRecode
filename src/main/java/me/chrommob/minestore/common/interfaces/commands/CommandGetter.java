@@ -4,4 +4,6 @@ public interface CommandGetter {
     boolean load();
 
     void start();
+
+    void stop();
 }

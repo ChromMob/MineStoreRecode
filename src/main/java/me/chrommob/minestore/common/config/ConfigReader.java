@@ -26,8 +26,8 @@ public class ConfigReader {
         options.setIndent(2);
         options.setPrettyFlow(true);
         yaml = new Yaml(options);
-        populateDefaultConfig();
         if (!configFile.exists()) {
+            populateDefaultConfig();
             configFile.getParentFile().mkdirs();
             saveDefaultConfig();
         }
@@ -40,9 +40,19 @@ public class ConfigReader {
             String location = configuration.getLocation();
             if (location.split("\\.").length > 1) {
                 String[] split = location.split("\\.");
-                String parent = split[0];
-                configYaml.putIfAbsent(parent, new LinkedHashMap<String, Object>());
-                ((Map<String, Object>) configYaml.get(parent)).put(split[1], configuration.getDefaultValue());
+                Map<String, Object> currentLocation = null;
+                for (int i = 0; i < split.length; i++) {
+                    boolean isLast = i >= split.length - 1;
+                    if (i == 0) {
+                        configYaml.putIfAbsent(split[i], new LinkedHashMap());
+                        currentLocation = (Map<String, Object>) configYaml.get(split[i]);
+                    } else if (!isLast) {
+                        currentLocation.putIfAbsent(split[i], new LinkedHashMap());
+                        currentLocation = (Map<String, Object>) currentLocation.get(split[i]);
+                    } else {
+                        currentLocation.putIfAbsent(split[i], configuration.getDefaultValue());
+                    }
+                }
             } else {
                 configYaml.put(location, configuration.getDefaultValue());
             }
@@ -80,10 +90,25 @@ public class ConfigReader {
             final String location = configuration.getLocation();
             final String[] split = location.split("\\.");
             if (split.length > 1) {
-                final String parent = split[0];
-                configYaml.putIfAbsent(parent, new LinkedHashMap());
-                final Map<String, Object> map = (Map<String, Object>) this.configYaml.get(parent);
-                map.putIfAbsent(split[1], configuration.getDefaultValue());
+                Map<String, Object> currentLocation = null;
+                for (int i = 0; i < split.length; i++) {
+                    boolean isLast = i == split.length - 1;
+                    if (i == 0) {
+                        if (!configYaml.containsKey(split[i])) {
+                            configYaml.put(split[i], new LinkedHashMap());
+                        }
+                        currentLocation = (Map<String, Object>) configYaml.get(split[i]);
+                    } else if (!isLast) {
+                        if (!currentLocation.containsKey(split[i])) {
+                            currentLocation.put(split[i], new LinkedHashMap());
+                        }
+                        currentLocation = (Map<String, Object>) currentLocation.get(split[i]);
+                    } else {
+                        if (!currentLocation.containsKey(split[i])) {
+                            currentLocation.put(split[i], configuration.getDefaultValue());
+                        }
+                    }
+                }
             }
             else if (!configYaml.containsKey(location)) {
                 configYaml.put(location, configuration.getDefaultValue());
@@ -97,8 +122,17 @@ public class ConfigReader {
         String location = configuration.getLocation();
         if (location.split("\\.").length > 1) {
             String[] split = location.split("\\.");
-            String parent = split[0];
-            return ((Map<String, Object>) configYaml.get(parent)).get(split[1]);
+            Map<String, Object> currentLocation = null;
+            for (int i = 0; i < split.length; i++) {
+                boolean isLast = i == split.length - 1;
+                if (i == 0) {
+                    currentLocation = (Map<String, Object>) configYaml.get(split[i]);
+                } else if (!isLast) {
+                    currentLocation = (Map<String, Object>) currentLocation.get(split[i]);
+                } else {
+                    return currentLocation.get(split[i]);
+                }
+            }
         }
         return configYaml.get(location);
     }
@@ -112,10 +146,21 @@ public class ConfigReader {
         }
         if (location.split("\\.").length > 1) {
             String[] split = location.split("\\.");
-            String parent = split[0];
-            ((Map<String, Object>) configYaml.get(parent)).put(split[1], value);
+            Map<String, Object> currentLocation = null;
+            for (int i = 0; i < split.length; i++) {
+                boolean isLast = i >= split.length - 1;
+                if (i == 0) {
+                    configYaml.putIfAbsent(split[i], new LinkedHashMap());
+                    currentLocation = (Map<String, Object>) configYaml.get(split[i]);
+                } else if (!isLast) {
+                    currentLocation.putIfAbsent(split[i], new LinkedHashMap());
+                    currentLocation = (Map<String, Object>) currentLocation.get(split[i]);
+                } else {
+                    currentLocation.putIfAbsent(split[i], configuration.getDefaultValue());
+                }
+            }
         } else {
-            configYaml.put(location, value);
+            configYaml.put(location, configuration.getDefaultValue());
         }
         saveDefaultConfig();
     }

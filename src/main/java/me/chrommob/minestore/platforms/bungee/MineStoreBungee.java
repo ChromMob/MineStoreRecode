@@ -16,12 +16,13 @@ import java.io.File;
 public class MineStoreBungee extends Plugin {
     private static MineStoreBungee instance;
     private BungeeAudiences adventure;
+    private MineStoreCommon common;
 
     @Override
     public void onEnable() {
         instance = this;
         this.adventure = BungeeAudiences.create(this);
-        MineStoreCommon common = new MineStoreCommon();
+        common = new MineStoreCommon();
         common.registerLogger(new LoggerBungee(this));
         common.registerUserGetter(new BungeeUserGetter(this));
         common.setConfigLocation(new File(getDataFolder(), "config.yml"));
@@ -37,6 +38,7 @@ public class MineStoreBungee extends Plugin {
             this.adventure.close();
             this.adventure = null;
         }
+        common.stop();
     }
 
     public static MineStoreBungee getInstance() {

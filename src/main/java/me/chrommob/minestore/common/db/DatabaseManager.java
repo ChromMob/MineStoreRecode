@@ -4,8 +4,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +22,7 @@ public class DatabaseManager {
     private String password;
     private String finalUrl;
     private String driverClass;
-    private boolean running = false;
+    private Thread thread = null;
     private enum DatabaseType {
         MYSQL("jdbc:mysql://"),
         MARIADB("jdbc:mariadb://");
@@ -80,7 +78,6 @@ public class DatabaseManager {
             return false;
         } else {
             plugin.log("Connected to database!");
-            running = true;
             return true;
         }
     }
@@ -117,17 +114,32 @@ public class DatabaseManager {
 
     public void start() {
         new Thread(this::createTable).start();
-        new Thread(() -> {
-            while (running) {
-                update();
-                try {
-                    Thread.sleep(1000 * 10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        if (thread != null) {
+            thread.interrupt();
+        }
+        thread = new Thread(updater);
+        thread.start();
     }
+
+    public void stop() {
+        if (thread != null) {
+            thread.interrupt();
+        }
+        if (hikari != null) {
+            hikari.close();
+        }
+    }
+
+    private Runnable updater = () -> {
+        while (true) {
+            update();
+            try {
+                Thread.sleep(1000 * 10);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    };
 
     private void update() {
         Set<PlayerData> changed = ConcurrentHashMap.newKeySet();

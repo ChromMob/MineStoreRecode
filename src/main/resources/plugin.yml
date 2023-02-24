@@ -1,4 +1,5 @@
 name: MineStore
+author: ChromMob
 version: '${version}'
 main: me.chrommob.minestore.platforms.bukkit.MineStoreBukkit
 softdepend:

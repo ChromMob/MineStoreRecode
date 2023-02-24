@@ -1,14 +1,19 @@
 package me.chrommob.minestore.platforms.bukkit.user;
 
+import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -19,6 +24,7 @@ import java.util.UUID;
 
 public class UserBukkit extends CommonUser {
     private final Player player;
+    private LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
 
     public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(uuid);
@@ -60,7 +66,7 @@ public class UserBukkit extends CommonUser {
 
     @Override
     public void openInventory(CommonInventory inventory) {
-        Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize());
+        Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize(), serializer.serialize(inventory.getTitle()));
         List<ItemStack> bukkitItems = new ArrayList<>();
         for (CommonItem item : inventory.getItems()) {
             Material material = null;
@@ -68,19 +74,22 @@ public class UserBukkit extends CommonUser {
                 material = Material.matchMaterial(item.getMaterial());
             }
             if (material == null) {
-                material = Material.BARRIER;
+                material = Material.CHEST;
             }
             ItemStack bukkitItem = new ItemStack(material);
             ItemMeta bukkitItemMeta = bukkitItem.getItemMeta();
-            bukkitItemMeta.setDisplayName(item.getName().toString());
+            bukkitItemMeta.setDisplayName(serializer.serialize(item.getName()));
             List<String> bukkitLore = new ArrayList<>();
             for (Component lore : item.getLore()) {
-                bukkitLore.add(lore.toString());
+                bukkitLore.add(serializer.serialize(lore));
             }
             bukkitItemMeta.setLore(bukkitLore);
+            bukkitItem.setItemMeta(bukkitItemMeta);
+            bukkitItems.add(bukkitItem);
         }
-        //Convert List<ItemStack> to ItemStack[]
-        bukkitInventory.setContents(bukkitItems.toArray(new ItemStack[0]));
+        ItemStack[] bukkitItemArray = new ItemStack[bukkitItems.size()];
+        bukkitItems.toArray(bukkitItemArray);
+        bukkitInventory.setContents(bukkitItemArray);
         player.openInventory(bukkitInventory);
     }
 }

@@ -3,6 +3,7 @@ package me.chrommob.minestore.platforms.velocity;
 import co.aikar.commands.VelocityCommandManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -27,9 +28,11 @@ public class MineStoreVelocity {
     @DataDirectory
     private Path dataPath;
 
+    private MineStoreCommon common;
+
     @Subscribe
     private void onProxyInitialization(ProxyInitializeEvent event) {
-        MineStoreCommon common = new MineStoreCommon();
+        common = new MineStoreCommon();
         common.registerLogger(new VelocityLogger(logger));
         common.registerUserGetter(new VelocityUserGetter(server));
         common.registerCommandManager(new VelocityCommandManager(server, this));
@@ -37,5 +40,10 @@ public class MineStoreVelocity {
         common.setConfigLocation(dataPath.resolve("config.yml").toFile());
         common.registerPlayerJoinListener(new VelocityPlayerEvent(this, server));
         common.init();
+    }
+
+    @Subscribe
+    public void onServerStop(ProxyShutdownEvent event) {
+        common.stop();
     }
 }

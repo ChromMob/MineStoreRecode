@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppedEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 
@@ -33,10 +34,12 @@ public class MineStoreSponge {
     @Inject
     private SpongeAudiences adventure;
 
+    private MineStoreCommon common;
+
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
         instance = this;
-        MineStoreCommon common = new MineStoreCommon();
+        common = new MineStoreCommon();
         common.registerLogger(new SpongeLogger(logger));
         common.registerUserGetter(new SpongeUserGetter());
         common.registerCommandManager(new SpongeCommandManager(pluginContainer));
@@ -44,6 +47,15 @@ public class MineStoreSponge {
         common.setConfigLocation(new File(defaultConfig.toFile(), "config.yml"));
         common.registerPlayerJoinListener(new SpongePlayerEvent(this));
         common.init();
+    }
+
+    @Listener
+    public void onServerStop(GameStoppedEvent event) {
+        if (this.adventure != null) {
+            this.adventure.close();
+            this.adventure = null;
+        }
+        common.stop();
     }
 
     public static MineStoreSponge getInstance() {

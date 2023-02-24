@@ -20,20 +20,20 @@ public class WebListener implements CommandGetter {
     private final MineStoreCommon mineStoreCommon;
     private final ConfigReader configReader;
     private final Gson gson = new Gson();
-    private boolean running;
     private boolean wasEmpty = false;
     private URL queueUrl;
     private URL executedUrl;
+    private Thread thread = null;
     public Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            while (running) {
+            while (true) {
                 if (wasEmpty) {
                     try {
                         Thread.sleep(25000);
                         wasEmpty = false;
                     } catch (InterruptedException e) {
-                        MineStoreCommon.getInstance().debug(e);
+                        break;
                     }
                     continue;
                 }
@@ -81,21 +81,19 @@ public class WebListener implements CommandGetter {
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
-                    MineStoreCommon.getInstance().debug(e);
+                    break;
                 }
             }
         }
     };
 
     public WebListener(MineStoreCommon mineStoreCommon) {
-        running = false;
         this.mineStoreCommon = mineStoreCommon;
         configReader = mineStoreCommon.configReader();
     }
 
     @Override
     public boolean load() {
-        running = false;
         String finalQueueUrl;
         String finalExecutedUrl;
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
@@ -127,13 +125,23 @@ public class WebListener implements CommandGetter {
             MineStoreCommon.getInstance().debug(e);
             return false;
         }
-        running = true;
         return true;
     }
 
     @Override
     public void start() {
-        new Thread(runnable).start();
+        if (thread != null) {
+            thread.interrupt();
+        }
+        thread = new Thread(runnable);
+        thread.start();
+    }
+
+    @Override
+    public void stop() {
+        if (thread != null) {
+            thread.interrupt();
+        }
     }
 
     private void post(ParsedResponse response) {

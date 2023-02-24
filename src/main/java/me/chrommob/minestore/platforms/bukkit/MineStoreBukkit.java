@@ -23,11 +23,13 @@ public final class MineStoreBukkit extends JavaPlugin {
         return this.adventure;
     }
 
+    private MineStoreCommon common;
+
     @Override
     public void onEnable() {
         instance = this;
         this.adventure = BukkitAudiences.create(this);
-        MineStoreCommon common = new MineStoreCommon();
+        common = new MineStoreCommon();
         // Plugin startup logic
         common.registerLogger(new BukkitLogger(this));
         common.registerUserGetter(new BukkitUserGetter(this));
@@ -58,5 +60,6 @@ public final class MineStoreBukkit extends JavaPlugin {
             this.adventure.close();
             this.adventure = null;
         }
+        common.stop();
     }
 }

@@ -112,6 +112,18 @@ public class MineStoreCommon {
         registerCommands();
     }
 
+    public void stop() {
+        log("Shutting down...");
+        if (guiData != null)
+            guiData.stop();
+        if (authHolder != null)
+            authHolder.stop();
+        if (databaseManager != null)
+            databaseManager.stop();
+        if (commandGetter != null)
+            commandGetter.stop();
+    }
+
     private boolean storeEnabled = false;
     private boolean buyEnabled = false;
     private void registerCommands() {
