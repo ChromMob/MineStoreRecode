@@ -11,6 +11,7 @@ import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +28,7 @@ public class GuiInfo {
         PACKAGES
     }
 
-    private CommonItem backItem;
+    private CommonItem backItem = new CommonItem(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_NAME)), (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM), Collections.singletonList(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_LORE))));
 
     private Map<UUID, MENU_TYPE> menuType = new ConcurrentHashMap<>();
     private Map<UUID, Object> menuPage = new ConcurrentHashMap<>();
@@ -36,7 +37,7 @@ public class GuiInfo {
         if (item == null) {
             menuPage.put(user.getUUID(), guiData.getParsedGui());
             menuType.put(user.getUUID(), MENU_TYPE.CATEGORIES);
-            openMenu(plugin, user);
+            openMenu(user);
             return;
         }
         if (item.equals(backItem)) {
@@ -54,7 +55,7 @@ public class GuiInfo {
                     menuType.put(user.getUUID(), MENU_TYPE.CATEGORIES);
                 }
             }
-            openMenu(plugin, user);
+            openMenu(user);
             return;
         }
         switch (menuType.get(user.getUUID())) {
@@ -71,13 +72,13 @@ public class GuiInfo {
                     menuPage.put(user.getUUID(), parsedCategory);
                     menuType.put(user.getUUID(), MENU_TYPE.PACKAGES);
                 }
-                openMenu(plugin, user);
+                openMenu(user);
                 break;
             case SUBCATEGORIES:
                 ParsedSubCategory parsedSubCategory = (ParsedSubCategory) ((ParsedCategory) menuPage.get(user.getUUID())).getByItem(item);
                 menuPage.put(user.getUUID(), parsedSubCategory);
                 menuType.put(user.getUUID(), MENU_TYPE.PACKAGES);
-                openMenu(plugin, user);
+                openMenu(user);
                 break;
             case PACKAGES:
                 if (item.equals(backItem)) {
@@ -97,7 +98,7 @@ public class GuiInfo {
         }
     }
 
-    private void openMenu(MineStoreCommon plugin, CommonUser user) {
+    private void openMenu(CommonUser user) {
         switch (menuType.get(user.getUUID())) {
             case CATEGORIES:
                 ParsedGui parsedGui = (ParsedGui) menuPage.get(user.getUUID());
@@ -116,9 +117,5 @@ public class GuiInfo {
 
     private void formatInventory(CommonInventory inventory) {
 
-    }
-
-    public CommonItem getBackItem() {
-        return backItem;
     }
 }

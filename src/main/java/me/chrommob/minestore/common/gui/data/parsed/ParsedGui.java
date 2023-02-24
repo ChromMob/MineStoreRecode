@@ -11,10 +11,12 @@ import java.util.List;
 
 public class ParsedGui {
     private final List<ParsedCategory> categories = new ArrayList<>();
+    private final CommonInventory inventory;
     public ParsedGui(List<Category> categories) {
         for (Category category : categories) {
             this.categories.add(new ParsedCategory(category));
         }
+        this.inventory = this.getInventory();
     }
 
     public ParsedCategory getByItem(CommonItem item) {
@@ -27,6 +29,9 @@ public class ParsedGui {
     }
 
     public CommonInventory getInventory() {
+        if (this.inventory != null) {
+            return this.inventory;
+        }
         CommonItem[] items = new CommonItem[this.categories.size()];
         for (int i = 0; i < this.categories.size(); i++) {
             items[i] = this.categories.get(i).getItem();

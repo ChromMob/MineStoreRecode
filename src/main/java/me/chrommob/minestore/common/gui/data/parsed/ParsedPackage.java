@@ -22,6 +22,7 @@ public class ParsedPackage {
     private int active;
     private String material;
     private String item_lore;
+    private final CommonItem item;
 
     public ParsedPackage(Package pack, Object root) {
         this.root = root;
@@ -34,9 +35,13 @@ public class ParsedPackage {
         this.active = pack.getActive();
         this.material = pack.getItem_id();
         this.item_lore = pack.getItem_lore();
+        this.item = this.getItem();
     }
 
     public CommonItem getItem() {
+        if (this.item != null) {
+            return this.item;
+        }
         ConfigReader config = MineStoreCommon.getInstance().configReader();
         MiniMessage miniMessage = MineStoreCommon.getInstance().miniMessage();
         List<Component> lore = new ArrayList<>();

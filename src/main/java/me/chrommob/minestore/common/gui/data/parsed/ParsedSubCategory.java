@@ -19,6 +19,8 @@ public class ParsedSubCategory {
     private String url;
     private String material;
     private List<ParsedPackage> packages = new ArrayList<>();
+    private final CommonItem item;
+    private final CommonInventory inventory;
 
     public ParsedSubCategory(SubCategory subCategory, List<Package> packages, ParsedCategory root) {
         this.root = root;
@@ -30,6 +32,8 @@ public class ParsedSubCategory {
                 this.packages.add(new ParsedPackage(pack, this));
             }
         }
+        this.item = this.getItem();
+        this.inventory = this.getInventory();
     }
 
     public ParsedPackage getByItem(CommonItem item) {
@@ -50,6 +54,9 @@ public class ParsedSubCategory {
     }
 
     public CommonItem getItem() {
+        if (item != null) {
+            return item;
+        }
         ConfigReader config = MineStoreCommon.getInstance().configReader();
         MiniMessage miniMessage = MineStoreCommon.getInstance().miniMessage();
         String configName = (String) config.get(ConfigKey.BUY_GUI_SUBCATEGORY_NAME);
@@ -59,6 +66,9 @@ public class ParsedSubCategory {
     }
 
     public CommonInventory getInventory() {
+        if (inventory != null) {
+            return inventory;
+        }
         CommonItem[] items = new CommonItem[packages.size()];
         for (int i = 0; i < packages.size(); i++) {
             items[i] = packages.get(i).getItem();
