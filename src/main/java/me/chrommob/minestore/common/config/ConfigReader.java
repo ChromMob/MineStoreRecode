@@ -156,12 +156,14 @@ public class ConfigReader {
                     currentLocation.putIfAbsent(split[i], new LinkedHashMap());
                     currentLocation = (Map<String, Object>) currentLocation.get(split[i]);
                 } else {
-                    currentLocation.putIfAbsent(split[i], configuration.getDefaultValue());
+                    currentLocation.put(split[i], value);
                 }
             }
         } else {
             configYaml.put(location, configuration.getDefaultValue());
         }
         saveDefaultConfig();
+        MineStoreCommon.getInstance().debug("Set config value: " + location + " to " + value);
+        MineStoreCommon.getInstance().reload();
     }
 }

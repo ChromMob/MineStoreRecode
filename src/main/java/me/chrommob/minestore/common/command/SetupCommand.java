@@ -32,7 +32,7 @@ public class SetupCommand extends BaseCommand {
         if (key == null || value == null) {
             for (ConfigKey configKey : ConfigKey.values()) {
                 String keyName = configKey.name().toUpperCase();
-                String keyValue = (String) plugin.configReader().get(configKey);
+                String keyValue = plugin.configReader().get(configKey).toString();
                 commonUser.sendMessage(Component.text(keyName).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD));
                 commonUser.sendMessage(Component.text("Current value: ").color(NamedTextColor.GRAY).append(Component.text(keyValue).color(NamedTextColor.WHITE)).append(Component.text(" | ").color(NamedTextColor.GRAY)).append(Component.text("CHANGE VALUE: /minestore setup " + keyName + " <value>").color(NamedTextColor.RED)).decorate(TextDecoration.BOLD));
             }
