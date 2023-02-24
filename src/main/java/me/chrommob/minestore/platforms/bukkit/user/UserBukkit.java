@@ -87,9 +87,7 @@ public class UserBukkit extends CommonUser {
             bukkitItem.setItemMeta(bukkitItemMeta);
             bukkitItems.add(bukkitItem);
         }
-        ItemStack[] bukkitItemArray = new ItemStack[bukkitItems.size()];
-        bukkitItems.toArray(bukkitItemArray);
-        bukkitInventory.setContents(bukkitItemArray);
+        bukkitInventory.setContents(bukkitItems.toArray(new ItemStack[0]));
         player.openInventory(bukkitInventory);
     }
 }
