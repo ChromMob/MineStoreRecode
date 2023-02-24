@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.gui.data.json.old;
 
+@SuppressWarnings("unused")
 public class SubCategory {
     private String name;
     private String url;

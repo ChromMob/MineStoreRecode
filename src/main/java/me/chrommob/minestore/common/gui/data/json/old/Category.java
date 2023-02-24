@@ -2,6 +2,7 @@ package me.chrommob.minestore.common.gui.data.json.old;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class Category {
     private int id;
     private String name;

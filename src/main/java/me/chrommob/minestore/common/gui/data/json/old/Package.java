@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.gui.data.json.old;
 
+@SuppressWarnings("unused")
 public class Package {
     private String name;
     private double price;
