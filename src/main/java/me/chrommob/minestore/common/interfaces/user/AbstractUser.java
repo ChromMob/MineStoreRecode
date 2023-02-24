@@ -2,7 +2,6 @@ package me.chrommob.minestore.common.interfaces.user;
 
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 import java.util.UUID;
 

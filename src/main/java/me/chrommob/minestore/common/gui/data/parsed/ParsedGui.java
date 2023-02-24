@@ -1,17 +1,13 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
-import com.flowpowered.noise.module.combiner.Min;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
-import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
 import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.gui.CommonItem;
-import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ParsedGui {
     private final List<ParsedCategory> categories = new ArrayList<>();

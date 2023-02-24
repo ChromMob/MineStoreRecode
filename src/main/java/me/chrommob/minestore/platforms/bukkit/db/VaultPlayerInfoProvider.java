@@ -6,7 +6,6 @@ import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 

@@ -4,12 +4,10 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.GuiInfo;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
-import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 
 import javax.net.ssl.HttpsURLConnection;

@@ -6,9 +6,9 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Subcommand;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.authHolder.AuthUser;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.config.ConfigKey;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 @CommandAlias("minestore|ms")

@@ -1,10 +1,10 @@
 package me.chrommob.minestore.common.authHolder;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.OutputStream;

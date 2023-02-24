@@ -4,7 +4,6 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.interfaces.economyInfo.PlayerEconomyProvider;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
-import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;

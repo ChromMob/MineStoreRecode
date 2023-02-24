@@ -83,7 +83,7 @@ public class GuiInfo {
                 if (item.equals(backItem)) {
                     return;
                 }
-                ParsedPackage parsedPackage = (ParsedPackage) ((ParsedSubCategory) menuPage.get(user.getUUID())).getByItem(item);
+                ParsedPackage parsedPackage = ((ParsedSubCategory) menuPage.get(user.getUUID())).getByItem(item);
                 String config = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_MESSAGE);
                 String url = MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL) + "/category/";
                 if (parsedPackage.getRoot() instanceof ParsedCategory) {
