@@ -13,8 +13,8 @@ import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 @CommandAlias("minestore|ms")
 public class AuthCommand extends BaseCommand {
+    @CommandPermission("minestore.auth")
     @Subcommand("auth")
-    @CommandPermission("minestore.auth|ms.auth")
     @SuppressWarnings("unused")
     public void onAuth(AbstractUser abstractUser) {
         CommonUser user = abstractUser.user();

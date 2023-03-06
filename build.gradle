@@ -63,7 +63,7 @@ dependencies {
 
 shadowJar {
     relocate 'com.google.gson', 'me.chrommob.minestore.libs.com.google.gson'
-    relocate 'co.aikar', 'me.chrommob.minestore.libs.co.aikar'
+    relocate 'co.aikar.acf', 'me.chrommob.minestore.libs.co.aikar.acf'
     relocate 'net.kyori', 'me.chrommob.minestore.libs.net.kyori'
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
 }

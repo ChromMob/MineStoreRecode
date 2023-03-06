@@ -12,7 +12,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 @CommandAlias("minestore|ms")
-@CommandPermission("minestore.setup|ms.setup")
 public class SetupCommand extends BaseCommand {
     private final MineStoreCommon plugin;
     public SetupCommand(MineStoreCommon plugin) {
@@ -20,6 +19,7 @@ public class SetupCommand extends BaseCommand {
     }
 
     @SuppressWarnings("unused")
+    @CommandPermission("minestore.setup")
     @Subcommand("setup")
     @CommandCompletion("@configKeys")
     @Syntax("<key> <value>")

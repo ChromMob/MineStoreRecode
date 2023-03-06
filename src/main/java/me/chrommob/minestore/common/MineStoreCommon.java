@@ -10,7 +10,6 @@ import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.gui.data.GuiData;
-import me.chrommob.minestore.common.gui.data.heads.HeadManager;
 import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
 import me.chrommob.minestore.common.interfaces.economyInfo.DefaultPlayerEconomyProvider;
@@ -25,10 +24,7 @@ import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class MineStoreCommon {
     private static MineStoreCommon instance;
@@ -48,7 +44,6 @@ public class MineStoreCommon {
     private GuiData guiData;
     private PlayerInfoProvider playerInfoProvider;
     private PlayerEconomyProvider playerEconomyProvider;
-    private HeadManager headManager;
 
     public MineStoreCommon() {
         instance = this;
@@ -93,7 +88,6 @@ public class MineStoreCommon {
 
     private boolean initialized = false;
     public void init() {
-        headManager = new HeadManager(this);
         miniMessage = MiniMessage.miniMessage();
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
@@ -145,14 +139,6 @@ public class MineStoreCommon {
     private boolean storeEnabled = false;
     private boolean buyEnabled = false;
     private void registerCommands() {
-        commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
-            try {
-                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId()) : new AbstractUser((UUID) null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
         commandManager.getCommandCompletions().registerAsyncCompletion("configKeys", c -> {
             Set<String> keys = new HashSet<>();
             for (ConfigKey key : ConfigKey.values()) {
@@ -355,9 +341,5 @@ public class MineStoreCommon {
 
     public GuiData guiData() {
         return guiData;
-    }
-
-    public HeadManager headManager() {
-        return headManager;
     }
 }

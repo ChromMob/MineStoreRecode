@@ -95,7 +95,7 @@ public class ParsedCategory {
                 items.add(subcategory.getItem());
             }
             CommonInventory inventory = new CommonInventory(displayName, 54, items);
-            MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory);
+            MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory, false);
             return inventory;
         }
         List<CommonItem> items = new ArrayList<>();
@@ -103,7 +103,7 @@ public class ParsedCategory {
             items.add(pack.getItem());
         }
         CommonInventory inventory = new CommonInventory(displayName, 54, items);
-        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory);
+        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory, false);
         return inventory;
     }
 

@@ -127,7 +127,7 @@ public class GuiOpenener {
         }
     }
 
-    public void formatInventory(CommonInventory inventory) {
+    public void formatInventory(CommonInventory inventory, boolean isRoot) {
         List<CommonItem> items = inventory.getItems();
         if (inventory.hasSorting()) {
             items.sort(Comparator.comparingInt(CommonItem::getSorting));
@@ -175,7 +175,9 @@ public class GuiOpenener {
                 index++;
             }
         }
-        finalItems.set(53, backItem);
+        if (!isRoot) {
+            finalItems.set(53, backItem);
+        }
         inventory.setItems(finalItems);
     }
 

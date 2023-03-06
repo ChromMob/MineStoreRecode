@@ -1,8 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit;
 
 import co.aikar.commands.PaperCommandManager;
-import com.github.retrooper.packetevents.PacketEvents;
-import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.bukkit.db.VaultEconomyProvider;
 import me.chrommob.minestore.platforms.bukkit.db.VaultPlayerInfoProvider;
@@ -29,19 +27,8 @@ public final class MineStoreBukkit extends JavaPlugin {
     private MineStoreCommon common;
 
     @Override
-    public void onLoad() {
-        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
-        //Are all listeners read only?
-        PacketEvents.getAPI().getSettings().readOnlyListeners(false)
-                .checkForUpdates(false)
-                .bStats(true);
-        PacketEvents.getAPI().load();
-    }
-
-    @Override
     public void onEnable() {
         instance = this;
-        PacketEvents.getAPI().init();
         this.adventure = BukkitAudiences.create(this);
         common = new MineStoreCommon();
         // Plugin startup logic
@@ -62,6 +49,9 @@ public final class MineStoreBukkit extends JavaPlugin {
                 common.registerPlayerEconomyProvider(vaultEconomyProvider);
             }
         }
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+
+        }
         common.init();
     }
 
@@ -75,7 +65,6 @@ public final class MineStoreBukkit extends JavaPlugin {
             this.adventure.close();
             this.adventure = null;
         }
-        PacketEvents.getAPI().terminate();
         common.stop();
     }
 }

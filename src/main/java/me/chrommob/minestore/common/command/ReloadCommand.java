@@ -11,8 +11,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 @CommandAlias("minestore|ms")
 public class ReloadCommand extends BaseCommand {
+    @CommandPermission("minestore.reload")
     @CommandAlias("reload")
-    @CommandPermission("minestore.reload|ms.reload")
     @SuppressWarnings("unused")
     public void onReload(AbstractUser abstractUser) {
         CommonUser user = abstractUser.user();

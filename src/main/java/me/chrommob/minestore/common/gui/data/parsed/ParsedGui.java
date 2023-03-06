@@ -37,7 +37,7 @@ public class ParsedGui {
             items.add(category.getItem());
         }
         CommonInventory inventory = new CommonInventory(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_CATEGORY_TITLE)), 54, items);
-        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory);
+        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory, true);
         return inventory;
     }
 
