@@ -17,6 +17,10 @@ weblistener:
   secret-enabled: false
   # This is the secret key that is used to authenticate the webhooks. This config option is required if secret-enabled is set to true.
   secret-key: extraSecretKey
+api:
+  key-enabled: false
+  # This is the secret key that is used to authenticate the API. This config option is required if key-enabled is set to true.
+  key: apiSecretKey
 # From this point on, all config options are optional.
 auth:
   # This is the amount of time in seconds that the player has to authenticate their Minecraft account with MineStore website.

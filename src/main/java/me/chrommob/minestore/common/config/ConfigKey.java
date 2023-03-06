@@ -5,7 +5,7 @@ public enum ConfigKey
     DEBUG(new Configuration("debug", false)),
 
     STORE_URL(new Configuration("store-url", "https://store.example.com")),
-    API_ENABLED(new Configuration("api.enabled", false)),
+    API_ENABLED(new Configuration("api.key-enabled", false)),
     API_KEY(new Configuration("api.key", "123456789")),
     SECRET_ENABLED(new Configuration("weblistener.secret-enabled", false)),
     SECRET_KEY(new Configuration("weblistener.secret-key", 123456789)),
