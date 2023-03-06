@@ -29,6 +29,10 @@ public class ParsedSubCategory {
         this.material = subCategory.getGui_item_id();
         if (packages != null && !packages.isEmpty()) {
             for (Package pack : packages) {
+                if (pack.getCategory_url() == null || !pack.getCategory_url().equals(this.url))
+                    continue;
+                if (pack.getActive() == 0)
+                    continue;
                 this.packages.add(new ParsedPackage(pack, this));
             }
         }
@@ -69,11 +73,12 @@ public class ParsedSubCategory {
         if (inventory != null) {
             return inventory;
         }
-        CommonItem[] items = new CommonItem[packages.size()];
-        for (int i = 0; i < packages.size(); i++) {
-            items[i] = packages.get(i).getItem();
+        List<CommonItem> items = new ArrayList<>();
+        for (ParsedPackage pack : this.packages) {
+            items.add(pack.getItem());
         }
         CommonInventory inventory = new CommonInventory(MineStoreCommon.getInstance().miniMessage().deserialize(((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_PACKAGE_TITLE)).replace("%subcategory%", name)), 54, items);
+        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory);
         return inventory;
     }
 }

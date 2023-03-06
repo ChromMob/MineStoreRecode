@@ -55,4 +55,9 @@ public class SpongeUser extends CommonUser {
     public void openInventory(CommonInventory inventory) {
         player.sendMessage(Text.of("Sponge not implemented yet"));
     }
+
+    @Override
+    public void closeInventory() {
+        player.sendMessage(Text.of("Sponge not implemented yet"));
+    }
 }

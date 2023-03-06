@@ -9,16 +9,16 @@ version = '0.1'
 repositories {
     mavenCentral()
     maven {
+        name = 'paper-repo'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+    maven {
         name = 'spigotmc-repo'
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
     maven {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
-    }
-    maven {
-        url = "https://repo.papermc.io/repository/maven-public/"
-        name = "paper-repo"
     }
     maven {
         name = "aikar-repo"

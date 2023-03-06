@@ -53,4 +53,9 @@ public class VelocityUser extends CommonUser {
     public void openInventory(CommonInventory inventory) {
         player.sendMessage(Component.text("Velocity not implemented yet"));
     }
+
+    @Override
+    public void closeInventory() {
+        player.sendMessage(Component.text("Velocity not implemented yet"));
+    }
 }

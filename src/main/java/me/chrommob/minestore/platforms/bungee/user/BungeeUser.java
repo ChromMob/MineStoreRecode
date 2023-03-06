@@ -50,4 +50,9 @@ public class BungeeUser extends CommonUser {
     public void openInventory(CommonInventory inventory) {
         player.sendMessage(new TextComponent("Bungee not implemented yet"));
     }
+
+    @Override
+    public void closeInventory() {
+        player.sendMessage(new TextComponent("Bungee not implemented yet"));
+    }
 }

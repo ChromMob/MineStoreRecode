@@ -13,6 +13,6 @@ public class BuyCommand extends BaseCommand {
     @SuppressWarnings("unused")
     public void onBuy(AbstractUser user) {
         CommonUser commonUser = user.user();
-        MineStoreCommon.getInstance().guiData().getGuiInfo().handleInventoryClick(MineStoreCommon.getInstance(), commonUser, null);
+        MineStoreCommon.getInstance().guiData().getGuiInfo().handleInventoryClick(commonUser, null);
     }
 }

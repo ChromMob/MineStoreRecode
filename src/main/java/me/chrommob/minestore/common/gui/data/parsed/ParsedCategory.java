@@ -39,6 +39,8 @@ public class ParsedCategory {
         } else {
             if (category.getPackages() != null && !category.getPackages().isEmpty()) {
                 for (Package pack : category.getPackages()) {
+                    if (pack.getActive() == 0)
+                        continue;
                     this.packages.add(new ParsedPackage(pack, this));
                 }
             }
@@ -88,16 +90,28 @@ public class ParsedCategory {
             return this.inventory;
         }
         if (hasSubcategories()) {
-            CommonItem[] items = new CommonItem[subcategories.size()];
-            for (int i = 0; i < subcategories.size(); i++) {
-                items[i] = subcategories.get(i).getItem();
+            List<CommonItem> items = new ArrayList<>();
+            for (ParsedSubCategory subcategory : subcategories) {
+                items.add(subcategory.getItem());
             }
-            return new CommonInventory(displayName, 54, items);
+            CommonInventory inventory = new CommonInventory(displayName, 54, items);
+            MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory);
+            return inventory;
         }
-        CommonItem[] items = new CommonItem[packages.size()];
-        for (int i = 0; i < packages.size(); i++) {
-            items[i] = packages.get(i).getItem();
+        List<CommonItem> items = new ArrayList<>();
+        for (ParsedPackage pack : packages) {
+            items.add(pack.getItem());
         }
-        return new CommonInventory(displayName, 54, items);
+        CommonInventory inventory = new CommonInventory(displayName, 54, items);
+        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory);
+        return inventory;
+    }
+
+    public List<ParsedSubCategory> getSubCategories() {
+        if (hasSubcategories()) {
+            return subcategories;
+        } else {
+            return new ArrayList<>();
+        }
     }
 }

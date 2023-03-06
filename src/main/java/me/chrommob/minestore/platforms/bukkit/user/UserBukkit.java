@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.user;
 
+import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
@@ -11,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -63,27 +65,43 @@ public class UserBukkit extends CommonUser {
     @Override
     public void openInventory(CommonInventory inventory) {
         Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize(), serializer.serialize(inventory.getTitle()));
+        player.openInventory(bukkitInventory);
         List<ItemStack> bukkitItems = new ArrayList<>();
         for (CommonItem item : inventory.getItems()) {
             Material material = null;
-            if (item.getMaterial() != null) {
+            if (item.getMaterial() == null) {
+                material = Material.CHEST;
+            } else {
                 material = Material.matchMaterial(item.getMaterial());
             }
             if (material == null) {
+                MineStoreCommon.getInstance().log("Material " + item.getMaterial() + " is not valid!");
                 material = Material.CHEST;
+                item.setMaterial("CHEST");
             }
-            ItemStack bukkitItem = new ItemStack(material);
-            ItemMeta bukkitItemMeta = bukkitItem.getItemMeta();
-            bukkitItemMeta.setDisplayName(serializer.serialize(item.getName()));
-            List<String> bukkitLore = new ArrayList<>();
-            for (Component lore : item.getLore()) {
-                bukkitLore.add(serializer.serialize(lore));
+            ItemStack bukkitItem = new ItemStack(material, 1);
+            ItemMeta meta = bukkitItem.getItemMeta();
+            LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
+            List<String> lore = new ArrayList<>();
+            for (Component line : item.getLore()) {
+                lore.add(serializer.serialize(line));
             }
-            bukkitItemMeta.setLore(bukkitLore);
-            bukkitItem.setItemMeta(bukkitItemMeta);
+            meta.setDisplayName(serializer.serialize(item.getName()));
+            meta.setLore(lore);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            if (item.isFeatured()){
+                meta.addEnchant(org.bukkit.enchantments.Enchantment.DURABILITY, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+            bukkitItem.setItemMeta(meta);
             bukkitItems.add(bukkitItem);
         }
         bukkitInventory.setContents(bukkitItems.toArray(new ItemStack[0]));
         player.openInventory(bukkitInventory);
+    }
+
+    @Override
+    public void closeInventory() {
+        player.closeInventory();
     }
 }

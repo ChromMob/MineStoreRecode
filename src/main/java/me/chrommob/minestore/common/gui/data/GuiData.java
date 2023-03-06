@@ -6,7 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
-import me.chrommob.minestore.common.gui.GuiInfo;
+import me.chrommob.minestore.common.gui.GuiOpenener;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 
@@ -22,7 +22,7 @@ public class GuiData {
     private URL packageURL;
     private Gson gson = new Gson();
 
-    private GuiInfo guiInfo = new GuiInfo(this);
+    private GuiOpenener guiOpenener = new GuiOpenener(this);
     private ParsedGui parsedGui;
     private Thread thread = null;
 
@@ -101,7 +101,7 @@ public class GuiData {
         return parsedGui;
     }
 
-    public GuiInfo getGuiInfo() {
-        return guiInfo;
+    public GuiOpenener getGuiInfo() {
+        return guiOpenener;
     }
 }

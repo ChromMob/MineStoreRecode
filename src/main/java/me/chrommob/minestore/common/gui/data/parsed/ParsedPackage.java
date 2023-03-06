@@ -52,13 +52,14 @@ public class ParsedPackage {
             lore.add(miniMessage.deserialize(configLore));
         }
         String configPrice = (String) config.get(ConfigKey.BUY_GUI_PACKAGE_PRICE);
-        double price = (int) (this.price - (this.discount / 100 * this.price) * 100 + 0.5) / 100.0;
+        double price = (this.price - (this.price * (this.discount / 100)));
+        price = Math.round(price * 100.0) / 100.0;
         configPrice = configPrice.replace("%price%", String.valueOf(price));
         lore.add(miniMessage.deserialize(configPrice));
         String configName = (String) config.get(ConfigKey.BUY_GUI_PACKAGE_NAME);
         configName = configName.replace("%package%", this.name);
         Component name = miniMessage.deserialize(configName);
-        return new CommonItem(name, material, lore);
+        return new CommonItem(name, material, lore, featured == 1, sorting);
     }
 
     public String getName() {

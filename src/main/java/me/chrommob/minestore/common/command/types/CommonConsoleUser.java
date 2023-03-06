@@ -45,6 +45,11 @@ public class CommonConsoleUser extends CommonUser {
     }
 
     @Override
+    public void closeInventory() {
+        MineStoreCommon.getInstance().log("Console can't close inventory");
+    }
+
+    @Override
     public String getPrefix() {
         return "";
     }

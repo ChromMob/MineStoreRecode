@@ -10,6 +10,7 @@ import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.gui.data.GuiData;
+import me.chrommob.minestore.common.gui.data.heads.HeadManager;
 import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
 import me.chrommob.minestore.common.interfaces.economyInfo.DefaultPlayerEconomyProvider;
@@ -47,6 +48,7 @@ public class MineStoreCommon {
     private GuiData guiData;
     private PlayerInfoProvider playerInfoProvider;
     private PlayerEconomyProvider playerEconomyProvider;
+    private HeadManager headManager;
 
     public MineStoreCommon() {
         instance = this;
@@ -89,7 +91,9 @@ public class MineStoreCommon {
         this.playerEconomyProvider = playerEconomyProvider;
     }
 
+    private boolean initialized = false;
     public void init() {
+        headManager = new HeadManager(this);
         miniMessage = MiniMessage.miniMessage();
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
@@ -100,10 +104,12 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager = new DatabaseManager(this);
         }
+        registerEssentialCommands();
         if (!verify()) {
             log("Your plugin is not configured correctly. Please check your config.yml");
             return;
         }
+        initialized = true;
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager.start();
         }
@@ -124,6 +130,18 @@ public class MineStoreCommon {
             commandGetter.stop();
     }
 
+    private void registerEssentialCommands() {
+        commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
+            try {
+                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId()) : new AbstractUser((UUID) null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        });
+        commandManager.registerCommand(new ReloadCommand());
+    }
+
     private boolean storeEnabled = false;
     private boolean buyEnabled = false;
     private void registerCommands() {
@@ -142,7 +160,6 @@ public class MineStoreCommon {
             }
             return keys;
         });
-        commandManager.registerCommand(new ReloadCommand());
         commandManager.registerCommand(new AuthCommand());
         commandManager.registerCommand(new SetupCommand(this));
         if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
@@ -157,6 +174,10 @@ public class MineStoreCommon {
 
     public void reload() {
         log("Reloading...");
+        if (!initialized) {
+            init();
+            return;
+        }
         configReader.reload();
         if (commandGetter.load()) {
             log("Config reloaded.");
@@ -334,5 +355,9 @@ public class MineStoreCommon {
 
     public GuiData guiData() {
         return guiData;
+    }
+
+    public HeadManager headManager() {
+        return headManager;
     }
 }

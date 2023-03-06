@@ -32,10 +32,16 @@ public class ParsedGui {
         if (this.inventory != null) {
             return this.inventory;
         }
-        CommonItem[] items = new CommonItem[this.categories.size()];
-        for (int i = 0; i < this.categories.size(); i++) {
-            items[i] = this.categories.get(i).getItem();
+        List<CommonItem> items = new ArrayList<>();
+        for (ParsedCategory category : this.categories) {
+            items.add(category.getItem());
         }
-        return new CommonInventory(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_CATEGORY_TITLE)), 54, items);
+        CommonInventory inventory = new CommonInventory(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_CATEGORY_TITLE)), 54, items);
+        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory);
+        return inventory;
+    }
+
+    public List<ParsedCategory> getCategories() {
+        return this.categories;
     }
 }

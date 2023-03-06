@@ -19,6 +19,7 @@ public abstract class CommonUser {
     public abstract UUID getUUID();
 
     public abstract void openInventory(CommonInventory inventory);
+    public abstract void closeInventory();
 
     public String getPrefix() {
         return MineStoreCommon.getInstance().playerInfoProvider().getPrefix(this);
@@ -37,5 +38,4 @@ public abstract class CommonUser {
     public String getGroup() {
         return MineStoreCommon.getInstance().playerInfoProvider().getGroup(this);
     }
-
 }

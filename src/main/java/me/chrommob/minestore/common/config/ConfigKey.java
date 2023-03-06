@@ -31,7 +31,7 @@ public enum ConfigKey
     BUY_GUI_PACKAGE_NAME(new Configuration("buy-gui.package.name", "<gold>%package%")),
     BUY_GUI_PACKAGE_LORE(new Configuration("buy-gui.package.description", "<white>%description%")),
     BUY_GUI_PACKAGE_PRICE(new Configuration("buy-gui.package.price", "<green>Price: </green><gold>%price%USD</gold>")),
-    BUY_GUI_MESSAGE(new Configuration("buy-gui.message", "<dark_green>To buy %package% click <click:open_url:%buy_url%><bold><gold>HERE</gold></bold></click>!")),
+    BUY_GUI_MESSAGE(new Configuration("buy-gui.message", "<dark_green>To buy <red><bold>%package%</bold></red> click <click:open_url:%buy_url%><bold><gold>HERE</gold></bold></click>!")),
 
     MYSQL_ENABLED(new Configuration("mysql.enabled", false)),
     MYSQL_HOST(new Configuration("mysql.ip", "localhost")),
