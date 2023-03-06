@@ -91,13 +91,13 @@ buy-gui:
 - **minestore.auth**
   - Allows the player to use the `/minestore auth` command. This command allows the player to authenticate their Minecraft account with MineStore website.
 - **minestore.buy**
-  - Allows the player to use the `/minestore buy` command. This command allows the player to display GUI.
+  - Allows the player to use the `/buy` command. This command allows the player to display GUI.
 - **minestore.reload**
   - Allows the player to use the `/minestore reload` command. This command reloads the config.yml file.
 - **minestore.setup**
   - Allows the player to use the `/minestore setup` command. This command allows the player to edit the config.yml file in-game.
 - **minestore.store**
-  - Allows the player to use the `/minestore store` command. This command sends the player link to the MineStore website.
+  - Allows the player to use the `/store` command. This command sends the player link to the MineStore website.
 ## Placeholders
 - TopDonators
   - **%ms_donator_username_number%**
