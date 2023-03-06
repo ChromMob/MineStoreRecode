@@ -32,6 +32,10 @@ repositories {
         name = "jitpack"
         url = "https://jitpack.io/"
     }
+    maven {
+        name = 'placeholderapi-repo'
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
 }
 
 dependencies {
@@ -41,6 +45,7 @@ dependencies {
     compileOnly 'org.spongepowered:spongeapi:7.4.0'
     compileOnly 'net.luckperms:api:5.4'
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
+    compileOnly 'me.clip:placeholderapi:2.11.2'
 
     implementation('co.aikar:acf-paper:0.5.1-SNAPSHOT')
     implementation('co.aikar:acf-bungee:0.5.1-SNAPSHOT')

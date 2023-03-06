@@ -7,6 +7,7 @@ import me.chrommob.minestore.platforms.bukkit.db.VaultPlayerInfoProvider;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitInventoryEvent;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitPlayerEvent;
 import me.chrommob.minestore.platforms.bukkit.logger.BukkitLogger;
+import me.chrommob.minestore.platforms.bukkit.placeholder.BukkitPlaceHolderProvider;
 import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
 import me.chrommob.minestore.platforms.bukkit.webCommand.CommandExecuterBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -37,6 +38,7 @@ public final class MineStoreBukkit extends JavaPlugin {
         common.registerCommandExecuter(new CommandExecuterBukkit(this));
         common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());
         common.registerPlayerJoinListener(new BukkitPlayerEvent(this));
+        common.registerPlaceHolderProvider(new BukkitPlaceHolderProvider(this));
         new BukkitInventoryEvent(this);
         common.registerCommandManager(new PaperCommandManager(this));
         if (getServer().getPluginManager().getPlugin("Vault") != null) {

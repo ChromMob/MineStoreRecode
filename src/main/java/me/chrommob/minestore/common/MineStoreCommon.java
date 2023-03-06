@@ -16,15 +16,20 @@ import me.chrommob.minestore.common.interfaces.economyInfo.DefaultPlayerEconomyP
 import me.chrommob.minestore.common.interfaces.economyInfo.PlayerEconomyProvider;
 import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
 import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
+import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProvider;
 import me.chrommob.minestore.common.interfaces.playerInfo.DefaultPlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.playerInfo.PlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.playerInfo.implementation.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
+import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class MineStoreCommon {
     private static MineStoreCommon instance;
@@ -42,8 +47,10 @@ public class MineStoreCommon {
     private CommandDumper commandDumper;
     private AuthHolder authHolder;
     private GuiData guiData;
+    private PlaceHolderData placeHolderData;
     private PlayerInfoProvider playerInfoProvider;
     private PlayerEconomyProvider playerEconomyProvider;
+    private CommonPlaceHolderProvider placeHolderProvider;
 
     public MineStoreCommon() {
         instance = this;
@@ -86,6 +93,10 @@ public class MineStoreCommon {
         this.playerEconomyProvider = playerEconomyProvider;
     }
 
+    public void registerPlaceHolderProvider(CommonPlaceHolderProvider placeHolderProvider) {
+        this.placeHolderProvider = placeHolderProvider;
+    }
+
     private boolean initialized = false;
     public void init() {
         miniMessage = MiniMessage.miniMessage();
@@ -95,6 +106,7 @@ public class MineStoreCommon {
         commandStorage.init();
         commandGetter = new WebListener(this);
         guiData = new GuiData();
+        placeHolderData = new PlaceHolderData();
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager = new DatabaseManager(this);
         }
@@ -107,7 +119,11 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager.start();
         }
+        if (placeHolderProvider != null) {
+            placeHolderProvider.init();
+        }
         guiData.start();
+        placeHolderData.start();
         commandGetter.start();
         registerCommands();
     }
@@ -116,6 +132,8 @@ public class MineStoreCommon {
         log("Shutting down...");
         if (guiData != null)
             guiData.stop();
+        if (placeHolderData != null)
+            placeHolderData.stop();
         if (authHolder != null)
             authHolder.stop();
         if (databaseManager != null)
@@ -173,6 +191,10 @@ public class MineStoreCommon {
             log("GuiData reloaded.");
             guiData.start();
         }
+        if (placeHolderData.load()) {
+            log("PlaceHolderData reloaded.");
+            placeHolderData.start();
+        }
         if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             storeEnabled = true;
             commandManager.registerCommand(new StoreCommand());
@@ -222,6 +244,10 @@ public class MineStoreCommon {
         }
         if (!guiData.load()) {
             log("GuiData is not configured correctly.");
+            return false;
+        }
+        if (!placeHolderData.load()) {
+            log("PlaceHolderData is not configured correctly.");
             return false;
         }
         if (!commandGetter.load()) {
@@ -341,5 +367,9 @@ public class MineStoreCommon {
 
     public GuiData guiData() {
         return guiData;
+    }
+
+    public PlaceHolderData placeHolderData() {
+        return placeHolderData;
     }
 }

@@ -5,3 +5,4 @@ main: me.chrommob.minestore.platforms.bukkit.MineStoreBukkit
 api-version: 1.13
 softdepend:
   - Vault
+  - PlaceholderAPI
