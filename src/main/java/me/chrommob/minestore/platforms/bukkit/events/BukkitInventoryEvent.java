@@ -29,6 +29,7 @@ public class BukkitInventoryEvent implements Listener {
             }
         }
         if (event.getCurrentItem() == null) return;
+        if (event.getCurrentItem().getItemMeta() == null) return;
         Component name = BukkitComponentSerializer.legacy().deserialize(event.getCurrentItem().getItemMeta().getDisplayName());
         List<Component> lore = new ArrayList<>();
         if (event.getCurrentItem().getItemMeta().getLore() != null) {
