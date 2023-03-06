@@ -4,9 +4,8 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,6 +37,14 @@ public class ConfigReader {
             populateDefaultLanguage();
             languageFile.getParentFile().mkdirs();
             saveDefaultLanguage();
+        }
+        if (!new File(languageFile.getParentFile(), "cs_CZ.lang").exists()) {
+            InputStream cs_CZ = MineStoreCommon.getInstance().getClass().getClassLoader().getResourceAsStream("cs_CZ.lang");
+            try {
+                Files.copy(cs_CZ, new File(languageFile.getParentFile(), "cs_CZ.lang").toPath());
+            } catch (IOException e) {
+                MineStoreCommon.getInstance().debug(e);
+            }
         }
         reload();
     }
