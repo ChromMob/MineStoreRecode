@@ -11,7 +11,7 @@ A recode of the MineStore plugin for Minecraft servers.
 # This is the configuration file for MineStore.
 # Only enable debug if requested by a MineStore developer. 
 debug: false
-# This is the language that is used by the plugin. This config option is required. Available languages: en_US, cs_CZ but you can create your own language file.
+# This is the language that is used by the plugin. This config option is required. Available languages: en_US, cs_CZ, ru_RU, ua_UA but you can create your own language file.
 language: en_US
 # Store URL is the URL to your MineStore website. This config option is required.
 store-url: "https://store.example.com"

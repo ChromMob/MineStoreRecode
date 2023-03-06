@@ -46,6 +46,22 @@ public class ConfigReader {
                 MineStoreCommon.getInstance().debug(e);
             }
         }
+        if (!new File(languageFile.getParentFile(), "ru_RU.lang").exists()) {
+            InputStream ru_RU = MineStoreCommon.getInstance().getClass().getClassLoader().getResourceAsStream("ru_RU.lang");
+            try {
+                Files.copy(ru_RU, new File(languageFile.getParentFile(), "ru_RU.lang").toPath());
+            } catch (IOException e) {
+                MineStoreCommon.getInstance().debug(e);
+            }
+        }
+        if (!new File(languageFile.getParentFile(), "ua_UA.lang").exists()) {
+            InputStream ua_UA = MineStoreCommon.getInstance().getClass().getClassLoader().getResourceAsStream("ua_UA.lang");
+            try {
+                Files.copy(ua_UA, new File(languageFile.getParentFile(), "ua_UA.lang").toPath());
+            } catch (IOException e) {
+                MineStoreCommon.getInstance().debug(e);
+            }
+        }
         reload();
     }
 
