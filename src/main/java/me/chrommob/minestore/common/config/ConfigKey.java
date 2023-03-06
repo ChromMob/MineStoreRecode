@@ -3,6 +3,7 @@ package me.chrommob.minestore.common.config;
 public enum ConfigKey
 {
     DEBUG(new Configuration("debug", false)),
+    LANGUAGE(new Configuration("language", "en_US")),
 
     STORE_URL(new Configuration("store-url", "https://store.example.com")),
     API_ENABLED(new Configuration("api.key-enabled", false)),

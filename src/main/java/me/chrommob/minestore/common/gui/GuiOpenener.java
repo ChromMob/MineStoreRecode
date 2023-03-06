@@ -91,7 +91,6 @@ public class GuiOpenener {
                 Class<?> clazz = menuPage.get(user.getUUID()).getClass();
                 ParsedPackage parsedPackage = clazz == ParsedCategory.class ? (ParsedPackage) ((ParsedCategory) menuPage.get(user.getUUID())).getByItem(item) : ((ParsedSubCategory) menuPage.get(user.getUUID())).getByItem(item);
                 if (parsedPackage == null) {
-                    MineStoreCommon.getInstance().log("Package is null!");
                     return;
                 }
                 String config = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_MESSAGE);
