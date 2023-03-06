@@ -1,5 +1,9 @@
 # MineStoreRecode
 A recode of the MineStore plugin for Minecraft servers.
+# Table of Contents
+1. [Configuration](#Configuration)
+2. [Permissions](#Permissions)
+3. [Placeholders](#Placeholders)
 ## Configuration
 ### config.yml
 ```yaml
