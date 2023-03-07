@@ -1,6 +1,9 @@
 package me.chrommob.minestore.common;
 
 import co.aikar.commands.CommandManager;
+import me.chrommob.minestore.common.addons.MineStoreAddon;
+import me.chrommob.minestore.common.addons.MineStoreEventSender;
+import me.chrommob.minestore.common.addons.MineStoreListener;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.commandGetters.WebListener;
@@ -24,12 +27,14 @@ import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class MineStoreCommon {
     private static MineStoreCommon instance;
@@ -97,8 +102,50 @@ public class MineStoreCommon {
         this.placeHolderProvider = placeHolderProvider;
     }
 
+    private Set<MineStoreAddon> addons = new HashSet<>();
+    private Set<MineStoreListener> listeners = new HashSet<>();
+    public void registerListener(MineStoreListener listener) {
+        listeners.add(listener);
+    }
+    public Set<MineStoreListener> getListeners() {
+        return listeners;
+    }
+    private MineStoreEventSender eventSender;
     private boolean initialized = false;
     public void init() {
+        instance = this;
+        eventSender = new MineStoreEventSender(this);
+        File addonFolder = new File(configFile.getParentFile(), "addons");
+        if (!addonFolder.exists()) {
+            addonFolder.mkdir();
+        }
+        if (addonFolder.listFiles() != null) {
+            for (File file : addonFolder.listFiles()) {
+                if (file.getName().endsWith(".jar")) {
+                    try {
+                        ZipFile zipFile = new ZipFile(file);
+                        if (zipFile.getEntry("addon.yml") != null) {
+                            ZipEntry zipEntry = zipFile.getEntry("addon.yml");
+                            Yaml yaml = new Yaml();
+                            HashMap<String, String> object = yaml.load(zipFile.getInputStream(zipEntry));
+                            String mainClass = object.get("main-class");
+                            ClassLoader dependencyClassLoader = getClass().getClassLoader();
+                            log("Loading addon " + mainClass + " from " + file.getName() + "..." );
+                            URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
+                            URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
+                            Class<?> cls = urlClassLoader.loadClass(mainClass);
+                            MineStoreAddon addon = (MineStoreAddon) cls.newInstance();
+                            addons.add(addon);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        for (MineStoreAddon addon : addons) {
+            addon.onEnable();
+        }
         miniMessage = MiniMessage.miniMessage();
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
@@ -129,6 +176,9 @@ public class MineStoreCommon {
     }
 
     public void stop() {
+        for (MineStoreAddon addon : addons) {
+            addon.onDisable();
+        }
         log("Shutting down...");
         if (guiData != null)
             guiData.stop();
@@ -177,6 +227,9 @@ public class MineStoreCommon {
     }
 
     public void reload() {
+        for (MineStoreAddon addon : addons) {
+            addon.onReload();
+        }
         log("Reloading...");
         if (!initialized) {
             init();
@@ -371,5 +424,9 @@ public class MineStoreCommon {
 
     public PlaceHolderData placeHolderData() {
         return placeHolderData;
+    }
+
+    public MineStoreEventSender listener() {
+        return eventSender;
     }
 }

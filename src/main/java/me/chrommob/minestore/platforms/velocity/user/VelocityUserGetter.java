@@ -4,6 +4,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class VelocityUserGetter implements UserGetter {
@@ -21,5 +23,14 @@ public class VelocityUserGetter implements UserGetter {
     @Override
     public CommonUser get(String username) {
         return new VelocityUser(username, server);
+    }
+
+    @Override
+    public Set<CommonUser> getAllPlayers() {
+        Set<CommonUser> users = new HashSet<>();
+        for (UUID uuid : server.getAllPlayers().stream().map(com.velocitypowered.api.proxy.Player::getUniqueId).toArray(UUID[]::new)) {
+            users.add(get(uuid));
+        }
+        return users;
     }
 }

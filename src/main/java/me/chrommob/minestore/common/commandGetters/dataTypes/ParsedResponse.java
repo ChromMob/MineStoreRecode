@@ -60,4 +60,8 @@ public class ParsedResponse {
         ONLINE,
         OFFLINE
     }
+
+    public ParsedResponse clone() {
+        return new ParsedResponse(type, commandType, command, username, requestId);
+    }
 }

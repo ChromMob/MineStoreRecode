@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-    id "com.github.johnrengelman.shadow" version "6.1.0"
+    id "com.github.johnrengelman.shadow" version "8.1.0"
+    id 'maven-publish'
 }
 
 group = 'me.chrommob'
@@ -64,6 +65,17 @@ dependencies {
     implementation 'com.zaxxer:HikariCP:4.0.3'
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
     implementation 'mysql:mysql-connector-java:8.0.32'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
 }
 
 shadowJar {

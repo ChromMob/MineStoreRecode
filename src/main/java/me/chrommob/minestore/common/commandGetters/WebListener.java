@@ -65,6 +65,7 @@ public class WebListener implements CommandGetter {
                     if (!wasEmpty) {
                         switch (parsedResponse.type()) {
                             case COMMAND:
+                                mineStoreCommon.listener().onPurchase(parsedResponse.clone());
                                 mineStoreCommon.commandStorage().listener(parsedResponse);
                                 mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\"" + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username() + " requires online: " + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE) ? "true" : "false"));
                                 break;
