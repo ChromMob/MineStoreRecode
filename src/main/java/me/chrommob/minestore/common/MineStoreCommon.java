@@ -26,6 +26,10 @@ import me.chrommob.minestore.common.interfaces.playerInfo.implementation.LuckPer
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
+import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
+import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
+import me.chrommob.minestore.platforms.sponge.MineStoreSponge;
+import me.chrommob.minestore.platforms.velocity.MineStoreVelocity;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.yaml.snakeyaml.Yaml;
 
@@ -57,8 +61,12 @@ public class MineStoreCommon {
     private PlayerEconomyProvider playerEconomyProvider;
     private CommonPlaceHolderProvider placeHolderProvider;
 
-    public MineStoreCommon() {
-        instance = this;
+    public MineStoreCommon(Object plugin) {
+        if (plugin instanceof MineStoreBungee || plugin instanceof MineStoreBukkit || plugin instanceof MineStoreVelocity || plugin instanceof MineStoreSponge) {
+            instance = this;
+        } else {
+            throw new RuntimeException("You can't create an instance of MineStoreCommon outside of the platforms!");
+        }
     }
 
     public static MineStoreCommon getInstance() {
@@ -113,36 +121,8 @@ public class MineStoreCommon {
     private MineStoreEventSender eventSender;
     private boolean initialized = false;
     public void init() {
-        instance = this;
         eventSender = new MineStoreEventSender(this);
-        File addonFolder = new File(configFile.getParentFile(), "addons");
-        if (!addonFolder.exists()) {
-            addonFolder.mkdir();
-        }
-        if (addonFolder.listFiles() != null) {
-            for (File file : addonFolder.listFiles()) {
-                if (file.getName().endsWith(".jar")) {
-                    try {
-                        ZipFile zipFile = new ZipFile(file);
-                        if (zipFile.getEntry("addon.yml") != null) {
-                            ZipEntry zipEntry = zipFile.getEntry("addon.yml");
-                            Yaml yaml = new Yaml();
-                            HashMap<String, String> object = yaml.load(zipFile.getInputStream(zipEntry));
-                            String mainClass = object.get("main-class");
-                            ClassLoader dependencyClassLoader = getClass().getClassLoader();
-                            log("Loading addon " + mainClass + " from " + file.getName() + "..." );
-                            URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
-                            URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
-                            Class<?> cls = urlClassLoader.loadClass(mainClass);
-                            MineStoreAddon addon = (MineStoreAddon) cls.newInstance();
-                            addons.add(addon);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
+        registerAddons();
         for (MineStoreAddon addon : addons) {
             addon.onEnable();
         }
@@ -173,6 +153,41 @@ public class MineStoreCommon {
         placeHolderData.start();
         commandGetter.start();
         registerCommands();
+    }
+
+    private void registerAddons() {
+        File addonFolder = new File(configFile.getParentFile(), "addons");
+        if (!addonFolder.exists()) {
+            addonFolder.mkdir();
+        }
+        if (addonFolder.listFiles() == null) {
+            return;
+        }
+        for (File file : addonFolder.listFiles()) {
+            if (!file.getName().endsWith(".jar")) {
+                continue;
+            }
+            try {
+                ZipFile zipFile = new ZipFile(file);
+                if (zipFile.getEntry("addon.yml") == null) {
+                    log("Addon " + file.getName() + " does not contain addon.yml!");
+                    continue;
+                }
+                ZipEntry zipEntry = zipFile.getEntry("addon.yml");
+                Yaml yaml = new Yaml();
+                HashMap<String, String> object = yaml.load(zipFile.getInputStream(zipEntry));
+                String mainClass = object.get("main-class");
+                ClassLoader dependencyClassLoader = getClass().getClassLoader();
+                log("Loading addon " + mainClass + " from " + file.getName() + "..." );
+                URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
+                URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
+                Class<?> cls = urlClassLoader.loadClass(mainClass);
+                MineStoreAddon addon = (MineStoreAddon) cls.newInstance();
+                addons.add(addon);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void stop() {
