@@ -31,7 +31,7 @@ public final class MineStoreBukkit extends JavaPlugin {
     public void onEnable() {
         instance = this;
         this.adventure = BukkitAudiences.create(this);
-        common = new MineStoreCommon();
+        common = new MineStoreCommon(this);
         // Plugin startup logic
         common.registerLogger(new BukkitLogger(this));
         common.registerUserGetter(new BukkitUserGetter(this));

@@ -39,7 +39,7 @@ public class MineStoreSponge {
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
         instance = this;
-        common = new MineStoreCommon();
+        common = new MineStoreCommon(this);
         common.registerLogger(new SpongeLogger(logger));
         common.registerUserGetter(new SpongeUserGetter());
         common.registerCommandManager(new SpongeCommandManager(pluginContainer));

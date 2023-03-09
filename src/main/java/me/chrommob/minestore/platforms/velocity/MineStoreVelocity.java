@@ -32,7 +32,7 @@ public class MineStoreVelocity {
 
     @Subscribe
     private void onProxyInitialization(ProxyInitializeEvent event) {
-        common = new MineStoreCommon();
+        common = new MineStoreCommon(this);
         common.registerLogger(new VelocityLogger(logger));
         common.registerUserGetter(new VelocityUserGetter(server));
         common.registerCommandManager(new VelocityCommandManager(server, this));

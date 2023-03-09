@@ -134,10 +134,9 @@ public class GuiOpenener {
         if (inventory.hasFeatured()) {
             items.sort(Comparator.comparing(CommonItem::isFeatured).reversed());
         }
-        CommonItem glassPane = new CommonItem(Component.text(" "), "glass_pane", Collections.emptyList());
         List<CommonItem> finalItems = new ArrayList<>();
-        for (int i = 0; i < 54; i++) {
-            finalItems.add(glassPane);
+        if ((boolean) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ENABLED)) {
+            addBackground(finalItems);
         }
         int index = 0;
         for (int i = 10; i < 17; i++) {
@@ -178,6 +177,14 @@ public class GuiOpenener {
             finalItems.set(53, backItem);
         }
         inventory.setItems(finalItems);
+    }
+    
+    private List<CommonItem> addBackground(List<CommonItem> finalItems) {
+        CommonItem glassPane = new CommonItem(Component.text(" "), (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ITEM), Collections.emptyList(), true);
+        for (int i = 0; i < 54; i++) {
+            finalItems.add(glassPane);
+        }
+        return finalItems;
     }
 
     public Set<Component> getTitles() {

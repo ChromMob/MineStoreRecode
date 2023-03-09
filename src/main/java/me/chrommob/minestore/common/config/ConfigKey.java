@@ -21,6 +21,8 @@ public enum ConfigKey
     STORE_COMMAND_MESSAGE(new Configuration("store-command.message", "<dark_green>Visit our store <click:open_url:%store_url%><hover:show_text:'<gold>Click to open the store!'><bold><gold>here</gold></bold></hover></click>!</dark_green>")),
 
     BUY_GUI_ENABLED(new Configuration("buy-gui.enabled", false)),
+    BUY_GUI_BACKGROUND_ENABLED(new Configuration("buy-gui.background.enabled", true)),
+    BUY_GUI_BACKGROUND_ITEM(new Configuration("buy-gui.background.item", "GLASS_PANE")),
     BUY_GUI_BACK_ITEM(new Configuration("buy-gui.back.item", "BARRIER")),
     BUY_GUI_BACK_ITEM_NAME(new Configuration("buy-gui.back.name", "<red>Back")),
     BUY_GUI_BACK_ITEM_LORE(new Configuration("buy-gui.back.description", "<red>Go back to the previous menu!")),

@@ -70,14 +70,23 @@ public class UserBukkit extends CommonUser {
         for (CommonItem item : inventory.getItems()) {
             Material material = null;
             if (item.getMaterial() == null) {
-                material = Material.CHEST;
+                if (item.isBackground()) {
+                    material = Material.STAINED_GLASS_PANE;
+                } else {
+                    material = Material.CHEST;
+                }
             } else {
                 material = Material.matchMaterial(item.getMaterial());
             }
             if (material == null) {
                 MineStoreCommon.getInstance().log("Material " + item.getMaterial() + " is not valid!");
-                material = Material.CHEST;
-                item.setMaterial("CHEST");
+                if (item.isBackground()) {
+                    material = Material.STAINED_GLASS_PANE;
+                    item.setMaterial("STAINED_GLASS_PANE");
+                } else {
+                    material = Material.CHEST;
+                    item.setMaterial("CHEST");
+                }
             }
             ItemStack bukkitItem = new ItemStack(material, 1);
             ItemMeta meta = bukkitItem.getItemMeta();

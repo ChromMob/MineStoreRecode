@@ -13,11 +13,19 @@ public class CommonItem {
     private final Component name;
     private final List<Component> lore;
     private String material;
+    private boolean isBackground = false;
 
     public CommonItem(Component name, String material, List<Component> lore) {
         this.name = name;
         this.material = material;
         this.lore = lore;
+    }
+
+    public CommonItem(Component name, String material, List<Component> lore, boolean isBackground) {
+        this.name = name;
+        this.material = material;
+        this.lore = lore;
+        this.isBackground = isBackground;
     }
 
     public CommonItem(Component name, String material, List<Component> lore, boolean isFeatured, int sorting) {
@@ -70,5 +78,9 @@ public class CommonItem {
 
     public void setMaterial(String chest) {
         this.material = chest;
+    }
+
+    public boolean isBackground() {
+        return isBackground;
     }
 }
