@@ -61,12 +61,8 @@ public class MineStoreCommon {
     private PlayerEconomyProvider playerEconomyProvider;
     private CommonPlaceHolderProvider placeHolderProvider;
 
-    public MineStoreCommon(Object plugin) {
-        if (plugin instanceof MineStoreBungee || plugin instanceof MineStoreBukkit || plugin instanceof MineStoreVelocity || plugin instanceof MineStoreSponge) {
-            instance = this;
-        } else {
-            throw new RuntimeException("You can't create an instance of MineStoreCommon outside of the platforms!");
-        }
+    public MineStoreCommon() {
+        instance = this;
     }
 
     public static MineStoreCommon getInstance() {
@@ -123,10 +119,10 @@ public class MineStoreCommon {
     public void init() {
         eventSender = new MineStoreEventSender(this);
         registerAddons();
-        miniMessage = MiniMessage.miniMessage();
         for (MineStoreAddon addon : addons) {
-            addon.onEnable();
+            addon.onLoad();
         }
+        miniMessage = MiniMessage.miniMessage();
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
         authHolder = new AuthHolder(this);
@@ -153,6 +149,9 @@ public class MineStoreCommon {
         placeHolderData.start();
         commandGetter.start();
         registerCommands();
+        for (MineStoreAddon addon : addons) {
+            addon.onEnable();
+        }
     }
 
     private void registerAddons() {

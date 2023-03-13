@@ -22,7 +22,7 @@ public class MineStoreBungee extends Plugin {
     public void onEnable() {
         instance = this;
         this.adventure = BungeeAudiences.create(this);
-        common = new MineStoreCommon(this);
+        common = new MineStoreCommon();
         common.registerLogger(new LoggerBungee(this));
         common.registerUserGetter(new BungeeUserGetter(this));
         common.setConfigLocation(new File(getDataFolder(), "config.yml"));
