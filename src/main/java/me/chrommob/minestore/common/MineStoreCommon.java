@@ -123,10 +123,10 @@ public class MineStoreCommon {
     public void init() {
         eventSender = new MineStoreEventSender(this);
         registerAddons();
+        miniMessage = MiniMessage.miniMessage();
         for (MineStoreAddon addon : addons) {
             addon.onEnable();
         }
-        miniMessage = MiniMessage.miniMessage();
         commandDumper = new CommandDumper();
         commandStorage = new CommandStorage();
         authHolder = new AuthHolder(this);
