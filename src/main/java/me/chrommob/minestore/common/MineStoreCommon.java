@@ -384,6 +384,9 @@ public class MineStoreCommon {
     }
 
     public void onPlayerJoin(String name) {
+        if (!initialized) {
+            return;
+        }
         commandStorage.onPlayerJoin(name);
         if (databaseManager != null) {
             databaseManager.onPlayerJoin(name);
@@ -391,6 +394,9 @@ public class MineStoreCommon {
     }
 
     public void onPlayerQuit(String name) {
+        if (!initialized) {
+            return;
+        }
         if (databaseManager != null) {
             databaseManager.onPlayerQuit(name);
         }
