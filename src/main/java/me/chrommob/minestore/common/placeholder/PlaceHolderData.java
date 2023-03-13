@@ -69,6 +69,7 @@ public class PlaceHolderData {
 
                 while ((line = reader.readLine()) != null) {
                     try {
+                        MineStoreCommon.getInstance().debug("Received: " + line);
                         if (apiUrl.equals(apiUrls.toArray()[0])) {
                             donationGoal = gson.fromJson(line, DonationGoal.class);
                         } else if (apiUrl.equals(apiUrls.toArray()[1])) {
