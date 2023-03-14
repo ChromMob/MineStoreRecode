@@ -14,6 +14,7 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,7 +25,7 @@ public class PlaceHolderData {
     private DonationGoal donationGoal;
     private List<LastDonator> lastDonators;
     private List<TopDonator> topDonators;
-    private Set<URL> apiUrls = new HashSet<>();
+    private Set<URI> apiUrls = new HashSet<>();
 
     private Gson gson = new Gson();
     private Thread thread = null;
@@ -42,9 +43,9 @@ public class PlaceHolderData {
         finalLastDonatorsUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/getTotalPayments" : "getTotalPayments");
         finalTopDonatorsUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/top_donators" : "top_donators");
         try {
-            URL donationGoalUrl = new URL(finalDonationGoalUrl);
-            URL lastDonatorsUrl = new URL(finalLastDonatorsUrl);
-            URL topDonatorsUrl = new URL(finalTopDonatorsUrl);
+            URI donationGoalUrl = new URI(finalDonationGoalUrl);
+            URI lastDonatorsUrl = new URI(finalLastDonatorsUrl);
+            URI topDonatorsUrl = new URI(finalTopDonatorsUrl);
             apiUrls.add(donationGoalUrl);
             apiUrls.add(lastDonatorsUrl);
             apiUrls.add(topDonatorsUrl);
@@ -54,8 +55,9 @@ public class PlaceHolderData {
         }
         try {
             MineStoreCommon.getInstance().debug("Loading placeholder data...");
-            for (URL apiUrl : apiUrls) {
-                HttpsURLConnection urlConnection = (HttpsURLConnection) apiUrl.openConnection();
+            for (URI apiUrl : apiUrls) {
+                URL url = apiUrl.toURL();
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 InputStream in = urlConnection.getInputStream();
 
                 BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
