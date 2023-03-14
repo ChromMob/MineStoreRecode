@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,21 +69,31 @@ public class PlaceHolderData {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    try {
                         MineStoreCommon.getInstance().debug("Received: " + line);
                         if (apiUrl.equals(apiUrls.toArray()[0])) {
-                            donationGoal = gson.fromJson(line, DonationGoal.class);
+                            try {
+                                donationGoal = gson.fromJson(line, DonationGoal.class);
+                            } catch (JsonSyntaxException e) {
+                                MineStoreCommon.getInstance().debug(e);
+                                donationGoal = new DonationGoal();
+                            }
                         } else if (apiUrl.equals(apiUrls.toArray()[1])) {
                             Type listType = new TypeToken<List<LastDonator>>() {}.getType();
-                            lastDonators = gson.fromJson(line, listType);
+                            try {
+                                lastDonators = gson.fromJson(line, listType);
+                            } catch (JsonSyntaxException e) {
+                                MineStoreCommon.getInstance().debug(e);
+                                lastDonators = new ArrayList<>();
+                            }
                         } else if (apiUrl.equals(apiUrls.toArray()[2])) {
                             Type listType = new TypeToken<List<TopDonator>>() {}.getType();
-                            topDonators = gson.fromJson(line, listType);
+                            try {
+                                topDonators = gson.fromJson(line, listType);
+                            } catch (JsonSyntaxException e) {
+                                MineStoreCommon.getInstance().debug(e);
+                                topDonators = new ArrayList<>();
+                            }
                         }
-                    } catch (JsonSyntaxException e) {
-                        MineStoreCommon.getInstance().debug(e);
-                        return false;
-                    }
                 }
             }
         } catch (Exception e) {
