@@ -14,7 +14,9 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +25,7 @@ public class PlaceHolderData {
     private DonationGoal donationGoal;
     private List<LastDonator> lastDonators;
     private List<TopDonator> topDonators;
-    private Set<URL> apiUrls = new HashSet<>();
+    private Set<URI> apiUrls = new HashSet<>();
 
     private Gson gson = new Gson();
     private Thread thread = null;
@@ -37,19 +39,13 @@ public class PlaceHolderData {
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
-        if ((boolean) configReader.get(ConfigKey.API_ENABLED)) {
-            finalDonationGoalUrl = storeUrl + "/api/" + configReader.get(ConfigKey.API_KEY) + "/donation_goal";
-            finalLastDonatorsUrl = storeUrl + "/api/" + configReader.get(ConfigKey.API_KEY) + "/getTotalPayments";
-            finalTopDonatorsUrl = storeUrl + "/api/" + configReader.get(ConfigKey.API_KEY) + "/top_donators";
-        } else {
-            finalDonationGoalUrl = storeUrl + "/api/donation_goal";
-            finalLastDonatorsUrl = storeUrl + "/api/getTotalPayments";
-            finalTopDonatorsUrl = storeUrl + "/api/top_donators";
-        }
+        finalDonationGoalUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/donation_goal" : "donation_goal");
+        finalLastDonatorsUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/getTotalPayments" : "getTotalPayments");
+        finalTopDonatorsUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/top_donators" : "top_donators");
         try {
-            URL donationGoalUrl = new URL(finalDonationGoalUrl);
-            URL lastDonatorsUrl = new URL(finalLastDonatorsUrl);
-            URL topDonatorsUrl = new URL(finalTopDonatorsUrl);
+            URI donationGoalUrl = new URI(finalDonationGoalUrl);
+            URI lastDonatorsUrl = new URI(finalLastDonatorsUrl);
+            URI topDonatorsUrl = new URI(finalTopDonatorsUrl);
             apiUrls.add(donationGoalUrl);
             apiUrls.add(lastDonatorsUrl);
             apiUrls.add(topDonatorsUrl);
@@ -59,8 +55,9 @@ public class PlaceHolderData {
         }
         try {
             MineStoreCommon.getInstance().debug("Loading placeholder data...");
-            for (URL apiUrl : apiUrls) {
-                HttpsURLConnection urlConnection = (HttpsURLConnection) apiUrl.openConnection();
+            for (URI apiUrl : apiUrls) {
+                URL url = apiUrl.toURL();
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 InputStream in = urlConnection.getInputStream();
 
                 BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
@@ -68,20 +65,31 @@ public class PlaceHolderData {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    try {
+                        MineStoreCommon.getInstance().debug("Received: " + line);
                         if (apiUrl.equals(apiUrls.toArray()[0])) {
-                            donationGoal = gson.fromJson(line, DonationGoal.class);
+                            try {
+                                donationGoal = gson.fromJson(line, DonationGoal.class);
+                            } catch (JsonSyntaxException e) {
+                                MineStoreCommon.getInstance().debug(e);
+                                donationGoal = new DonationGoal();
+                            }
                         } else if (apiUrl.equals(apiUrls.toArray()[1])) {
                             Type listType = new TypeToken<List<LastDonator>>() {}.getType();
-                            lastDonators = gson.fromJson(line, listType);
+                            try {
+                                lastDonators = gson.fromJson(line, listType);
+                            } catch (JsonSyntaxException e) {
+                                MineStoreCommon.getInstance().debug(e);
+                                lastDonators = new ArrayList<>();
+                            }
                         } else if (apiUrl.equals(apiUrls.toArray()[2])) {
                             Type listType = new TypeToken<List<TopDonator>>() {}.getType();
-                            topDonators = gson.fromJson(line, listType);
+                            try {
+                                topDonators = gson.fromJson(line, listType);
+                            } catch (JsonSyntaxException e) {
+                                MineStoreCommon.getInstance().debug(e);
+                                topDonators = new ArrayList<>();
+                            }
                         }
-                    } catch (JsonSyntaxException e) {
-                        MineStoreCommon.getInstance().debug(e);
-                        return false;
-                    }
                 }
             }
         } catch (Exception e) {

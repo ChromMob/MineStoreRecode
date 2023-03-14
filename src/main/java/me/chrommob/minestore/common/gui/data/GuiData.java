@@ -33,11 +33,7 @@ public class GuiData {
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
-        if ((boolean) configReader.get(ConfigKey.API_ENABLED)) {
-            finalUrl = storeUrl + "/api/" + configReader.get(ConfigKey.API_KEY) + "/gui/packages_new";
-        } else {
-            finalUrl = storeUrl + "/api/gui/packages_new";
-        }
+        finalUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/gui/packages_new" : "gui/packages_new");
         try {
             packageURL = new URL(finalUrl);
         } catch (Exception e) {
