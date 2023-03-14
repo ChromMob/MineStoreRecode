@@ -38,15 +38,9 @@ public class PlaceHolderData {
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
-        if ((boolean) configReader.get(ConfigKey.API_ENABLED)) {
-            finalDonationGoalUrl = storeUrl + "/api/" + configReader.get(ConfigKey.API_KEY) + "/donation_goal";
-            finalLastDonatorsUrl = storeUrl + "/api/" + configReader.get(ConfigKey.API_KEY) + "/getTotalPayments";
-            finalTopDonatorsUrl = storeUrl + "/api/" + configReader.get(ConfigKey.API_KEY) + "/top_donators";
-        } else {
-            finalDonationGoalUrl = storeUrl + "/api/donation_goal";
-            finalLastDonatorsUrl = storeUrl + "/api/getTotalPayments";
-            finalTopDonatorsUrl = storeUrl + "/api/top_donators";
-        }
+        finalDonationGoalUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/donation_goal" : "donation_goal");
+        finalLastDonatorsUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/getTotalPayments" : "getTotalPayments");
+        finalTopDonatorsUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/top_donators" : "top_donators");
         try {
             URL donationGoalUrl = new URL(finalDonationGoalUrl);
             URL lastDonatorsUrl = new URL(finalLastDonatorsUrl);
