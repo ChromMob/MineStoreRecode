@@ -5,6 +5,9 @@ import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProv
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -91,6 +94,34 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
         }
         if (params.contains("donation_goal_percentage")) {
             return String.valueOf(data.getDonationGoal().getDonationGoalPercentage());
+        }
+        if (params.contains("donation_goal_bar")) {
+            int amount = Integer.parseInt(params.replaceFirst("donation_goal_bar_", ""));
+            Component component = Component.text("");
+            if (data.getDonationGoal().getDonationGoalPercentage() > 100) {
+                for (int i = 0; i < amount; i++) {
+                    component = component.append(Component.text("█").color(NamedTextColor.GREEN));
+                }
+                LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
+                return serializer.serialize(component);
+            }
+            if (data.getDonationGoal().getDonationGoalPercentage() < 0) {
+                for (int i = 0; i < amount; i++) {
+                    component = component.append(Component.text("█").color(NamedTextColor.RED));
+                }
+                LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
+                return serializer.serialize(component);
+            }
+            int step = 100 / amount;
+            for (int i = 0; i < amount; i++) {
+                if ((i+1) * step <= data.getDonationGoal().getDonationGoalPercentage()) {
+                    component = component.append(Component.text("█").color(NamedTextColor.GREEN));
+                    continue;
+                }
+                component = component.append(Component.text("█").color(NamedTextColor.RED));
+            }
+            LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
+            return serializer.serialize(component);
         }
         return "";
     }
