@@ -445,4 +445,8 @@ public class MineStoreCommon {
     public MineStoreEventSender listener() {
         return eventSender;
     }
+
+    public CommandManager commandManager() {
+        return commandManager;
+    }
 }
