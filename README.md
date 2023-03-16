@@ -137,4 +137,6 @@ buy-gui:
     - Example result: `40`
   - **%ms_donation_goal_bar_number%**
     - Example: %ms_donation_goal_bar_10% will return a bar that represents the percentage of the donation goal that has been reached.
+    - Example result if percentage is 50%: ![image](https://user-images.githubusercontent.com/62996347/225689985-d6ee5fbc-a80b-484b-908e-046c2869f784.png)
+
   
