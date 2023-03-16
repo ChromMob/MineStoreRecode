@@ -109,18 +109,18 @@ buy-gui:
   - Allows the player to use the `/store` command. This command sends the player link to the MineStore website.
 ## Placeholders
 - TopDonators
-  - **%ms_donator_username_number%**
-    - Example: %ms_donator_username_1% will return the username with the most amount of money donated.
+  - **%ms_top_donator_username_number%**
+    - Example: %ms_top_donator_username_1% will return the username with the most amount of money donated.
     - Example result: `Notch`
-  - **%ms_donator_price_number%**
-    - Example: %ms_donator_price_1% will return the amount of money donated by the user with the most amount of money donated.
+  - **%ms_top_donator_price_number%**
+    - Example: %ms_top_donator_price_1% will return the amount of money donated by the user with the most amount of money donated.
     - Example result: `1000000`
 - LastDonators
-  - **%ms_lastdonator_username_number%**
-    - Example: %ms_lastdonator_username_1% will return the username of the last person to donate.
+  - **%ms_last_donator_username_number%**
+    - Example: %ms_last_donator_username_1% will return the username of the last person to donate.
     - Example result: `Steve`
-  - **%ms_lastdonator_price_number%**
-    - Example: %ms_lastdonator_price_1% will return the amount of money donated by the last person to donate.
+  - **%ms_last_donator_price_number%**
+    - Example: %ms_last_donator_price_1% will return the amount of money donated by the last person to donate.
     - Example result: `100`
   - **%ms_last_donator_package_number%**
     - Example: %ms_last_donator_package_1% will return the name of the package the last person to donate bought.
