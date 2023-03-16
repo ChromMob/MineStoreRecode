@@ -54,35 +54,35 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
         if (params.contains("top_donator_username_")) {
             int arg = Integer.parseInt(params.replaceFirst("top_donator_username_", ""));
             try {
-                return data.getTopDonators().get(arg + 1).getUserName();
+                return data.getTopDonators().get(arg - 1).getUserName();
             } catch (Exception ignored) {
             }
         }
         if (params.contains("top_donator_price_")) {
             int arg = Integer.parseInt(params.replaceFirst("top_donator_price_", ""));
             try {
-                return String.valueOf(data.getTopDonators().get(arg + 1).getPrice());
+                return String.valueOf(data.getTopDonators().get(arg - 1).getPrice());
             } catch (Exception ignored) {
             }
         }
         if (params.contains("last_donator_username_")) {
             int arg = Integer.parseInt(params.replaceFirst("last_donator_username_", ""));
             try {
-                return data.getLastDonators().get(arg + 1).getUserName();
+                return data.getLastDonators().get(arg - 1).getUserName();
             } catch (Exception ignored) {
             }
         }
         if (params.contains("last_donator_price_")) {
             int arg = Integer.parseInt(params.replaceFirst("last_donator_price_", ""));
             try {
-                return String.valueOf(data.getLastDonators().get(arg + 1).getPrice());
+                return String.valueOf(data.getLastDonators().get(arg - 1).getPrice());
             } catch (Exception ignored) {
             }
         }
         if (params.contains("last_donator_package_")) {
             int arg = Integer.parseInt(params.replaceFirst("last_donator_package_", ""));
             try {
-                return data.getLastDonators().get(arg + 1).getPackageName();
+                return data.getLastDonators().get(arg - 1).getPackageName();
             } catch (Exception ignored) {
             }
         }
