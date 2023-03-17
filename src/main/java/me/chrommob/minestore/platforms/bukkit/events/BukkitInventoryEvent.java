@@ -21,13 +21,16 @@ public class BukkitInventoryEvent implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         String eventTitle = event.getView().getTitle();
 
+        boolean isMineStoreGui = false;
         for (Component title : MineStoreCommon.getInstance().guiData().getGuiInfo().getTitles()) {
             String titleString = BukkitComponentSerializer.legacy().serialize(title);
             if (eventTitle.equals(titleString)) {
+                isMineStoreGui = true;
                 event.setCancelled(true);
                 break;
             }
         }
+        if (!isMineStoreGui) return;
         if (event.getCurrentItem() == null) return;
         if (event.getCurrentItem().getItemMeta() == null) return;
         Component name = BukkitComponentSerializer.legacy().deserialize(event.getCurrentItem().getItemMeta().getDisplayName());

@@ -38,7 +38,6 @@ public final class MineStoreBukkit extends JavaPlugin {
         common.registerCommandExecuter(new CommandExecuterBukkit(this));
         common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());
         common.registerPlayerJoinListener(new BukkitPlayerEvent(this));
-        common.registerPlaceHolderProvider(new BukkitPlaceHolderProvider(this));
         new BukkitInventoryEvent(this);
         common.registerCommandManager(new PaperCommandManager(this));
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
@@ -52,7 +51,7 @@ public final class MineStoreBukkit extends JavaPlugin {
             }
         }
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
-
+            common.registerPlaceHolderProvider(new BukkitPlaceHolderProvider(this));
         }
         common.init();
     }
