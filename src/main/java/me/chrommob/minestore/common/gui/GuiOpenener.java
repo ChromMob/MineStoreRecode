@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.gui;
 
+import co.aikar.commands.annotation.HelpSearchTags;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.GuiData;
@@ -136,14 +137,14 @@ public class GuiOpenener {
             items.sort(Comparator.comparing(CommonItem::isFeatured).reversed());
         }
         List<CommonItem> finalItems = new ArrayList<>();
-        if ((boolean) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ENABLED)) {
-            addBackground(finalItems);
-        }
+        addBackground(finalItems, (boolean) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ENABLED));
         int index = 0;
         for (int i = 10; i < 17; i++) {
             if (index >= items.size()) {
                 break;
             }
+            MineStoreCommon.getInstance().debug("Index: " + index);
+            MineStoreCommon.getInstance().debug("Size: " + items.size());
             finalItems.set(i, items.get(index));
             index++;
         }
@@ -180,10 +181,15 @@ public class GuiOpenener {
         inventory.setItems(finalItems);
     }
     
-    private List<CommonItem> addBackground(List<CommonItem> finalItems) {
+    private List<CommonItem> addBackground(List<CommonItem> finalItems, boolean enabled) {
         CommonItem glassPane = new CommonItem(Component.text(" "), (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ITEM), Collections.emptyList(), true);
+        CommonItem air = new CommonItem(Component.text(" "), "AIR", Collections.emptyList(), true);
         for (int i = 0; i < 54; i++) {
-            finalItems.add(glassPane);
+            if (enabled) {
+                finalItems.add(glassPane);
+                continue;
+            }
+            finalItems.add(air);
         }
         return finalItems;
     }

@@ -8,6 +8,7 @@ import me.chrommob.minestore.platforms.bukkit.events.BukkitInventoryEvent;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitPlayerEvent;
 import me.chrommob.minestore.platforms.bukkit.logger.BukkitLogger;
 import me.chrommob.minestore.platforms.bukkit.placeholder.BukkitPlaceHolderProvider;
+import me.chrommob.minestore.platforms.bukkit.scheduler.BukkitScheduler;
 import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
 import me.chrommob.minestore.platforms.bukkit.webCommand.CommandExecuterBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -34,6 +35,7 @@ public final class MineStoreBukkit extends JavaPlugin {
         common = new MineStoreCommon();
         // Plugin startup logic
         common.registerLogger(new BukkitLogger(this));
+        common.registerScheduler(new BukkitScheduler(this));
         common.registerUserGetter(new BukkitUserGetter(this));
         common.registerCommandExecuter(new CommandExecuterBukkit(this));
         common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());

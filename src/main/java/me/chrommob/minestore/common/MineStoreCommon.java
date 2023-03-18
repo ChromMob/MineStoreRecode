@@ -23,6 +23,7 @@ import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProv
 import me.chrommob.minestore.common.interfaces.playerInfo.DefaultPlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.playerInfo.PlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.playerInfo.implementation.LuckPermsPlayerInfoProvider;
+import me.chrommob.minestore.common.interfaces.scheduler.CommonScheduler;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
@@ -56,6 +57,7 @@ public class MineStoreCommon {
     private PlayerInfoProvider playerInfoProvider;
     private PlayerEconomyProvider playerEconomyProvider;
     private CommonPlaceHolderProvider placeHolderProvider;
+    private CommonScheduler scheduler;
 
     public MineStoreCommon() {
         instance = this;
@@ -72,6 +74,10 @@ public class MineStoreCommon {
 
     public void registerCommandExecuter(CommandExecuterCommon commandExecuter) {
         this.commandExecuterCommon = commandExecuter;
+    }
+
+    public void registerScheduler(CommonScheduler scheduler) {
+        this.scheduler = scheduler;
     }
 
     public void registerLogger(LoggerCommon logger) {
@@ -317,6 +323,10 @@ public class MineStoreCommon {
             log("Url is not configured correctly.");
             return false;
         }
+        if (scheduler == null) {
+            log("Scheduler is not registered.");
+            return false;
+        }
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             if (databaseManager == null) {
                 log("DatabaseManager is not registered.");
@@ -448,5 +458,9 @@ public class MineStoreCommon {
 
     public CommandManager commandManager() {
         return commandManager;
+    }
+
+    public void runOnMainThread(Runnable runnable) {
+        scheduler.run(runnable);
     }
 }
