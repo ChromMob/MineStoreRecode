@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class GuiOpenener {
     private final GuiData guiData;
@@ -197,5 +198,17 @@ public class GuiOpenener {
             }
         }
         return titles;
+    }
+
+    private Set<Component> customTitles = new CopyOnWriteArraySet<>();
+    public void addCustomTitle(Component title) {
+        if (customTitles.contains(title)) {
+            return;
+        }
+        customTitles.add(title);
+    }
+
+    public Set<Component> getCustomTitles() {
+        return customTitles;
     }
 }

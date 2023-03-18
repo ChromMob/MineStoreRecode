@@ -30,6 +30,13 @@ public class BukkitInventoryEvent implements Listener {
                 break;
             }
         }
+        for (Component title : MineStoreCommon.getInstance().guiData().getGuiInfo().getCustomTitles()) {
+            String titleString = BukkitComponentSerializer.legacy().serialize(title);
+            if (eventTitle.equals(titleString)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
         if (!isMineStoreGui) return;
         if (event.getCurrentItem() == null) return;
         if (event.getCurrentItem().getItemMeta() == null) return;
