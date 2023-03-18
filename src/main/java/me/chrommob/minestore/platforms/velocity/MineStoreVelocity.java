@@ -10,6 +10,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.velocity.events.VelocityPlayerEvent;
 import me.chrommob.minestore.platforms.velocity.logger.VelocityLogger;
+import me.chrommob.minestore.platforms.velocity.scheduler.VelocityScheduler;
 import me.chrommob.minestore.platforms.velocity.user.VelocityUserGetter;
 import me.chrommob.minestore.platforms.velocity.webCommand.CommandExecuterVelocity;
 
@@ -34,6 +35,7 @@ public class MineStoreVelocity {
     private void onProxyInitialization(ProxyInitializeEvent event) {
         common = new MineStoreCommon();
         common.registerLogger(new VelocityLogger(logger));
+        common.registerScheduler(new VelocityScheduler(this));
         common.registerUserGetter(new VelocityUserGetter(server));
         common.registerCommandManager(new VelocityCommandManager(server, this));
         common.registerCommandExecuter(new CommandExecuterVelocity(server));
@@ -45,5 +47,9 @@ public class MineStoreVelocity {
     @Subscribe
     public void onServerStop(ProxyShutdownEvent event) {
         common.stop();
+    }
+
+    public ProxyServer getServer() {
+        return server;
     }
 }

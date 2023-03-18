@@ -4,6 +4,7 @@ import co.aikar.commands.BungeeCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.bungee.events.PlayerEventListenerBungee;
 import me.chrommob.minestore.platforms.bungee.logger.LoggerBungee;
+import me.chrommob.minestore.platforms.bungee.scheduler.BungeeScheduler;
 import me.chrommob.minestore.platforms.bungee.user.BungeeUserGetter;
 import me.chrommob.minestore.platforms.bungee.webCommand.CommandExecuterBungee;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
@@ -24,6 +25,7 @@ public class MineStoreBungee extends Plugin {
         this.adventure = BungeeAudiences.create(this);
         common = new MineStoreCommon();
         common.registerLogger(new LoggerBungee(this));
+        common.registerScheduler(new BungeeScheduler(this));
         common.registerUserGetter(new BungeeUserGetter(this));
         common.setConfigLocation(new File(getDataFolder(), "config.yml"));
         common.registerCommandExecuter(new CommandExecuterBungee(this));
