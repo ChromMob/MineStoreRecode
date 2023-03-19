@@ -247,11 +247,11 @@ public class MineStoreCommon {
             addon.onReload();
         }
         log("Reloading...");
+        configReader.reload();
         if (!initialized) {
             init();
             return;
         }
-        configReader.reload();
         if (commandGetter.load()) {
             log("Config reloaded.");
             commandGetter.start();
