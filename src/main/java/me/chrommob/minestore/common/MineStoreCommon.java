@@ -15,6 +15,7 @@ import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
+import me.chrommob.minestore.common.interfaces.commands.CommandStorageInterface;
 import me.chrommob.minestore.common.interfaces.economyInfo.DefaultPlayerEconomyProvider;
 import me.chrommob.minestore.common.interfaces.economyInfo.PlayerEconomyProvider;
 import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
@@ -49,7 +50,7 @@ public class MineStoreCommon {
     private MiniMessage miniMessage;
     private UserGetter userGetter;
     private CommandGetter commandGetter;
-    private CommandStorage commandStorage;
+    private CommandStorageInterface commandStorage;
     private CommandDumper commandDumper;
     private AuthHolder authHolder;
     private GuiData guiData;
@@ -412,7 +413,7 @@ public class MineStoreCommon {
         }
     }
 
-    public CommandStorage commandStorage() {
+    public CommandStorageInterface commandStorage() {
         return commandStorage;
     }
 

@@ -2,13 +2,14 @@ package me.chrommob.minestore.common.commandHolder;
 
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
+import me.chrommob.minestore.common.interfaces.commands.CommandStorageInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class CommandStorage {
+public class CommandStorage implements CommandStorageInterface {
     private Map<String, List<String>> commands;
 
     private void remove(String username) {
@@ -27,6 +28,7 @@ public class CommandStorage {
         MineStoreCommon.getInstance().commandDumper().update(commands);
     }
 
+    @Override
     public void onPlayerJoin(String username) {
         if (commands.containsKey(username)) {
             MineStoreCommon.getInstance().debug("Executing commands for " + username);
@@ -35,6 +37,7 @@ public class CommandStorage {
         }
     }
 
+    @Override
     public void listener(ParsedResponse command) {
         if (command.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE) {
             handleOnlineCommand(command.command(), command.username());
@@ -56,6 +59,7 @@ public class CommandStorage {
         MineStoreCommon.getInstance().commandExecuter().execute(command);
     }
 
+    @Override
     public void init() {
         commands = MineStoreCommon.getInstance().commandDumper().load();
     }
