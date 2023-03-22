@@ -109,6 +109,10 @@ public class MineStoreCommon {
         this.placeHolderProvider = placeHolderProvider;
     }
 
+    public void overrideCommandStorage(CommandStorageInterface commandStorage) {
+        this.commandStorage = commandStorage;
+    }
+
     private Set<MineStoreAddon> addons = new HashSet<>();
     private Set<MineStoreListener> listeners = new HashSet<>();
     public void registerListener(MineStoreListener listener) {
