@@ -96,7 +96,11 @@ public class GuiOpenener {
                     return;
                 }
                 String config = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_MESSAGE);
-                String url = MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL) + "/category/";
+                String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
+                if (storeUrl.endsWith("/")) {
+                    storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
+                }
+                String url = storeUrl + "/buy/";
                 if (parsedPackage.getRoot() instanceof ParsedCategory) {
                     url += ((ParsedCategory) parsedPackage.getRoot()).getUrl();
                 } else if (parsedPackage.getRoot() instanceof ParsedSubCategory) {
