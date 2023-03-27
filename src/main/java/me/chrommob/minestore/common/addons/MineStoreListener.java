@@ -5,6 +5,7 @@ import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 
+@SuppressWarnings("unused")
 public class MineStoreListener {
     public void onPurchase(ParsedResponse event) {}
 
