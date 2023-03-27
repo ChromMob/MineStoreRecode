@@ -20,7 +20,8 @@ public class BukkitInventoryEvent implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         String eventTitle = event.getView().getTitle();
-
+        if (eventTitle == null) return;
+        if (event.getCurrentItem() == null) return;
         boolean isMineStoreGui = false;
         for (Component title : MineStoreCommon.getInstance().guiData().getGuiInfo().getTitles()) {
             String titleString = BukkitComponentSerializer.legacy().serialize(title);
@@ -30,11 +31,14 @@ public class BukkitInventoryEvent implements Listener {
                 break;
             }
         }
-        for (Component title : MineStoreCommon.getInstance().guiData().getGuiInfo().getCustomTitles()) {
-            String titleString = BukkitComponentSerializer.legacy().serialize(title);
-            if (eventTitle.equals(titleString)) {
-                event.setCancelled(true);
-                return;
+        if (!isMineStoreGui) {
+            for (Component title : MineStoreCommon.getInstance().guiData().getGuiInfo().getCustomTitles()) {
+                String titleString = BukkitComponentSerializer.legacy().serialize(title);
+                if (eventTitle.equals(titleString)) {
+                    event.setCancelled(true);
+                    MineStoreCommon.getInstance().listener().onClick(new CommonItem(BukkitComponentSerializer.legacy().deserialize(event.getCurrentItem().getItemMeta().getDisplayName()), event.getCurrentItem().getType().toString(), new ArrayList<>()), MineStoreCommon.getInstance().userGetter().get(event.getWhoClicked().getUniqueId()), title);
+                    return;
+                }
             }
         }
         if (!isMineStoreGui) return;
