@@ -221,6 +221,8 @@ economy:
     # %player% is replaced with the name of the player the money was sent by.
     # Requires permission: ms.economy.send
     send-other: <gold>Received %amount% from %player%
+
+# This feature requires player to have the permission: ms.redeem
 manual-redeem:
   # Enables or disables the manual redeem. If enabled, the plugin will send the message below to the player when they have packages to redeem.
   enabled: true
