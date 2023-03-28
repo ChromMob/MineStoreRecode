@@ -221,4 +221,18 @@ economy:
     # %player% is replaced with the name of the player the money was sent by.
     # Requires permission: ms.economy.send
     send-other: <gold>Received %amount% from %player%
+manual-redeem:
+  # Enables or disables the manual redeem. If enabled, the plugin will send the message below to the player when they have packages to redeem.
+  enabled: true
+  # Enables or disables the message that is sent to the player when they have join the server and have packages to redeem.
+  message-enabled: true
+  # Message that is sent to the player when they have join the server and have packages to redeem.
+  message: <gold>You have %amount% packages to redeem. Run <bold>/redeem</bold> to redeem them.
+  # Message that is sent to the player when they run the /redeem command and have no packages to redeem.
+  no-packages: <gold>You have no packages to redeem.
+  gui:
+    # Title of the GUI.
+    title: <gold>Redeem packages
+    # Name of the item that is used to display the package in the GUI.
+    item: PAPER
 ```
