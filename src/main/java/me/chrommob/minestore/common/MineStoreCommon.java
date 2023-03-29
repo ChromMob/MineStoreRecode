@@ -222,6 +222,7 @@ public class MineStoreCommon {
             }
             return null;
         });
+        commandManager.registerCommand(new AutoSetupCommand());
         commandManager.registerCommand(new ReloadCommand());
     }
 
