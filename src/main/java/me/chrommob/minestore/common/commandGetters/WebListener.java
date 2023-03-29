@@ -118,9 +118,23 @@ public class WebListener implements CommandGetter {
         }
         try {
             HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-            urlConnection.disconnect();
+            InputStream in = urlConnection.getInputStream();
+
+            BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                try {
+                    gson.fromJson(line, GsonReponse.class);
+                } catch (JsonSyntaxException e) {
+                    if (line.equals("{}")) {
+                        wasEmpty = true;
+                    } else {
+                        MineStoreCommon.getInstance().debug(e);
+                        mineStoreCommon.debug(e);
+                        return false;
+                    }
+                }
+            }
         } catch (IOException e) {
             mineStoreCommon.log("Store URL is not a valid URL!");
             MineStoreCommon.getInstance().debug(e);

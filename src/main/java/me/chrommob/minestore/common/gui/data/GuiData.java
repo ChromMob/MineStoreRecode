@@ -62,6 +62,9 @@ public class GuiData {
             MineStoreCommon.getInstance().debug(e);
             return false;
         }
+        if (parsedResponse == null) {
+            return false;
+        }
         parsedGui = new ParsedGui(parsedResponse);
         return true;
     }
