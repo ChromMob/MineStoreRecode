@@ -21,5 +21,6 @@ public class AutoSetupCommand extends BaseCommand {
         MineStoreCommon.getInstance().configReader().set(ConfigKey.API_KEY, apiKey);
         MineStoreCommon.getInstance().configReader().set(ConfigKey.SECRET_ENABLED, true);
         MineStoreCommon.getInstance().configReader().set(ConfigKey.SECRET_KEY, secretKey);
+        MineStoreCommon.getInstance().reload();
     }
 }

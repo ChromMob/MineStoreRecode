@@ -319,6 +319,5 @@ public class ConfigReader {
         }
         saveDefaultConfig();
         MineStoreCommon.getInstance().debug("Set config value: " + location + " to " + value);
-        MineStoreCommon.getInstance().reload();
     }
 }
