@@ -9,7 +9,7 @@ public enum ConfigKey
     API_ENABLED(new Configuration("api.key-enabled", false)),
     API_KEY(new Configuration("api.key", "123456789")),
     SECRET_ENABLED(new Configuration("weblistener.secret-enabled", false)),
-    SECRET_KEY(new Configuration("weblistener.secret-key", 123456789)),
+    SECRET_KEY(new Configuration("weblistener.secret-key", "123456789")),
 
     AUTH_TIMEOUT(new Configuration("auth.timeout", 300)),
     AUTH_INIT_MESSAGE(new Configuration("auth.initial-message", "<dark_green>You are trying to login in to our store. <click:run_command:/ms auth><bold><gold>CLICK HERE</gold></bold></click> to confirm authorization! If you are not able to click run /minestore auth.")),

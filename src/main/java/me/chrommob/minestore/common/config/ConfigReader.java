@@ -315,7 +315,7 @@ public class ConfigReader {
                 }
             }
         } else {
-            configYaml.put(location, configuration.getDefaultValue());
+            configYaml.put(location, value);
         }
         saveDefaultConfig();
         MineStoreCommon.getInstance().debug("Set config value: " + location + " to " + value);
