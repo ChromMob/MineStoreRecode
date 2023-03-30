@@ -388,6 +388,7 @@ public class MineStoreCommon {
     }
 
     public void debug(Exception e) {
+        debug(e.getClass().getTypeName());
         if (e.getMessage() != null) {
             debug(e.getMessage());
         }
