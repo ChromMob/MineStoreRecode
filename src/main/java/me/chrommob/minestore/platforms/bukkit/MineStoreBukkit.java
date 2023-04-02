@@ -12,6 +12,7 @@ import me.chrommob.minestore.platforms.bukkit.scheduler.BukkitScheduler;
 import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
 import me.chrommob.minestore.platforms.bukkit.webCommand.CommandExecuterBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -34,6 +35,9 @@ public final class MineStoreBukkit extends JavaPlugin {
         this.adventure = BukkitAudiences.create(this);
         common = new MineStoreCommon();
         // Plugin startup logic
+        common.setPlatform("bukkit");
+        common.setPlatformName(Bukkit.getName());
+        common.setPlatformVersion(Bukkit.getVersion());
         common.registerLogger(new BukkitLogger(this));
         common.registerScheduler(new BukkitScheduler(this));
         common.registerUserGetter(new BukkitUserGetter(this));

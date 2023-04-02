@@ -1,6 +1,7 @@
 package me.chrommob.minestore.common;
 
 import co.aikar.commands.CommandManager;
+import com.google.common.math.Stats;
 import me.chrommob.minestore.common.addons.MineStoreAddon;
 import me.chrommob.minestore.common.addons.MineStoreEventSender;
 import me.chrommob.minestore.common.addons.MineStoreListener;
@@ -28,6 +29,7 @@ import me.chrommob.minestore.common.interfaces.scheduler.CommonScheduler;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
+import me.chrommob.minestore.common.stats.StatSender;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.yaml.snakeyaml.Yaml;
 
@@ -59,6 +61,7 @@ public class MineStoreCommon {
     private PlayerEconomyProvider playerEconomyProvider;
     private CommonPlaceHolderProvider placeHolderProvider;
     private CommonScheduler scheduler;
+    private StatSender statsSender;
 
     public MineStoreCommon() {
         instance = this;
@@ -71,6 +74,29 @@ public class MineStoreCommon {
     public void setConfigLocation(File configFile) {
         this.configFile = configFile;
         configReader = new ConfigReader(configFile);
+    }
+
+    private String platformType;
+    public void setPlatform(String platform) {
+        this.platformType = platform;
+    }
+    private String platformName;
+    public void setPlatformName(String platformName) {
+        this.platformName = platformName;
+    }
+    private String platformVersion;
+    public void setPlatformVersion(String platformVersion) {
+        this.platformVersion = platformVersion;
+    }
+
+    public String getPlatform() {
+        return platformType;
+    }
+    public String getPlatformName() {
+        return platformName;
+    }
+    public String getPlatformVersion() {
+        return platformVersion;
     }
 
     public void registerCommandExecuter(CommandExecuterCommon commandExecuter) {
@@ -109,12 +135,14 @@ public class MineStoreCommon {
         this.placeHolderProvider = placeHolderProvider;
     }
 
+    @SuppressWarnings("unused")
     public void overrideCommandStorage(CommandStorageInterface commandStorage) {
         this.commandStorage = commandStorage;
     }
 
     private Set<MineStoreAddon> addons = new HashSet<>();
     private Set<MineStoreListener> listeners = new HashSet<>();
+    @SuppressWarnings("unused")
     public void registerListener(MineStoreListener listener) {
         listeners.add(listener);
     }
@@ -124,6 +152,7 @@ public class MineStoreCommon {
     private MineStoreEventSender eventSender;
     private boolean initialized = false;
     public void init() {
+        statsSender = new StatSender(this);
         eventSender = new MineStoreEventSender(this);
         registerAddons();
         for (MineStoreAddon addon : addons) {
@@ -146,6 +175,7 @@ public class MineStoreCommon {
             return;
         }
         initialized = true;
+        statsSender.start();
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager.start();
         }
@@ -201,6 +231,8 @@ public class MineStoreCommon {
             addon.onDisable();
         }
         log("Shutting down...");
+        if (statsSender != null)
+            statsSender.stop();
         if (guiData != null)
             guiData.stop();
         if (placeHolderData != null)
@@ -273,6 +305,10 @@ public class MineStoreCommon {
         if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             storeEnabled = true;
             commandManager.registerCommand(new StoreCommand());
+        }
+        if (statsSender != null) {
+            statsSender.stop();
+            statsSender.start();
         }
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             if (databaseManager == null) {

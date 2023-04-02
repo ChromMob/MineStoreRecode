@@ -24,6 +24,9 @@ public class MineStoreBungee extends Plugin {
         instance = this;
         this.adventure = BungeeAudiences.create(this);
         common = new MineStoreCommon();
+        common.setPlatform("bungee");
+        common.setPlatformName(getProxy().getName());
+        common.setPlatformVersion(getProxy().getVersion());
         common.registerLogger(new LoggerBungee(this));
         common.registerScheduler(new BungeeScheduler(this));
         common.registerUserGetter(new BungeeUserGetter(this));

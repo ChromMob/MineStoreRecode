@@ -1,5 +1,7 @@
 package me.chrommob.minestore.common.config;
 
+import java.util.UUID;
+
 public enum ConfigKey
 {
     DEBUG(new Configuration("debug", false)),
@@ -41,7 +43,8 @@ public enum ConfigKey
     MYSQL_PORT(new Configuration("mysql.port", 3306)),
     MYSQL_DATABASE(new Configuration("mysql.database", "minestore")),
     MYSQL_USERNAME(new Configuration("mysql.username", "root")),
-    MYSQL_PASSWORD(new Configuration("mysql.password", "password"));
+    MYSQL_PASSWORD(new Configuration("mysql.password", "password")),
+    SERVER_UUID(new Configuration("server-uuid", UUID.randomUUID().toString()));
 
 
     private final Configuration configuration;

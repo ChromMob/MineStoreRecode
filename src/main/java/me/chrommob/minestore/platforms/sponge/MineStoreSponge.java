@@ -10,6 +10,7 @@ import me.chrommob.minestore.platforms.sponge.webCommand.CommandExecuterSponge;
 import net.kyori.adventure.platform.spongeapi.SpongeAudiences;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
@@ -41,6 +42,9 @@ public class MineStoreSponge {
     public void onServerStart(GameStartedServerEvent event) {
         instance = this;
         common = new MineStoreCommon();
+        common.setPlatform("sponge");
+        common.setPlatformName(Sponge.getGame().getPlatform().getType().name());
+        common.setPlatformVersion(Sponge.getGame().getPlatform().getMinecraftVersion().getName());
         common.registerLogger(new SpongeLogger(logger));
         common.registerScheduler(new SpongeScheduler(this));
         common.registerUserGetter(new SpongeUserGetter());

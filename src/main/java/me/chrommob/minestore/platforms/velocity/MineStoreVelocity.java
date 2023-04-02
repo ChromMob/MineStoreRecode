@@ -34,6 +34,9 @@ public class MineStoreVelocity {
     @Subscribe
     private void onProxyInitialization(ProxyInitializeEvent event) {
         common = new MineStoreCommon();
+        common.setPlatform("velocity");
+        common.setPlatformName(server.getVersion().getName());
+        common.setPlatformVersion(server.getVersion().getVersion());
         common.registerLogger(new VelocityLogger(logger));
         common.registerScheduler(new VelocityScheduler(this));
         common.registerUserGetter(new VelocityUserGetter(server));
