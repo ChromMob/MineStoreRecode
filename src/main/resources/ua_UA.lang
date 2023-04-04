@@ -1,10 +1,10 @@
 auth:
-  initial-message: <dark_green>Вы попытались авторизоваться в магазине. <click:run_command:/ms
-    auth><bold><gold>НАЖМИТЕ ЗДЕСЬ</gold></bold></click> для подтверждения авторизации! Если вы не можете нажать, введите команду /minestore auth.
-  success-message: <dark_green>Вы успешно авторизовались в нашем магазине!</dark_green>
-  failure-message: <dark_red>У вас нет запросов на авторизацию!</dark_red>
-  timeout-message: <dark_red>Произошла ошибка во время авторизации в магазине!</dark_red>
+  initial-message: <dark_green>Ви спробували авторизуватись у магазині. <click:run_command:/ms
+    auth><bold><gold>НАТИСНІТЬ ТУТ</gold></bold></click> для підтвердження авторизації! Якщо ви не можете натиснути, введіть команду /minestore auth.
+  success-message: <dark_green>Ви успішно авторизувалися у нашому магазині!</dark_green>
+  failure-message: <dark_red>У вас немає запитів на авторизацію!</dark_red>
+  timeout-message: <dark_red>Сталася помилка під час авторизації у магазині!</dark_red>
 store-command:
-  message: <dark_green>Посетите наш магазин <click:open_url:%store_url%><hover:show_text:'<gold>Нажмите, чтобы перейти в магазин'><bold><gold>ТУТ</gold></bold></hover></click>!</dark_green>
+  message: <dark_green>Відвідайте наш магазин <click:open_url:%store_url%><hover:show_text:'<gold>Натисніть, щоб перейти до магазину'><bold><gold>ТУТ</gold></bold></hover></click>!</dark_green>
 buy-gui:
-  message: <dark_green>Для покупки <red><bold>%package%</bold></red> нажмите <click:open_url:%buy_url%><bold><gold>ТУТ</gold></bold></click>!
+  message: <dark_green>Для покупки <red><bold>%package%</bold></red> натисніть <click:open_url:%buy_url%><bold><gold>ТУТ</gold></bold></click>!
