@@ -27,6 +27,7 @@ import me.chrommob.minestore.common.interfaces.playerInfo.PlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.playerInfo.implementation.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.common.interfaces.scheduler.CommonScheduler;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
+import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
@@ -503,7 +504,7 @@ public class MineStoreCommon {
         return commandManager;
     }
 
-    public void runOnMainThread(Runnable runnable) {
+    public void runOnMainThread(Runnable runnable, CommonUser user) {
         scheduler.run(runnable);
     }
 }
