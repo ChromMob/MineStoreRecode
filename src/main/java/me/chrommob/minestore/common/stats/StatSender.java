@@ -6,6 +6,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.io.IOException;
 import java.util.UUID;
 
 public class StatSender {
@@ -55,8 +56,8 @@ public class StatSender {
                     connection.getOutputStream().flush();
                     connection.getOutputStream().close();
                     connection.getInputStream().close();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (IOException e) {
+                    common.log(e.getMessage());
                 } finally {
                     if (connection != null) {
                         connection.disconnect();
