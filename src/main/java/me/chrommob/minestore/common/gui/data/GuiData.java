@@ -60,7 +60,6 @@ public class GuiData {
             }
         } catch (Exception e) {
             MineStoreCommon.getInstance().debug(e);
-            e.printStackTrace();
             return false;
         }
         if (parsedResponse == null) {

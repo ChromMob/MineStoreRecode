@@ -12,7 +12,8 @@ public class StatJson {
     private final String platformName;
     private final String platformVersion;
     private final int coreCount;
-    private final String systemArchitecture;
+    private String systemArchitecture;
+    private int playerCount;
     public StatJson(UUID uuid, String javaVersion, String platformType, String platformName, String platformVersion, int coreCount, String systemArchitecture) {
         this.uuid = uuid;
         this.javaVersion = javaVersion;
@@ -24,24 +25,6 @@ public class StatJson {
     }
 
     public void send(int playerCount) {
-        HttpsURLConnection connection = null;
-        try {
-            connection = (HttpsURLConnection) new java.net.URL("https://api.chrommob.fun/minestore/data").openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.getOutputStream().write(("{\"uuid\":\"" + uuid.toString() + "\",\"javaVersion\":\"" + javaVersion + "\",\"platformType\":\"" + platformType + "\",\"platformName\":\"" + platformName + "\",\"platformVersion\":\"" + platformVersion + "\",\"coreCount\":" + coreCount + ",\"systemArchitecture\":\"" + systemArchitecture + "\",\"playerCount\":" + playerCount + "}").getBytes());
-            connection.getOutputStream().flush();
-            connection.getOutputStream().close();
-            connection.getInputStream().close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-//        System.out.println("Sending stat update: " + "{\"uuid\":\"" + uuid.toString() + "\",\"javaVersion\":\"" + javaVersion + "\",\"platformType\":\"" + platformType + "\",\"platformName\":\"" + platformName + "\",\"platformVersion\":\"" + platformVersion + "\",\"coreCount\":" + coreCount + ",\"systemArchitecture\":\"" + systemArchitecture + "\",\"playerCount\":" + playerCount + "}");
+        this.playerCount = playerCount;
     }
 }

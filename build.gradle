@@ -48,7 +48,7 @@ dependencies {
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
     compileOnly 'me.clip:placeholderapi:2.11.2'
 
-    implementation('co.aikar:acf-paper:0.5.1-SNAPSHOT')
+    implementation('co.aikar:acf-paper:0.5.1-20230402.114301-23')
     implementation('co.aikar:acf-bungee:0.5.1-SNAPSHOT')
     implementation('co.aikar:acf-velocity:0.5.1-SNAPSHOT')
     annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
@@ -111,4 +111,8 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+shadowJar {
+    minimize()
 }

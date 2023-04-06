@@ -1,9 +1,11 @@
 package me.chrommob.minestore.common.stats;
 
 
+import com.google.gson.Gson;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.util.UUID;
 
 public class StatSender {
@@ -15,6 +17,7 @@ public class StatSender {
     private final String PLATFORM_VERSION;
     private final int CORE_COUNT;
     private final String SYSTEM_ARCHITECTURE;
+    private final Gson gson = new Gson();
     private Thread thread;
 
     public StatSender(MineStoreCommon common) {
@@ -41,6 +44,24 @@ public class StatSender {
                 int playerCount = common.userGetter().getAllPlayers().size();
                 StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE);
                 statJson.send(playerCount);
+                HttpsURLConnection connection = null;
+                try {
+                    connection = (HttpsURLConnection) new java.net.URL("https://api.chrommob.fun/minestore/data").openConnection();
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/json");
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+                    connection.getOutputStream().write(gson.toJson(statJson).getBytes());
+                    connection.getOutputStream().flush();
+                    connection.getOutputStream().close();
+                    connection.getInputStream().close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (connection != null) {
+                        connection.disconnect();
+                    }
+                }
                 try {
                     Thread.sleep(1000 * 60);
                 } catch (InterruptedException e) {
