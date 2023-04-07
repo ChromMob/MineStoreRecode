@@ -504,7 +504,7 @@ public class MineStoreCommon {
         return commandManager;
     }
 
-    public void runOnMainThread(Runnable runnable, CommonUser user) {
+    public void runOnMainThread(Runnable runnable) {
         scheduler.run(runnable);
     }
 }
