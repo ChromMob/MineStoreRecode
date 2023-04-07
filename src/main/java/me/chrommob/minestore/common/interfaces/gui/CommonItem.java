@@ -15,6 +15,15 @@ public class CommonItem {
     private String material;
     private boolean isBackground = false;
 
+    private int amount = 1;
+
+    public CommonItem(Component name, String material, List<Component> lore, int amount) {
+        this.name = name;
+        this.material = material;
+        this.lore = lore;
+        this.amount = amount;
+    }
+
     public CommonItem(Component name, String material, List<Component> lore) {
         this.name = name;
         this.material = material;
@@ -83,4 +92,9 @@ public class CommonItem {
     public boolean isBackground() {
         return isBackground;
     }
+
+    public int getAmount() {
+        return amount;
+    }
 }
+

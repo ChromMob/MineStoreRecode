@@ -88,7 +88,7 @@ public class UserBukkit extends CommonUser {
                     item.setMaterial("CHEST");
                 }
             }
-            ItemStack bukkitItem = new ItemStack(material, 1);
+            ItemStack bukkitItem = new ItemStack(material, item.getAmount());
             ItemMeta meta = bukkitItem.getItemMeta();
             LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
             List<String> lore = new ArrayList<>();
