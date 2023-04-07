@@ -18,10 +18,6 @@ repositories {
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
     maven {
-        name = 'sonatype'
-        url = 'https://oss.sonatype.org/content/groups/public/'
-    }
-    maven {
         name = "aikar-repo"
         url = "https://repo.aikar.co/content/groups/aikar/"
     }
@@ -36,6 +32,10 @@ repositories {
     maven {
         name = 'placeholderapi-repo'
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
     }
 }
 
