@@ -200,6 +200,11 @@ public class GuiOpenener {
 
     public Set<Component> getTitles() {
         Set<Component> titles = new HashSet<>();
+        if (guiData == null || guiData.getParsedGui() == null || guiData.getParsedGui().getInventory() == null) {
+            return titles;
+        } else {
+            guiData.getParsedGui().getInventory();
+        }
         titles.add(guiData.getParsedGui().getInventory().getTitle());
         for (ParsedCategory parsedCategory : guiData.getParsedGui().getCategories()) {
             titles.add(parsedCategory.getInventory().getTitle());
