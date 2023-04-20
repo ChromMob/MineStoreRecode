@@ -54,7 +54,7 @@ dependencies {
     annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
     implementation('co.aikar:acf-sponge:0.5.1-SNAPSHOT')
 
-    implementation('com.google.code.gson:gson:2.8.6')
+    implementation('com.google.code.gson:gson:2.8.9')
     implementation "net.kyori:adventure-api:4.12.0"
     implementation "net.kyori:adventure-platform-bungeecord:4.2.0"
     implementation "net.kyori:adventure-platform-spongeapi:4.2.0"
