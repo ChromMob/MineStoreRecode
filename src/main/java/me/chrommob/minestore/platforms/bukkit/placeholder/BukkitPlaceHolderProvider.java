@@ -51,77 +51,67 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
         if (data == null) {
             return "";
         }
-        if (params.contains("top_donator_username_")) {
-            int arg = Integer.parseInt(params.replaceFirst("top_donator_username_", ""));
-            try {
+        try {
+            if (params.contains("top_donator_username_")) {
+                int arg = Integer.parseInt(params.replaceFirst("top_donator_username_", ""));
                 return data.getTopDonators().get(arg - 1).getUserName();
-            } catch (Exception ignored) {
             }
-        }
-        if (params.contains("top_donator_price_")) {
-            int arg = Integer.parseInt(params.replaceFirst("top_donator_price_", ""));
-            try {
+            if (params.contains("top_donator_price_")) {
+                int arg = Integer.parseInt(params.replaceFirst("top_donator_price_", ""));
                 return String.valueOf(data.getTopDonators().get(arg - 1).getPrice());
-            } catch (Exception ignored) {
             }
-        }
-        if (params.contains("last_donator_username_")) {
-            int arg = Integer.parseInt(params.replaceFirst("last_donator_username_", ""));
-            try {
+            if (params.contains("last_donator_username_")) {
+                int arg = Integer.parseInt(params.replaceFirst("last_donator_username_", ""));
                 return data.getLastDonators().get(arg - 1).getUserName();
-            } catch (Exception ignored) {
             }
-        }
-        if (params.contains("last_donator_price_")) {
-            int arg = Integer.parseInt(params.replaceFirst("last_donator_price_", ""));
-            try {
+            if (params.contains("last_donator_price_")) {
+                int arg = Integer.parseInt(params.replaceFirst("last_donator_price_", ""));
                 return String.valueOf(data.getLastDonators().get(arg - 1).getPrice());
-            } catch (Exception ignored) {
             }
-        }
-        if (params.contains("last_donator_package_")) {
-            int arg = Integer.parseInt(params.replaceFirst("last_donator_package_", ""));
-            try {
+            if (params.contains("last_donator_package_")) {
+                int arg = Integer.parseInt(params.replaceFirst("last_donator_package_", ""));
                 return data.getLastDonators().get(arg - 1).getPackageName();
-            } catch (Exception ignored) {
             }
-        }
-        if (params.contains("donation_goal_current")) {
-            return String.valueOf(data.getDonationGoal().getDonationGoalCurrentAmount());
-        }
-        if (params.contains("donation_goal_target")) {
-            return String.valueOf(data.getDonationGoal().getDonationGoalAmount());
-        }
-        if (params.contains("donation_goal_percentage")) {
-            return String.valueOf(data.getDonationGoal().getDonationGoalPercentage());
-        }
-        if (params.contains("donation_goal_bar")) {
-            int amount = Integer.parseInt(params.replaceFirst("donation_goal_bar_", ""));
-            Component component = Component.text("");
-            if (data.getDonationGoal().getDonationGoalPercentage() > 100) {
-                for (int i = 0; i < amount; i++) {
-                    component = component.append(Component.text("█").color(NamedTextColor.GREEN));
+            if (params.contains("donation_goal_current")) {
+                return String.valueOf(data.getDonationGoal().getDonationGoalCurrentAmount());
+            }
+            if (params.contains("donation_goal_target")) {
+                return String.valueOf(data.getDonationGoal().getDonationGoalAmount());
+            }
+            if (params.contains("donation_goal_percentage")) {
+                return String.valueOf(data.getDonationGoal().getDonationGoalPercentage());
+            }
+            if (params.contains("donation_goal_bar")) {
+                int amount = Integer.parseInt(params.replaceFirst("donation_goal_bar_", ""));
+                Component component = Component.text("");
+                if (data.getDonationGoal().getDonationGoalPercentage() > 100) {
+                    for (int i = 0; i < amount; i++) {
+                        component = component.append(Component.text("█").color(NamedTextColor.GREEN));
+                    }
+                    LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
+                    return serializer.serialize(component);
                 }
-                LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
-                return serializer.serialize(component);
-            }
-            if (data.getDonationGoal().getDonationGoalPercentage() < 0) {
+                if (data.getDonationGoal().getDonationGoalPercentage() < 0) {
+                    for (int i = 0; i < amount; i++) {
+                        component = component.append(Component.text("█").color(NamedTextColor.RED));
+                    }
+                    LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
+                    return serializer.serialize(component);
+                }
+                int step = 100 / amount;
                 for (int i = 0; i < amount; i++) {
+                    if ((i + 1) * step <= data.getDonationGoal().getDonationGoalPercentage()) {
+                        component = component.append(Component.text("█").color(NamedTextColor.GREEN));
+                        continue;
+                    }
                     component = component.append(Component.text("█").color(NamedTextColor.RED));
                 }
                 LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
                 return serializer.serialize(component);
             }
-            int step = 100 / amount;
-            for (int i = 0; i < amount; i++) {
-                if ((i+1) * step <= data.getDonationGoal().getDonationGoalPercentage()) {
-                    component = component.append(Component.text("█").color(NamedTextColor.GREEN));
-                    continue;
-                }
-                component = component.append(Component.text("█").color(NamedTextColor.RED));
-            }
-            LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
-            return serializer.serialize(component);
+        } catch (Exception e) {
+            MineStoreCommon.getInstance().debug("Placeholder error: " + e.getMessage());
+            return "";
         }
         return "";
     }
