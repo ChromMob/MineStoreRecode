@@ -1,4 +1,5 @@
-import groovy.json.JsonSlurper;
+import groovy.json.JsonSlurper
+import io.papermc.hangarpublishplugin.model.Platforms
 
 plugins {
     id 'java'
@@ -151,6 +152,18 @@ hangarPublish {
         else
             System.out.println("Hangar API Key is not set!")
         apiKey.set(System.getenv("HANGAR_API_KEY"));
+
+        platforms {
+            register(Platforms.PAPER) {
+                url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
+            }
+            register(Platforms.WATERFALL) {
+                url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
+            }
+            register(Platforms.VELOCITY) {
+                url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
+            }
+        }
     }
 }
 
