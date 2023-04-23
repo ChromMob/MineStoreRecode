@@ -132,8 +132,7 @@ if (latestVersion == currentVersion) {
 }
 
 
-//def changelog = new URL(System.getenv("GITHUB_API_URL") + "/repos/" + System.getenv("GITHUB_REPOSITORY") + "/commits/" + System.getenv("GITHUB_SHA")).openConnection()
-def changelogUrl = new URL("https://api.github.com/repos/ChromMob/MineStoreRecode/commits/04db5b875073fc81f25cb5344af6d5ae3711edb6").openConnection()
+def changelog = new URL(System.getenv("GITHUB_API_URL") + "/repos/" + System.getenv("GITHUB_REPOSITORY") + "/commits/" + System.getenv("GITHUB_SHA")).openConnection()
 changelogUrl.setRequestProperty("User-Agent", "Mozilla/5.0")
 changelogUrl.setRequestProperty("Accept", "application/json")
 changelogUrl.setRequestProperty("Content-Type", "application/json")
