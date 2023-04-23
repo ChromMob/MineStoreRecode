@@ -118,8 +118,8 @@ processResources {
     }
 }
 
-def author = 'ChromMob'
-def pluginName = 'MineStore'
+def author = "ChromMob"
+def pluginName = "MineStore"
 def latestUrl = new URL("https://hangar.papermc.io/api/v1/projects/${author}/${pluginName}/latestrelease").openConnection()
 latestUrl.setRequestProperty("User-Agent", "Mozilla/5.0")
 latestUrl.setRequestProperty("Accept", "text/plain")
