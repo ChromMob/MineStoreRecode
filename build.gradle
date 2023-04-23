@@ -140,10 +140,6 @@ def resp = new JsonSlurper().parseText(changelogUrl.getInputStream().getText())
 def changelogMessage = resp.commit.message;
 System.out.println(changelogMessage)
 
-if (changeLogMessage.contains("UPDATE")) {
-    changelogMessage = changelogMessage.replace("UPDATE", "Update")
-}
-
 hangarPublish {
     publications.register("plugin") {
         version.set(currentVersion)
