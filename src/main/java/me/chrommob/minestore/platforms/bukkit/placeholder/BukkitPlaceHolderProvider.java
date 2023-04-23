@@ -54,6 +54,7 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
         try {
             if (params.contains("top_donator_username_")) {
                 int arg = Integer.parseInt(params.replaceFirst("top_donator_username_", ""));
+                MineStoreCommon.getInstance().debug("Top donator username: " + data.getTopDonators().get(arg - 1).getUserName() + " (" + arg + ")");
                 return data.getTopDonators().get(arg - 1).getUserName();
             }
             if (params.contains("top_donator_price_")) {
