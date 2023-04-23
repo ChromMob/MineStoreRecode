@@ -119,56 +119,56 @@ processResources {
     }
 }
 
-def author = "ChromMob"
-def pluginName = "MineStore"
-def latestUrl = new URL("https://hangar.papermc.io/api/v1/projects/${author}/${pluginName}/latestrelease").openConnection()
-latestUrl.setRequestProperty("User-Agent", "Mozilla/5.0")
-latestUrl.setRequestProperty("Accept", "text/plain")
-latestUrl.setRequestProperty("Content-Type", "text/plain")
-latestUrl.connect()
-def latestVersion = latestUrl.getInputStream().text
-def currentVersion = project.version as String
-if (latestVersion == currentVersion) {
-    throw new GradleException("Version ${currentVersion} is already published!")
-}
-
-
-def changelogUrl = new URL(System.getenv("GITHUB_API_URL") + "/repos/" + System.getenv("GITHUB_REPOSITORY") + "/commits/" + System.getenv("GITHUB_SHA")).openConnection()
-changelogUrl.setRequestProperty("User-Agent", "Mozilla/5.0")
-changelogUrl.setRequestProperty("Accept", "application/json")
-changelogUrl.setRequestProperty("Content-Type", "application/json")
-def resp = new JsonSlurper().parseText(changelogUrl.getInputStream().getText())
-def changelogMessage = resp.commit.message;
-System.out.println(changelogMessage)
-
-hangarPublish {
-    publications.register("plugin") {
-        version.set(currentVersion)
-        namespace(author, pluginName)
-        channel.set("Release")
-        changelog.set(changelogMessage)
-        if (System.getenv("HANGAR_API_KEY") != null)
-            System.out.println("Hangar API Key is set!")
-        else
-            System.out.println("Hangar API Key is not set!")
-        apiKey.set(System.getenv("HANGAR_API_KEY"));
-
-        platforms {
-            register(Platforms.PAPER) {
-                url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
-                platformVersions.set(["1.8-1.19.4"])
-            }
-            register(Platforms.WATERFALL) {
-                url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
-                platformVersions.set(["1.12-1.19"])
-            }
-            register(Platforms.VELOCITY) {
-                url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
-                platformVersions.set(["3.0-3.2"])
-            }
-        }
-    }
-}
+//def author = "ChromMob"
+//def pluginName = "MineStore"
+//def latestUrl = new URL("https://hangar.papermc.io/api/v1/projects/${author}/${pluginName}/latestrelease").openConnection()
+//latestUrl.setRequestProperty("User-Agent", "Mozilla/5.0")
+//latestUrl.setRequestProperty("Accept", "text/plain")
+//latestUrl.setRequestProperty("Content-Type", "text/plain")
+//latestUrl.connect()
+//def latestVersion = latestUrl.getInputStream().text
+//def currentVersion = project.version as String
+//if (latestVersion == currentVersion) {
+//    throw new GradleException("Version ${currentVersion} is already published!")
+//}
+//
+//
+//def changelogUrl = new URL(System.getenv("GITHUB_API_URL") + "/repos/" + System.getenv("GITHUB_REPOSITORY") + "/commits/" + System.getenv("GITHUB_SHA")).openConnection()
+//changelogUrl.setRequestProperty("User-Agent", "Mozilla/5.0")
+//changelogUrl.setRequestProperty("Accept", "application/json")
+//changelogUrl.setRequestProperty("Content-Type", "application/json")
+//def resp = new JsonSlurper().parseText(changelogUrl.getInputStream().getText())
+//def changelogMessage = resp.commit.message;
+//System.out.println(changelogMessage)
+//
+//hangarPublish {
+//    publications.register("plugin") {
+//        version.set(currentVersion)
+//        namespace(author, pluginName)
+//        channel.set("Release")
+//        changelog.set(changelogMessage)
+//        if (System.getenv("HANGAR_API_KEY") != null)
+//            System.out.println("Hangar API Key is set!")
+//        else
+//            System.out.println("Hangar API Key is not set!")
+//        apiKey.set(System.getenv("HANGAR_API_KEY"));
+//
+//        platforms {
+//            register(Platforms.PAPER) {
+//                jar.set
+//                platformVersions.set(["1.8-1.19.4"])
+//            }
+//            register(Platforms.WATERFALL) {
+//                url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
+//                platformVersions.set(["1.12-1.19"])
+//            }
+//            register(Platforms.VELOCITY) {
+//                url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
+//                platformVersions.set(["3.0-3.2"])
+//            }
+//        }
+//    }
+//}
 
 shadowJar {
     minimize()
