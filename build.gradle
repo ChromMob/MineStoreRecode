@@ -156,12 +156,15 @@ hangarPublish {
         platforms {
             register(Platforms.PAPER) {
                 url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
+                platformVersions.set("1.8-1.19.4")
             }
             register(Platforms.WATERFALL) {
                 url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
+                platformVersions.set("1.12-1.19")
             }
             register(Platforms.VELOCITY) {
                 url.set("https://js.chrommob.fun/job/MineStore/lastSuccessfulBuild/")
+                platformVersions.set("3.0-3.2")
             }
         }
     }
