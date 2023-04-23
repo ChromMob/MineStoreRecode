@@ -132,11 +132,12 @@ if (latestVersion == currentVersion) {
 }
 
 
-def changelog = new URL(System.getenv("GITHUB_API_URL") + "/repos/" + System.getenv("GITHUB_REPOSITORY") + "/commits/" + System.getenv("GITHUB_SHA")).openConnection()
-changelog.setRequestProperty("User-Agent", "Mozilla/5.0")
-changelog.setRequestProperty("Accept", "application/json")
-changelog.setRequestProperty("Content-Type", "application/json")
-def resp = new JsonSlurper().parseText(changelog.getInputStream().getText())
+//def changelog = new URL(System.getenv("GITHUB_API_URL") + "/repos/" + System.getenv("GITHUB_REPOSITORY") + "/commits/" + System.getenv("GITHUB_SHA")).openConnection()
+def changelogUrl = new URL("https://api.github.com/repos/ChromMob/MineStoreRecode/commits/04db5b875073fc81f25cb5344af6d5ae3711edb6").openConnection()
+changelogUrl.setRequestProperty("User-Agent", "Mozilla/5.0")
+changelogUrl.setRequestProperty("Accept", "application/json")
+changelogUrl.setRequestProperty("Content-Type", "application/json")
+def resp = new JsonSlurper().parseText(changelogUrl.getInputStream().getText())
 def changelogMessage = resp.commit.message;
 System.out.println(changelogMessage)
 
@@ -144,9 +145,9 @@ System.out.println(changelogMessage)
 hangarPublish {
     publications.register("plugin") {
         version.set(currentVersion)
-        namespace($author, $pluginName)
+        namespace(author, pluginName)
         channel.set("Release")
-        changelog.set(changelog)
+        changelog.set(changelogMessage)
 
         // your api key.
         // defaults to the `io.papermc.hangar-publish-plugin.[publicationName].api-key` or `io.papermc.hangar-publish-plugin.default-api-key` Gradle properties
