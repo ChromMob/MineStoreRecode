@@ -1,11 +1,14 @@
+import groovy.json.JsonSlurper;
+
 plugins {
     id 'java'
     id "com.github.johnrengelman.shadow" version "8.1.0"
     id 'maven-publish'
+    id("io.papermc.hangar-publish-plugin") version "0.0.5"
 }
 
 group = 'me.chrommob'
-version = '0.1.1'
+version = '0.1.2'
 
 repositories {
     mavenCentral()
@@ -112,6 +115,42 @@ processResources {
     filteringCharset 'UTF-8'
     filesMatching('plugin.yml') {
         expand props
+    }
+}
+
+def author = 'ChromMob'
+def pluginName = 'MineStore'
+def latestUrl = new URL("https://hangar.papermc.io/api/v1/projects/${author}/${pluginName}/latestrelease").openConnection()
+latestUrl.setRequestProperty("User-Agent", "Mozilla/5.0")
+latestUrl.setRequestProperty("Accept", "text/plain")
+latestUrl.setRequestProperty("Content-Type", "text/plain")
+latestUrl.connect()
+def latestVersion = latestUrl.getInputStream().text
+def currentVersion = project.version as String
+if (latestVersion == currentVersion) {
+    throw new GradleException("Version ${currentVersion} is already published!")
+}
+
+
+def changelog = new URL(System.getenv("GITHUB_API_URL") + "/repos/" + System.getenv("GITHUB_REPOSITORY") + "/commits/" + System.getenv("GITHUB_SHA")).openConnection()
+changelog.setRequestProperty("User-Agent", "Mozilla/5.0")
+changelog.setRequestProperty("Accept", "application/json")
+changelog.setRequestProperty("Content-Type", "application/json")
+def resp = new JsonSlurper().parseText(changelog.getInputStream().getText())
+def changelogMessage = resp.commit.message;
+System.out.println(changelogMessage)
+
+
+hangarPublish {
+    publications.register("plugin") {
+        version.set(currentVersion)
+        namespace($author, $pluginName)
+        channel.set("Release")
+        changelog.set(changelog)
+
+        // your api key.
+        // defaults to the `io.papermc.hangar-publish-plugin.[publicationName].api-key` or `io.papermc.hangar-publish-plugin.default-api-key` Gradle properties
+        apiKey.set(System.getenv("HANGAR_API_KEY"));
     }
 }
 
