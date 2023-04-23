@@ -64,7 +64,7 @@ dependencies {
 
     implementation 'com.zaxxer:HikariCP:4.0.3'
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
-    implementation 'mysql:mysql-connector-java:8.0.32'
+    implementation "com.mysql:mysql-connector-j:8.0.33"
 }
 
 publishing {
@@ -83,6 +83,8 @@ shadowJar {
     relocate 'co.aikar.acf', 'me.chrommob.minestore.libs.co.aikar.acf'
     relocate 'net.kyori', 'me.chrommob.minestore.libs.net.kyori'
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
+    relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
+    relocate "org.mariadb", "me.chrommob.minestore.libs.org.mariadb"
 }
 
 def targetJavaVersion = 8

@@ -90,10 +90,10 @@ public class DatabaseManager {
             hikari.setUsername(username);
             switch (type) {
                 case MARIADB:
-                    driverClass = "org.mariadb.jdbc.Driver";
+                    driverClass = "me.chrommob.minestore.libs.org.mariadb.jdbc.Driver";
                     break;
                 case MYSQL:
-                    driverClass = "com.mysql.jdbc.Driver";
+                    driverClass = "me.chrommob.minestore.libs.com.mysql.cj.jdbc.Driver";
                     break;
             }
             hikari.setDriverClassName(driverClass);
@@ -107,6 +107,7 @@ public class DatabaseManager {
             hikari.getConnection().close();
             return true;
         } catch (Exception e) {
+            plugin.debug("Could not connect to database using " + type.name());
             plugin.debug(e);
             return false;
         }
