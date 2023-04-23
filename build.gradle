@@ -141,6 +141,9 @@ def resp = new JsonSlurper().parseText(changelogUrl.getInputStream().getText())
 def changelogMessage = resp.commit.message;
 System.out.println(changelogMessage)
 
+if (changeLogMessage.contains("UPDATE")) {
+    changelogMessage = changelogMessage.replace("UPDATE", "Update")
+}
 
 hangarPublish {
     publications.register("plugin") {
@@ -148,9 +151,10 @@ hangarPublish {
         namespace(author, pluginName)
         channel.set("Release")
         changelog.set(changelogMessage)
-
-        // your api key.
-        // defaults to the `io.papermc.hangar-publish-plugin.[publicationName].api-key` or `io.papermc.hangar-publish-plugin.default-api-key` Gradle properties
+        if (System.getenv("HANGAR_API_KEY") != null)
+            System.out.println("Hangar API Key is set!")
+        else
+            System.out.println("Hangar API Key is not set!")
         apiKey.set(System.getenv("HANGAR_API_KEY"));
     }
 }
