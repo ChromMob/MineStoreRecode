@@ -115,7 +115,3 @@ processResources {
         expand props
     }
 }
-
-shadowJar {
-    minimize()
-}
