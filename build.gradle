@@ -24,6 +24,18 @@ allprojects {
 
 defaultTasks("shadowJar")
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
