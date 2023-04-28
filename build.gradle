@@ -1,117 +1,97 @@
 
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'com.github.johnrengelman:shadow:8.1.1'
+    }
+}
+
 plugins {
     id 'java'
-    id "com.github.johnrengelman.shadow" version "8.1.0"
-    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-group = 'me.chrommob'
-version = '0.1.1'
-
-repositories {
-    mavenCentral()
-    maven {
-        name = 'paper-repo'
-        url = 'https://repo.papermc.io/repository/maven-public/'
-    }
-    maven {
-        name = 'spigotmc-repo'
-        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
-    maven {
-        name = "aikar-repo"
-        url = "https://repo.aikar.co/content/groups/aikar/"
-    }
-    maven {
-        name = "sponge-repo"
-        url = "https://repo.spongepowered.org/repository/maven-public/"
-    }
-    maven {
-        name = "jitpack"
-        url = "https://jitpack.io/"
-    }
-    maven {
-        name = 'placeholderapi-repo'
-        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
-    }
-    maven {
-        name = 'sonatype'
-        url = 'https://oss.sonatype.org/content/groups/public/'
+allprojects {
+    group = 'me.chrommob'
+    version = '0.1.1'
+    shadowJar {
+        setArchiveFileName("${project.name}-${project.version}.jar")
     }
 }
 
-dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
-    compileOnly 'com.velocitypowered:velocity-api:3.1.1'
-    compileOnly 'net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT'
-    compileOnly 'org.spongepowered:spongeapi:7.4.0'
-    compileOnly 'net.luckperms:api:5.4'
-    compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
-    compileOnly 'me.clip:placeholderapi:2.11.2'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
 
-    implementation('co.aikar:acf-paper:0.5.1-20230402.215239-24')
-    implementation('co.aikar:acf-bungee:0.5.1-20230402.215239-25')
-    implementation('co.aikar:acf-velocity:0.5.1-20230402.215239-24')
-    annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
-    implementation('co.aikar:acf-sponge:0.5.1-SNAPSHOT')
 
-    implementation('com.google.code.gson:gson:2.8.9')
-    implementation "net.kyori:adventure-api:4.12.0"
-    implementation "net.kyori:adventure-platform-bungeecord:4.2.0"
-    implementation "net.kyori:adventure-platform-spongeapi:4.2.0"
-    implementation "net.kyori:adventure-platform-bukkit:4.2.0"
-    implementation "net.kyori:adventure-text-serializer-plain:4.12.0"
-    implementation "net.kyori:adventure-text-minimessage:4.12.0"
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.release = 8
+        options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+    }
 
-    implementation 'com.zaxxer:HikariCP:4.0.3'
-    implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
-    implementation "com.mysql:mysql-connector-j:8.0.33"
-}
+    processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'paper-repo'
+            url = 'https://repo.papermc.io/repository/maven-public/'
+        }
+        maven {
+            name = 'spigotmc-repo'
+            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        }
+        maven {
+            name = "aikar-repo"
+            url = "https://repo.aikar.co/content/groups/aikar/"
+        }
+        maven {
+            name = "sponge-repo"
+            url = "https://repo.spongepowered.org/repository/maven-public/"
+        }
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io/"
+        }
+        maven {
+            name = 'placeholderapi-repo'
+            url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+        }
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/groups/public/'
         }
     }
-    repositories {
-        mavenLocal()
+
+    processResources {
+        def props = [version: project.version]
+        inputs.properties props
+        filteringCharset 'UTF-8'
+        filesMatching('plugin.yml') {
+            expand props
+        }
     }
 }
 
 shadowJar {
-    relocate 'com.google.gson', 'me.chrommob.minestore.libs.com.google.gson'
-    relocate 'co.aikar.acf', 'me.chrommob.minestore.libs.co.aikar.acf'
-    relocate 'net.kyori', 'me.chrommob.minestore.libs.net.kyori'
+    relocate "co.aikar.commands", "me.chrommob.minestore.libs.co.aikar.commands"
+    relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
     relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
     relocate "org.mariadb", "me.chrommob.minestore.libs.org.mariadb"
+    relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
+    relocate "net.kyori", "me.chrommob.minestore.libs.net.kyori"
+    exclude "META-INF/*.SF"
 }
 
-def targetJavaVersion = 8
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-}
-
-def encoding = 'UTF-8'
-tasks.withType(JavaCompile).configureEach {
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release = targetJavaVersion
-    }
-    options.encoding = encoding
-    options.compilerArgs << "-Xlint:all" << "-Xlint:-processing"
-}
-
-processResources {
-    def props = [version: version]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
-        expand props
-    }
+dependencies {
+    implementation project(path: ':common', configuration: 'shadow')
+    implementation project(path: ':MineStore-Bukkit', configuration: 'shadow')
+    implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
+    implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
 }

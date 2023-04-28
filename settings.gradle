@@ -1,1 +1,10 @@
 rootProject.name = 'MineStore'
+
+include "common"
+include "bukkit"
+include "velocity"
+include "bungee"
+
+project(":bukkit").name = "MineStore-Bukkit"
+project(":velocity").name = "MineStore-Velocity"
+project(":bungee").name = "MineStore-Bungee"
