@@ -16,9 +16,18 @@ plugins {
 
 allprojects {
     group = 'me.chrommob'
-    version = '0.2.0'
+    version = '0.2.1'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
+    }
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.release = 8
+        options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+    }
+
+    processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 }
 
@@ -39,17 +48,6 @@ publishing {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
-
-
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-        options.release = 8
-        options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-    }
-
-    processResources {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    }
 
     repositories {
         mavenCentral()
