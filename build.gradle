@@ -15,7 +15,7 @@ plugins {
 }
 
 allprojects {
-    def targetJavaVersion = 1.8
+    def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
     version = '0.2.1'
