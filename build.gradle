@@ -18,7 +18,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '0.2.1'
+    version = '0.2.2'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
     }
@@ -96,6 +96,12 @@ subprojects {
         }
     }
 
+    if (project.name != "common") {
+        dependencies {
+            implementation project(path: ':common', configuration: 'shadow')
+        }
+    }
+
     processResources {
         def props = [version: project.version]
         inputs.properties props
@@ -122,4 +128,5 @@ dependencies {
     implementation project(path: ':MineStore-Bukkit', configuration: 'shadow')
     implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
     implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
+    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }

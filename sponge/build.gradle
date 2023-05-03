@@ -1,0 +1,5 @@
+dependencies {
+    compileOnly 'org.spongepowered:spongeapi:7.4.0'
+    implementation('co.aikar:acf-sponge:0.5.1-SNAPSHOT')
+    implementation "net.kyori:adventure-platform-spongeapi:4.2.0"
+}

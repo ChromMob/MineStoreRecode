@@ -1,5 +1,4 @@
 dependencies {
-    implementation project(path: ':common', configuration: 'shadow')
     annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
     compileOnly 'com.velocitypowered:velocity-api:3.1.1'
     implementation('co.aikar:acf-velocity:0.5.1-20230402.215239-24')
