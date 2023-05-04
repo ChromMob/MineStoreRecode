@@ -100,7 +100,7 @@ public class GuiOpenener {
                 if (storeUrl.endsWith("/")) {
                     storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
                 }
-                String url = storeUrl + "/buy/";
+                String url = storeUrl + "/category/";
                 if (parsedPackage.getRoot() instanceof ParsedCategory) {
                     url += ((ParsedCategory) parsedPackage.getRoot()).getUrl();
                 } else if (parsedPackage.getRoot() instanceof ParsedSubCategory) {
