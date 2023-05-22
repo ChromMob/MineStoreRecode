@@ -7,6 +7,7 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.command.types.MineStoreCommand;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
@@ -14,12 +15,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 @CommandAlias("store")
-public class StoreCommand extends BaseCommand {
-    @Override
-    public void help(CommandIssuer issuer, String[] args) {
-        CommonUser user = MineStoreCommon.getInstance().userGetter().get(issuer.getUniqueId());
-        user.sendMessage(Component.text("[MineStore] /store").color(NamedTextColor.RED));
-    }
+public class StoreCommand extends MineStoreCommand {
     @Default
     @CommandPermission("minestore.store")
     @SuppressWarnings("unused")

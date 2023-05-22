@@ -7,6 +7,7 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Subcommand;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.command.types.MineStoreCommand;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
@@ -14,14 +15,7 @@ import me.chrommob.minestore.common.interfaces.user.CommonUser;
 @SuppressWarnings("unused")
 @CommandAlias("minestore|ms")
 @CommandPermission("minestore.autosetup")
-public class AutoSetupCommand extends BaseCommand {
-
-    @Override
-    public void help(CommandIssuer issuer, String[] args) {
-        CommonUser user = MineStoreCommon.getInstance().userGetter().get(issuer.getUniqueId());
-        user.sendMessage("[MineStore] /minestore autosetup <storeUrl> <apiKey> <secretKey>");
-    }
-
+public class AutoSetupCommand extends MineStoreCommand {
     @Subcommand("autosetup")
     public void onAutoSetup(AbstractUser abstractUser, String storeUrl, String apiKey, String secretKey) {
         CommonUser user = abstractUser.user();

@@ -5,6 +5,7 @@ import co.aikar.commands.CommandIssuer;
 import co.aikar.commands.annotation.*;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.command.types.MineStoreCommand;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
@@ -13,14 +14,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 @CommandAlias("minestore|ms")
-public class SetupCommand extends BaseCommand {
-
-    @Override
-    public void help(CommandIssuer issuer, String[] args) {
-        CommonUser user = MineStoreCommon.getInstance().userGetter().get(issuer.getUniqueId());
-        user.sendMessage(Component.text("[MineStore] /minestore setup <key> <value>").color(NamedTextColor.RED));
-    }
-
+public class SetupCommand extends MineStoreCommand {
     private final MineStoreCommon plugin;
     public SetupCommand(MineStoreCommon plugin) {
         this.plugin = plugin;

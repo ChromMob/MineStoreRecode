@@ -320,4 +320,8 @@ public class ConfigReader {
         saveDefaultConfig();
         MineStoreCommon.getInstance().debug("Set config value: " + location + " to " + value);
     }
+
+    public Map<String, Object> getLoadedConfig() {
+        return new LinkedHashMap<>(configYaml);
+    }
 }

@@ -12,6 +12,7 @@ import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.db.DatabaseManager;
+import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
@@ -61,6 +62,7 @@ public class MineStoreCommon {
     private CommonPlaceHolderProvider placeHolderProvider;
     private CommonScheduler scheduler;
     private StatSender statsSender;
+    private final Dumper dumper = new Dumper();
 
     public MineStoreCommon() {
         instance = this;
@@ -255,6 +257,7 @@ public class MineStoreCommon {
         });
         commandManager.registerCommand(new AutoSetupCommand());
         commandManager.registerCommand(new ReloadCommand());
+        commandManager.registerCommand(new DumpCommand());
     }
 
     private boolean storeEnabled = false;
@@ -494,6 +497,10 @@ public class MineStoreCommon {
         return placeHolderData;
     }
 
+    public Dumper dumper() {
+        return dumper;
+    }
+
     public MineStoreEventSender listener() {
         return eventSender;
     }
@@ -504,5 +511,9 @@ public class MineStoreCommon {
 
     public void runOnMainThread(Runnable runnable) {
         scheduler.run(runnable);
+    }
+
+    public File jarFile() {
+        return new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
     }
 }

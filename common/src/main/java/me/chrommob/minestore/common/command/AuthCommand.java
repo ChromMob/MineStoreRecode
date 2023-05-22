@@ -8,23 +8,13 @@ import co.aikar.commands.annotation.Subcommand;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.authHolder.AuthUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.command.types.MineStoreCommand;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 @CommandAlias("minestore|ms")
-public class AuthCommand extends BaseCommand {
-
-    @Override
-    public void help(CommandIssuer issuer, String[] args) {
-        CommonUser user = MineStoreCommon.getInstance().userGetter().get(issuer.getUniqueId());
-        if (!(user instanceof CommonConsoleUser)) {
-            user.sendMessage("[MineStore] /minestore auth");
-        } else {
-            user.sendMessage("[MineStore] You can't use this command from console!");
-        }
-    }
-
+public class AuthCommand extends MineStoreCommand {
     @CommandPermission("minestore.auth")
     @Subcommand("auth")
     @SuppressWarnings("unused")

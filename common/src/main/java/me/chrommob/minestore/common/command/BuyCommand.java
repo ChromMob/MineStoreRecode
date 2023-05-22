@@ -7,21 +7,12 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.command.types.MineStoreCommand;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 @CommandAlias("buy")
-public class BuyCommand extends BaseCommand {
-
-    @Override
-    public void help(CommandIssuer issuer, String[] args) {
-        CommonUser user = MineStoreCommon.getInstance().userGetter().get(issuer.getUniqueId());
-        if (!(user instanceof CommonConsoleUser)) {
-            user.sendMessage("[MineStore] /buy");
-        } else {
-            user.sendMessage("[MineStore] You can't use this command from console!");
-        }
-    }
+public class BuyCommand extends MineStoreCommand {
 
     @CommandPermission("minestore.buy")
     @Default
