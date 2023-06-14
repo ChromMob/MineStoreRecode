@@ -1,6 +1,5 @@
 package me.chrommob.minestore.common.gui;
 
-import co.aikar.commands.annotation.HelpSearchTags;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.GuiData;
@@ -185,7 +184,7 @@ public class GuiOpenener {
         inventory.setItems(finalItems);
     }
     
-    private List<CommonItem> addBackground(List<CommonItem> finalItems, boolean enabled) {
+    private void addBackground(List<CommonItem> finalItems, boolean enabled) {
         CommonItem glassPane = new CommonItem(Component.text(" "), (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ITEM), Collections.emptyList(), true);
         CommonItem air = new CommonItem(Component.text(" "), "AIR", Collections.emptyList(), true);
         for (int i = 0; i < 54; i++) {
@@ -195,7 +194,6 @@ public class GuiOpenener {
             }
             finalItems.add(air);
         }
-        return finalItems;
     }
 
     public Set<Component> getTitles() {
