@@ -21,7 +21,10 @@ public class DumpCommand extends MineStoreCommand {
         user.sendMessage(Component.text("Dumping MineStore data...").color(NamedTextColor.GREEN));
         new Thread(() -> {
             String link = MineStoreCommon.getInstance().dumper().dump();
-            user.sendMessage(Component.text("Dumped MineStore data to: " + link + " click to copy to clipboard.").clickEvent(ClickEvent.copyToClipboard(link)).color(NamedTextColor.GREEN));
+            user.sendMessage(Component.text("Dumped MineStore data to ").color(NamedTextColor.GRAY)
+                    .append(Component.text(link).color(NamedTextColor.YELLOW)
+                            .append(Component.text(" (Click to copy)").color(NamedTextColor.GOLD)
+                                    .clickEvent(ClickEvent.copyToClipboard(link)))));
         }).start();
     }
 }
