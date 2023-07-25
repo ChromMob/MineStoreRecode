@@ -131,7 +131,7 @@ public class WebListener implements CommandGetter {
                     } else {
                         MineStoreCommon.getInstance().debug(e);
                         mineStoreCommon.debug(e);
-                        mineStoreCommon.log("API key is invalid!");
+                        mineStoreCommon.log("SECRET KEY is invalid!");
                         return false;
                     }
                 }
