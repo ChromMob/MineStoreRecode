@@ -12,6 +12,7 @@ import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
@@ -38,6 +39,7 @@ public class GuiData {
             packageURL = new URL(finalUrl);
         } catch (Exception e) {
             MineStoreCommon.getInstance().debug(e);
+            MineStoreCommon.getInstance().log("STORE URL format is invalid!");
             return false;
         }
         try {
@@ -54,15 +56,18 @@ public class GuiData {
                     parsedResponse = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
                     MineStoreCommon.getInstance().debug(e);
+                    MineStoreCommon.getInstance().log("API key is invalid!");
                     parsedResponse = null;
                     return false;
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            MineStoreCommon.getInstance().log("STORE URL has to start with https://");
             MineStoreCommon.getInstance().debug(e);
             return false;
         }
         if (parsedResponse == null) {
+            MineStoreCommon.getInstance().log("API key is invalid!");
             return false;
         }
         parsedGui = new ParsedGui(parsedResponse);

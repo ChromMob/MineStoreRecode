@@ -112,7 +112,7 @@ public class WebListener implements CommandGetter {
             queueUrl = new URL(finalQueueUrl);
             executedUrl = new URL(finalExecutedUrl);
         } catch (Exception e) {
-            mineStoreCommon.log("Store URL is not a URL!");
+            mineStoreCommon.log("Store URL is not a valid URL!");
             MineStoreCommon.getInstance().debug(e);
             return false;
         }
@@ -131,12 +131,13 @@ public class WebListener implements CommandGetter {
                     } else {
                         MineStoreCommon.getInstance().debug(e);
                         mineStoreCommon.debug(e);
+                        mineStoreCommon.log("API key is invalid!");
                         return false;
                     }
                 }
             }
         } catch (IOException e) {
-            mineStoreCommon.log("Store URL is not a valid URL!");
+            mineStoreCommon.log("Store URL has to start with https://");
             MineStoreCommon.getInstance().debug(e);
             return false;
         }

@@ -141,8 +141,8 @@ public class MineStoreCommon {
         this.commandStorage = commandStorage;
     }
 
-    private Set<MineStoreAddon> addons = new HashSet<>();
-    private Set<MineStoreListener> listeners = new HashSet<>();
+    private final Set<MineStoreAddon> addons = new HashSet<>();
+    private final Set<MineStoreListener> listeners = new HashSet<>();
     @SuppressWarnings("unused")
     public void registerListener(MineStoreListener listener) {
         listeners.add(listener);
@@ -355,16 +355,7 @@ public class MineStoreCommon {
             log("UserGetter is not registered.");
             return false;
         }
-        if (!guiData.load()) {
-            log("GuiData is not configured correctly.");
-            return false;
-        }
-        if (!placeHolderData.load()) {
-            log("PlaceHolderData is not configured correctly.");
-            return false;
-        }
-        if (!commandGetter.load()) {
-            log("Url is not configured correctly.");
+        if (!guiData.load() || !placeHolderData.load() || !commandGetter.load()) {
             return false;
         }
         if (scheduler == null) {

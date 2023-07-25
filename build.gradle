@@ -18,7 +18,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '0.2.5'
+    version = '0.3.0'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
     }

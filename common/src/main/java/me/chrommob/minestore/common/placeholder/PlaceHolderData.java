@@ -12,6 +12,7 @@ import me.chrommob.minestore.common.placeholder.json.TopDonator;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -51,6 +52,7 @@ public class PlaceHolderData {
             apiUrls.add(topDonatorsUrl);
         } catch (Exception e) {
             MineStoreCommon.getInstance().debug(e);
+            MineStoreCommon.getInstance().log("STORE URL has invalid format!");
             return false;
         }
         try {
@@ -92,8 +94,9 @@ public class PlaceHolderData {
                         }
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             MineStoreCommon.getInstance().debug(e);
+            MineStoreCommon.getInstance().log("STORE URL has to start with https://");
             return false;
         }
         return true;
