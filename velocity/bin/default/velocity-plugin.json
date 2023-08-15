@@ -1,0 +1,1 @@
+{"id":"minestore","name":"MineStore","version":"0.1","description":"MineStore plugin for Velocity","authors":["chrommob"],"dependencies":[],"main":"me.chrommob.minestore.platforms.velocity.MineStoreVelocity"}

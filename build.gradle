@@ -21,6 +21,7 @@ allprojects {
     version = '0.3.0'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
+        destinationDirectory = file("${projectDir}/build/libs/")
     }
 
     java {
@@ -109,6 +110,12 @@ subprojects {
         filesMatching('plugin.yml') {
             expand props
         }
+
+        inputs.property "version", project.version
+
+        filesMatching("fabric.mod.json") {
+            expand "version": project.version
+        }
     }
 }
 
@@ -121,6 +128,7 @@ shadowJar {
     relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
     relocate "net.kyori", "me.chrommob.minestore.libs.net.kyori"
     exclude "META-INF/*.SF"
+    exclude ".properties"
 }
 
 dependencies {
@@ -129,4 +137,7 @@ dependencies {
     implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
     implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
     implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
+    implementation project(path: ':MineStore-Fabric')
 }
+
+println(shadowJar.archiveFile.get().getAsFile().absolutePath)

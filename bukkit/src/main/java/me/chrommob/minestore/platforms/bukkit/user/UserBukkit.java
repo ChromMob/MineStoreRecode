@@ -64,7 +64,8 @@ public class UserBukkit extends CommonUser {
 
     @Override
     public void openInventory(CommonInventory inventory) {
-        Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize(), serializer.serialize(inventory.getTitle()));
+        Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize(),
+                serializer.serialize(inventory.getTitle()));
         player.openInventory(bukkitInventory);
         List<ItemStack> bukkitItems = new ArrayList<>();
         for (CommonItem item : inventory.getItems()) {
@@ -98,9 +99,9 @@ public class UserBukkit extends CommonUser {
             meta.setDisplayName(serializer.serialize(item.getName()));
             meta.setLore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            if (item.isFeatured()){
+            if (item.isFeatured()) {
                 meta.addEnchant(org.bukkit.enchantments.Enchantment.DURABILITY, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             bukkitItem.setItemMeta(meta);
             bukkitItems.add(bukkitItem);

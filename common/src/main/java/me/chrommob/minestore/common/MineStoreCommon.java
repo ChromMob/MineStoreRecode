@@ -78,14 +78,19 @@ public class MineStoreCommon {
     }
 
     private String platformType;
+
     public void setPlatform(String platform) {
         this.platformType = platform;
     }
+
     private String platformName;
+
     public void setPlatformName(String platformName) {
         this.platformName = platformName;
     }
+
     private String platformVersion;
+
     public void setPlatformVersion(String platformVersion) {
         this.platformVersion = platformVersion;
     }
@@ -93,9 +98,11 @@ public class MineStoreCommon {
     public String getPlatform() {
         return platformType;
     }
+
     public String getPlatformName() {
         return platformName;
     }
+
     public String getPlatformVersion() {
         return platformVersion;
     }
@@ -143,15 +150,19 @@ public class MineStoreCommon {
 
     private final Set<MineStoreAddon> addons = new HashSet<>();
     private final Set<MineStoreListener> listeners = new HashSet<>();
+
     @SuppressWarnings("unused")
     public void registerListener(MineStoreListener listener) {
         listeners.add(listener);
     }
+
     public Set<MineStoreListener> getListeners() {
         return listeners;
     }
+
     private MineStoreEventSender eventSender;
     private boolean initialized = false;
+
     public void init() {
         statsSender = new StatSender(this);
         eventSender = new MineStoreEventSender(this);
@@ -215,7 +226,7 @@ public class MineStoreCommon {
                 HashMap<String, String> object = yaml.load(zipFile.getInputStream(zipEntry));
                 String mainClass = object.get("main-class");
                 ClassLoader dependencyClassLoader = getClass().getClassLoader();
-                log("Loading addon " + mainClass + " from " + file.getName() + "..." );
+                log("Loading addon " + mainClass + " from " + file.getName() + "...");
                 URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
                 Class<?> cls = urlClassLoader.loadClass(mainClass);
@@ -249,7 +260,8 @@ public class MineStoreCommon {
     private void registerEssentialCommands() {
         commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
             try {
-                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId()) : new AbstractUser((UUID) null);
+                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId())
+                        : new AbstractUser((UUID) null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -262,6 +274,7 @@ public class MineStoreCommon {
 
     private boolean storeEnabled = false;
     private boolean buyEnabled = false;
+
     private void registerCommands() {
         commandManager.getCommandCompletions().registerAsyncCompletion("configKeys", c -> {
             Set<String> keys = new HashSet<>();
@@ -331,7 +344,7 @@ public class MineStoreCommon {
     }
 
     private boolean verify() {
-        if (commandManager == null) {
+        if (commandManager == null && !platformType.equalsIgnoreCase("fabric")) {
             log("CommandManager is not registered.");
             return false;
         }

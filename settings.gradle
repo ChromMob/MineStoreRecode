@@ -1,3 +1,25 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenLocal()
+        maven {
+            url "https://jitpack.io"
+        }
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        mavenCentral()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "me.chrommob.skidfuscatorgradle") {
+                useModule("com.github.ChromMob.SkidFuscatorGradle:SkidFuscatorGradle:master-SNAPSHOT")
+            }
+        }
+    }
+}
+
 rootProject.name = 'MineStore'
 
 include "common"
@@ -5,8 +27,10 @@ include "bukkit"
 include "velocity"
 include "bungee"
 include "sponge"
+include "fabric"
 
 project(":bukkit").name = "MineStore-Bukkit"
 project(":velocity").name = "MineStore-Velocity"
 project(":bungee").name = "MineStore-Bungee"
 project(":sponge").name = "MineStore-Sponge"
+project(":fabric").name = "MineStore-Fabric"

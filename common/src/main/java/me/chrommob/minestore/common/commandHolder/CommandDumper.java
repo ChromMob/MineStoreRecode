@@ -27,17 +27,23 @@ public class CommandDumper {
             inputStream = new FileInputStream(dumpedFile);
         } catch (FileNotFoundException e) {
             MineStoreCommon.getInstance().debug(e);
+            return new ConcurrentHashMap<>();
         }
         return new ConcurrentHashMap<>(yaml.load(inputStream));
     }
 
     public void update(Map<String, List<String>> commands) {
-        FileWriter fileOutputStream = null;
-        try {
-            fileOutputStream = new FileWriter(dumpedFile);
-        } catch (IOException e) {
-            MineStoreCommon.getInstance().debug(e);
-        }
-        yaml.dump(commands, fileOutputStream);
+        new Runnable() {
+            @Override
+            public void run() {
+                FileWriter fileOutputStream = null;
+                try {
+                    fileOutputStream = new FileWriter(dumpedFile);
+                } catch (IOException e) {
+                    MineStoreCommon.getInstance().debug(e);
+                }
+                yaml.dump(commands, fileOutputStream);
+            }
+        }.run();
     }
 }
