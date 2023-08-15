@@ -1,4 +1,3 @@
-
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -14,7 +13,43 @@ plugins {
     id "maven-publish"
 }
 
+java {
+	disableAutoTargetJvm()
+}
+
 allprojects {
+        repositories {
+        mavenCentral()
+        maven {
+            name = 'paper-repo'
+            url = 'https://repo.papermc.io/repository/maven-public/'
+        }
+        maven {
+            name = 'spigotmc-repo'
+            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        }
+        maven {
+            name = "aikar-repo"
+            url = "https://repo.aikar.co/content/groups/aikar/"
+        }
+        maven {
+            name = "sponge-repo"
+            url = "https://repo.spongepowered.org/repository/maven-public/"
+        }
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io/"
+        }
+        maven {
+            name = 'placeholderapi-repo'
+            url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+        }
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/groups/public/'
+        }
+    }
+
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
@@ -47,8 +82,6 @@ allprojects {
     }
 }
 
-defaultTasks("shadowJar")
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -65,37 +98,6 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
 
-    repositories {
-        mavenCentral()
-        maven {
-            name = 'paper-repo'
-            url = 'https://repo.papermc.io/repository/maven-public/'
-        }
-        maven {
-            name = 'spigotmc-repo'
-            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-        }
-        maven {
-            name = "aikar-repo"
-            url = "https://repo.aikar.co/content/groups/aikar/"
-        }
-        maven {
-            name = "sponge-repo"
-            url = "https://repo.spongepowered.org/repository/maven-public/"
-        }
-        maven {
-            name = "jitpack"
-            url = "https://jitpack.io/"
-        }
-        maven {
-            name = 'placeholderapi-repo'
-            url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
-        }
-        maven {
-            name = 'sonatype'
-            url = 'https://oss.sonatype.org/content/groups/public/'
-        }
-    }
 
     if (project.name != "common") {
         dependencies {
@@ -128,7 +130,6 @@ shadowJar {
     relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
     relocate "net.kyori", "me.chrommob.minestore.libs.net.kyori"
     exclude "META-INF/*.SF"
-    exclude ".properties"
 }
 
 dependencies {
@@ -138,6 +139,11 @@ dependencies {
     implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
     implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
     implementation project(path: ':MineStore-Fabric')
+}
+
+shadowJar {
+    archiveFileName = "${project.name}-${project.version}.jar"
+    destinationDirectory = file("${projectDir}/build/libs/")
 }
 
 println(shadowJar.archiveFile.get().getAsFile().absolutePath)
