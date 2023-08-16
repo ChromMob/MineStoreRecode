@@ -33,7 +33,7 @@ public class MineStoreFabric implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		instance = this;
-		ServerLifecycleEvents.SERVER_STARTING.register(this::onEnable);
+		ServerLifecycleEvents.SERVER_STARTED.register(this::onEnable);
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onDisable);
 
 	}

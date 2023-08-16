@@ -11,10 +11,12 @@ import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class FabricUserGetter implements UserGetter {
-    private final PlayerManager pManager;
+    private PlayerManager pManager;
+    private final MinecraftServer server;
 
     public FabricUserGetter(MinecraftServer server) {
         this.pManager = server.getPlayerManager();
+        this.server = server;
     }
 
     @Override
