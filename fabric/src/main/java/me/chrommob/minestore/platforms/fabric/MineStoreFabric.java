@@ -51,7 +51,7 @@ public class MineStoreFabric implements ModInitializer {
 		common.registerScheduler(new FabricScheduler());
 		common.registerUserGetter(new FabricUserGetter(server));
 		common.registerCommandExecuter(new CommandExecuterFabric(server));
-		common.setConfigLocation(FabricLoader.getInstance().getConfigDir().resolve("minestore.yml").toFile());
+		common.setConfigLocation(FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("config.yml").toFile());
 		common.registerPlayerJoinListener(new FabricPlayerEvent());
 		common.init();
 	}

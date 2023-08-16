@@ -258,6 +258,9 @@ public class MineStoreCommon {
     }
 
     private void registerEssentialCommands() {
+        if (commandManager == null) {
+            return;
+        }
         commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
             try {
                 return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId())
@@ -276,6 +279,9 @@ public class MineStoreCommon {
     private boolean buyEnabled = false;
 
     private void registerCommands() {
+        if (commandManager == null) {
+            return;
+        }
         commandManager.getCommandCompletions().registerAsyncCompletion("configKeys", c -> {
             Set<String> keys = new HashSet<>();
             for (ConfigKey key : ConfigKey.values()) {

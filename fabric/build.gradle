@@ -6,6 +6,12 @@ plugins {
 version = project.version
 group = project.maven_group
 
+gradle.taskGraph.afterTask {
+    Task task,TaskState state ->
+        if (state.failure) {    println "$task.name FAILED"}
+        else               {    println "$task.name SUCCESSFULL"}
+}
+
 
 loom {
     splitEnvironmentSourceSets()
@@ -18,12 +24,6 @@ loom {
 	}
 }
 
-//Ignore that net.fabricmc:yarn requires JAVA 17
-java {
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
-}
-
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -33,11 +33,8 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation include("net.kyori:adventure-platform-fabric:5.9.0")
-	modImplementation include(project(":common"))
-	// Uncomment the following line to enable the deprecated Fabric API modules. 
-	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
 
-	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
+	implementation project(path: ':common', configuration: 'shadow')
 }
 
 jar {

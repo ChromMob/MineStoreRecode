@@ -96,7 +96,10 @@ publishing {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'com.github.johnrengelman.shadow'
+    if (project.name != "MineStore-Fabric") {
+        apply plugin: 'com.github.johnrengelman.shadow'
+        println("Applying shadow to ${project.name}")
+    }
 
 
     if (project.name != "common") {
@@ -121,6 +124,22 @@ subprojects {
     }
 }
 
+task finalJar(type: Jar, group: "modding") {
+    dependsOn shadowJar
+    dependsOn(':MineStore-Fabric:build')
+    from {
+        //Include the output from shadowJar
+        zipTree( shadowJar.archiveFile.get() )
+    }
+    from {
+        zipTree("${project(':MineStore-Fabric').buildDir}/libs/${project(':MineStore-Fabric').name}-${project(':MineStore-Fabric').version}.jar")
+    }
+    archiveClassifier.set("final")
+    archiveFileName = "${project.name}-${project.version}.jar"
+    destinationDirectory = file("${projectDir}/build/libs/")
+}
+assemble.finalizedBy(finalJar)
+
 shadowJar {
     relocate "co.aikar.commands", "me.chrommob.minestore.libs.co.aikar.commands"
     relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
@@ -128,7 +147,9 @@ shadowJar {
     relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
     relocate "org.mariadb", "me.chrommob.minestore.libs.org.mariadb"
     relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
-    relocate "net.kyori", "me.chrommob.minestore.libs.net.kyori"
+    relocate ("net.kyori", "me.chrommob.minestore.libs.net.kyori") {
+        exclude "net.kyori.adventure.platform.fabric.**"
+    }
     exclude "META-INF/*.SF"
 }
 
@@ -138,12 +159,5 @@ dependencies {
     implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
     implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
     implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
-    implementation project(path: ':MineStore-Fabric')
 }
 
-shadowJar {
-    archiveFileName = "${project.name}-${project.version}.jar"
-    destinationDirectory = file("${projectDir}/build/libs/")
-}
-
-println(shadowJar.archiveFile.get().getAsFile().absolutePath)
