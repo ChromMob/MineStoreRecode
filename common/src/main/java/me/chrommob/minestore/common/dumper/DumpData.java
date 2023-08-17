@@ -18,10 +18,16 @@ public class DumpData {
     private final String plaformName = MineStoreCommon.getInstance().getPlatformName();
     private final String platformVersion = MineStoreCommon.getInstance().getPlatformVersion();
     private final Map<String, Object> config;
-    private String log = "Log file not found";
-    public DumpData() {
+    private String log = "Log file not found or too large to dump.";
+
+    public DumpData(boolean includeLog) {
         this.config = MineStoreCommon.getInstance().configReader().getLoadedConfig();
-        Path logPath = Paths.get(MineStoreCommon.getInstance().jarFile().getParentFile().getParentFile().getAbsolutePath(), "logs", "latest.log");
+        Path logPath = Paths.get(
+                MineStoreCommon.getInstance().jarFile().getParentFile().getParentFile().getAbsolutePath(), "logs",
+                "latest.log");
+        if (!includeLog) {
+            return;
+        }
         File logFile = logPath.toFile();
         if (logFile.exists()) {
             try {
