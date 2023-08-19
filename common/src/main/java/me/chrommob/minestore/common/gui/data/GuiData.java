@@ -34,7 +34,10 @@ public class GuiData {
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
-        finalUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/gui/packages_new" : "gui/packages_new");
+        finalUrl = storeUrl + "/api/"
+                + ((boolean) configReader.get(ConfigKey.API_ENABLED)
+                        ? configReader.get(ConfigKey.API_KEY) + "/gui/packages_new"
+                        : "gui/packages_new");
         try {
             packageURL = new URL(finalUrl);
         } catch (Exception e) {
@@ -52,7 +55,8 @@ public class GuiData {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
-                    Type listType = new TypeToken<List<Category>>() {}.getType();
+                    Type listType = new TypeToken<List<Category>>() {
+                    }.getType();
                     parsedResponse = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
                     MineStoreCommon.getInstance().debug(e);
@@ -61,9 +65,13 @@ public class GuiData {
                     return false;
                 }
             }
-        } catch (IOException e) {
+        } catch (ClassCastException e) {
             MineStoreCommon.getInstance().log("STORE URL has to start with https://");
             MineStoreCommon.getInstance().debug(e);
+            return false;
+        } catch (IOException e) {
+            MineStoreCommon.getInstance().debug(e);
+            MineStoreCommon.getInstance().log("API key is invalid!");
             return false;
         }
         if (parsedResponse == null) {
