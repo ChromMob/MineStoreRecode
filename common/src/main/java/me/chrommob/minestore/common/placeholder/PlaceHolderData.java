@@ -40,9 +40,18 @@ public class PlaceHolderData {
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
-        finalDonationGoalUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/donation_goal" : "donation_goal");
-        finalLastDonatorsUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/getTotalPayments" : "getTotalPayments");
-        finalTopDonatorsUrl = storeUrl + "/api/" + ((boolean) configReader.get(ConfigKey.API_ENABLED) ? configReader.get(ConfigKey.API_KEY) + "/top_donators" : "top_donators");
+        finalDonationGoalUrl = storeUrl + "/api/"
+                + ((boolean) configReader.get(ConfigKey.API_ENABLED)
+                        ? configReader.get(ConfigKey.API_KEY) + "/donation_goal"
+                        : "donation_goal");
+        finalLastDonatorsUrl = storeUrl + "/api/"
+                + ((boolean) configReader.get(ConfigKey.API_ENABLED)
+                        ? configReader.get(ConfigKey.API_KEY) + "/getTotalPayments"
+                        : "getTotalPayments");
+        finalTopDonatorsUrl = storeUrl + "/api/"
+                + ((boolean) configReader.get(ConfigKey.API_ENABLED)
+                        ? configReader.get(ConfigKey.API_KEY) + "/top_donators"
+                        : "top_donators");
         try {
             URI donationGoalUrl = new URI(finalDonationGoalUrl);
             URI lastDonatorsUrl = new URI(finalLastDonatorsUrl);
@@ -67,34 +76,40 @@ public class PlaceHolderData {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                        MineStoreCommon.getInstance().debug("Received: " + line);
-                        if (apiUrl.equals(apiUrls.toArray()[0])) {
-                            try {
-                                donationGoal = gson.fromJson(line, DonationGoal.class);
-                            } catch (JsonSyntaxException e) {
-                                MineStoreCommon.getInstance().debug(e);
-                                donationGoal = new DonationGoal();
-                            }
-                        } else if (apiUrl.equals(apiUrls.toArray()[1])) {
-                            Type listType = new TypeToken<List<LastDonator>>() {}.getType();
-                            try {
-                                lastDonators = gson.fromJson(line, listType);
-                            } catch (JsonSyntaxException e) {
-                                MineStoreCommon.getInstance().debug(e);
-                                lastDonators = new ArrayList<>();
-                            }
-                        } else if (apiUrl.equals(apiUrls.toArray()[2])) {
-                            Type listType = new TypeToken<List<TopDonator>>() {}.getType();
-                            try {
-                                topDonators = gson.fromJson(line, listType);
-                            } catch (JsonSyntaxException e) {
-                                MineStoreCommon.getInstance().debug(e);
-                                topDonators = new ArrayList<>();
-                            }
+                    MineStoreCommon.getInstance().debug("Received: " + line);
+                    if (apiUrl.equals(apiUrls.toArray()[0])) {
+                        try {
+                            donationGoal = gson.fromJson(line, DonationGoal.class);
+                        } catch (JsonSyntaxException e) {
+                            MineStoreCommon.getInstance().debug(e);
+                            donationGoal = new DonationGoal();
                         }
+                    } else if (apiUrl.equals(apiUrls.toArray()[1])) {
+                        Type listType = new TypeToken<List<LastDonator>>() {
+                        }.getType();
+                        try {
+                            lastDonators = gson.fromJson(line, listType);
+                        } catch (JsonSyntaxException e) {
+                            MineStoreCommon.getInstance().debug(e);
+                            lastDonators = new ArrayList<>();
+                        }
+                    } else if (apiUrl.equals(apiUrls.toArray()[2])) {
+                        Type listType = new TypeToken<List<TopDonator>>() {
+                        }.getType();
+                        try {
+                            topDonators = gson.fromJson(line, listType);
+                        } catch (JsonSyntaxException e) {
+                            MineStoreCommon.getInstance().debug(e);
+                            topDonators = new ArrayList<>();
+                        }
+                    }
                 }
             }
         } catch (IOException e) {
+            MineStoreCommon.getInstance().debug(e);
+            MineStoreCommon.getInstance().log("API KEY is invalid!");
+            return false;
+        } catch (ClassCastException e) {
             MineStoreCommon.getInstance().debug(e);
             MineStoreCommon.getInstance().log("STORE URL has to start with https://");
             return false;

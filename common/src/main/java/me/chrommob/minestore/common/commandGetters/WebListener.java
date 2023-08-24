@@ -67,10 +67,16 @@ public class WebListener implements CommandGetter {
                             case COMMAND:
                                 mineStoreCommon.listener().onPurchase(parsedResponse.clone());
                                 mineStoreCommon.commandStorage().listener(parsedResponse);
-                                mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\"" + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username() + " requires online: " + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE) ? "true" : "false"));
+                                mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\""
+                                        + " with id: " + parsedResponse.commandId() + " for player: "
+                                        + parsedResponse.username() + " requires online: "
+                                        + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
+                                                ? "true"
+                                                : "false"));
                                 break;
                             case AUTH:
-                                mineStoreCommon.debug("Got auth for player: " + parsedResponse.username() + " with id: " + parsedResponse.authId());
+                                mineStoreCommon.debug("Got auth for player: " + parsedResponse.username() + " with id: "
+                                        + parsedResponse.authId());
                                 mineStoreCommon.authHolder().listener(parsedResponse);
                                 break;
                         }
@@ -103,7 +109,8 @@ public class WebListener implements CommandGetter {
         }
         if ((boolean) configReader.get(ConfigKey.SECRET_ENABLED)) {
             finalQueueUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/queue";
-            finalExecutedUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/executed/";
+            finalExecutedUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY)
+                    + "/commands/executed/";
         } else {
             finalQueueUrl = storeUrl + "/api/servers/commands/queue";
             finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
@@ -137,7 +144,11 @@ public class WebListener implements CommandGetter {
                 }
             }
         } catch (IOException e) {
-            mineStoreCommon.log("Store URL has to start with https://");
+            mineStoreCommon.log("SECRET KEY is invalid!");
+            MineStoreCommon.getInstance().debug(e);
+            return false;
+        } catch (ClassCastException e) {
+            mineStoreCommon.log("STORE URL has to start with https://");
             MineStoreCommon.getInstance().debug(e);
             return false;
         }

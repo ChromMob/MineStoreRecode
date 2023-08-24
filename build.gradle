@@ -1,3 +1,4 @@
+
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -53,7 +54,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '0.3.0'
+    version = '0.3.2'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -100,7 +101,6 @@ subprojects {
         apply plugin: 'com.github.johnrengelman.shadow'
         println("Applying shadow to ${project.name}")
     }
-
 
     if (project.name != "common") {
         dependencies {
@@ -160,4 +160,3 @@ dependencies {
     implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
     implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }
-
