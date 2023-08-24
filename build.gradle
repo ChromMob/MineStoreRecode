@@ -49,6 +49,10 @@ allprojects {
             name = 'sonatype'
             url = 'https://oss.sonatype.org/content/groups/public/'
         }
+        maven {
+            name = 'sonatype-snapshots'
+            url = "https://oss.sonatype.org/content/repositories/snapshots"
+        }
     }
 
     def targetJavaVersion = 8
@@ -141,7 +145,7 @@ task finalJar(type: Jar, group: "modding") {
 assemble.finalizedBy(finalJar)
 
 shadowJar {
-    relocate "co.aikar.commands", "me.chrommob.minestore.libs.co.aikar.commands"
+    relocate "cloud.commandframework", "me.chrommob.minestore.libs.cloud.commandframework"
     relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
     relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"

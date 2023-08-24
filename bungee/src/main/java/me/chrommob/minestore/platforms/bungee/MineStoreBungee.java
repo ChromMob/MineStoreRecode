@@ -1,17 +1,21 @@
 package me.chrommob.minestore.platforms.bungee;
 
-import co.aikar.commands.BungeeCommandManager;
+import cloud.commandframework.bungee.BungeeCommandManager;
+import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.platforms.bungee.events.PlayerEventListenerBungee;
 import me.chrommob.minestore.platforms.bungee.logger.LoggerBungee;
 import me.chrommob.minestore.platforms.bungee.scheduler.BungeeScheduler;
 import me.chrommob.minestore.platforms.bungee.user.BungeeUserGetter;
 import me.chrommob.minestore.platforms.bungee.webCommand.CommandExecuterBungee;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
+import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class MineStoreBungee extends Plugin {
@@ -33,7 +37,13 @@ public class MineStoreBungee extends Plugin {
         common.setConfigLocation(new File(getDataFolder(), "config.yml"));
         common.registerCommandExecuter(new CommandExecuterBungee(this));
         common.registerPlayerJoinListener(new PlayerEventListenerBungee(this));
-        common.registerCommandManager(new BungeeCommandManager(this));
+        Function cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null);
+        common.registerCommandManager(new BungeeCommandManager<>(
+                /* Owning plugin */ this,
+                /* Execution coordinator */ AsynchronousCommandExecutionCoordinator.simpleCoordinator(),
+                /* Function to get a command sender from a bukkit command source */ commandSource -> commandSource,
+                /* Function to get a command source from a bukkit command sender */ commandSender -> commandSender
+        ));
         common.init();
     }
 

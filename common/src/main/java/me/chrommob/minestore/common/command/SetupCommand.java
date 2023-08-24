@@ -1,11 +1,8 @@
 package me.chrommob.minestore.common.command;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandIssuer;
-import co.aikar.commands.annotation.*;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.command.types.MineStoreCommand;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
@@ -13,19 +10,17 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
-@CommandAlias("minestore|ms")
-public class SetupCommand extends MineStoreCommand {
+@SuppressWarnings("unused")
+public class SetupCommand {
     private final MineStoreCommon plugin;
     public SetupCommand(MineStoreCommon plugin) {
         this.plugin = plugin;
     }
 
-    @SuppressWarnings("unused")
     @CommandPermission("minestore.setup")
-    @Subcommand("setup")
-    @CommandCompletion("@configKeys")
-    @Syntax("<key> <value>")
-    public void onSetupCommand(AbstractUser user, @Optional String key, @Optional String value) {
+    @CommandMethod("minestore|ms setup [key] [value]")
+//    @CommandCompletion("@configKeys")
+    public void onSetupCommand(AbstractUser user, String key, String value) {
         CommonUser commonUser = user.user();
         if (key == null || value == null) {
             for (ConfigKey configKey : ConfigKey.values()) {

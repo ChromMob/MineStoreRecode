@@ -1,7 +1,11 @@
 package me.chrommob.minestore.platforms.bukkit;
 
-import co.aikar.commands.PaperCommandManager;
+import cloud.commandframework.CommandTree;
+import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
+import cloud.commandframework.execution.CommandExecutionCoordinator;
+import cloud.commandframework.paper.PaperCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.platforms.bukkit.db.VaultEconomyProvider;
 import me.chrommob.minestore.platforms.bukkit.db.VaultPlayerInfoProvider;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitInventoryEvent;
@@ -13,7 +17,10 @@ import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
 import me.chrommob.minestore.platforms.bukkit.webCommand.CommandExecuterBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.function.Function;
 
 public final class MineStoreBukkit extends JavaPlugin {
     private static MineStoreBukkit instance;
@@ -44,7 +51,20 @@ public final class MineStoreBukkit extends JavaPlugin {
         common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());
         common.registerPlayerJoinListener(new BukkitPlayerEvent(this));
         new BukkitInventoryEvent(this);
-        common.registerCommandManager(new PaperCommandManager(this));
+
+        final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender.getName());
+        final Function<AbstractUser, CommandSender> aToC = abstractUser -> Bukkit.getPlayer(abstractUser.user().getName());
+
+        try {
+            common.registerCommandManager(new PaperCommandManager<>(
+                    /* Owning plugin */ this,
+                    /* Coordinator function */ CommandExecutionCoordinator.simpleCoordinator() ,
+                    /* Command Sender -> C */ cToA,
+                    /* C -> A */ aToC
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
             VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(this);
             if (vaultPlayerInfoProvider.isInstalled()) {

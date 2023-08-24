@@ -1,22 +1,17 @@
 package me.chrommob.minestore.common.command;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandIssuer;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.command.types.MineStoreCommand;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
-@CommandAlias("buy")
-public class BuyCommand extends MineStoreCommand {
+@SuppressWarnings("unused")
+public class BuyCommand {
 
     @CommandPermission("minestore.buy")
-    @Default
-    @SuppressWarnings("unused")
+    @CommandMethod("buy")
     public void onBuy(AbstractUser user) {
         CommonUser commonUser = user.user();
         if (commonUser instanceof CommonConsoleUser) {

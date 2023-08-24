@@ -2,6 +2,7 @@
 dependencies {
     implementation('net.kyori:adventure-platform-bungeecord:4.2.0')
     compileOnly 'net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT'
-    implementation 'co.aikar:acf-bungee:0.5.1-20230402.215239-25'
     implementation "net.kyori:adventure-api:4.12.0"
+
+    implementation("cloud.commandframework:cloud-bungee:1.8.3")
 }

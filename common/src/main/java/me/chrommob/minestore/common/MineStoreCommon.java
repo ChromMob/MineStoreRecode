@@ -1,6 +1,11 @@
 package me.chrommob.minestore.common;
 
-import co.aikar.commands.CommandManager;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.annotations.AnnotationParser;
+import cloud.commandframework.arguments.parser.ParserParameters;
+import cloud.commandframework.arguments.parser.StandardParameters;
+import cloud.commandframework.meta.CommandMeta;
+import cloud.commandframework.paper.PaperCommandManager;
 import me.chrommob.minestore.common.addons.MineStoreAddon;
 import me.chrommob.minestore.common.addons.MineStoreEventSender;
 import me.chrommob.minestore.common.addons.MineStoreListener;
@@ -37,6 +42,7 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -261,44 +267,49 @@ public class MineStoreCommon {
         if (commandManager == null) {
             return;
         }
-        commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
-            try {
-                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId())
-                        : new AbstractUser((UUID) null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
-        commandManager.registerCommand(new AutoSetupCommand());
-        commandManager.registerCommand(new ReloadCommand());
-        commandManager.registerCommand(new DumpCommand());
+        final Function<ParserParameters, CommandMeta> commandMetaFunction = p ->
+                CommandMeta.simple()
+                        // This will allow you to decorate commands with descriptions
+                        .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))
+                        .build();
+        this.annotationParser = new AnnotationParser<>(
+                /* Manager */ this.commandManager,
+                /* Command sender type */ AbstractUser.class,
+                /* Mapper for command meta instances */ commandMetaFunction
+        );
+        this.annotationParser.parse(new AutoSetupCommand());
+        this.annotationParser.parse(new ReloadCommand());
+        this.annotationParser.parse(new DumpCommand());
+//        commandManager.command(new AutoSetupCommand());
+//        commandManager.registerCommand(new ReloadCommand());
+//        commandManager.registerCommand(new DumpCommand());
     }
 
     private boolean storeEnabled = false;
     private boolean buyEnabled = false;
 
+    private AnnotationParser<AbstractUser> annotationParser;
     private void registerCommands() {
         if (commandManager == null) {
             return;
         }
-        commandManager.getCommandCompletions().registerAsyncCompletion("configKeys", c -> {
-            Set<String> keys = new HashSet<>();
-            for (ConfigKey key : ConfigKey.values()) {
-                keys.add(key.name().toUpperCase());
-            }
-            return keys;
-        });
-        commandManager.registerCommand(new AuthCommand());
-        commandManager.registerCommand(new SetupCommand(this));
-        if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
-            storeEnabled = true;
-            commandManager.registerCommand(new StoreCommand());
-        }
-        if (!buyEnabled && configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
-            buyEnabled = true;
-            commandManager.registerCommand(new BuyCommand());
-        }
+//        commandManager.commandSuggestionProcessor().registerAsyncCompletion("configKeys", c -> {
+//            Set<String> keys = new HashSet<>();
+//            for (ConfigKey key : ConfigKey.values()) {
+//                keys.add(key.name().toUpperCase());
+//            }
+//            return keys;
+//        });
+//        commandManager.registerCommand(new AuthCommand());
+//        commandManager.registerCommand(new SetupCommand(this));
+//        if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
+//            storeEnabled = true;
+//            commandManager.registerCommand(new StoreCommand());
+//        }
+//        if (!buyEnabled && configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
+//            buyEnabled = true;
+//            commandManager.registerCommand(new BuyCommand());
+//        }
     }
 
     public void reload() {
@@ -325,7 +336,7 @@ public class MineStoreCommon {
         }
         if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             storeEnabled = true;
-            commandManager.registerCommand(new StoreCommand());
+//            commandManager.registerCommand(new StoreCommand());
         }
         if (statsSender != null) {
             statsSender.stop();

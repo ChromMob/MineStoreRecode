@@ -1,23 +1,18 @@
 package me.chrommob.minestore.common.command;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandIssuer;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Subcommand;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.authHolder.AuthUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.command.types.MineStoreCommand;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
-@CommandAlias("minestore|ms")
-public class AuthCommand extends MineStoreCommand {
+@SuppressWarnings("unused")
+public class AuthCommand {
     @CommandPermission("minestore.auth")
-    @Subcommand("auth")
-    @SuppressWarnings("unused")
+    @CommandMethod("minestore|ms auth")
     public void onAuth(AbstractUser abstractUser) {
         CommonUser user = abstractUser.user();
         if (user instanceof CommonConsoleUser) {
