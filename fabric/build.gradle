@@ -35,6 +35,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation include("net.kyori:adventure-platform-fabric:5.9.0")
+	modImplementation include("cloud.commandframework:cloud-fabric:1.8.4")
 
 	implementation project(path: ':common', configuration: 'shadow')
 }

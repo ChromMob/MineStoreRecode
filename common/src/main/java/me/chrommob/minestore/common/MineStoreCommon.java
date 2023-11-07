@@ -5,7 +5,6 @@ import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.arguments.parser.ParserParameters;
 import cloud.commandframework.arguments.parser.StandardParameters;
 import cloud.commandframework.meta.CommandMeta;
-import cloud.commandframework.paper.PaperCommandManager;
 import me.chrommob.minestore.common.addons.MineStoreAddon;
 import me.chrommob.minestore.common.addons.MineStoreEventSender;
 import me.chrommob.minestore.common.addons.MineStoreListener;
@@ -169,7 +168,7 @@ public class MineStoreCommon {
     private MineStoreEventSender eventSender;
     private boolean initialized = false;
 
-    public void init() {
+    public void init(boolean reload) {
         statsSender = new StatSender(this);
         eventSender = new MineStoreEventSender(this);
         registerAddons();
@@ -187,7 +186,10 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager = new DatabaseManager(this);
         }
-        registerEssentialCommands();
+        if (!reload) {
+            registerEssentialCommands();
+            registerCommands();
+        }
         if (!verify()) {
             log("Your plugin is not configured correctly. Please check your config.yml");
             return;
@@ -203,7 +205,6 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         commandGetter.start();
-        registerCommands();
         for (MineStoreAddon addon : addons) {
             addon.onEnable();
         }
@@ -280,13 +281,8 @@ public class MineStoreCommon {
         this.annotationParser.parse(new AutoSetupCommand());
         this.annotationParser.parse(new ReloadCommand());
         this.annotationParser.parse(new DumpCommand());
-//        commandManager.command(new AutoSetupCommand());
-//        commandManager.registerCommand(new ReloadCommand());
-//        commandManager.registerCommand(new DumpCommand());
     }
 
-    private boolean storeEnabled = false;
-    private boolean buyEnabled = false;
 
     private AnnotationParser<AbstractUser> annotationParser;
     private void registerCommands() {
@@ -300,16 +296,14 @@ public class MineStoreCommon {
 //            }
 //            return keys;
 //        });
-//        commandManager.registerCommand(new AuthCommand());
-//        commandManager.registerCommand(new SetupCommand(this));
-//        if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
-//            storeEnabled = true;
-//            commandManager.registerCommand(new StoreCommand());
-//        }
-//        if (!buyEnabled && configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
-//            buyEnabled = true;
-//            commandManager.registerCommand(new BuyCommand());
-//        }
+        annotationParser.parse(new AuthCommand());
+        annotationParser.parse(new SetupCommand(this));
+        if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
+            annotationParser.parse(new StoreCommand());
+        }
+        if (configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
+            annotationParser.parse(new BuyCommand());
+        }
     }
 
     public void reload() {
@@ -319,7 +313,7 @@ public class MineStoreCommon {
         log("Reloading...");
         configReader.reload();
         if (!initialized) {
-            init();
+            init(true);
             return;
         }
         if (commandGetter.load()) {
@@ -333,10 +327,6 @@ public class MineStoreCommon {
         if (placeHolderData.load()) {
             log("PlaceHolderData reloaded.");
             placeHolderData.start();
-        }
-        if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
-            storeEnabled = true;
-//            commandManager.registerCommand(new StoreCommand());
         }
         if (statsSender != null) {
             statsSender.stop();
@@ -361,7 +351,7 @@ public class MineStoreCommon {
     }
 
     private boolean verify() {
-        if (commandManager == null && !platformType.equalsIgnoreCase("fabric")) {
+        if (commandManager == null) {
             log("CommandManager is not registered.");
             return false;
         }

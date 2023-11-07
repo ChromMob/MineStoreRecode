@@ -1,13 +1,19 @@
 package me.chrommob.minestore.platforms.velocity;
 
-import co.aikar.commands.VelocityCommandManager;
+import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
+import cloud.commandframework.velocity.VelocityCommandManager;
+import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.platforms.velocity.events.VelocityPlayerEvent;
 import me.chrommob.minestore.platforms.velocity.logger.VelocityLogger;
 import me.chrommob.minestore.platforms.velocity.scheduler.VelocityScheduler;
@@ -16,6 +22,7 @@ import me.chrommob.minestore.platforms.velocity.webCommand.CommandExecuterVeloci
 
 import javax.inject.Inject;
 import java.nio.file.Path;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 @Plugin(id = "minestore", name = "MineStore", version = "0.1", description = "MineStore plugin for Velocity", authors = {"chrommob"})
@@ -40,12 +47,23 @@ public class MineStoreVelocity {
         common.registerLogger(new VelocityLogger(logger));
         common.registerScheduler(new VelocityScheduler(this));
         common.registerUserGetter(new VelocityUserGetter(server));
-        common.registerCommandManager(new VelocityCommandManager(server, this));
+
+        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null);
+        final Function<AbstractUser, CommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getConsoleCommandSource() : getServer().getPlayer(abstractUser.user().getUUID()).get();
+
+        common.registerCommandManager(new VelocityCommandManager<>(
+                getServer().getPluginManager().getPlugin("minestore").get(),
+                getServer(),
+                AsynchronousCommandExecutionCoordinator.simpleCoordinator(),
+                cToA,
+                aToC
+        ));
+
         common.registerCommandExecuter(new CommandExecuterVelocity(server));
         common.setConfigLocation(dataPath.resolve("config.yml").toFile());
         common.registerPlayerJoinListener(new VelocityPlayerEvent(this, server));
         System.out.println("MineStore has been enabled!");
-        common.init();
+        common.init(false);
     }
 
     @Subscribe

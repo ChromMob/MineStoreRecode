@@ -58,7 +58,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '0.3.2'
+    version = '1.0.0'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -128,12 +128,12 @@ subprojects {
     }
 }
 
-task finalJar(type: Jar, group: "modding") {
+tasks.register('finalJar', Jar) {
     dependsOn shadowJar
     dependsOn(':MineStore-Fabric:build')
     from {
         //Include the output from shadowJar
-        zipTree( shadowJar.archiveFile.get() )
+        zipTree(shadowJar.archiveFile.get())
     }
     from {
         zipTree("${project(':MineStore-Fabric').buildDir}/libs/${project(':MineStore-Fabric').name}-${project(':MineStore-Fabric').version}.jar")
@@ -162,5 +162,5 @@ dependencies {
     implementation project(path: ':MineStore-Bukkit', configuration: 'shadow')
     implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
     implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
-    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
+//    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }
