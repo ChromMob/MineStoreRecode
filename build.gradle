@@ -87,23 +87,13 @@ allprojects {
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        mavenLocal()
-    }
-}
+
 
 
 subprojects {
     apply plugin: 'java'
     if (project.name != "MineStore-Fabric") {
         apply plugin: 'com.github.johnrengelman.shadow'
-        println("Applying shadow to ${project.name}")
     }
 
     if (project.name != "common") {
@@ -128,21 +118,39 @@ subprojects {
     }
 }
 
-tasks.register('finalJar', Jar) {
-    dependsOn shadowJar
-    dependsOn(':MineStore-Fabric:build')
-    from {
-        //Include the output from shadowJar
-        zipTree(shadowJar.archiveFile.get())
-    }
-    from {
-        zipTree("${project(':MineStore-Fabric').buildDir}/libs/${project(':MineStore-Fabric').name}-${project(':MineStore-Fabric').version}.jar")
-    }
-    archiveClassifier.set("final")
+
+
+def fabricProject = project(":MineStore-Fabric")
+def finalJar = tasks.register('finalJar', Jar) {
+    from zipTree(shadowJar.archiveFile)
+    archiveClassifier = "final"
     archiveFileName = "${project.name}-${project.version}.jar"
     destinationDirectory = file("${projectDir}/build/libs/")
 }
-assemble.finalizedBy(finalJar)
+
+fabricProject.afterEvaluate {
+    finalJar.configure {
+        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
+            it.archiveFile
+        })
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact finalJar
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+tasks.generateMetadataFileForMavenJavaPublication.dependsOn finalJar
+
+assemble.dependsOn(finalJar)
 
 shadowJar {
     relocate "cloud.commandframework", "me.chrommob.minestore.libs.cloud.commandframework"
