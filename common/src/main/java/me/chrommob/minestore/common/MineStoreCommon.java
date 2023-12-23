@@ -268,34 +268,33 @@ public class MineStoreCommon {
         if (commandManager == null) {
             return;
         }
-        final Function<ParserParameters, CommandMeta> commandMetaFunction = p ->
-                CommandMeta.simple()
-                        // This will allow you to decorate commands with descriptions
-                        .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))
-                        .build();
+        final Function<ParserParameters, CommandMeta> commandMetaFunction = p -> CommandMeta.simple()
+                // This will allow you to decorate commands with descriptions
+                .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))
+                .build();
         this.annotationParser = new AnnotationParser<>(
                 /* Manager */ this.commandManager,
                 /* Command sender type */ AbstractUser.class,
-                /* Mapper for command meta instances */ commandMetaFunction
-        );
+                /* Mapper for command meta instances */ commandMetaFunction);
         this.annotationParser.parse(new AutoSetupCommand());
         this.annotationParser.parse(new ReloadCommand());
         this.annotationParser.parse(new DumpCommand());
     }
 
-
     private AnnotationParser<AbstractUser> annotationParser;
+
     private void registerCommands() {
         if (commandManager == null) {
             return;
         }
-//        commandManager.commandSuggestionProcessor().registerAsyncCompletion("configKeys", c -> {
-//            Set<String> keys = new HashSet<>();
-//            for (ConfigKey key : ConfigKey.values()) {
-//                keys.add(key.name().toUpperCase());
-//            }
-//            return keys;
-//        });
+        // commandManager.commandSuggestionProcessor().registerAsyncCompletion("configKeys",
+        // c -> {
+        // Set<String> keys = new HashSet<>();
+        // for (ConfigKey key : ConfigKey.values()) {
+        // keys.add(key.name().toUpperCase());
+        // }
+        // return keys;
+        // });
         annotationParser.parse(new AuthCommand());
         annotationParser.parse(new SetupCommand(this));
         if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
@@ -516,8 +515,8 @@ public class MineStoreCommon {
         return eventSender;
     }
 
-    public CommandManager commandManager() {
-        return commandManager;
+    public AnnotationParser<AbstractUser> annotationParser() {
+        return annotationParser;
     }
 
     public void runOnMainThread(Runnable runnable) {
