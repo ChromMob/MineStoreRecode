@@ -1,17 +1,23 @@
 package me.chrommob.minestore.platforms.bungee;
 
-import co.aikar.commands.BungeeCommandManager;
+import cloud.commandframework.bungee.BungeeCommandManager;
+import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.command.types.CommonConsoleUser;
+import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.platforms.bungee.events.PlayerEventListenerBungee;
 import me.chrommob.minestore.platforms.bungee.logger.LoggerBungee;
 import me.chrommob.minestore.platforms.bungee.scheduler.BungeeScheduler;
 import me.chrommob.minestore.platforms.bungee.user.BungeeUserGetter;
 import me.chrommob.minestore.platforms.bungee.webCommand.CommandExecuterBungee;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
+import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class MineStoreBungee extends Plugin {
@@ -33,8 +39,18 @@ public class MineStoreBungee extends Plugin {
         common.setConfigLocation(new File(getDataFolder(), "config.yml"));
         common.registerCommandExecuter(new CommandExecuterBungee(this));
         common.registerPlayerJoinListener(new PlayerEventListenerBungee(this));
-        common.registerCommandManager(new BungeeCommandManager(this));
-        common.init();
+
+        final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null);
+        final Function<AbstractUser, CommandSender> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? getProxy().getConsole() : getProxy().getPlayer(abstractUser.user().getName());
+
+
+        common.registerCommandManager(new BungeeCommandManager<>(
+                /* Owning plugin */ this,
+                /* Execution coordinator */ AsynchronousCommandExecutionCoordinator.simpleCoordinator(),
+                /* Function to get a command sender from a bukkit command source */ cToA,
+                /* Function to get a command source from a bukkit command sender */ aToC
+        ));
+        common.init(false);
     }
 
     @Override

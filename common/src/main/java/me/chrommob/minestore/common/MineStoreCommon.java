@@ -1,6 +1,10 @@
 package me.chrommob.minestore.common;
 
-import co.aikar.commands.CommandManager;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.annotations.AnnotationParser;
+import cloud.commandframework.arguments.parser.ParserParameters;
+import cloud.commandframework.arguments.parser.StandardParameters;
+import cloud.commandframework.meta.CommandMeta;
 import me.chrommob.minestore.common.addons.MineStoreAddon;
 import me.chrommob.minestore.common.addons.MineStoreEventSender;
 import me.chrommob.minestore.common.addons.MineStoreListener;
@@ -37,6 +41,7 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -78,14 +83,19 @@ public class MineStoreCommon {
     }
 
     private String platformType;
+
     public void setPlatform(String platform) {
         this.platformType = platform;
     }
+
     private String platformName;
+
     public void setPlatformName(String platformName) {
         this.platformName = platformName;
     }
+
     private String platformVersion;
+
     public void setPlatformVersion(String platformVersion) {
         this.platformVersion = platformVersion;
     }
@@ -93,9 +103,11 @@ public class MineStoreCommon {
     public String getPlatform() {
         return platformType;
     }
+
     public String getPlatformName() {
         return platformName;
     }
+
     public String getPlatformVersion() {
         return platformVersion;
     }
@@ -143,16 +155,20 @@ public class MineStoreCommon {
 
     private final Set<MineStoreAddon> addons = new HashSet<>();
     private final Set<MineStoreListener> listeners = new HashSet<>();
+
     @SuppressWarnings("unused")
     public void registerListener(MineStoreListener listener) {
         listeners.add(listener);
     }
+
     public Set<MineStoreListener> getListeners() {
         return listeners;
     }
+
     private MineStoreEventSender eventSender;
     private boolean initialized = false;
-    public void init() {
+
+    public void init(boolean reload) {
         statsSender = new StatSender(this);
         eventSender = new MineStoreEventSender(this);
         registerAddons();
@@ -170,7 +186,10 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager = new DatabaseManager(this);
         }
-        registerEssentialCommands();
+        if (!reload) {
+            registerEssentialCommands();
+            registerCommands();
+        }
         if (!verify()) {
             log("Your plugin is not configured correctly. Please check your config.yml");
             return;
@@ -186,7 +205,6 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         commandGetter.start();
-        registerCommands();
         for (MineStoreAddon addon : addons) {
             addon.onEnable();
         }
@@ -215,7 +233,7 @@ public class MineStoreCommon {
                 HashMap<String, String> object = yaml.load(zipFile.getInputStream(zipEntry));
                 String mainClass = object.get("main-class");
                 ClassLoader dependencyClassLoader = getClass().getClassLoader();
-                log("Loading addon " + mainClass + " from " + file.getName() + "..." );
+                log("Loading addon " + mainClass + " from " + file.getName() + "...");
                 URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
                 Class<?> cls = urlClassLoader.loadClass(mainClass);
@@ -247,38 +265,43 @@ public class MineStoreCommon {
     }
 
     private void registerEssentialCommands() {
-        commandManager.getCommandContexts().registerIssuerAwareContext(AbstractUser.class, c -> {
-            try {
-                return c.getIssuer().isPlayer() ? new AbstractUser(c.getIssuer().getUniqueId()) : new AbstractUser((UUID) null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
-        commandManager.registerCommand(new AutoSetupCommand());
-        commandManager.registerCommand(new ReloadCommand());
-        commandManager.registerCommand(new DumpCommand());
+        if (commandManager == null) {
+            return;
+        }
+        final Function<ParserParameters, CommandMeta> commandMetaFunction = p -> CommandMeta.simple()
+                // This will allow you to decorate commands with descriptions
+                .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))
+                .build();
+        this.annotationParser = new AnnotationParser<>(
+                /* Manager */ this.commandManager,
+                /* Command sender type */ AbstractUser.class,
+                /* Mapper for command meta instances */ commandMetaFunction);
+        this.annotationParser.parse(new AutoSetupCommand());
+        this.annotationParser.parse(new ReloadCommand());
+        this.annotationParser.parse(new DumpCommand());
     }
 
-    private boolean storeEnabled = false;
-    private boolean buyEnabled = false;
+    private AnnotationParser<AbstractUser> annotationParser;
+
     private void registerCommands() {
-        commandManager.getCommandCompletions().registerAsyncCompletion("configKeys", c -> {
-            Set<String> keys = new HashSet<>();
-            for (ConfigKey key : ConfigKey.values()) {
-                keys.add(key.name().toUpperCase());
-            }
-            return keys;
-        });
-        commandManager.registerCommand(new AuthCommand());
-        commandManager.registerCommand(new SetupCommand(this));
-        if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
-            storeEnabled = true;
-            commandManager.registerCommand(new StoreCommand());
+        if (commandManager == null) {
+            return;
         }
-        if (!buyEnabled && configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
-            buyEnabled = true;
-            commandManager.registerCommand(new BuyCommand());
+        // commandManager.commandSuggestionProcessor().registerAsyncCompletion("configKeys",
+        // c -> {
+        // Set<String> keys = new HashSet<>();
+        // for (ConfigKey key : ConfigKey.values()) {
+        // keys.add(key.name().toUpperCase());
+        // }
+        // return keys;
+        // });
+        annotationParser.parse(new AuthCommand());
+        annotationParser.parse(new SetupCommand(this));
+        if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
+            annotationParser.parse(new StoreCommand());
+        }
+        if (configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
+            annotationParser.parse(new BuyCommand());
         }
     }
 
@@ -289,7 +312,7 @@ public class MineStoreCommon {
         log("Reloading...");
         configReader.reload();
         if (!initialized) {
-            init();
+            init(true);
             return;
         }
         if (commandGetter.load()) {
@@ -303,10 +326,6 @@ public class MineStoreCommon {
         if (placeHolderData.load()) {
             log("PlaceHolderData reloaded.");
             placeHolderData.start();
-        }
-        if (!storeEnabled && configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
-            storeEnabled = true;
-            commandManager.registerCommand(new StoreCommand());
         }
         if (statsSender != null) {
             statsSender.stop();
@@ -496,8 +515,8 @@ public class MineStoreCommon {
         return eventSender;
     }
 
-    public CommandManager commandManager() {
-        return commandManager;
+    public AnnotationParser<AbstractUser> annotationParser() {
+        return annotationParser;
     }
 
     public void runOnMainThread(Runnable runnable) {

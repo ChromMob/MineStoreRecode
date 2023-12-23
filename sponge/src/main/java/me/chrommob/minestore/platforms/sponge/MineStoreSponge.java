@@ -1,6 +1,5 @@
 package me.chrommob.minestore.platforms.sponge;
 
-import co.aikar.commands.SpongeCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.sponge.events.SpongePlayerEvent;
 import me.chrommob.minestore.platforms.sponge.logger.SpongeLogger;
@@ -48,7 +47,7 @@ public class MineStoreSponge {
         common.registerLogger(new SpongeLogger(logger));
         common.registerScheduler(new SpongeScheduler(this));
         common.registerUserGetter(new SpongeUserGetter());
-        common.registerCommandManager(new SpongeCommandManager(pluginContainer));
+        common.registerCommandManager(new SpongeCommand(pluginContainer));
         common.registerCommandExecuter(new CommandExecuterSponge());
         common.setConfigLocation(new File(defaultConfig.toFile(), "config.yml"));
         common.registerPlayerJoinListener(new SpongePlayerEvent(this));

@@ -14,57 +14,12 @@ plugins {
     id "maven-publish"
 }
 
+java {
+	disableAutoTargetJvm()
+}
+
 allprojects {
-    def targetJavaVersion = 8
-    def encoding = 'UTF-8'
-    group = 'me.chrommob'
-    version = '0.3.2'
-    shadowJar {
-        setArchiveFileName("${project.name}-${project.version}.jar")
-    }
-
-    java {
-        def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-        if (JavaVersion.current() < javaVersion) {
-            toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-        }
-    }
-
-    tasks.withType(JavaCompile).configureEach {
-        options.encoding = 'UTF-8'
-        if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-            options.release = targetJavaVersion
-        }
-        options.encoding = encoding
-        options.compilerArgs << "-Xlint:all" << "-Xlint:-processing"
-    }
-
-    processResources {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    }
-}
-
-defaultTasks("shadowJar")
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        mavenLocal()
-    }
-}
-
-
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'com.github.johnrengelman.shadow'
-
-    repositories {
+        repositories {
         mavenCentral()
         maven {
             name = 'paper-repo'
@@ -94,6 +49,51 @@ subprojects {
             name = 'sonatype'
             url = 'https://oss.sonatype.org/content/groups/public/'
         }
+        maven {
+            name = 'sonatype-snapshots'
+            url = "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+    }
+
+    def targetJavaVersion = 8
+    def encoding = 'UTF-8'
+    group = 'me.chrommob'
+    version = '1.0.0'
+    shadowJar {
+        setArchiveFileName("${project.name}-${project.version}.jar")
+        destinationDirectory = file("${projectDir}/build/libs/")
+    }
+
+    java {
+        def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+        if (JavaVersion.current() < javaVersion) {
+            toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+            options.release = targetJavaVersion
+        }
+        options.encoding = encoding
+        options.compilerArgs << "-Xlint:all" << "-Xlint:-processing"
+    }
+
+    processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+}
+
+
+
+
+subprojects {
+    apply plugin: 'java'
+    if (project.name != "MineStore-Fabric") {
+        apply plugin: 'com.github.johnrengelman.shadow'
     }
 
     if (project.name != "common") {
@@ -109,17 +109,61 @@ subprojects {
         filesMatching('plugin.yml') {
             expand props
         }
+
+        inputs.property "version", project.version
+
+        filesMatching("fabric.mod.json") {
+            expand "version": project.version
+        }
     }
 }
 
+
+
+def fabricProject = project(":MineStore-Fabric")
+def finalJar = tasks.register('finalJar', Jar) {
+    from zipTree(shadowJar.archiveFile)
+    archiveClassifier = "final"
+    archiveFileName = "${project.name}-${project.version}.jar"
+    destinationDirectory = file("${projectDir}/build/libs/")
+}
+
+fabricProject.afterEvaluate {
+    finalJar.configure {
+        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
+            it.archiveFile
+        })
+    }
+}
+
+assemble.dependsOn(finalJar)
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact finalJar
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+tasks.generateMetadataFileForMavenJavaPublication.dependsOn assemble
+
+
+
 shadowJar {
-    relocate "co.aikar.commands", "me.chrommob.minestore.libs.co.aikar.commands"
+    relocate "cloud.commandframework", "me.chrommob.minestore.libs.cloud.commandframework"
     relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
     relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
     relocate "org.mariadb", "me.chrommob.minestore.libs.org.mariadb"
     relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
-    relocate "net.kyori", "me.chrommob.minestore.libs.net.kyori"
+    relocate ("net.kyori", "me.chrommob.minestore.libs.net.kyori") {
+        exclude "net.kyori.adventure.platform.fabric.**"
+    }
     exclude "META-INF/*.SF"
 }
 
@@ -128,5 +172,5 @@ dependencies {
     implementation project(path: ':MineStore-Bukkit', configuration: 'shadow')
     implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
     implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
-    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
+//    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }
