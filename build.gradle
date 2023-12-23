@@ -136,6 +136,8 @@ fabricProject.afterEvaluate {
     }
 }
 
+assemble.dependsOn(finalJar)
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -148,9 +150,9 @@ publishing {
         mavenLocal()
     }
 }
-tasks.generateMetadataFileForMavenJavaPublication.dependsOn finalJar
+tasks.generateMetadataFileForMavenJavaPublication.dependsOn assemble
 
-assemble.dependsOn(finalJar)
+
 
 shadowJar {
     relocate "cloud.commandframework", "me.chrommob.minestore.libs.cloud.commandframework"
