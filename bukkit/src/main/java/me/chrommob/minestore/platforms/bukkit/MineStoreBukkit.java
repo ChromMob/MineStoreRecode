@@ -52,17 +52,19 @@ public final class MineStoreBukkit extends JavaPlugin {
         common.registerPlayerJoinListener(new BukkitPlayerEvent(this));
         new BukkitInventoryEvent(this);
 
-        final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender) ? new AbstractUser((String) null) : new AbstractUser(commandSender.getName());
-        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (abstractUser.user() instanceof CommonConsoleUser) ?
-        Bukkit.getConsoleSender() : Bukkit.getServer().getPlayer(abstractUser.user().getUUID());
+        final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
+                ? new AbstractUser((String) null)
+                : new AbstractUser(commandSender.getName());
+        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (abstractUser
+                .user() instanceof CommonConsoleUser) ? Bukkit.getConsoleSender()
+                        : Bukkit.getServer().getPlayer(abstractUser.user().getUUID());
 
         try {
             common.registerCommandManager(new PaperCommandManager<>(
                     /* Owning plugin */ this,
-                    /* Coordinator function */ AsynchronousCommandExecutionCoordinator.simpleCoordinator() ,
+                    /* Coordinator function */ AsynchronousCommandExecutionCoordinator.simpleCoordinator(),
                     /* Command Sender -> C */ cToA,
-                    /* C -> A */ aToC
-            ));
+                    /* C -> A */ aToC));
         } catch (Exception e) {
             e.printStackTrace();
         }
