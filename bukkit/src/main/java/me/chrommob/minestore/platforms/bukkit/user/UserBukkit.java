@@ -21,44 +21,62 @@ import java.util.List;
 import java.util.UUID;
 
 public class UserBukkit extends CommonUser {
-    private final Player player;
+    private final String name;
+    private Player player;
     private LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
 
     public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(uuid);
+        name = player.getName();
     }
 
     public UserBukkit(String username, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(username);
+        name = player.getName();
     }
 
     @Override
     public String getName() {
-        return player.getName();
+        return name;
     }
 
     @Override
     public void sendMessage(String message) {
+        if (player == null) {
+            player = Bukkit.getPlayer(name);
+        }
         player.sendMessage(message);
     }
 
     @Override
     public void sendMessage(Component message) {
+        if (player == null) {
+            player = Bukkit.getPlayer(name);
+        }
         MineStoreBukkit.getInstance().adventure().player(player).sendMessage(message);
     }
 
     @Override
     public boolean hasPermission(String permission) {
+        if (player == null) {
+            player = Bukkit.getPlayer(name);
+        }
         return player.hasPermission(permission);
     }
 
     @Override
     public boolean isOnline() {
+        if (player == null) {
+            player = Bukkit.getPlayer(name);
+        }
         return player != null && player.isOnline();
     }
 
     @Override
     public UUID getUUID() {
+        if (player == null) {
+            player = Bukkit.getPlayer(name);
+        }
         return player.getUniqueId();
     }
 
