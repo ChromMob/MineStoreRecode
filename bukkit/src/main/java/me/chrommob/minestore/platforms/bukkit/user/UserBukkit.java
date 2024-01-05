@@ -21,29 +21,26 @@ import java.util.List;
 import java.util.UUID;
 
 public class UserBukkit extends CommonUser {
-    private final String name;
-    private Player player;
+    private final Player player;
     private LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
 
     public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(uuid);
-        name = player.getName();
     }
 
     public UserBukkit(String username, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(username);
-        name = player.getName();
     }
 
     @Override
     public String getName() {
-        return name;
+        return player == null ? "" : player.getName();
     }
 
     @Override
     public void sendMessage(String message) {
         if (player == null) {
-            player = Bukkit.getPlayer(name);
+            return;
         }
         player.sendMessage(message);
     }
@@ -51,7 +48,7 @@ public class UserBukkit extends CommonUser {
     @Override
     public void sendMessage(Component message) {
         if (player == null) {
-            player = Bukkit.getPlayer(name);
+            return;
         }
         MineStoreBukkit.getInstance().adventure().player(player).sendMessage(message);
     }
@@ -59,7 +56,7 @@ public class UserBukkit extends CommonUser {
     @Override
     public boolean hasPermission(String permission) {
         if (player == null) {
-            player = Bukkit.getPlayer(name);
+            return false;
         }
         return player.hasPermission(permission);
     }
@@ -67,7 +64,7 @@ public class UserBukkit extends CommonUser {
     @Override
     public boolean isOnline() {
         if (player == null) {
-            player = Bukkit.getPlayer(name);
+            return false;
         }
         return player != null && player.isOnline();
     }
@@ -75,13 +72,16 @@ public class UserBukkit extends CommonUser {
     @Override
     public UUID getUUID() {
         if (player == null) {
-            player = Bukkit.getPlayer(name);
+            return UUID.fromString("00000000-0000-0000-0000-000000000000");
         }
         return player.getUniqueId();
     }
 
     @Override
     public void openInventory(CommonInventory inventory) {
+        if (player == null) {
+            return;
+        }
         Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize(),
                 serializer.serialize(inventory.getTitle()));
         player.openInventory(bukkitInventory);
