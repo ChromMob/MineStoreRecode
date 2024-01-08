@@ -23,11 +23,13 @@ public class DatabaseManager {
     private String finalUrl;
     private String driverClass;
     private Thread thread = null;
+
     private enum DatabaseType {
         MYSQL("jdbc:mysql://"),
         MARIADB("jdbc:mariadb://");
 
         private final String s;
+
         DatabaseType(String s) {
             this.s = s;
         }
@@ -44,6 +46,7 @@ public class DatabaseManager {
     }
 
     private Map<String, PlayerData> playerData = new ConcurrentHashMap<>();
+
     public void onPlayerJoin(String name) {
         playerData.put(name, new PlayerData(plugin.userGetter().get(name)));
         plugin.debug("Added " + name + " to playerData");
@@ -83,9 +86,10 @@ public class DatabaseManager {
     }
 
     private boolean tryType(DatabaseType type) {
-        finalUrl = type.protocol() + host + ":" + port + "/" + database + "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+        finalUrl = type.protocol() + host + ":" + port + "/" + database
+                + "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
         try {
-            hikari = new HikariDataSource();
+            HikariConfig hikari = new HikariConfig();
             hikari.setJdbcUrl(finalUrl);
             hikari.setUsername(username);
             switch (type) {
@@ -104,9 +108,12 @@ public class DatabaseManager {
             hikari.setConnectionTestQuery("SELECT 1");
             hikari.setIdleTimeout(600000);
             hikari.setMaxLifetime(1800000);
-            hikari.getConnection().close();
+            HikariDataSource hikariDataSource = new HikariDataSource(hikari);
+            Connection conn = hikariDataSource.getConnection();
+            conn.close();
+            hikariDataSource.close();
             return true;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             plugin.debug("Could not connect to database using " + type.name());
             plugin.debug(e);
             return false;
