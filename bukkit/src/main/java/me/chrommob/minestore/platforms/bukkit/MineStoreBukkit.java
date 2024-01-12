@@ -18,6 +18,7 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.function.Function;
@@ -54,7 +55,7 @@ public final class MineStoreBukkit extends JavaPlugin {
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
                 ? new AbstractUser((String) null)
-                : new AbstractUser(commandSender.getName());
+                : new AbstractUser(((HumanEntity) commandSender).getUniqueId());
         final Function<AbstractUser, CommandSender> aToC = abstractUser -> (abstractUser
                 .user() instanceof CommonConsoleUser) ? Bukkit.getConsoleSender()
                         : Bukkit.getServer().getPlayer(abstractUser.user().getUUID());
