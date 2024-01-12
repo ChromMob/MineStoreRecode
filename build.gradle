@@ -30,10 +30,6 @@ allprojects {
             url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
         }
         maven {
-            name = "aikar-repo"
-            url = "https://repo.aikar.co/content/groups/aikar/"
-        }
-        maven {
             name = "sponge-repo"
             url = "https://repo.spongepowered.org/repository/maven-public/"
         }
@@ -58,7 +54,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '1.0.3'
+    version = '1.0.4'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
