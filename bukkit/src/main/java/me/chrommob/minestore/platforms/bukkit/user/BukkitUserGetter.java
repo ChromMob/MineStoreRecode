@@ -28,7 +28,8 @@ public class BukkitUserGetter implements UserGetter {
     @Override
     public Set<CommonUser> getAllPlayers() {
         Set<CommonUser> users = new HashSet<>();
-        for (UUID uuid : mineStoreBukkit.getServer().getOnlinePlayers().stream().map(org.bukkit.entity.Player::getUniqueId).toArray(UUID[]::new)) {
+        for (UUID uuid : mineStoreBukkit.getServer().getOnlinePlayers().stream()
+                .map(org.bukkit.entity.Player::getUniqueId).toArray(UUID[]::new)) {
             users.add(get(uuid));
         }
         return users;

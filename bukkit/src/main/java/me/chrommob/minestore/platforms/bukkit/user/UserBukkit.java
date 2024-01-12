@@ -22,19 +22,25 @@ import java.util.UUID;
 
 public class UserBukkit extends CommonUser {
     private final Player player;
+    private final String name;
+    private final UUID uuid;
     private LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
 
     public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(uuid);
+        name = player.getName();
+        this.uuid = uuid;
     }
 
     public UserBukkit(String username, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(username);
+        name = player.getName();
+        uuid = player.getUniqueId();
     }
 
     @Override
     public String getName() {
-        return player == null ? "" : player.getName();
+        return name;
     }
 
     @Override
@@ -71,10 +77,7 @@ public class UserBukkit extends CommonUser {
 
     @Override
     public UUID getUUID() {
-        if (player == null) {
-            return UUID.fromString("00000000-0000-0000-0000-000000000000");
-        }
-        return player.getUniqueId();
+        return uuid;
     }
 
     @Override
