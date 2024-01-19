@@ -48,7 +48,13 @@ allprojects {
         maven {
             name = 'sonatype-snapshots'
             url = "https://oss.sonatype.org/content/repositories/snapshots"
+        } 
+        maven {
+            name = "sonatype-oss-snapshots1"
+            url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            mavenContent { snapshotsOnly()
         }
+   }
     }
 
     def targetJavaVersion = 8
