@@ -28,13 +28,21 @@ public class UserBukkit extends CommonUser {
 
     public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(uuid);
-        name = player.getName();
         this.uuid = uuid;
+        if (player == null) {
+            name = null;
+            return;
+        }
+        name = player.getName();
     }
 
     public UserBukkit(String username, MineStoreBukkit mineStoreBukkit) {
         player = mineStoreBukkit.getServer().getPlayer(username);
-        name = player.getName();
+        name = username;
+        if (player == null) {
+            uuid = null;
+            return;
+        }
         uuid = player.getUniqueId();
     }
 
