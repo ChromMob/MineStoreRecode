@@ -113,7 +113,7 @@ public class DatabaseManager {
             conn.close();
             hikariDataSource.close();
             return true;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             plugin.debug("Could not connect to database using " + type.name());
             plugin.debug(e);
             return false;
