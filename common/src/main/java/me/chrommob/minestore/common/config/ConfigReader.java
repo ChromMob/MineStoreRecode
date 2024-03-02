@@ -296,7 +296,7 @@ public class ConfigReader {
     private String encodedApiKey = null;
     public String getEncodedApiKey() {
         if (encodedApiKey != null) return encodedApiKey;
-        encodedApiKey = URLEncoder.encode(get(ConfigKey.API_KEY));
+        encodedApiKey = URLEncoder.encode((String) (get(ConfigKey.API_KEY)));
         return encodedApiKey;
     }
 
