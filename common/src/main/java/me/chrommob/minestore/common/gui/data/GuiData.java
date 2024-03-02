@@ -36,7 +36,7 @@ public class GuiData {
         }
         finalUrl = storeUrl + "/api/"
                 + ((boolean) configReader.get(ConfigKey.API_ENABLED)
-                        ? configReader.get(ConfigKey.API_KEY) + "/gui/packages_new"
+                        ? configReader.getEncodedApiKey() + "/gui/packages_new"
                         : "gui/packages_new");
         try {
             packageURL = new URL(finalUrl);

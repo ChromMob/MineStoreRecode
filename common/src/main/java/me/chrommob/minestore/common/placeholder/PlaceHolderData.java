@@ -42,15 +42,15 @@ public class PlaceHolderData {
         }
         finalDonationGoalUrl = storeUrl + "/api/"
                 + ((boolean) configReader.get(ConfigKey.API_ENABLED)
-                        ? configReader.get(ConfigKey.API_KEY) + "/donation_goal"
+                        ? configReader.getEncodedApiKey() + "/donation_goal"
                         : "donation_goal");
         finalLastDonatorsUrl = storeUrl + "/api/"
                 + ((boolean) configReader.get(ConfigKey.API_ENABLED)
-                        ? configReader.get(ConfigKey.API_KEY) + "/getTotalPayments"
+                        ? configReader.getEncodedApiKey() + "/getTotalPayments"
                         : "getTotalPayments");
         finalTopDonatorsUrl = storeUrl + "/api/"
                 + ((boolean) configReader.get(ConfigKey.API_ENABLED)
-                        ? configReader.get(ConfigKey.API_KEY) + "/top_donators"
+                        ? configReader.getEncodedApiKey() + "/top_donators"
                         : "top_donators");
         try {
             URI donationGoalUrl = new URI(finalDonationGoalUrl);

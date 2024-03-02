@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.net.URLEncoder;
 
 public class ConfigReader {
     private final File configFile;
@@ -290,6 +291,13 @@ public class ConfigReader {
             }
         }
         return configYaml.get(location);
+    }
+
+    private String encodedApiKey = null;
+    public String getEncodedApiKey() {
+        if (encodedApiKey != null) return encodedApiKey;
+        encodedApiKey = URLEncoder.encode(get(ConfigKey.API_KEY));
+        return encodedApiKey;
     }
 
     public void set(ConfigKey key, Object value) {
