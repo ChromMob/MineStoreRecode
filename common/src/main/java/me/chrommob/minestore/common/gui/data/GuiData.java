@@ -53,6 +53,12 @@ public class GuiData {
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
 
             String line;
+
+            if (urlConnection.getResponseCode() == 403) {
+                MineStoreCommon.getInstance().log("The request was denied by the server! Probably Cloudflare protection.");
+                return false;
+            }
+
             while ((line = reader.readLine()) != null) {
                 try {
                     Type listType = new TypeToken<List<Category>>() {
