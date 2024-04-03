@@ -1,5 +1,16 @@
 dependencies {
+    implementation project(':common')
     implementation 'cloud.commandframework:cloud-velocity:1.8.4'
     annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
     compileOnly 'com.velocitypowered:velocity-api:3.1.1'
+}
+
+shadowJar {
+    relocate("me.chrommob.minestore.common", "me.chrommob.minestore.velocity.common")
+    relocate "cloud.commandframework", "me.chrommob.minestore.libs.cloud.commandframework"
+    relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
+    relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
+    relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
+    relocate "org.mariadb", "me.chrommob.minestore.libs.org.mariadb"
+    relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
 }

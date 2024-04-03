@@ -60,7 +60,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '1.0.8'
+    version = '1.0.9'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -88,9 +88,6 @@ allprojects {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 }
-
-
-
 
 subprojects {
     apply plugin: 'java'
@@ -123,7 +120,9 @@ subprojects {
 
 
 def fabricProject = project(":MineStore-Fabric")
+def velocityProject = project(":MineStore-Velocity")
 def finalJar = tasks.register('finalJar', Jar) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from zipTree(shadowJar.archiveFile)
     archiveClassifier = "final"
     archiveFileName = "${project.name}-${project.version}.jar"
@@ -133,6 +132,15 @@ def finalJar = tasks.register('finalJar', Jar) {
 fabricProject.afterEvaluate {
     finalJar.configure {
         from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
+            it.archiveFile
+        })
+    }
+}
+
+
+velocityProject.afterEvaluate {
+    finalJar.configure {
+        from zipTree(velocityProject.tasks.named("shadowJar", AbstractArchiveTask).flatMap {
             it.archiveFile
         })
     }
@@ -173,6 +181,5 @@ dependencies {
     implementation project(path: ':common', configuration: 'shadow')
     implementation project(path: ':MineStore-Bukkit', configuration: 'shadow')
     implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
-    implementation project(path: ':MineStore-Velocity', configuration: 'shadow')
 //    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }
