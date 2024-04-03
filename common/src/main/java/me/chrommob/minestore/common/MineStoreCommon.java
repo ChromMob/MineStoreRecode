@@ -186,6 +186,15 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager = new DatabaseManager(this);
         }
+        String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
+        if (!storeUrl.startsWith("https://")) {
+            if (storeUrl.contains("://")) {
+                String[] prefix = storeUrl.split("://");
+                storeUrl = "https://" + prefix[1];
+            } else
+                storeUrl = "https://" + storeUrl;
+            configReader.set(ConfigKey.STORE_URL, storeUrl);
+        }
         if (!reload) {
             registerEssentialCommands();
             registerCommands();
