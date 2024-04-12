@@ -14,6 +14,6 @@ dependencies {
 
     compileOnly 'net.luckperms:api:5.4'
 
-    implementation("cloud.commandframework:cloud-annotations:1.8.3")
-    compileOnly("cloud.commandframework:cloud-paper:1.8.4")
+    implementation("cloud.commandframework:cloud-annotations:2.0.0-SNAPSHOT")
+    compileOnly("cloud.commandframework:cloud-paper:2.0.0-SNAPSHOT")
 }

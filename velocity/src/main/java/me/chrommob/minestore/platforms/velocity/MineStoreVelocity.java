@@ -1,6 +1,7 @@
 package me.chrommob.minestore.platforms.velocity;
 
-import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
+import cloud.commandframework.SenderMapper;
+import cloud.commandframework.execution.ExecutionCoordinator;
 import cloud.commandframework.velocity.VelocityCommandManager;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
@@ -50,13 +51,22 @@ public class MineStoreVelocity {
 
         final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null);
         final Function<AbstractUser, CommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getConsoleCommandSource() : getServer().getPlayer(abstractUser.user().getUUID()).get();
+        final SenderMapper<CommandSource, AbstractUser> senderMapper = new SenderMapper<CommandSource, AbstractUser>() {
+            @Override
+            public AbstractUser map(CommandSource base) {
+                return cToA.apply(base);
+            }
 
+            @Override
+            public CommandSource reverse(AbstractUser mapped) {
+                return aToC.apply(mapped);
+            }
+        };
         common.registerCommandManager(new VelocityCommandManager<>(
                 getServer().getPluginManager().getPlugin("minestore").get(),
                 getServer(),
-                AsynchronousCommandExecutionCoordinator.simpleCoordinator(),
-                cToA,
-                aToC
+                ExecutionCoordinator.asyncCoordinator(),
+                senderMapper
         ));
 
         common.registerCommandExecuter(new CommandExecuterVelocity(server));

@@ -1,7 +1,8 @@
 package me.chrommob.minestore.platforms.bungee;
 
+import cloud.commandframework.SenderMapper;
 import cloud.commandframework.bungee.BungeeCommandManager;
-import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
+import cloud.commandframework.execution.ExecutionCoordinator;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
@@ -42,13 +43,21 @@ public class MineStoreBungee extends Plugin {
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null);
         final Function<AbstractUser, CommandSender> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? getProxy().getConsole() : getProxy().getPlayer(abstractUser.user().getName());
+        final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
+            @Override
+            public @NonNull AbstractUser map(@NonNull CommandSender base) {
+                return cToA.apply(base);
+            }
 
-
+            @Override
+            public @NonNull CommandSender reverse(@NonNull AbstractUser mapped) {
+                return aToC.apply(mapped);
+            }
+        };
         common.registerCommandManager(new BungeeCommandManager<>(
                 /* Owning plugin */ this,
-                /* Execution coordinator */ AsynchronousCommandExecutionCoordinator.simpleCoordinator(),
-                /* Function to get a command sender from a bukkit command source */ cToA,
-                /* Function to get a command source from a bukkit command sender */ aToC
+                /* Execution coordinator */ ExecutionCoordinator.asyncCoordinator(),
+                /* Sender mapper */ senderMapper
         ));
         common.init(false);
     }

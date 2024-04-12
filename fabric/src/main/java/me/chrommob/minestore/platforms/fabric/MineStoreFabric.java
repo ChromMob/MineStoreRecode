@@ -1,6 +1,7 @@
 package me.chrommob.minestore.platforms.fabric;
 
-import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
+import cloud.commandframework.SenderMapper;
+import cloud.commandframework.execution.ExecutionCoordinator;
 import cloud.commandframework.fabric.FabricServerCommandManager;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
@@ -60,12 +61,22 @@ public class MineStoreFabric implements ModInitializer {
 		common.registerUserGetter(new FabricUserGetter(server));
 
 		final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource.isExecutedByPlayer() ? commandSource.getPlayer().getUuid() : null);
-		final Function<AbstractUser, CommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getCommandSource() : server.getPlayerManager().getPlayer(abstractUser.user().getUUID()).getCommandSource();
+		final Function<AbstractUser, ServerCommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getCommandSource() : server.getPlayerManager().getPlayer(abstractUser.user().getUUID()).getCommandSource();
+		final SenderMapper<ServerCommandSource, AbstractUser> senderMapper = new SenderMapper<ServerCommandSource, AbstractUser>() {
+			@Override
+			public AbstractUser map(ServerCommandSource base) {
+				return cToA.apply(base);
+			}
+
+			@Override
+			public ServerCommandSource reverse(AbstractUser mapped) {
+				return aToC.apply(mapped);
+			}
+		};
 
 		common.registerCommandManager(new FabricServerCommandManager(
-				AsynchronousCommandExecutionCoordinator.simpleCoordinator(),
-				cToA,
-				aToC
+				ExecutionCoordinator.asyncCoordinator(),
+				senderMapper
 		));
 
 		common.registerCommandExecuter(new CommandExecuterFabric(server));

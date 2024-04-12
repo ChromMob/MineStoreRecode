@@ -1,7 +1,7 @@
 package me.chrommob.minestore.common.command;
 
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.Command;
+import cloud.commandframework.annotations.Permission;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
@@ -10,8 +10,8 @@ import me.chrommob.minestore.common.interfaces.user.CommonUser;
 @SuppressWarnings("unused")
 public class BuyCommand {
 
-    @CommandPermission("minestore.buy")
-    @CommandMethod("buy")
+    @Permission("minestore.buy")
+    @Command("buy")
     public void onBuy(AbstractUser user) {
         CommonUser commonUser = user.user();
         if (commonUser instanceof CommonConsoleUser) {

@@ -1,8 +1,8 @@
 package me.chrommob.minestore.common.command;
 
 import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.Command;
+import cloud.commandframework.annotations.Permission;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
@@ -18,8 +18,8 @@ public class SetupCommand {
         this.plugin = plugin;
     }
 
-    @CommandPermission("minestore.setup")
-    @CommandMethod("minestore|ms setup [key] [value]")
+    @Permission("minestore.setup")
+    @Command("minestore|ms setup [key] [value]")
 //    @CommandCompletion("@configKeys")
     public void onSetupCommand(AbstractUser user, @Argument("key") String key, @Argument("value") String value) {
         CommonUser commonUser = user.user();

@@ -1,6 +1,7 @@
 package me.chrommob.minestore.platforms.bukkit;
 
-import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
+import cloud.commandframework.SenderMapper;
+import cloud.commandframework.execution.ExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
@@ -20,6 +21,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Function;
 
@@ -60,12 +62,22 @@ public final class MineStoreBukkit extends JavaPlugin {
                 .user() instanceof CommonConsoleUser) ? Bukkit.getConsoleSender()
                         : Bukkit.getServer().getPlayer(abstractUser.user().getUUID());
 
+        final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
+            @Override
+            public @NonNull AbstractUser map(@NonNull CommandSender base) {
+                return cToA.apply(base);
+            }
+
+            @Override
+            public @NonNull CommandSender reverse(@NonNull AbstractUser mapped) {
+                return aToC.apply(mapped);
+            }
+        };
         try {
             common.registerCommandManager(new PaperCommandManager<>(
                     /* Owning plugin */ this,
-                    /* Coordinator function */ AsynchronousCommandExecutionCoordinator.simpleCoordinator(),
-                    /* Command Sender -> C */ cToA,
-                    /* C -> A */ aToC));
+                    /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
+                    /* Command Sender -> C */ senderMapper));
         } catch (Exception e) {
             e.printStackTrace();
         }
