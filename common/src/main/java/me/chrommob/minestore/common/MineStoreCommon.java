@@ -1,10 +1,5 @@
 package me.chrommob.minestore.common;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.annotations.AnnotationParser;
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.arguments.parser.StandardParameters;
-import cloud.commandframework.meta.CommandMeta;
 import me.chrommob.minestore.common.addons.MineStoreAddon;
 import me.chrommob.minestore.common.addons.MineStoreEventSender;
 import me.chrommob.minestore.common.addons.MineStoreListener;
@@ -15,6 +10,7 @@ import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
+import me.chrommob.minestore.common.config.MineStoreVersion;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
@@ -35,6 +31,8 @@ import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.annotations.AnnotationParser;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -68,6 +66,7 @@ public class MineStoreCommon {
     private CommonScheduler scheduler;
     private StatSender statsSender;
     private final Dumper dumper = new Dumper();
+    private MineStoreVersion version;
 
     public MineStoreCommon() {
         instance = this;
@@ -186,6 +185,8 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager = new DatabaseManager(this);
         }
+        if (!reload)
+            registerEssentialCommands();
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
         if (!storeUrl.startsWith("https://")) {
             if (storeUrl.contains("://")) {
@@ -195,13 +196,13 @@ public class MineStoreCommon {
                 storeUrl = "https://" + storeUrl;
             configReader.set(ConfigKey.STORE_URL, storeUrl);
         }
-        if (!reload) {
-            registerEssentialCommands();
-            registerCommands();
-        }
         if (!verify()) {
             log("Your plugin is not configured correctly. Please check your config.yml");
             return;
+        }
+        if (!reload) {
+            registerCommands();
+            version = MineStoreVersion.getMineStoreVersion();
         }
         initialized = true;
         statsSender.start();
@@ -277,14 +278,9 @@ public class MineStoreCommon {
         if (commandManager == null) {
             return;
         }
-        final Function<ParserParameters, CommandMeta> commandMetaFunction = p -> CommandMeta.simple()
-                // This will allow you to decorate commands with descriptions
-                .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))
-                .build();
         this.annotationParser = new AnnotationParser<>(
                 /* Manager */ this.commandManager,
-                /* Command sender type */ AbstractUser.class,
-                /* Mapper for command meta instances */ commandMetaFunction);
+                /* Command sender type */ AbstractUser.class);
         this.annotationParser.parse(new AutoSetupCommand());
         this.annotationParser.parse(new ReloadCommand());
         this.annotationParser.parse(new DumpCommand());
@@ -534,5 +530,9 @@ public class MineStoreCommon {
 
     public File jarFile() {
         return new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+    }
+
+    public MineStoreVersion version() {
+        return version;
     }
 }

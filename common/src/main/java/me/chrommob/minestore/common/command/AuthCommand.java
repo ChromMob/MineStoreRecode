@@ -1,18 +1,18 @@
 package me.chrommob.minestore.common.command;
 
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.authHolder.AuthUser;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.Permission;
 
 @SuppressWarnings("unused")
 public class AuthCommand {
-    @CommandPermission("minestore.auth")
-    @CommandMethod("minestore|ms auth")
+    @Permission("minestore.auth")
+    @Command("minestore|ms auth")
     public void onAuth(AbstractUser abstractUser) {
         CommonUser user = abstractUser.user();
         if (user instanceof CommonConsoleUser) {

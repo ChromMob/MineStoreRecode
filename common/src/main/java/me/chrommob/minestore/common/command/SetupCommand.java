@@ -1,8 +1,5 @@
 package me.chrommob.minestore.common.command;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
@@ -10,6 +7,9 @@ import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.Permission;
 
 @SuppressWarnings("unused")
 public class SetupCommand {
@@ -18,8 +18,8 @@ public class SetupCommand {
         this.plugin = plugin;
     }
 
-    @CommandPermission("minestore.setup")
-    @CommandMethod("minestore|ms setup [key] [value]")
+    @Permission("minestore.setup")
+    @Command("minestore|ms setup [key] [value]")
 //    @CommandCompletion("@configKeys")
     public void onSetupCommand(AbstractUser user, @Argument("key") String key, @Argument("value") String value) {
         CommonUser commonUser = user.user();
