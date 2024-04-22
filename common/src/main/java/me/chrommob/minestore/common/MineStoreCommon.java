@@ -8,6 +8,7 @@ import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
+import me.chrommob.minestore.common.commandHolder.NewCommandDumper;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.config.MineStoreVersion;
@@ -57,6 +58,7 @@ public class MineStoreCommon {
     private CommandGetter commandGetter;
     private CommandStorageInterface commandStorage;
     private CommandDumper commandDumper;
+    private NewCommandDumper newCommandDumper;
     private AuthHolder authHolder;
     private GuiData guiData;
     private PlaceHolderData placeHolderData;
@@ -176,6 +178,7 @@ public class MineStoreCommon {
         }
         miniMessage = MiniMessage.miniMessage();
         commandDumper = new CommandDumper();
+        newCommandDumper = new NewCommandDumper();
         commandStorage = new CommandStorage();
         authHolder = new AuthHolder(this);
         commandStorage.init();
@@ -520,6 +523,10 @@ public class MineStoreCommon {
         return eventSender;
     }
 
+    public CommandGetter commandGetter() {
+        return commandGetter;
+    }
+
     public AnnotationParser<AbstractUser> annotationParser() {
         return annotationParser;
     }
@@ -534,5 +541,9 @@ public class MineStoreCommon {
 
     public MineStoreVersion version() {
         return version;
+    }
+
+    public NewCommandDumper newCommandDumper() {
+        return newCommandDumper;
     }
 }

@@ -23,6 +23,7 @@ public class WebListener implements CommandGetter {
     private boolean wasEmpty = false;
     private URL queueUrl;
     private URL executedUrl;
+    private URL deliveredUrl;
     private Thread thread = null;
     public Runnable runnable = new Runnable() {
         @Override
@@ -80,7 +81,14 @@ public class WebListener implements CommandGetter {
                                 mineStoreCommon.authHolder().listener(parsedResponse);
                                 break;
                         }
-                        post(parsedResponse);
+                        if (MineStoreCommon.getInstance().version().requires("3.0.0")) {
+                            postDelivered(String.valueOf(parsedResponse.commandId()));
+                            if (parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.OFFLINE) {
+                                postExecuted(String.valueOf(parsedResponse.commandId()));
+                            }
+                        } else {
+                            postExecuted(String.valueOf(parsedResponse.commandId()));
+                        }
                     }
                 } catch (IOException e) {
                     MineStoreCommon.getInstance().debug(e);
@@ -103,6 +111,7 @@ public class WebListener implements CommandGetter {
     public boolean load() {
         String finalQueueUrl;
         String finalExecutedUrl;
+        String finalDeliveredUrl;
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
@@ -111,13 +120,17 @@ public class WebListener implements CommandGetter {
             finalQueueUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/queue";
             finalExecutedUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY)
                     + "/commands/executed/";
+            finalDeliveredUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY)
+                    + "/commands/delivered/";
         } else {
             finalQueueUrl = storeUrl + "/api/servers/commands/queue";
             finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
+            finalDeliveredUrl = storeUrl + "/api/servers/commands/delivered/";
         }
         try {
             queueUrl = new URL(finalQueueUrl);
             executedUrl = new URL(finalExecutedUrl);
+            deliveredUrl = new URL(finalDeliveredUrl);
         } catch (Exception e) {
             mineStoreCommon.log("Store URL is not a valid URL!");
             MineStoreCommon.getInstance().debug(e);
@@ -171,9 +184,26 @@ public class WebListener implements CommandGetter {
         }
     }
 
-    private void post(ParsedResponse response) {
+    private void postDelivered(String id) {
         try {
-            String id = String.valueOf(response.commandId());
+            URL url = new URL(deliveredUrl + id);
+            MineStoreCommon.getInstance().debug("Posting to: " + url);
+            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setDoOutput(true);
+            urlConnection.connect();
+            try (final OutputStream os = urlConnection.getOutputStream()) {
+                os.write(id.getBytes());
+            }
+            urlConnection.getInputStream();
+            urlConnection.disconnect();
+        } catch (IOException e) {
+            MineStoreCommon.getInstance().debug(e);
+        }
+    }
+
+    public void postExecuted(String id) {
+        try {
             URL url = new URL(executedUrl + id);
             MineStoreCommon.getInstance().debug("Posting to: " + url);
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();

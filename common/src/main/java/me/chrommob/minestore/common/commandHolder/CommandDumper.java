@@ -33,17 +33,16 @@ public class CommandDumper {
     }
 
     public void update(Map<String, List<String>> commands) {
-        new Runnable() {
-            @Override
-            public void run() {
-                FileWriter fileOutputStream = null;
-                try {
-                    fileOutputStream = new FileWriter(dumpedFile);
-                } catch (IOException e) {
-                    MineStoreCommon.getInstance().debug(e);
-                }
-                yaml.dump(commands, fileOutputStream);
-            }
-        }.run();
+        FileWriter fileOutputStream = null;
+        try {
+            fileOutputStream = new FileWriter(dumpedFile);
+        } catch (IOException e) {
+            MineStoreCommon.getInstance().debug(e);
+        }
+        yaml.dump(commands, fileOutputStream);
+    }
+
+    public void delete() {
+        dumpedFile.delete();
     }
 }

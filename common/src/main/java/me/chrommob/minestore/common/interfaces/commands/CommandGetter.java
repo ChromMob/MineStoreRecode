@@ -6,4 +6,6 @@ public interface CommandGetter {
     void start();
 
     void stop();
+
+    void postExecuted(String id);
 }
