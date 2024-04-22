@@ -1,11 +1,11 @@
 package me.chrommob.minestore.common.command;
 
-import cloud.commandframework.annotations.Command;
-import cloud.commandframework.annotations.Permission;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import net.kyori.adventure.text.Component;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.Permission;
 
 public class StoreCommand  {
     @Command("store")

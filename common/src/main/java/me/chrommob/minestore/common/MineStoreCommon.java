@@ -1,8 +1,5 @@
 package me.chrommob.minestore.common;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.annotations.AnnotationParser;
-import cloud.commandframework.meta.CommandMeta;
 import me.chrommob.minestore.common.addons.MineStoreAddon;
 import me.chrommob.minestore.common.addons.MineStoreEventSender;
 import me.chrommob.minestore.common.addons.MineStoreListener;
@@ -34,6 +31,8 @@ import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.annotations.AnnotationParser;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -186,6 +185,8 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager = new DatabaseManager(this);
         }
+        if (!reload)
+            registerEssentialCommands();
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
         if (!storeUrl.startsWith("https://")) {
             if (storeUrl.contains("://")) {
@@ -200,7 +201,6 @@ public class MineStoreCommon {
             return;
         }
         if (!reload) {
-            registerEssentialCommands();
             registerCommands();
             version = MineStoreVersion.getMineStoreVersion();
         }

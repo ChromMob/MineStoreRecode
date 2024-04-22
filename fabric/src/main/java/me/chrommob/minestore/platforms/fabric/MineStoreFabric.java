@@ -1,18 +1,17 @@
 package me.chrommob.minestore.platforms.fabric;
 
-import cloud.commandframework.SenderMapper;
-import cloud.commandframework.execution.ExecutionCoordinator;
-import cloud.commandframework.fabric.FabricServerCommandManager;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
-import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 
 import net.minecraft.server.command.ServerCommandSource;
+import org.incendo.cloud.SenderMapper;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.fabric.FabricServerCommandManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

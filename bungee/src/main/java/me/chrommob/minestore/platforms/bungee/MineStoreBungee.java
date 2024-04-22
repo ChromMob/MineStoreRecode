@@ -1,8 +1,5 @@
 package me.chrommob.minestore.platforms.bungee;
 
-import cloud.commandframework.SenderMapper;
-import cloud.commandframework.bungee.BungeeCommandManager;
-import cloud.commandframework.execution.ExecutionCoordinator;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
@@ -16,6 +13,9 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.incendo.cloud.SenderMapper;
+import org.incendo.cloud.bungee.BungeeCommandManager;
+import org.incendo.cloud.execution.ExecutionCoordinator;
 
 import java.io.File;
 import java.util.function.Function;

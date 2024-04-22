@@ -1,8 +1,5 @@
 package me.chrommob.minestore.platforms.bukkit;
 
-import cloud.commandframework.SenderMapper;
-import cloud.commandframework.execution.ExecutionCoordinator;
-import cloud.commandframework.paper.PaperCommandManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
@@ -22,6 +19,9 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.incendo.cloud.SenderMapper;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.paper.PaperCommandManager;
 
 import java.util.function.Function;
 

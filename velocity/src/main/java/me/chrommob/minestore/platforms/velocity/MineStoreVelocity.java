@@ -1,14 +1,10 @@
 package me.chrommob.minestore.platforms.velocity;
 
-import cloud.commandframework.SenderMapper;
-import cloud.commandframework.execution.ExecutionCoordinator;
-import cloud.commandframework.velocity.VelocityCommandManager;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -20,6 +16,9 @@ import me.chrommob.minestore.platforms.velocity.logger.VelocityLogger;
 import me.chrommob.minestore.platforms.velocity.scheduler.VelocityScheduler;
 import me.chrommob.minestore.platforms.velocity.user.VelocityUserGetter;
 import me.chrommob.minestore.platforms.velocity.webCommand.CommandExecuterVelocity;
+import org.incendo.cloud.SenderMapper;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.velocity.VelocityCommandManager;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
