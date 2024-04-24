@@ -305,6 +305,7 @@ public class MineStoreCommon {
         // });
         annotationParser.parse(new AuthCommand());
         annotationParser.parse(new SetupCommand(this));
+        annotationParser.parse(new VersionCommand());
         if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             annotationParser.parse(new StoreCommand());
         }
