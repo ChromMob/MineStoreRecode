@@ -90,6 +90,12 @@ public class MineStoreVersion {
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
             String line;
             if ((line = reader.readLine()) != null) {
+                String[] split = line.split("\\.");
+                try {
+                    Integer.parseInt(split[0]);
+                } catch (NumberFormatException e) {
+                    return MineStoreVersion.dummy();
+                }
                 return new MineStoreVersion(line);
             }
         } catch (IOException e) {
