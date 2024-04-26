@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
-import me.chrommob.minestore.common.gui.data.json.old.Category;
 
 import java.io.File;
 import java.io.FileReader;

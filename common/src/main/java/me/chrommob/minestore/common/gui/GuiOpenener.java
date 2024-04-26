@@ -146,8 +146,6 @@ public class GuiOpenener {
             if (index >= items.size()) {
                 break;
             }
-            MineStoreCommon.getInstance().debug("Index: " + index);
-            MineStoreCommon.getInstance().debug("Size: " + items.size());
             finalItems.set(i, items.get(index));
             index++;
         }

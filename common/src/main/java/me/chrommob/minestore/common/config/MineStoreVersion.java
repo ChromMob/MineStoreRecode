@@ -89,11 +89,14 @@ public class MineStoreVersion {
             InputStream in = urlConnection.getInputStream();
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
             String line;
+            MineStoreCommon.getInstance().debug("Getting version...");
             if ((line = reader.readLine()) != null) {
+                MineStoreCommon.getInstance().debug("Got version: " + line);
                 String[] split = line.split("\\.");
                 try {
                     Integer.parseInt(split[0]);
                 } catch (NumberFormatException e) {
+                    MineStoreCommon.getInstance().debug(e);
                     return MineStoreVersion.dummy();
                 }
                 return new MineStoreVersion(line);
