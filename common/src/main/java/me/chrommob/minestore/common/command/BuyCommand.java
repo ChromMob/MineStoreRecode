@@ -18,6 +18,6 @@ public class BuyCommand {
             commonUser.sendMessage("[MineStore] You can't use this command from console!");
             return;
         }
-        MineStoreCommon.getInstance().guiData().getGuiInfo().handleInventoryClick(commonUser, null);
+        MineStoreCommon.getInstance().runOnMainThread(() -> MineStoreCommon.getInstance().guiData().getGuiInfo().handleInventoryClick(commonUser, null));
     }
 }

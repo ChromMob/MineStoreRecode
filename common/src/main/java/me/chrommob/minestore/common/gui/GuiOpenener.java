@@ -28,10 +28,10 @@ public class GuiOpenener {
         PACKAGES
     }
 
-    private CommonItem backItem = new CommonItem(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_NAME)), (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM), Collections.singletonList(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_LORE))));
+    private final CommonItem backItem = new CommonItem(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_NAME)), (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM), Collections.singletonList(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_LORE))));
 
-    private Map<UUID, MENU_TYPE> menuType = new ConcurrentHashMap<>();
-    private Map<UUID, Object> menuPage = new ConcurrentHashMap<>();
+    private final Map<UUID, MENU_TYPE> menuType = new ConcurrentHashMap<>();
+    private final Map<UUID, Object> menuPage = new ConcurrentHashMap<>();
 
     public void handleInventoryClick(CommonUser user, CommonItem item) {
         if (item == null) {
