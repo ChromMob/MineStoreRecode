@@ -131,7 +131,7 @@ public class PlaceHolderData {
                 MineStoreCommon.getInstance().debug("Failed to load placeholder data!");
             }
             try {
-                Thread.sleep(1000 * 10);
+                Thread.sleep(1000 * 60);
             } catch (InterruptedException e) {
                 break;
             }

@@ -31,7 +31,7 @@ public class WebListener implements CommandGetter {
             while (true) {
                 if (wasEmpty) {
                     try {
-                        Thread.sleep(25000);
+                        Thread.sleep(9000);
                         wasEmpty = false;
                     } catch (InterruptedException e) {
                         break;
@@ -94,7 +94,7 @@ public class WebListener implements CommandGetter {
                     MineStoreCommon.getInstance().debug(e);
                 }
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     break;
                 }
