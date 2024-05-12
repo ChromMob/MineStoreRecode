@@ -116,7 +116,7 @@ subprojects {
 
 
 
-def fabricProject = project(":MineStore-Fabric")
+//def fabricProject = project(":MineStore-Fabric")
 def velocityProject = project(":MineStore-Velocity")
 def finalJar = tasks.register('finalJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -126,13 +126,13 @@ def finalJar = tasks.register('finalJar', Jar) {
     destinationDirectory = file("${projectDir}/build/libs/")
 }
 
-fabricProject.afterEvaluate {
-    finalJar.configure {
-        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
-            it.archiveFile
-        })
-    }
-}
+//fabricProject.afterEvaluate {
+//    finalJar.configure {
+//        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
+//            it.archiveFile
+//        })
+//    }
+//}
 
 
 velocityProject.afterEvaluate {
