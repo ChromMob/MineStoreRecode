@@ -14,15 +14,24 @@ import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
 import me.chrommob.minestore.platforms.bukkit.webCommand.CommandExecuterBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.paper.PaperCommandManager;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 public final class MineStoreBukkit extends JavaPlugin {
@@ -63,6 +72,7 @@ public final class MineStoreBukkit extends JavaPlugin {
                         : Bukkit.getServer().getPlayer(abstractUser.user().getUUID());
 
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
+
             @Override
             public @NonNull AbstractUser map(@NonNull CommandSender base) {
                 return cToA.apply(base);
@@ -70,11 +80,99 @@ public final class MineStoreBukkit extends JavaPlugin {
 
             @Override
             public @NonNull CommandSender reverse(@NonNull AbstractUser mapped) {
-                return aToC.apply(mapped);
+                CommandSender commandSender = aToC.apply(mapped);
+                if (commandSender == null) {
+                    return new CommandSender() {
+
+                        @Override
+                        public boolean isOp() {
+                            return false;
+                        }
+
+                        @Override
+                        public void setOp(boolean value) {
+                        }
+
+                        @Override
+                        public boolean isPermissionSet(String name) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isPermissionSet(Permission perm) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean hasPermission(String name) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean hasPermission(Permission perm) {
+                            return false;
+                        }
+
+                        @Override
+                        public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
+                            return null;
+                        }
+
+                        @Override
+                        public PermissionAttachment addAttachment(Plugin plugin) {
+                            return null;
+                        }
+
+                        @Override
+                        public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
+                            return null;
+                        }
+
+                        @Override
+                        public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
+                            return null;
+                        }
+
+                        @Override
+                        public void removeAttachment(PermissionAttachment attachment) {
+                        }
+
+                        @Override
+                        public void recalculatePermissions() {
+
+                        }
+
+                        @Override
+                        public Set<PermissionAttachmentInfo> getEffectivePermissions() {
+                            return new HashSet<>();
+                        }
+
+                        @Override
+                        public void sendMessage(String message) {
+
+                        }
+
+                        @Override
+                        public void sendMessage(String[] messages) {
+
+                        }
+
+                        @Override
+                        public Server getServer() {
+                            return null;
+                        }
+
+                        @Override
+                        public String getName() {
+                            return "";
+                        }
+                    };
+                }
+                return commandSender;
             }
         };
         try {
-            common.registerCommandManager(new PaperCommandManager<>(
+            common.registerCommandManager(new LegacyPaperCommandManager<>(
                     /* Owning plugin */ this,
                     /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
                     /* Command Sender -> C */ senderMapper));
