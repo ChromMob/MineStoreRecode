@@ -26,9 +26,9 @@ public class PlaceHolderData {
     private DonationGoal donationGoal;
     private List<LastDonator> lastDonators;
     private List<TopDonator> topDonators;
-    private Set<URI> apiUrls = new HashSet<>();
+    private final List<URI> apiUrls = new ArrayList<>();
 
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
     private Thread thread = null;
 
     public boolean load() {
@@ -76,11 +76,11 @@ public class PlaceHolderData {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    MineStoreCommon.getInstance().debug("Received: " + line);
                     if (apiUrl.equals(apiUrls.toArray()[0])) {
                         try {
                             donationGoal = gson.fromJson(line, DonationGoal.class);
                         } catch (JsonSyntaxException e) {
+                            MineStoreCommon.getInstance().debug("Error while parsing donation goal from: " + line);
                             MineStoreCommon.getInstance().debug(e);
                             donationGoal = new DonationGoal();
                         }
@@ -90,6 +90,7 @@ public class PlaceHolderData {
                         try {
                             lastDonators = gson.fromJson(line, listType);
                         } catch (JsonSyntaxException e) {
+                            MineStoreCommon.getInstance().debug("Error while parsing lastDonators goal from " + line);
                             MineStoreCommon.getInstance().debug(e);
                             lastDonators = new ArrayList<>();
                         }
@@ -99,6 +100,7 @@ public class PlaceHolderData {
                         try {
                             topDonators = gson.fromJson(line, listType);
                         } catch (JsonSyntaxException e) {
+                            MineStoreCommon.getInstance().debug("Error while parsing topDonators goal from " + line);
                             MineStoreCommon.getInstance().debug(e);
                             topDonators = new ArrayList<>();
                         }
