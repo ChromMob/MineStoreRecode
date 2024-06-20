@@ -16,6 +16,9 @@ public class AutoSetupCommand {
         CommonUser user = abstractUser.user();
         user.sendMessage("Auto setup started!");
         user.sendMessage("Store URL: " + storeUrl);
+        if (!storeUrl.endsWith("/")) {
+            storeUrl += "/";
+        }
         MineStoreCommon.getInstance().configReader().set(ConfigKey.STORE_URL, storeUrl);
         MineStoreCommon.getInstance().configReader().set(ConfigKey.API_ENABLED, true);
         MineStoreCommon.getInstance().configReader().set(ConfigKey.API_KEY, apiKey);
