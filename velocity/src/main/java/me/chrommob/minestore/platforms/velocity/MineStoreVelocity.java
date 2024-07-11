@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.velocity;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -20,7 +21,6 @@ import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.velocity.VelocityCommandManager;
 
-import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.logging.Logger;
