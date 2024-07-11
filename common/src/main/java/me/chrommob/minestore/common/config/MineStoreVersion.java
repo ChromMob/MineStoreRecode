@@ -78,8 +78,8 @@ public class MineStoreVersion {
         return this.major + "." + this.minor + "." + this.patch;
     }
 
-    public static MineStoreVersion getMineStoreVersion() {
-        String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
+    public static MineStoreVersion getMineStoreVersion(MineStoreCommon plugin) {
+        String storeUrl = (String) plugin.configReader().get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
@@ -89,20 +89,20 @@ public class MineStoreVersion {
             InputStream in = urlConnection.getInputStream();
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
             String line;
-            MineStoreCommon.getInstance().debug("Getting version...");
+            plugin.debug("Getting version...");
             if ((line = reader.readLine()) != null) {
-                MineStoreCommon.getInstance().debug("Got version: " + line);
+                plugin.debug("Got version: " + line);
                 String[] split = line.split("\\.");
                 try {
                     Integer.parseInt(split[0]);
                 } catch (NumberFormatException e) {
-                    MineStoreCommon.getInstance().debug(e);
+                    plugin.debug(e);
                     return MineStoreVersion.dummy();
                 }
                 return new MineStoreVersion(line);
             }
         } catch (IOException e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
         }
         return MineStoreVersion.dummy();
     }

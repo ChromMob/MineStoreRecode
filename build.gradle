@@ -84,6 +84,8 @@ allprojects {
     processResources {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
+
+
 }
 
 subprojects {
@@ -92,10 +94,14 @@ subprojects {
         apply plugin: 'io.github.goooler.shadow'
     }
 
-    if (project.name != "common") {
+    if (project.name != "common" && project.name != "MineStoreAddonApi") {
         dependencies {
             implementation project(path: ':common', configuration: 'shadow')
         }
+    }
+
+    dependencies {
+        testImplementation 'junit:junit:4.13.2'
     }
 
     processResources {
@@ -143,8 +149,6 @@ velocityProject.afterEvaluate {
     }
 }
 
-assemble.dependsOn(finalJar)
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -173,6 +177,7 @@ shadowJar {
     }
     exclude "META-INF/*.SF"
 }
+
 
 dependencies {
     implementation project(path: ':common', configuration: 'shadow')

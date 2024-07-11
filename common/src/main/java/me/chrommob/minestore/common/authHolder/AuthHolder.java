@@ -13,11 +13,25 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class AuthHolder {
+    private MineStoreCommon plugin;
     private int authTimeout;
     private Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
     private Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
     private String url;
     private Thread thread = null;
+    
+    public AuthHolder(MineStoreCommon plugin) {
+        this.plugin = plugin;
+        authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT) * 1000;
+        thread = new Thread(removeAndPost);
+        thread.start();
+        String storeUrl = (String) this.plugin.configReader().get(ConfigKey.STORE_URL);
+        if (storeUrl.endsWith("/")) {
+            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
+        }
+        url = storeUrl + "/api/game_auth/confirm/";
+    }
+    
     private Runnable removeAndPost = () -> {
         while (true) {
             if (authUsers.isEmpty() && toPost.isEmpty()) {
@@ -40,9 +54,9 @@ public final class AuthHolder {
             This is to prevent memory leaks.
              */
                 if (isExpired(authUser) || !authUser.user().isOnline()) {
-                    MineStoreCommon.getInstance().debug("Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
+                    plugin.debug("Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
                     if (authUser.user().isOnline()) {
-                        authUser.user().sendMessage((MineStoreCommon.getInstance().miniMessage()).deserialize((String)MineStoreCommon.getInstance().configReader().get(ConfigKey.AUTH_TIMEOUT_MESSAGE)));
+                        authUser.user().sendMessage((this.plugin.miniMessage()).deserialize((String)this.plugin.configReader().get(ConfigKey.AUTH_TIMEOUT_MESSAGE)));
                     }
                     authUsers.remove(s);
                 }
@@ -55,19 +69,8 @@ public final class AuthHolder {
         }
     };
 
-    public AuthHolder(MineStoreCommon plugin) {
-        authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT) * 1000;
-        thread = new Thread(removeAndPost);
-        thread.start();
-        String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
-        if (storeUrl.endsWith("/")) {
-            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
-        }
-        url = storeUrl + "/api/game_auth/confirm/";
-    }
-
     private void postAuthCompleted(ParsedResponse parsedResponse) {
-        MineStoreCommon.getInstance().debug("Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
+        plugin.debug("Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
         try {
             HttpsURLConnection urlConnection;
             String link = url + parsedResponse.authId();
@@ -83,7 +86,7 @@ public final class AuthHolder {
             }
             urlConnection.getInputStream();
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug("Error while posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
+            this.plugin.debug("Error while posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
         }
     }
 
@@ -105,13 +108,13 @@ public final class AuthHolder {
     If the user is already in the authUsers map, the time is updated else the user is added to the map.
      */
     public void listener(ParsedResponse parsedResponse) {
-        AbstractUser abstractUser = new AbstractUser(parsedResponse.username());
+        AbstractUser abstractUser = new AbstractUser(parsedResponse.username(), plugin);
         if (!abstractUser.user().isOnline() || abstractUser.user() instanceof CommonConsoleUser) {
             return;
         }
         AuthUser authUser = authUsers.getOrDefault(parsedResponse.username(), null);
         if (authUser == null) {
-            authUsers.put(parsedResponse.username(), new AuthUser(abstractUser.user(), parsedResponse, System.currentTimeMillis()));
+            authUsers.put(parsedResponse.username(), new AuthUser(plugin, abstractUser.user(), parsedResponse, System.currentTimeMillis()));
         } else {
             authUser.setTime(System.currentTimeMillis());
         }

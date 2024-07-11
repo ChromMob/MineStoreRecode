@@ -6,15 +6,17 @@ import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 
 public class AuthUser {
+    private final MineStoreCommon plugin;
     private final CommonUser user;
     private final ParsedResponse parsedResponse;
     private long time;
 
-    public AuthUser(CommonUser user, ParsedResponse parsedResponse, long time) {
+    public AuthUser(MineStoreCommon plugin, CommonUser user, ParsedResponse parsedResponse, long time) {
+        this.plugin = plugin;
         this.user = user;
         this.parsedResponse = parsedResponse;
         this.time = time;
-        user.sendMessage(MineStoreCommon.getInstance().miniMessage().deserialize((String)MineStoreCommon.getInstance().configReader().get(ConfigKey.AUTH_INIT_MESSAGE)));
+        user.sendMessage(plugin.miniMessage().deserialize((String)plugin.configReader().get(ConfigKey.AUTH_INIT_MESSAGE)));
     }
 
     public long time() {
@@ -30,7 +32,7 @@ public class AuthUser {
     }
 
     public void confirmAuth() {
-        MineStoreCommon.getInstance().authHolder().confirmAuth(this);
+        plugin.authHolder().confirmAuth(this);
     }
 
     public ParsedResponse parsedResponse() {

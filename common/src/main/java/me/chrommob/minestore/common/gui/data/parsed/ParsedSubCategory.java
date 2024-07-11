@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParsedSubCategory {
+    private final MineStoreCommon plugin;
     private ParsedCategory root;
     private String name;
     private String url;
@@ -22,7 +23,8 @@ public class ParsedSubCategory {
     private final CommonItem item;
     private final CommonInventory inventory;
 
-    public ParsedSubCategory(SubCategory subCategory, List<Package> packages, ParsedCategory root) {
+    public ParsedSubCategory(SubCategory subCategory, List<Package> packages, ParsedCategory root, MineStoreCommon plugin) {
+        this.plugin = plugin;
         this.root = root;
         this.name = subCategory.getName();
         this.url = subCategory.getUrl();
@@ -33,7 +35,7 @@ public class ParsedSubCategory {
                     continue;
                 if (pack.getActive() == 0)
                     continue;
-                this.packages.add(new ParsedPackage(pack, this));
+                this.packages.add(new ParsedPackage(pack, this, plugin));
             }
         }
         this.item = this.getItem();
@@ -61,8 +63,8 @@ public class ParsedSubCategory {
         if (item != null) {
             return item;
         }
-        ConfigReader config = MineStoreCommon.getInstance().configReader();
-        MiniMessage miniMessage = MineStoreCommon.getInstance().miniMessage();
+        ConfigReader config = plugin.configReader();
+        MiniMessage miniMessage = plugin.miniMessage();
         String configName = (String) config.get(ConfigKey.BUY_GUI_SUBCATEGORY_NAME);
         configName = configName.replace("%subcategory%", this.name);
         Component name = miniMessage.deserialize(configName);
@@ -77,8 +79,8 @@ public class ParsedSubCategory {
         for (ParsedPackage pack : this.packages) {
             items.add(pack.getItem());
         }
-        CommonInventory inventory = new CommonInventory(MineStoreCommon.getInstance().miniMessage().deserialize(((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_PACKAGE_TITLE)).replace("%subcategory%", name)), 54, items);
-        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory, false);
+        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(((String) plugin.configReader().get(ConfigKey.BUY_GUI_PACKAGE_TITLE)).replace("%subcategory%", name)), 54, items);
+        plugin.guiData().getGuiInfo().formatInventory(inventory, false);
         return inventory;
     }
 }

@@ -36,12 +36,12 @@ public class MineStoreBungee extends Plugin {
         common.setPlatformVersion(getProxy().getVersion());
         common.registerLogger(new LoggerBungee(this));
         common.registerScheduler(new BungeeScheduler(this));
-        common.registerUserGetter(new BungeeUserGetter(this));
+        common.registerUserGetter(new BungeeUserGetter(this, common));
         common.setConfigLocation(new File(getDataFolder(), "config.yml"));
         common.registerCommandExecuter(new CommandExecuterBungee(this));
-        common.registerPlayerJoinListener(new PlayerEventListenerBungee(this));
+        common.registerPlayerJoinListener(new PlayerEventListenerBungee(this, common));
 
-        final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null);
+        final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null, common);
         final Function<AbstractUser, CommandSender> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? getProxy().getConsole() : getProxy().getPlayer(abstractUser.user().getName());
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
             @Override

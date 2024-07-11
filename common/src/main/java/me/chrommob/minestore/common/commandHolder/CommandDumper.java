@@ -9,10 +9,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandDumper {
-    private File dumpedFile = new File(MineStoreCommon.getInstance().configFile().getParentFile(), "dumpedCommands.yml");
-    private Yaml yaml = new Yaml();
+    private final MineStoreCommon plugin;
+    private final File dumpedFile;
+    private final Yaml yaml = new Yaml();
 
-    public CommandDumper() {
+    public CommandDumper(MineStoreCommon plugin) {
+        this.plugin = plugin;
+        dumpedFile = new File(plugin.configFile().getParentFile(), "dumpedCommands.yml");
         if (!dumpedFile.getParentFile().exists()) {
             dumpedFile.getParentFile().mkdirs();
         }
@@ -26,7 +29,7 @@ public class CommandDumper {
         try {
             inputStream = new FileInputStream(dumpedFile);
         } catch (FileNotFoundException e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
             return new ConcurrentHashMap<>();
         }
         return new ConcurrentHashMap<>(yaml.load(inputStream));
@@ -37,7 +40,7 @@ public class CommandDumper {
         try {
             fileOutputStream = new FileWriter(dumpedFile);
         } catch (IOException e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
         }
         yaml.dump(commands, fileOutputStream);
     }

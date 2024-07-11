@@ -205,7 +205,7 @@ public class DatabaseManager {
         Connection conn = null;
         PreparedStatement ps = null;
         try {
-            MineStoreCommon.getInstance().debug(hikari == null ? "Connection is null" : "Connection is not null");
+            plugin.debug(hikari == null ? "Connection is null" : "Connection is not null");
             conn = hikari.getConnection();
             String createTable = "CREATE TABLE IF NOT EXISTS playerdata"
                     + "  (uuid           VARCHAR(255) UNIQUE,"

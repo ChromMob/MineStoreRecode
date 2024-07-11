@@ -2,6 +2,7 @@ package me.chrommob.minestore.platforms.fabric.user;
 
 import java.util.UUID;
 
+import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
@@ -10,7 +11,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class UserFabric extends CommonUser {
     private final ServerPlayerEntity player;
 
-    public UserFabric(ServerPlayerEntity player) {
+    public UserFabric(ServerPlayerEntity player, MineStoreCommon plugin) {
+        super(plugin);
         this.player = player;
     }
 

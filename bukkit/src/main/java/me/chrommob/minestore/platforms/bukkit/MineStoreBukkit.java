@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.SenderMapper;
@@ -24,6 +25,7 @@ import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.paper.PaperCommandManager;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 public final class MineStoreBukkit extends JavaPlugin {
@@ -50,15 +52,15 @@ public final class MineStoreBukkit extends JavaPlugin {
         common.setPlatformVersion(Bukkit.getVersion());
         common.registerLogger(new BukkitLogger(this));
         common.registerScheduler(new BukkitScheduler(this));
-        common.registerUserGetter(new BukkitUserGetter(this));
-        common.registerCommandExecuter(new CommandExecuterBukkit(this));
+        common.registerUserGetter(new BukkitUserGetter(this, common));
+        common.registerCommandExecuter(new CommandExecuterBukkit(this, common));
         common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());
-        common.registerPlayerJoinListener(new BukkitPlayerEvent(this));
-        new BukkitInventoryEvent(this);
+        common.registerPlayerJoinListener(new BukkitPlayerEvent(this, common));
+        new BukkitInventoryEvent(this, common);
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
-                ? new AbstractUser((String) null)
-                : new AbstractUser(((HumanEntity) commandSender).getUniqueId());
+                ? new AbstractUser((String) null, common)
+                : new AbstractUser(((HumanEntity) commandSender).getUniqueId(), common);
         final Function<AbstractUser, CommandSender> aToC = abstractUser -> (abstractUser
                 .user() instanceof CommonConsoleUser) ? Bukkit.getConsoleSender()
                         : Bukkit.getServer().getPlayer(abstractUser.user().getUUID());
@@ -83,17 +85,17 @@ public final class MineStoreBukkit extends JavaPlugin {
             e.printStackTrace();
         }
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
-            VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(this);
+            VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(this, common);
             if (vaultPlayerInfoProvider.isInstalled()) {
                 common.registerPlayerInfoProvider(vaultPlayerInfoProvider);
             }
-            VaultEconomyProvider vaultEconomyProvider = new VaultEconomyProvider(this);
+            VaultEconomyProvider vaultEconomyProvider = new VaultEconomyProvider(this, common);
             if (vaultEconomyProvider.isInstalled()) {
                 common.registerPlayerEconomyProvider(vaultEconomyProvider);
             }
         }
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            common.registerPlaceHolderProvider(new BukkitPlaceHolderProvider(this));
+            common.registerPlaceHolderProvider(new BukkitPlaceHolderProvider(this, common));
         }
         common.init(false);
     }

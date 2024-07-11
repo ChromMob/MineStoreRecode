@@ -9,17 +9,19 @@ import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
 import me.chrommob.minestore.platforms.velocity.MineStoreVelocity;
 
 public class VelocityPlayerEvent implements PlayerEventListener {
-    public VelocityPlayerEvent(MineStoreVelocity plugin, ProxyServer server) {
+    private final MineStoreCommon pl;
+    public VelocityPlayerEvent(MineStoreVelocity plugin, ProxyServer server, MineStoreCommon pl) {
+        this.pl = pl;
         server.getEventManager().register(plugin, this);
     }
 
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
-        MineStoreCommon.getInstance().onPlayerJoin(event.getPlayer().getUsername());
+        pl.onPlayerJoin(event.getPlayer().getUsername());
     }
 
     @Subscribe
     public void onPlayerQuit(DisconnectEvent event) {
-        MineStoreCommon.getInstance().onPlayerQuit(event.getPlayer().getUsername());
+        pl.onPlayerQuit(event.getPlayer().getUsername());
     }
 }

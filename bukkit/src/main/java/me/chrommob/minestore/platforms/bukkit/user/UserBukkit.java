@@ -21,12 +21,15 @@ import java.util.List;
 import java.util.UUID;
 
 public class UserBukkit extends CommonUser {
+    private final MineStoreCommon plugin;
     private final Player player;
     private final String name;
     private final UUID uuid;
     private LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
 
-    public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit) {
+    public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit, MineStoreCommon plugin) {
+        super(plugin);
+        this.plugin = plugin;
         player = mineStoreBukkit.getServer().getPlayer(uuid);
         this.uuid = uuid;
         if (player == null) {
@@ -36,7 +39,9 @@ public class UserBukkit extends CommonUser {
         name = player.getName();
     }
 
-    public UserBukkit(String username, MineStoreBukkit mineStoreBukkit) {
+    public UserBukkit(String username, MineStoreBukkit mineStoreBukkit, MineStoreCommon plugin) {
+        super(plugin);
+        this.plugin = plugin;
         player = mineStoreBukkit.getServer().getPlayer(username);
         name = username;
         if (player == null) {
@@ -109,7 +114,7 @@ public class UserBukkit extends CommonUser {
                 material = Material.matchMaterial(item.getMaterial());
             }
             if (material == null) {
-                MineStoreCommon.getInstance().log("Material " + item.getMaterial() + " is not valid!");
+                plugin.log("Material " + item.getMaterial() + " is not valid!");
                 if (item.isBackground()) {
                     material = Material.STAINED_GLASS_PANE;
                     item.setMaterial("STAINED_GLASS_PANE");

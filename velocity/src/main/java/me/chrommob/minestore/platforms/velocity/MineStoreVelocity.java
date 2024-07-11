@@ -46,9 +46,9 @@ public class MineStoreVelocity {
         common.setPlatformVersion(server.getVersion().getVersion());
         common.registerLogger(new VelocityLogger(logger));
         common.registerScheduler(new VelocityScheduler(this));
-        common.registerUserGetter(new VelocityUserGetter(server));
+        common.registerUserGetter(new VelocityUserGetter(server, common));
 
-        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null);
+        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null, common);
         final Function<AbstractUser, CommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getConsoleCommandSource() : getServer().getPlayer(abstractUser.user().getUUID()).get();
         final SenderMapper<CommandSource, AbstractUser> senderMapper = new SenderMapper<CommandSource, AbstractUser>() {
             @Override
@@ -70,7 +70,7 @@ public class MineStoreVelocity {
 
         common.registerCommandExecuter(new CommandExecuterVelocity(server));
         common.setConfigLocation(dataPath.resolve("config.yml").toFile());
-        common.registerPlayerJoinListener(new VelocityPlayerEvent(this, server));
+        common.registerPlayerJoinListener(new VelocityPlayerEvent(this, server, common));
         System.out.println("MineStore has been enabled!");
         common.init(false);
     }

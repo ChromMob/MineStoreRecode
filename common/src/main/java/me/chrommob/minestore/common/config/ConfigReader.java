@@ -11,14 +11,16 @@ import java.util.Map;
 import java.net.URLEncoder;
 
 public class ConfigReader {
+    private final MineStoreCommon plugin;
     private final File configFile;
     private File languageFile;
     private Yaml yaml;
     private Map<String, Object> configYaml = new LinkedHashMap<>();
     private Map<String, Object> languageYaml = new LinkedHashMap<>();
 
-    public ConfigReader(File configFile) {
+    public ConfigReader(File configFile, MineStoreCommon plugin) {
         this.configFile = configFile;
+        this.plugin = plugin;
         init();
     }
 
@@ -40,27 +42,27 @@ public class ConfigReader {
             saveDefaultLanguage();
         }
         if (!new File(languageFile.getParentFile(), "cs_CZ.lang").exists()) {
-            InputStream cs_CZ = MineStoreCommon.getInstance().getClass().getClassLoader().getResourceAsStream("cs_CZ.lang");
+            InputStream cs_CZ = plugin.getClass().getClassLoader().getResourceAsStream("cs_CZ.lang");
             try {
                 Files.copy(cs_CZ, new File(languageFile.getParentFile(), "cs_CZ.lang").toPath());
             } catch (IOException e) {
-                MineStoreCommon.getInstance().debug(e);
+                plugin.debug(e);
             }
         }
         if (!new File(languageFile.getParentFile(), "ru_RU.lang").exists()) {
-            InputStream ru_RU = MineStoreCommon.getInstance().getClass().getClassLoader().getResourceAsStream("ru_RU.lang");
+            InputStream ru_RU = plugin.getClass().getClassLoader().getResourceAsStream("ru_RU.lang");
             try {
                 Files.copy(ru_RU, new File(languageFile.getParentFile(), "ru_RU.lang").toPath());
             } catch (IOException e) {
-                MineStoreCommon.getInstance().debug(e);
+                plugin.debug(e);
             }
         }
         if (!new File(languageFile.getParentFile(), "ua_UA.lang").exists()) {
-            InputStream ua_UA = MineStoreCommon.getInstance().getClass().getClassLoader().getResourceAsStream("ua_UA.lang");
+            InputStream ua_UA = plugin.getClass().getClassLoader().getResourceAsStream("ua_UA.lang");
             try {
                 Files.copy(ua_UA, new File(languageFile.getParentFile(), "ua_UA.lang").toPath());
             } catch (IOException e) {
-                MineStoreCommon.getInstance().debug(e);
+                plugin.debug(e);
             }
         }
         reload();
@@ -163,14 +165,14 @@ public class ConfigReader {
             reader = new FileReader(configFile);
             configYaml = yaml.load(reader);
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
         }
         try {
             if (reader != null) {
                 reader.close();
             }
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
         }
         for (final ConfigKey key : ConfigKey.values()) {
             final Configuration configuration = key.getConfiguration();
@@ -209,14 +211,14 @@ public class ConfigReader {
             reader = new FileReader(languageFile);
             languageYaml = yaml.load(reader);
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
         }
         try {
             if (reader != null) {
                 reader.close();
             }
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
         }
         for (final ConfigKey key : ConfigKey.values()) {
             if (!key.name().toLowerCase().contains("message")) {
@@ -305,7 +307,7 @@ public class ConfigReader {
         String location = configuration.getLocation();
         Class<?> type = configuration.getDefaultValue().getClass();
         if (value.getClass() != type) {
-            MineStoreCommon.getInstance().debug("Invalid type for config value: " + location + " (expected " + type.getSimpleName() + ", got " + value.getClass().getSimpleName() + ")");
+            plugin.debug("Invalid type for config value: " + location + " (expected " + type.getSimpleName() + ", got " + value.getClass().getSimpleName() + ")");
         }
         if (location.split("\\.").length > 1) {
             String[] split = location.split("\\.");
@@ -326,7 +328,7 @@ public class ConfigReader {
             configYaml.put(location, value);
         }
         saveDefaultConfig();
-        MineStoreCommon.getInstance().debug("Set config value: " + location + " to " + value);
+        plugin.debug("Set config value: " + location + " to " + value);
     }
 
     public Map<String, Object> getLoadedConfig() {

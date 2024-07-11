@@ -15,11 +15,17 @@ import java.util.List;
 import java.util.Map;
 
 public class NewCommandDumper {
+    private final MineStoreCommon plugin;
+    private final File dumpedFile;
+    public NewCommandDumper(MineStoreCommon plugin) {
+        this.plugin = plugin;
+        dumpedFile = new File(plugin.configFile().getParentFile(), "savedCommands.json");
+    }
+    
     private final Gson gson = new Gson();
-    private final File dumpedFile = new File(MineStoreCommon.getInstance().configFile().getParentFile(), "savedCommands.json");
     public Map<String, List<StoredCommand>> load() {
         if (!dumpedFile.exists()) {
-            Map<String, List<String>> old = MineStoreCommon.getInstance().commandDumper().load();
+            Map<String, List<String>> old = plugin.commandDumper().load();
             if (!old.isEmpty()) {
                 Map<String, List<StoredCommand>> commands = new HashMap<>();
                 old.forEach((key, value) -> {
@@ -28,7 +34,7 @@ public class NewCommandDumper {
                     commands.put(key, storedCommands);
                 });
                 update(commands);
-                MineStoreCommon.getInstance().commandDumper().delete();
+                plugin.commandDumper().delete();
                 return commands;
             }
             return new HashMap<>();
@@ -39,7 +45,7 @@ public class NewCommandDumper {
             }.getType();
             commands = gson.fromJson(reader, listType);
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
         }
         return commands;
     }
@@ -49,7 +55,7 @@ public class NewCommandDumper {
         try (FileWriter writer = new FileWriter(dumpedFile, false)) {
             writer.write(json);
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
         }
     }
 }

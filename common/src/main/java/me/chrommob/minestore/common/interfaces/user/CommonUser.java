@@ -7,6 +7,10 @@ import net.kyori.adventure.text.Component;
 import java.util.UUID;
 
 public abstract class CommonUser {
+    private final MineStoreCommon plugin;
+    public CommonUser(MineStoreCommon plugin) {
+        this.plugin = plugin;
+    }
     public abstract String getName();
     public abstract void sendMessage(String message);
 
@@ -22,20 +26,20 @@ public abstract class CommonUser {
     public abstract void closeInventory();
 
     public String getPrefix() {
-        return MineStoreCommon.getInstance().playerInfoProvider().getPrefix(this);
+        return plugin.playerInfoProvider().getPrefix(this);
     }
 
     public String getSuffix() {
-        return MineStoreCommon.getInstance().playerInfoProvider().getSuffix(this);
+        return plugin.playerInfoProvider().getSuffix(this);
     }
 
 
     public double getBalance() {
-        return MineStoreCommon.getInstance().playerEconomyProvider().getBalance(this);
+        return plugin.playerEconomyProvider().getBalance(this);
     }
 
 
     public String getGroup() {
-        return MineStoreCommon.getInstance().playerInfoProvider().getGroup(this);
+        return plugin.playerInfoProvider().getGroup(this);
     }
 }

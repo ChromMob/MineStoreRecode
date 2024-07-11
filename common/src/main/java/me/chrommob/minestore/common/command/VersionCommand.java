@@ -7,10 +7,14 @@ import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 
 public class VersionCommand {
+    private final MineStoreCommon plugin;
+    public VersionCommand(MineStoreCommon plugin) {
+        this.plugin = plugin;
+    }
     @Permission("minestore.version")
     @Command("minestore|ms version")
     public void onVersion(AbstractUser abstractUser) {
-        MineStoreVersion version = MineStoreCommon.getInstance().version();
+        MineStoreVersion version = plugin.version();
         abstractUser.user().sendMessage("MineStore version: " + version.toString());
     }
 }

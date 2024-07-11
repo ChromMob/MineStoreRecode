@@ -16,4 +16,6 @@ dependencies {
 
     implementation("org.incendo:cloud-annotations:2.0.0-SNAPSHOT")
     compileOnly("org.incendo:cloud-paper:2.0.0-SNAPSHOT")
+
+    implementation(project(path: ':MineStoreAddonApi'))
 }

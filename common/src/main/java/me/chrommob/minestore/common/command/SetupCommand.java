@@ -67,6 +67,6 @@ public class SetupCommand {
             return;
         }
         commonUser.sendMessage(Component.text("Successfully set ").color(NamedTextColor.GREEN).append(Component.text(key.toUpperCase()).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD)).append(Component.text(" to ").color(NamedTextColor.GREEN)).append(Component.text(value).color(NamedTextColor.WHITE).decorate(TextDecoration.BOLD)));
-        MineStoreCommon.getInstance().reload();
+        plugin.reload();
     }
 }

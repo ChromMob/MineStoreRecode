@@ -57,9 +57,9 @@ public class MineStoreFabric implements ModInitializer {
 		common.setPlatformVersion(server.getVersion());
 		common.registerLogger(new FabricLogger(LOGGER));
 		common.registerScheduler(new FabricScheduler());
-		common.registerUserGetter(new FabricUserGetter(server));
+		common.registerUserGetter(new FabricUserGetter(server, common));
 
-		final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource.isExecutedByPlayer() ? commandSource.getPlayer().getUuid() : null);
+		final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource.isExecutedByPlayer() ? commandSource.getPlayer().getUuid() : null, common);
 		final Function<AbstractUser, ServerCommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getCommandSource() : server.getPlayerManager().getPlayer(abstractUser.user().getUUID()).getCommandSource();
 		final SenderMapper<ServerCommandSource, AbstractUser> senderMapper = new SenderMapper<ServerCommandSource, AbstractUser>() {
 			@Override
@@ -80,7 +80,7 @@ public class MineStoreFabric implements ModInitializer {
 
 		common.registerCommandExecuter(new CommandExecuterFabric(server));
 		common.setConfigLocation(FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("config.yml").toFile());
-		common.registerPlayerJoinListener(new FabricPlayerEvent());
+		common.registerPlayerJoinListener(new FabricPlayerEvent(common));
 		common.init(false);
 	}
 

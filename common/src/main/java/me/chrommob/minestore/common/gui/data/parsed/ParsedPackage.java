@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParsedPackage {
+    private final MineStoreCommon plugin;
     private Object root;
     private String name;
     private double price;
@@ -24,7 +25,8 @@ public class ParsedPackage {
     private String item_lore;
     private final CommonItem item;
 
-    public ParsedPackage(Package pack, Object root) {
+    public ParsedPackage(Package pack, Object root, MineStoreCommon plugin) {
+        this.plugin = plugin;
         this.root = root;
         this.name = pack.getName();
         this.price = pack.getPrice();
@@ -42,8 +44,8 @@ public class ParsedPackage {
         if (this.item != null) {
             return this.item;
         }
-        ConfigReader config = MineStoreCommon.getInstance().configReader();
-        MiniMessage miniMessage = MineStoreCommon.getInstance().miniMessage();
+        ConfigReader config = plugin.configReader();
+        MiniMessage miniMessage = plugin.miniMessage();
         List<Component> lore = new ArrayList<>();
         if (this.item_lore != null && !this.item_lore.isEmpty()) {
             String item_lore = this.item_lore;

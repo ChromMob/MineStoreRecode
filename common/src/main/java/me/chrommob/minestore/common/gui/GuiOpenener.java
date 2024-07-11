@@ -20,6 +20,7 @@ public class GuiOpenener {
     private final GuiData guiData;
     public GuiOpenener(GuiData guiData) {
         this.guiData = guiData;
+        backItem = new CommonItem(guiData.getPlugin().miniMessage().deserialize((String) guiData.getPlugin().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_NAME)), (String) guiData.getPlugin().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM), Collections.singletonList(guiData.getPlugin().miniMessage().deserialize((String) guiData.getPlugin().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_LORE))));
     }
 
     public enum MENU_TYPE {
@@ -28,8 +29,7 @@ public class GuiOpenener {
         PACKAGES
     }
 
-    private final CommonItem backItem = new CommonItem(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_NAME)), (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM), Collections.singletonList(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACK_ITEM_LORE))));
-
+    private final CommonItem backItem;
     private final Map<UUID, MENU_TYPE> menuType = new ConcurrentHashMap<>();
     private final Map<UUID, Object> menuPage = new ConcurrentHashMap<>();
 
@@ -94,8 +94,8 @@ public class GuiOpenener {
                 if (parsedPackage == null) {
                     return;
                 }
-                String config = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_MESSAGE);
-                String storeUrl = (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.STORE_URL);
+                String config = (String) guiData.getPlugin().configReader().get(ConfigKey.BUY_GUI_MESSAGE);
+                String storeUrl = (String) guiData.getPlugin().configReader().get(ConfigKey.STORE_URL);
                 if (storeUrl.endsWith("/")) {
                     storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
                 }
@@ -106,7 +106,7 @@ public class GuiOpenener {
                     url += ((ParsedSubCategory) parsedPackage.getRoot()).getUrl();
                 }
                 config = config.replace("%package%", parsedPackage.getName()).replace("%buy_url%", url);
-                Component component = MineStoreCommon.getInstance().miniMessage().deserialize(config);
+                Component component = guiData.getPlugin().miniMessage().deserialize(config);
                 user.closeInventory();
                 user.sendMessage(component);
                 break;
@@ -140,7 +140,7 @@ public class GuiOpenener {
             items.sort(Comparator.comparing(CommonItem::isFeatured).reversed());
         }
         List<CommonItem> finalItems = new ArrayList<>();
-        addBackground(finalItems, (boolean) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ENABLED));
+        addBackground(finalItems, (boolean) guiData.getPlugin().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ENABLED));
         int index = 0;
         for (int i = 10; i < 17; i++) {
             if (index >= items.size()) {
@@ -183,7 +183,7 @@ public class GuiOpenener {
     }
     
     private void addBackground(List<CommonItem> finalItems, boolean enabled) {
-        CommonItem glassPane = new CommonItem(Component.text(" "), (String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ITEM), Collections.emptyList(), true);
+        CommonItem glassPane = new CommonItem(Component.text(" "), (String) guiData.getPlugin().configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ITEM), Collections.emptyList(), true);
         CommonItem air = new CommonItem(Component.text(" "), "AIR", Collections.emptyList(), true);
         for (int i = 0; i < 54; i++) {
             if (enabled) {

@@ -24,15 +24,20 @@ import java.util.Set;
 
 public class PlaceHolderData {
     private DonationGoal donationGoal;
+    private MineStoreCommon plugin;
     private List<LastDonator> lastDonators;
     private List<TopDonator> topDonators;
     private final List<URI> apiUrls = new ArrayList<>();
 
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
     private Thread thread = null;
+    
+    public PlaceHolderData(MineStoreCommon plugin) {
+        this.plugin = plugin;
+    }
 
     public boolean load() {
-        ConfigReader configReader = MineStoreCommon.getInstance().configReader();
+        ConfigReader configReader = plugin.configReader();
         String finalDonationGoalUrl;
         String finalLastDonatorsUrl;
         String finalTopDonatorsUrl;
@@ -60,12 +65,12 @@ public class PlaceHolderData {
             apiUrls.add(lastDonatorsUrl);
             apiUrls.add(topDonatorsUrl);
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
-            MineStoreCommon.getInstance().log("STORE URL has invalid format!");
+            plugin.debug(e);
+            plugin.log("STORE URL has invalid format!");
             return false;
         }
         try {
-            MineStoreCommon.getInstance().debug("Loading placeholder data...");
+            plugin.debug("Loading placeholder data...");
             for (URI apiUrl : apiUrls) {
                 URL url = apiUrl.toURL();
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -76,12 +81,12 @@ public class PlaceHolderData {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    MineStoreCommon.getInstance().debug("Received: " + line);
+                    plugin.debug("Received: " + line);
                     if (apiUrl.equals(apiUrls.toArray()[0])) {
                         try {
                             donationGoal = gson.fromJson(line, DonationGoal.class);
                         } catch (JsonSyntaxException e) {
-                            MineStoreCommon.getInstance().debug(e);
+                            plugin.debug(e);
                             donationGoal = new DonationGoal();
                         }
                     } else if (apiUrl.equals(apiUrls.toArray()[1])) {
@@ -90,7 +95,7 @@ public class PlaceHolderData {
                         try {
                             lastDonators = gson.fromJson(line, listType);
                         } catch (JsonSyntaxException e) {
-                            MineStoreCommon.getInstance().debug(e);
+                            plugin.debug(e);
                             lastDonators = new ArrayList<>();
                         }
                     } else if (apiUrl.equals(apiUrls.toArray()[2])) {
@@ -99,19 +104,19 @@ public class PlaceHolderData {
                         try {
                             topDonators = gson.fromJson(line, listType);
                         } catch (JsonSyntaxException e) {
-                            MineStoreCommon.getInstance().debug(e);
+                            plugin.debug(e);
                             topDonators = new ArrayList<>();
                         }
                     }
                 }
             }
         } catch (IOException e) {
-            MineStoreCommon.getInstance().debug(e);
-            MineStoreCommon.getInstance().log("API KEY is invalid!");
+            plugin.debug(e);
+            plugin.log("API KEY is invalid!");
             return false;
         } catch (ClassCastException e) {
-            MineStoreCommon.getInstance().debug(e);
-            MineStoreCommon.getInstance().log("STORE URL has to start with https://");
+            plugin.debug(e);
+            plugin.log("STORE URL has to start with https://");
             return false;
         }
         return true;
@@ -128,7 +133,7 @@ public class PlaceHolderData {
     private Runnable runnable = () -> {
         while (true) {
             if (!load()) {
-                MineStoreCommon.getInstance().debug("Failed to load placeholder data!");
+                plugin.debug("Failed to load placeholder data!");
             }
             try {
                 Thread.sleep(1000 * 60);
