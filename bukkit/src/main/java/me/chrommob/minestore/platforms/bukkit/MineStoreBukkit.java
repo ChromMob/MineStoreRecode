@@ -21,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.paper.PaperCommandManager;
 
 import java.util.function.Function;
@@ -74,7 +75,7 @@ public final class MineStoreBukkit extends JavaPlugin {
             }
         };
         try {
-            common.registerCommandManager(new PaperCommandManager<>(
+            common.registerCommandManager(new LegacyPaperCommandManager<>(
                     /* Owning plugin */ this,
                     /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
                     /* Command Sender -> C */ senderMapper));

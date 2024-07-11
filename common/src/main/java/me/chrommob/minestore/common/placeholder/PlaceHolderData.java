@@ -26,7 +26,7 @@ public class PlaceHolderData {
     private DonationGoal donationGoal;
     private List<LastDonator> lastDonators;
     private List<TopDonator> topDonators;
-    private Set<URI> apiUrls = new HashSet<>();
+    private final List<URI> apiUrls = new ArrayList<>();
 
     private Gson gson = new Gson();
     private Thread thread = null;

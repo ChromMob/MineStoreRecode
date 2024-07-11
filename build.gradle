@@ -162,7 +162,7 @@ tasks.generateMetadataFileForMavenJavaPublication.dependsOn assemble
 
 
 shadowJar {
-    relocate "cloud.commandframework", "me.chrommob.minestore.libs.cloud.commandframework"
+    relocate "org.incendo", "me.chrommob.minestore.libs.org.incendo"
     relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
     relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
