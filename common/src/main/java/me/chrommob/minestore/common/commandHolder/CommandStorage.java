@@ -52,7 +52,7 @@ public class CommandStorage implements CommandStorageInterface {
 
     @Override
     public void onPlayerJoin(String username) {
-        if (plugin.version().requires("3.0.0")) {
+        if (MineStoreCommon.version().requires("3.0.0")) {
             if (newCommands.containsKey(username)) {
                 plugin.debug("Executing new commands for " + username);
                 newCommands.get(username).forEach(storedCommand -> {

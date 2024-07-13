@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WebListener implements CommandGetter {
     private final MineStoreCommon plugin;
@@ -26,6 +28,7 @@ public class WebListener implements CommandGetter {
     private URL executedUrl;
     private URL deliveredUrl;
     private Thread thread = null;
+    private final Set<String> toPostExecuted = new HashSet<>();
     public Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -38,6 +41,13 @@ public class WebListener implements CommandGetter {
                         break;
                     }
                     continue;
+                }
+                if (!toPostExecuted.isEmpty()) {
+                    Set<String> toPostExecutedCopy = new HashSet<>(toPostExecuted);
+                    toPostExecuted.clear();
+                    for (String id : toPostExecutedCopy) {
+                        postExecuted(id);
+                    }
                 }
                 plugin.debug("[WebListener] Running...");
                 try {
@@ -82,7 +92,7 @@ public class WebListener implements CommandGetter {
                                 plugin.authHolder().listener(parsedResponse);
                                 break;
                         }
-                        if (plugin.version().requires("3.0.0")) {
+                        if (MineStoreCommon.version().requires("3.0.0")) {
                             postDelivered(String.valueOf(parsedResponse.commandId()));
                             if (parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.OFFLINE) {
                                 postExecuted(String.valueOf(parsedResponse.commandId()));
@@ -204,6 +214,10 @@ public class WebListener implements CommandGetter {
     }
 
     public void postExecuted(String id) {
+        toPostExecuted.add(id);
+    }
+
+    public void postExecutedAsync(String id) {
         try {
             URL url = new URL(executedUrl + id);
             plugin.debug("Posting to: " + url);

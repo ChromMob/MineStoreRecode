@@ -69,7 +69,7 @@ public class MineStoreCommon {
     private CommonScheduler scheduler;
     private StatSender statsSender;
     private final Dumper dumper = new Dumper();
-    private MineStoreVersion version;
+    private static MineStoreVersion version;
 
     public void setConfigLocation(File configFile) {
         this.configFile = configFile;
@@ -513,7 +513,7 @@ public class MineStoreCommon {
         return new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
     }
 
-    public MineStoreVersion version() {
+    public static MineStoreVersion version() {
         return version;
     }
 
