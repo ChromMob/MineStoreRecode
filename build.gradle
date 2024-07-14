@@ -82,7 +82,7 @@ allprojects {
     }
 
     processResources {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
 
@@ -125,20 +125,20 @@ subprojects {
 def fabricProject = project(":MineStore-Fabric")
 def velocityProject = project(":MineStore-Velocity")
 def finalJar = tasks.register('finalJar', Jar) {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from zipTree(shadowJar.archiveFile)
     archiveClassifier = "final"
     archiveFileName = "${project.name}-${project.version}.jar"
     destinationDirectory = file("${projectDir}/build/libs/")
 }
 
-fabricProject.afterEvaluate {
-    finalJar.configure {
-        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
-            it.archiveFile
-        })
-    }
-}
+//fabricProject.afterEvaluate {
+//    finalJar.configure {
+//        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
+//            it.archiveFile
+//        })
+//    }
+//}
 
 
 velocityProject.afterEvaluate {
