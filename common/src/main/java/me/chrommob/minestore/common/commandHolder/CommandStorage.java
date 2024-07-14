@@ -85,7 +85,7 @@ public class CommandStorage implements CommandStorageInterface {
             plugin.commandExecuter().execute(command);
             return;
         }
-        if (plugin.version().requires("3.0.0")) {
+        if (MineStoreCommon.version().requires("3.0.0")) {
             addNewCommand(username, command, requestId);
             return;
         }

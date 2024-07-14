@@ -22,12 +22,13 @@ public class GuiData {
     private MineStoreCommon plugin;
     public GuiData(MineStoreCommon plugin) {
         this.plugin = plugin;
+        guiOpenener = new GuiOpenener(this);
     }
     private List<Category> parsedResponse;
     private URL packageURL;
     private final Gson gson = new Gson();
 
-    private final GuiOpenener guiOpenener = new GuiOpenener(this);
+    private final GuiOpenener guiOpenener;
     private ParsedGui parsedGui;
     private Thread thread = null;
 

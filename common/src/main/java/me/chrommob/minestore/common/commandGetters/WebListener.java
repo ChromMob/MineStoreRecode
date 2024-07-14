@@ -46,7 +46,7 @@ public class WebListener implements CommandGetter {
                     Set<String> toPostExecutedCopy = new HashSet<>(toPostExecuted);
                     toPostExecuted.clear();
                     for (String id : toPostExecutedCopy) {
-                        postExecuted(id);
+                        postExecutedAsync(id);
                     }
                 }
                 plugin.debug("[WebListener] Running...");
