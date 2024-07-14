@@ -84,7 +84,10 @@ public class PlaceHolderData {
                     plugin.debug("Received: " + line);
                     if (apiUrl.equals(apiUrls.toArray()[0])) {
                         try {
-                            donationGoal = gson.fromJson(line, DonationGoal.class);
+                            Type listType = new TypeToken<List<DonationGoal>>() {
+                            }.getType();
+                            List<DonationGoal> donationGoals = gson.fromJson(line, listType);
+                            donationGoal = donationGoals.get(0);
                         } catch (JsonSyntaxException e) {
                             plugin.debug(e);
                             donationGoal = new DonationGoal();
