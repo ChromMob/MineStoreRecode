@@ -84,10 +84,14 @@ public class PlaceHolderData {
                     plugin.debug("Received: " + line);
                     if (apiUrl.equals(apiUrls.toArray()[0])) {
                         try {
-                            Type listType = new TypeToken<List<DonationGoal>>() {
-                            }.getType();
-                            List<DonationGoal> donationGoals = gson.fromJson(line, listType);
-                            donationGoal = donationGoals.get(0);
+                            if (!MineStoreCommon.version().requires("3.0.0")) {
+                                donationGoal = gson.fromJson(line, DonationGoal.class);
+                            } else {
+                                Type listType = new TypeToken<List<DonationGoal>>() {
+                                }.getType();
+                                List<DonationGoal> donationGoals = gson.fromJson(line, listType);
+                                donationGoal = donationGoals.get(0);
+                            }
                         } catch (JsonSyntaxException e) {
                             plugin.debug(e);
                             donationGoal = new DonationGoal();
