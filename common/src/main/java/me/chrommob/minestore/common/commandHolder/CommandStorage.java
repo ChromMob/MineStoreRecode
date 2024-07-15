@@ -3,6 +3,7 @@ package me.chrommob.minestore.common.commandHolder;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
+import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.interfaces.commands.CommandStorageInterface;
 
 import java.util.ArrayList;
@@ -56,6 +57,9 @@ public class CommandStorage implements CommandStorageInterface {
             if (newCommands.containsKey(username)) {
                 plugin.debug("Executing new commands for " + username);
                 newCommands.get(username).forEach(storedCommand -> {
+                    if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
+                        plugin.log("Executing command: " + storedCommand.command());
+                    }
                     plugin.commandExecuter().execute(storedCommand.command());
                     plugin.commandGetter().postExecuted(String.valueOf(storedCommand.requestId()));
                 });
@@ -65,7 +69,12 @@ public class CommandStorage implements CommandStorageInterface {
         }
         if (commands.containsKey(username)) {
             plugin.debug("Executing commands for " + username);
-            commands.get(username).forEach(plugin.commandExecuter()::execute);
+            commands.get(username).forEach(command -> {
+                if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
+                    plugin.log("Executing command: " + command);
+                }
+                plugin.commandExecuter().execute(command);
+            });
             remove(username);
         }
     }
@@ -82,6 +91,9 @@ public class CommandStorage implements CommandStorageInterface {
     private void handleOnlineCommand(String command, String username, int requestId) {
         boolean isOnline = plugin.commandExecuter().isOnline(username);
         if (isOnline) {
+            if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
+                plugin.log("Executing command: " + command);
+            }
             plugin.commandExecuter().execute(command);
             return;
         }
@@ -93,6 +105,9 @@ public class CommandStorage implements CommandStorageInterface {
     }
 
     private void handleOfflineCommand(String command) {
+        if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
+            plugin.log("Executing command: " + command);
+        }
         plugin.commandExecuter().execute(command);
     }
 

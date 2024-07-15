@@ -5,6 +5,7 @@ import java.util.UUID;
 public enum ConfigKey
 {
     DEBUG(new Configuration("debug", false)),
+    COMMAND_LOGGING(new Configuration("command-execution-logging", false)),
     LANGUAGE(new Configuration("language", "en_US")),
 
     STORE_URL(new Configuration("store-url", "https://store.example.com")),
