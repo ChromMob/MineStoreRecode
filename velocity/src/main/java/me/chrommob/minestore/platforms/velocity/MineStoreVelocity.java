@@ -20,6 +20,7 @@ import me.chrommob.minestore.platforms.velocity.webCommand.CommandExecuterVeloci
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.velocity.VelocityCommandManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.function.Function;
@@ -48,16 +49,16 @@ public class MineStoreVelocity {
         common.registerScheduler(new VelocityScheduler(this));
         common.registerUserGetter(new VelocityUserGetter(server, common));
 
-        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null, common);
-        final Function<AbstractUser, CommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getConsoleCommandSource() : getServer().getPlayer(abstractUser.user().getUUID()).get();
+        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null, common, commandSource);
+        final Function<AbstractUser, CommandSource> aToC = abstractUser -> (CommandSource) abstractUser.nativeCommandSender();
         final SenderMapper<CommandSource, AbstractUser> senderMapper = new SenderMapper<CommandSource, AbstractUser>() {
             @Override
-            public AbstractUser map(CommandSource base) {
+            public @NotNull AbstractUser map(CommandSource base) {
                 return cToA.apply(base);
             }
 
             @Override
-            public CommandSource reverse(AbstractUser mapped) {
+            public @NotNull CommandSource reverse(AbstractUser mapped) {
                 return aToC.apply(mapped);
             }
         };

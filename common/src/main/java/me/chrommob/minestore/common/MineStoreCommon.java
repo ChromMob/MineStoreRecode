@@ -163,6 +163,7 @@ public class MineStoreCommon {
         commandStorage.init();
         commandGetter = new WebListener(this);
         guiData = new GuiData(this);
+        version = MineStoreVersion.getMineStoreVersion(this);
         placeHolderData = new PlaceHolderData(this);
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager = new DatabaseManager(this);
@@ -184,7 +185,6 @@ public class MineStoreCommon {
         }
         if (!reload) {
             registerCommands();
-            version = MineStoreVersion.getMineStoreVersion(this);
         }
         initialized = true;
         statsSender.start();

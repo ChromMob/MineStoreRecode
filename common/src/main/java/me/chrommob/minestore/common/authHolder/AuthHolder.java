@@ -108,7 +108,7 @@ public final class AuthHolder {
     If the user is already in the authUsers map, the time is updated else the user is added to the map.
      */
     public void listener(ParsedResponse parsedResponse) {
-        AbstractUser abstractUser = new AbstractUser(parsedResponse.username(), plugin);
+        AbstractUser abstractUser = new AbstractUser(parsedResponse.username(), plugin, null);
         if (!abstractUser.user().isOnline() || abstractUser.user() instanceof CommonConsoleUser) {
             return;
         }

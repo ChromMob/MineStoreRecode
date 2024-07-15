@@ -7,19 +7,26 @@ import java.util.UUID;
 
 public class AbstractUser {
     private final CommonUser user;
+    private final Object nativeCommandSender;
 
-    public AbstractUser(UUID uniqueId, MineStoreCommon plugin) {
+    public AbstractUser(UUID uniqueId, MineStoreCommon plugin, Object nativeCommandSender) {
+        this.nativeCommandSender = nativeCommandSender;
         if (uniqueId == null) {
             user = new CommonConsoleUser(plugin);
         } else
             user = plugin.userGetter().get(uniqueId);
     }
 
-    public AbstractUser(String username, MineStoreCommon plugin) {
+    public AbstractUser(String username, MineStoreCommon plugin, Object nativeCommandSender) {
+        this.nativeCommandSender = nativeCommandSender;
         if (username == null) {
             user = new CommonConsoleUser(plugin);
         } else
             user = plugin.userGetter().get(username);
+    }
+
+    public Object nativeCommandSender() {
+        return nativeCommandSender;
     }
 
     public CommonUser user() {

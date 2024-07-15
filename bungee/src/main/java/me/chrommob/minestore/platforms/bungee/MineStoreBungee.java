@@ -41,8 +41,8 @@ public class MineStoreBungee extends Plugin {
         common.registerCommandExecuter(new CommandExecuterBungee(this));
         common.registerPlayerJoinListener(new PlayerEventListenerBungee(this, common));
 
-        final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null, common);
-        final Function<AbstractUser, CommandSender> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? getProxy().getConsole() : getProxy().getPlayer(abstractUser.user().getName());
+        final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null, common, commandSender);
+        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.nativeCommandSender();
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
             @Override
             public @NonNull AbstractUser map(@NonNull CommandSender base) {

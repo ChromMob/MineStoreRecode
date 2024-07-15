@@ -17,15 +17,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
-import org.incendo.cloud.paper.PaperCommandManager;
 
-import java.util.UUID;
 import java.util.function.Function;
 
 public final class MineStoreBukkit extends JavaPlugin {
@@ -59,11 +56,9 @@ public final class MineStoreBukkit extends JavaPlugin {
         new BukkitInventoryEvent(this, common);
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
-                ? new AbstractUser((String) null, common)
-                : new AbstractUser(((HumanEntity) commandSender).getUniqueId(), common);
-        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (abstractUser
-                .user() instanceof CommonConsoleUser) ? Bukkit.getConsoleSender()
-                        : Bukkit.getServer().getPlayer(abstractUser.user().getUUID());
+                ? new AbstractUser((String) null, common, commandSender)
+                : new AbstractUser(((HumanEntity) commandSender).getUniqueId(), common, commandSender);
+        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.nativeCommandSender();
 
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
             @Override
