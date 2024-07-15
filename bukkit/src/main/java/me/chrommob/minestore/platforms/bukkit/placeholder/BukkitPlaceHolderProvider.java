@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.placeholder;
 
+import me.chrommob.minestore.addons.placeholder.PlaceHolderManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProvider;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
@@ -11,6 +12,8 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+import java.util.function.BiFunction;
 public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements CommonPlaceHolderProvider {
     private final MineStoreCommon plugin;
     public BukkitPlaceHolderProvider(MineStoreBukkit plugin, MineStoreCommon pl) {
@@ -52,6 +55,22 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
             return "";
         }
         try {
+            Map<String, BiFunction<String, String, String>> placeHolders = PlaceHolderManager.getInstance().getPlaceHolders();
+            if (placeHolders.containsKey(params)) {
+                String value = placeHolders.get(params).apply(p.getName(), params);
+                plugin.debug("Placeholder: " + params + " = " + value);
+                return value;
+            } else {
+                String regexTest = placeHolders.keySet().stream()
+                        .filter(stringStringFunction -> stringStringFunction.matches(params))
+                        .findFirst()
+                        .orElse(null);
+                if (regexTest != null) {
+                    String value = placeHolders.get(regexTest).apply(p.getName(), params);
+                    plugin.debug("Placeholder: " + params + " = " + value);
+                    return value;
+                }
+            }
             if (params.contains("top_donator_username_")) {
                 int arg = Integer.parseInt(params.replaceFirst("top_donator_username_", ""));
                 plugin.debug("Top donator username: " + data.getTopDonators().get(arg - 1).getUserName() + " (" + arg + ")");
