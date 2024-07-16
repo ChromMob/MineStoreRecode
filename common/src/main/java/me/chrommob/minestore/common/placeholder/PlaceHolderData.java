@@ -90,7 +90,9 @@ public class PlaceHolderData {
                                 Type listType = new TypeToken<List<DonationGoal>>() {
                                 }.getType();
                                 List<DonationGoal> donationGoals = gson.fromJson(line, listType);
-                                donationGoal = donationGoals.get(0);
+                                if (!donationGoals.isEmpty()) {
+                                    donationGoal = donationGoals.get(0);
+                                }
                             }
                         } catch (JsonSyntaxException e) {
                             plugin.debug(e);
