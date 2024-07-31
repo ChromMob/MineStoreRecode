@@ -18,16 +18,14 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class PlaceHolderData {
     private DonationGoal donationGoal;
     private MineStoreCommon plugin;
     private List<LastDonator> lastDonators;
     private List<TopDonator> topDonators;
-    private final List<URI> apiUrls = new ArrayList<>();
+    private final URI[] apiUrls = new URI[3];
 
     private final Gson gson = new Gson();
     private Thread thread = null;
@@ -61,9 +59,9 @@ public class PlaceHolderData {
             URI donationGoalUrl = new URI(finalDonationGoalUrl);
             URI lastDonatorsUrl = new URI(finalLastDonatorsUrl);
             URI topDonatorsUrl = new URI(finalTopDonatorsUrl);
-            apiUrls.add(donationGoalUrl);
-            apiUrls.add(lastDonatorsUrl);
-            apiUrls.add(topDonatorsUrl);
+            apiUrls[0] = donationGoalUrl;
+            apiUrls[1] = lastDonatorsUrl;
+            apiUrls[2] = topDonatorsUrl;
         } catch (Exception e) {
             plugin.debug(e);
             plugin.log("STORE URL has invalid format!");
@@ -82,7 +80,7 @@ public class PlaceHolderData {
 
                 while ((line = reader.readLine()) != null) {
                     plugin.debug("Received: " + line);
-                    if (apiUrl.equals(apiUrls.toArray()[0])) {
+                    if (apiUrl.equals(apiUrls[0])) {
                         try {
                             if (!MineStoreCommon.version().requires("3.0.0")) {
                                 donationGoal = gson.fromJson(line, DonationGoal.class);
@@ -98,7 +96,7 @@ public class PlaceHolderData {
                             plugin.debug(e);
                             donationGoal = new DonationGoal();
                         }
-                    } else if (apiUrl.equals(apiUrls.toArray()[1])) {
+                    } else if (apiUrl.equals(apiUrls[1])) {
                         Type listType = new TypeToken<List<LastDonator>>() {
                         }.getType();
                         try {
@@ -107,7 +105,7 @@ public class PlaceHolderData {
                             plugin.debug(e);
                             lastDonators = new ArrayList<>();
                         }
-                    } else if (apiUrl.equals(apiUrls.toArray()[2])) {
+                    } else if (apiUrl.equals(apiUrls[2])) {
                         Type listType = new TypeToken<List<TopDonator>>() {
                         }.getType();
                         try {
