@@ -166,7 +166,9 @@ public class MineStoreCommon {
         version = MineStoreVersion.getMineStoreVersion(this);
         placeHolderData = new PlaceHolderData(this);
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
-            databaseManager = new DatabaseManager(this);
+            if (databaseManager == null) {
+                databaseManager = new DatabaseManager(this);
+            }
         }
         if (!reload)
             registerEssentialCommands();
@@ -187,13 +189,13 @@ public class MineStoreCommon {
             if (placeHolderProvider != null) {
                 placeHolderProvider.init();
             }
+            if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+                databaseManager.start();
+            }
             registerCommands();
         }
         initialized = true;
         statsSender.start();
-        if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
-            databaseManager.start();
-        }
         guiData.start();
         placeHolderData.start();
         commandGetter.start();
@@ -326,6 +328,7 @@ public class MineStoreCommon {
                 }
                 databaseManager.start();
             } else {
+                databaseManager.stop();
                 if (!databaseManager().load()) {
                     log("Failed to reload database.");
                     return;

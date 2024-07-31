@@ -7,7 +7,6 @@ import me.chrommob.minestore.common.config.ConfigKey;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +44,7 @@ public class DatabaseManager {
         this.plugin = plugin;
     }
 
-    private Map<String, PlayerData> playerData = new ConcurrentHashMap<>();
+    private final Map<String, PlayerData> playerData = new ConcurrentHashMap<>();
 
     public void onPlayerJoin(String name) {
         playerData.put(name, new PlayerData(plugin.userGetter().get(name)));
@@ -88,30 +87,26 @@ public class DatabaseManager {
     private boolean tryType(DatabaseType type) {
         finalUrl = type.protocol() + host + ":" + port + "/" + database
                 + "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
-        try {
-            HikariConfig hikari = new HikariConfig();
-            hikari.setJdbcUrl(finalUrl);
-            hikari.setUsername(username);
-            switch (type) {
-                case MARIADB:
-                    driverClass = "me.chrommob.minestore.libs.org.mariadb.jdbc.Driver";
-                    break;
-                case MYSQL:
-                    driverClass = "me.chrommob.minestore.libs.com.mysql.cj.jdbc.Driver";
-                    break;
-            }
-            hikari.setDriverClassName(driverClass);
-            hikari.setPassword(password);
-            hikari.setMaximumPoolSize(10);
-            hikari.setConnectionTimeout(5000);
-            hikari.setLeakDetectionThreshold(5000);
-            hikari.setConnectionTestQuery("SELECT 1");
-            hikari.setIdleTimeout(600000);
-            hikari.setMaxLifetime(1800000);
-            HikariDataSource hikariDataSource = new HikariDataSource(hikari);
-            Connection conn = hikariDataSource.getConnection();
-            conn.close();
-            hikariDataSource.close();
+        HikariConfig hikari = new HikariConfig();
+        hikari.setJdbcUrl(finalUrl);
+        hikari.setUsername(username);
+        switch (type) {
+            case MARIADB:
+                driverClass = "me.chrommob.minestore.libs.org.mariadb.jdbc.Driver";
+                break;
+            case MYSQL:
+                driverClass = "me.chrommob.minestore.libs.com.mysql.cj.jdbc.Driver";
+                break;
+        }
+        hikari.setDriverClassName(driverClass);
+        hikari.setPassword(password);
+        hikari.setMaximumPoolSize(10);
+        hikari.setConnectionTimeout(5000);
+        hikari.setLeakDetectionThreshold(5000);
+        hikari.setConnectionTestQuery("SELECT 1");
+        hikari.setIdleTimeout(600000);
+        hikari.setMaxLifetime(1800000);
+        try (HikariDataSource hikariDataSource = new HikariDataSource(hikari); Connection ignored = hikariDataSource.getConnection()) {
             return true;
         } catch (Exception e) {
             plugin.debug("Could not connect to database using " + type.name());
@@ -138,7 +133,7 @@ public class DatabaseManager {
         }
     }
 
-    private Runnable updater = () -> {
+    private final Runnable updater = () -> {
         while (true) {
             update();
             try {
@@ -160,85 +155,44 @@ public class DatabaseManager {
         if (changed.isEmpty()) {
             return;
         }
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = hikari.getConnection();
+        try (Connection conn = hikari.getConnection()) {
             for (PlayerData data : changed) {
                 plugin.debug("Updating " + data.getName());
                 String update = "INSERT INTO playerdata (uuid, username, prefix, suffix, balance, player_group) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE username = ?, prefix = ?, suffix = ?, balance = ?, player_group = ?";
-                ps = conn.prepareStatement(update);
-                ps.setString(1, data.getUuid().toString());
-                ps.setString(2, data.getName());
-                ps.setString(3, data.getPrefix());
-                ps.setString(4, data.getSuffix());
-                ps.setDouble(5, data.getBalance());
-                ps.setString(6, data.getPlayerGroup());
-                ps.setString(7, data.getName());
-                ps.setString(8, data.getPrefix());
-                ps.setString(9, data.getSuffix());
-                ps.setDouble(10, data.getBalance());
-                ps.setString(11, data.getPlayerGroup());
-                ps.executeUpdate();
+                try (PreparedStatement ps = conn.prepareStatement(update)) {
+                    ps.setString(1, data.getUuid().toString());
+                    ps.setString(2, data.getName());
+                    ps.setString(3, data.getPrefix());
+                    ps.setString(4, data.getSuffix());
+                    ps.setDouble(5, data.getBalance());
+                    ps.setString(6, data.getPlayerGroup());
+                    ps.setString(7, data.getName());
+                    ps.setString(8, data.getPrefix());
+                    ps.setString(9, data.getSuffix());
+                    ps.setDouble(10, data.getBalance());
+                    ps.setString(11, data.getPlayerGroup());
+                    ps.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             plugin.debug(e);
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    plugin.debug(e);
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    plugin.debug(e);
-                }
-            }
         }
     }
 
     private void createTable() {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
+        String createTable = "CREATE TABLE IF NOT EXISTS playerdata"
+                + "  (uuid           VARCHAR(255) UNIQUE,"
+                + "   username       VARCHAR(255) NOT NULL default '',"
+                + "   prefix         VARCHAR(255) NOT NULL default '',"
+                + "   suffix         VARCHAR(255) NOT NULL default '',"
+                + "   balance             DOUBLE NOT NULL default 0.00,"
+                + "   player_group          VARCHAR(255) NOT NULL default 0,"
+                + "   PRIMARY KEY  (uuid));";
+        try (Connection conn = hikari.getConnection(); PreparedStatement ps = conn.prepareStatement(createTable)) {
             plugin.debug(hikari == null ? "Connection is null" : "Connection is not null");
-            conn = hikari.getConnection();
-            String createTable = "CREATE TABLE IF NOT EXISTS playerdata"
-                    + "  (uuid           VARCHAR(255) UNIQUE,"
-                    + "   username       VARCHAR(255) NOT NULL default '',"
-                    + "   prefix         VARCHAR(255) NOT NULL default '',"
-                    + "   suffix         VARCHAR(255) NOT NULL default '',"
-                    + "   balance             DOUBLE NOT NULL default 0.00,"
-                    + "   player_group          VARCHAR(255) NOT NULL default 0,"
-                    + "   PRIMARY KEY  (uuid));";
-            ps = conn.prepareStatement(createTable);
             ps.executeUpdate();
         } catch (SQLException e) {
             plugin.debug(e);
-        } finally {
-            close(conn, ps, null);
         }
-    }
-
-    private void close(Connection conn, PreparedStatement ps, ResultSet res) {
-        if (conn != null)
-            try {
-                conn.close();
-            } catch (SQLException ignored) {
-            }
-        if (ps != null)
-            try {
-                ps.close();
-            } catch (SQLException ignored) {
-            }
-        if (res != null)
-            try {
-                res.close();
-            } catch (SQLException ignored) {
-            }
     }
 }
