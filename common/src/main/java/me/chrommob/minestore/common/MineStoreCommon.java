@@ -184,15 +184,15 @@ public class MineStoreCommon {
             return;
         }
         if (!reload) {
+            if (placeHolderProvider != null) {
+                placeHolderProvider.init();
+            }
             registerCommands();
         }
         initialized = true;
         statsSender.start();
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             databaseManager.start();
-        }
-        if (placeHolderProvider != null) {
-            placeHolderProvider.init();
         }
         guiData.start();
         placeHolderData.start();
