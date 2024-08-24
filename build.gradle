@@ -132,13 +132,13 @@ def finalJar = tasks.register('finalJar', Jar) {
     destinationDirectory = file("${projectDir}/build/libs/")
 }
 
-//fabricProject.afterEvaluate {
-//    finalJar.configure {
-//        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
-//            it.archiveFile
-//        })
-//    }
-//}
+fabricProject.afterEvaluate {
+    finalJar.configure {
+        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
+            it.archiveFile
+        })
+    }
+}
 
 
 velocityProject.afterEvaluate {
