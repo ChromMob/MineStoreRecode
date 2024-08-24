@@ -23,7 +23,7 @@ public class AuthCommand {
             user.sendMessage("[MineStore] You can't use this command from console!");
             return;
         }
-        AuthUser authUser = plugin.authHolder().getAuthUser(user.getName());
+        AuthUser authUser = plugin.authHolder().getAuthUser(user.getName().toLowerCase());
         if (authUser == null) {
             user.sendMessage((plugin.miniMessage()).deserialize((String)plugin.configReader().get(ConfigKey.AUTH_FAILURE_MESSAGE)));
             return;

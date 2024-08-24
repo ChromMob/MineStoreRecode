@@ -114,7 +114,7 @@ public final class AuthHolder {
         }
         AuthUser authUser = authUsers.getOrDefault(parsedResponse.username(), null);
         if (authUser == null) {
-            authUsers.put(parsedResponse.username(), new AuthUser(plugin, abstractUser.user(), parsedResponse, System.currentTimeMillis()));
+            authUsers.put(parsedResponse.username().toLowerCase(), new AuthUser(plugin, abstractUser.user(), parsedResponse, System.currentTimeMillis()));
         } else {
             authUser.setTime(System.currentTimeMillis());
         }
