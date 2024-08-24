@@ -149,12 +149,11 @@ velocityProject.afterEvaluate {
     }
 }
 
+def addonApiProject = project(":MineStoreAddonApi")
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
-
-            artifact finalJar
+            from addonApiProject.components.java
         }
     }
     repositories {
