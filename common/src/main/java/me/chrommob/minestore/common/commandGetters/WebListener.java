@@ -77,14 +77,19 @@ public class WebListener implements CommandGetter {
                     if (!wasEmpty) {
                         switch (parsedResponse.type()) {
                             case COMMAND:
-                                plugin.commandStorage().listener(parsedResponse);
+                                MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStorePurchaseEvent.COMMAND_TYPE.ONLINE : MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
+                                event.call();
+                                if (event.isCancelled()) {
+                                    return;
+                                }
+                                ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStorePurchaseEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
+                                plugin.commandStorage().listener(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
                                 plugin.debug("Got command: " + "\"" + parsedResponse.command() + "\""
                                         + " with id: " + parsedResponse.commandId() + " for player: "
                                         + parsedResponse.username() + " requires online: "
                                         + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
                                                 ? "true"
                                                 : "false"));
-                                new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStorePurchaseEvent.COMMAND_TYPE.ONLINE : MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
                                 break;
                             case AUTH:
                                 plugin.debug("Got auth for player: " + parsedResponse.username() + " with id: "

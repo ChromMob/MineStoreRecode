@@ -1,21 +1,29 @@
 package me.chrommob.minestore.addons.events.types;
 
-import me.chrommob.minestore.addons.events.MineStoreEvent;
+import me.chrommob.minestore.addons.events.MineStoreCancellableEvent;
 
-public class MineStorePurchaseEvent extends MineStoreEvent {
+public class MineStorePurchaseEvent extends MineStoreCancellableEvent {
     public enum COMMAND_TYPE {
         ONLINE,
         OFFLINE
     }
 
     private final String username;
-    private final String command;
+    private String command;
     private final int id;
-    private final COMMAND_TYPE commandType;
+    private COMMAND_TYPE commandType;
     public MineStorePurchaseEvent(String username, String command, int id, COMMAND_TYPE commandType) {
         this.username = username;
         this.command = command;
         this.id = id;
+        this.commandType = commandType;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    public void setCommandType(COMMAND_TYPE commandType) {
         this.commandType = commandType;
     }
 

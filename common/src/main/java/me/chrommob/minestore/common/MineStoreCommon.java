@@ -155,7 +155,7 @@ public class MineStoreCommon {
     public void init(boolean reload) {
         statsSender = new StatSender(this);
         registerAddons();
-        new MineStoreLoadEvent();
+        new MineStoreLoadEvent().call();
         miniMessage = MiniMessage.miniMessage();
         commandDumper = new CommandDumper(this);
         newCommandDumper = new NewCommandDumper(this);
@@ -201,7 +201,7 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         commandGetter.start();
-        new MineStoreEnableEvent();
+        new MineStoreEnableEvent().call();
     }
 
     private void registerAddons() {
@@ -226,13 +226,17 @@ public class MineStoreCommon {
                 Yaml yaml = new Yaml();
                 HashMap<String, String> object = yaml.load(zipFile.getInputStream(zipEntry));
                 String mainClass = object.get("main-class");
+                if (mainClass == null) {
+                    log("Addon " + file.getName() + " does not contain main-class attribute!");
+                    continue;
+                }
                 ClassLoader dependencyClassLoader = getClass().getClassLoader();
                 log("Loading addon " + mainClass + " from " + file.getName() + "...");
                 URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
                 Class<?> cls = urlClassLoader.loadClass(mainClass);
                 try {
-                    MineStoreAddon addon = (MineStoreAddon) cls.newInstance();
+                    MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
                     addons.add(addon);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -244,7 +248,7 @@ public class MineStoreCommon {
     }
 
     public void stop() {
-        new MineStoreDisableEvent();
+        new MineStoreDisableEvent().call();
         log("Shutting down...");
         if (statsSender != null)
             statsSender.stop();
@@ -301,7 +305,7 @@ public class MineStoreCommon {
     }
 
     public void reload() {
-        new MineStoreReloadEvent();
+        new MineStoreReloadEvent().call();
         log("Reloading...");
         configReader.reload();
         if (!initialized) {

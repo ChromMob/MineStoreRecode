@@ -43,13 +43,22 @@ public class EventBusTest {
     @Test
     public void testPurchase() {
         MineStoreEventBus.registerListener(MineStorePurchaseEvent.class, event -> {
+            event.setCancelled(true);
             Assert.assertEquals("test", event.username());
             Assert.assertEquals("test", event.command());
             Assert.assertEquals(0, event.id());
             Assert.assertEquals(MineStorePurchaseEvent.COMMAND_TYPE.ONLINE, event.commandType());
+            event.setCommandType(MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
+            event.setCommand("test 2");
             purchase = true;
         });
-        new MineStorePurchaseEvent("test", "test", 0, MineStorePurchaseEvent.COMMAND_TYPE.ONLINE).call();
+        MineStorePurchaseEvent event = new MineStorePurchaseEvent("test", "test", 0, MineStorePurchaseEvent.COMMAND_TYPE.ONLINE);
+        event.call();
+        if (!event.isCancelled()) {
+            Assert.fail("Event should be cancelled");
+        }
+        Assert.assertEquals("test 2", event.command());
+        Assert.assertEquals(MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE, event.commandType());
         Assert.assertTrue(purchase);
     }
 
