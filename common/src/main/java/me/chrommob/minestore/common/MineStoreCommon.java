@@ -33,6 +33,7 @@ import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
+import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
@@ -165,6 +166,7 @@ public class MineStoreCommon {
         guiData = new GuiData(this);
         version = MineStoreVersion.getMineStoreVersion(this);
         placeHolderData = new PlaceHolderData(this);
+        SubscriptionUtil.init(this);
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
@@ -286,12 +288,15 @@ public class MineStoreCommon {
         // });
         annotationParser.parse(new AuthCommand(this));
         annotationParser.parse(new SetupCommand(this));
-        annotationParser.parse(new VersionCommand(this));
+        annotationParser.parse(new VersionCommand());
         if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             annotationParser.parse(new StoreCommand(this));
         }
         if (configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
             annotationParser.parse(new BuyCommand(this));
+        }
+        if (version.requires(new MineStoreVersion(3, 0, 8))) {
+            annotationParser.parse(new SubscriptionsCommand(this));
         }
     }
 
