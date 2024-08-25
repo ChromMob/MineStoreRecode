@@ -1,5 +1,6 @@
 package me.chrommob;
 
+import me.chrommob.minestore.addons.MineStoreAddon;
 import me.chrommob.minestore.addons.events.*;
 import me.chrommob.minestore.addons.events.types.*;
 import org.junit.Assert;
@@ -13,9 +14,11 @@ public class EventBusTest {
     private boolean reload = false;
     private boolean customEvent = false;
 
+    private MineStoreAddon addon = () -> "test";
+
     @Test
     public void testDisable() {
-        MineStoreEventBus.registerListener(MineStoreDisableEvent.class, event -> {
+        MineStoreEventBus.registerListener(addon, MineStoreDisableEvent.class, event -> {
             disabled = true;
         });
         new MineStoreDisableEvent().call();
@@ -24,7 +27,7 @@ public class EventBusTest {
 
     @Test
     public void testEnable() {
-        MineStoreEventBus.registerListener(MineStoreEnableEvent.class, event -> {
+        MineStoreEventBus.registerListener(addon,MineStoreEnableEvent.class, event -> {
             enabled = true;
         });
         new MineStoreEnableEvent().call();
@@ -33,7 +36,7 @@ public class EventBusTest {
 
     @Test
     public void testLoad() {
-        MineStoreEventBus.registerListener(MineStoreLoadEvent.class, event -> {
+        MineStoreEventBus.registerListener(addon, MineStoreLoadEvent.class, event -> {
             loaded = true;
         });
         new MineStoreLoadEvent().call();
@@ -42,7 +45,7 @@ public class EventBusTest {
 
     @Test
     public void testPurchase() {
-        MineStoreEventBus.registerListener(MineStorePurchaseEvent.class, event -> {
+        MineStoreEventBus.registerListener(addon, MineStorePurchaseEvent.class, event -> {
             event.setCancelled(true);
             Assert.assertEquals("test", event.username());
             Assert.assertEquals("test", event.command());
@@ -64,7 +67,7 @@ public class EventBusTest {
 
     @Test
     public void testReload() {
-        MineStoreEventBus.registerListener(MineStoreReloadEvent.class, event -> {
+        MineStoreEventBus.registerListener(addon, MineStoreReloadEvent.class, event -> {
             reload = true;
         });
         new MineStoreReloadEvent().call();
@@ -73,7 +76,7 @@ public class EventBusTest {
 
     @Test
     public void testCustomEvent() {
-        MineStoreEventBus.registerListener(CustomEventExample.class, event -> {
+        MineStoreEventBus.registerListener(addon, CustomEventExample.class, event -> {
             Assert.assertEquals("test", event.getMessage());
             customEvent = true;
         });

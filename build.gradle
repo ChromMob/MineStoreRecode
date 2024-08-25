@@ -160,7 +160,7 @@ publishing {
         mavenLocal()
     }
 }
-tasks.generateMetadataFileForMavenJavaPublication.dependsOn assemble
+tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.jar
 
 
 

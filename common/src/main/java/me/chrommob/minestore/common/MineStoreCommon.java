@@ -35,23 +35,15 @@ import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
-import org.incendo.cloud.annotations.suggestion.SuggestionProviderFactory;
-import org.incendo.cloud.context.CommandContext;
-import org.incendo.cloud.context.CommandInput;
-import org.incendo.cloud.injection.ParameterInjectorRegistry;
-import org.incendo.cloud.suggestion.Suggestion;
-import org.incendo.cloud.suggestion.SuggestionProvider;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -156,7 +148,8 @@ public class MineStoreCommon {
         this.commandStorage = commandStorage;
     }
 
-    private final Set<String> addons = new HashSet<>();
+    private final Set<MineStoreAddon> addons = new HashSet<>();
+    private final Set<String> addonClasses = new HashSet<>();
 
     private boolean initialized = false;
 
@@ -233,12 +226,17 @@ public class MineStoreCommon {
                 Yaml yaml = new Yaml();
                 HashMap<String, String> object = yaml.load(zipFile.getInputStream(zipEntry));
                 String mainClass = object.get("main-class");
+                String name = object.get("name");
                 if (mainClass == null) {
                     log("Addon " + file.getName() + " does not contain main-class attribute!");
                     continue;
                 }
+                if (name == null) {
+                    log("Addon " + file.getName() + " does not contain name attribute!");
+                    continue;
+                }
                 ClassLoader dependencyClassLoader = getClass().getClassLoader();
-                log("Loading addon " + mainClass + " from " + file.getName() + "...");
+                log("Loading addon " + name + " from " + file.getName() + "...");
                 URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
                 Class<?> cls = urlClassLoader.loadClass(mainClass);
@@ -246,13 +244,15 @@ public class MineStoreCommon {
                     log("Addon " + file.getName() + " does not implement MineStoreAddon!");
                     continue;
                 }
-                if (addons.contains(mainClass)) {
+                if (addonClasses.contains(mainClass)) {
                     log("Addon " + file.getName() + " is already loaded!");
                     continue;
                 }
-                addons.add(mainClass);
+                addonClasses.add(mainClass);
                 try {
-                    cls.getConstructor().newInstance();
+                    MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
+                    addons.add(addon);
+                    log("Loaded addon " + addon.getName() + " from " + file.getName());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -260,6 +260,10 @@ public class MineStoreCommon {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String getAddons() {
+        return addons.stream().map(MineStoreAddon::getName).collect(Collectors.joining(", "));
     }
 
     public void stop() {
@@ -290,6 +294,7 @@ public class MineStoreCommon {
         annotationParser.parse(new ReloadCommand(this));
         annotationParser.parse(new DumpCommand(this));
         annotationParser.parse(new SetupCommand(this));
+        annotationParser.parse(new AddonCommand(this));
     }
 
     private AnnotationParser<AbstractUser> annotationParser;

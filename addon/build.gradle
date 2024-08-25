@@ -13,5 +13,5 @@ repositories {
 }
 
 dependencies {
-    compileOnly "me.chrommob:MineStoreAddonApi:3.0.0"
+    compileOnly "me.chrommob:MineStore:3.0.0"
 }
