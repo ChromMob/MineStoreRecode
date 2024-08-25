@@ -75,6 +75,13 @@ buy-gui:
     description: <white>%description%
     # Format of the price of the package.
     price: '<green>Price: </green><gold>%price%USD</gold>'
+  subscription:
+    # Message that is sent to the player when they run the /minestore subscriptions command.
+    title: <red><bold>Subscriptions:</red>
+    # Format the message returned by the API.
+    status: <dark_green>%message%</dark_green>
+    # Format of the URL of the subscription management.
+    url: <click:open_url:%url%><yellow>%url%</yellow></click>
 ```
 ## Language
 ### en_US.yml
@@ -109,6 +116,10 @@ buy-gui:
   - Allows the player to use the `/minestore setup` command. This command allows the player to edit the config.yml file in-game.
 - **minestore.store**
   - Allows the player to use the `/store` command. This command sends the player link to the MineStore website.
+- **minestore.subscriptions**
+  - Allows the player to use the `/minestore subscriptions` command. This command allows the player to display subscriptions.
+- **minestore.addons**
+  - Allows the player to use the `/minestore addons` command. This command allows the player to see all loaded addons.
 ## Placeholders
 - TopDonators
   - **%ms_top_donator_username_number%**
@@ -144,97 +155,3 @@ buy-gui:
 ## Addons
 ### Where to put addons
 Addons should be placed in the `plugins/MineStore/addons` folder.
-
-### Where to get addons
-You can get the official addon from the same website as the plugin from my [JENKINS](https://js.chrommob.fun) server here: [MineStore Addon](https://js.chrommob.fun/job/MineStoreAddons/)
-
-### What does the official addon do?
-The official addon adds the following features:
-- **UserInfo**
-  - This feature allows you to display all the information about the player in the GUI. The packages they purchased, how many times they donated, how much money they donated, etc.
-- **Announcements**
-  - This feature allows you to send customizable message to players when someone donates, purchases a package, etc.
-- **CustomEconomy**
-  - This feature allows you to use MineStore own economy instead of Vault. This is useful if you want to use virtual currency separate from your server economy.
-The addon is also very secure because everything is stored in remote database and encrypted with AES and RSA just like every communication the addon does.
-
-### Configuring the addon
-The addon is configured in the `plugins/MineStore/addons/<addon_name>/config.yml` file.
-```yaml
-purchase-announcer:
-  # Enables or disables the purchase announcer. If enabled, the plugin will send the message below to all players when someone purchases a package.
-  enabled: true
-  # Message that is sent to all players when someone purchases a package.
-  format: <red><bold>%player%</bold></red> bought <bold>%package%</bold> for <gold>%price%
-user-info:
-  # Enables or disables the user info. If enabled, the plugin will open the GUI with all the information about the player when someone executes the /user <player> command.
-  # /user requires permission: minestoreaddons.userinfo.self to open GUI about yourself. /user <player> command requires permission: minestoreaddons.userinfo.other to open GUI about other players.
-  enabled: true
-  # Message that is sent to the player when the player they are trying to open the GUI about did not buy any packages yet.
-  not-found: <red>%player% did not buy any packages yet.
-  gui:
-    # Title of the GUI.
-    title: <gold>%player%'s packages
-    # Name of the item that is used to display the package name.
-    item: PAPER
-economy:
-  # Enables or disables the custom economy. If enabled, the plugin will use MineStore own economy instead of Vault.
-  enabled: true
-  message:
-    # Message that is sent to the player when they execute the /mse balance command. %amount% is replaced with the amount of money the player has.
-    # Requires permission: ms.economy.balance
-    balance: <red>Your balance is</red> <white><bold>%amount%</bold>.
-    # Message that is sent to the player when they execute the /mse add <amount> command. 
-    # %amount% is replaced with the amount of money the player has added to the player's balance.
-    # Requires permission: ms.economy.add.self
-    add: <gold>Added %amount% to your balance
-    # Message that is sent to the player when they execute the /mse add <player> <amount> command.
-    # %amount% is replaced with the amount of money the player has added to the player's balance.
-    # %player% is replaced with the name of the player the money was added to.
-    # Requires permission: ms.economy.add.other
-    add-other: <gold>Added %amount% to %player%'s balance
-    # Message that is sent to the player when they execute the /mse remove <amount> command.
-    # %amount% is replaced with the amount of money the player has removed from the player's balance.
-    # Requires permission: ms.economy.remove.self
-    remove: <gold>Removed %amount% from your balance
-    # Message that is sent to the player when they execute the /mse remove <player> <amount> command.
-    # %amount% is replaced with the amount of money the player has removed from the player's balance.
-    # %player% is replaced with the name of the player the money was removed from.
-    # Requires permission: ms.economy.remove.other
-    remove-other: <gold>Removed %amount% from %player%'s balance
-    # Message that is sent to the player when they execute the /mse set <amount> command.
-    # %amount% is replaced with the amount of money the player has set their balance to.
-    # Requires permission: ms.economy.set.self
-    set: <gold>Set your balance to %amount%
-    # Message that is sent to the player when they execute the /mse set <player> <amount> command.
-    # %amount% is replaced with the amount of money the player has set the player's balance to.
-    # %player% is replaced with the name of the player the money was set to.
-    # Requires permission: ms.economy.set.other
-    set-other: <gold>Set %player%'s balance to %amount%
-    # Message that is sent to the player when they execute the /mse send <player> <amount> command.
-    # %amount% is replaced with the amount of money the player has sent to the player.
-    # %player% is replaced with the name of the player the money was sent to.
-    # Requires permission: ms.economy.send
-    send: <gold>Sent %amount% to %player%
-    # Message that is sent to the receiver when they receive money from the /mse send <player> <amount> command.
-    # %amount% is replaced with the amount of money the player was sent.
-    # %player% is replaced with the name of the player the money was sent by.
-    # Requires permission: ms.economy.send
-    send-other: <gold>Received %amount% from %player%
-
-# This feature requires player to have the permission: ms.redeem
-manual-redeem:
-  # Enables or disables the manual redeem. If enabled, the plugin will send the message below to the player when they have packages to redeem.
-  enabled: true
-  # Enables or disables the message that is sent to the player when they have join the server and have packages to redeem.
-  message-enabled: true
-  # Message that is sent to the player when they have join the server and have packages to redeem.
-  message: <gold>You have %amount% packages to redeem. Run <bold>/redeem</bold> to redeem them.
-  # Message that is sent to the player when they run the /redeem command and have no packages to redeem.
-  no-packages: <gold>You have no packages to redeem.
-  gui:
-    # Title of the GUI.
-    title: <gold>Redeem packages
-    # Name of the item that is used to display the package in the GUI.
-    item: PAPER
-```
