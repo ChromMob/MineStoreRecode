@@ -7,6 +7,9 @@ import me.chrommob.minestore.common.config.ConfigKey;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 public class StatSender {
@@ -16,6 +19,7 @@ public class StatSender {
     private final String PLATFORM_TYPE;
     private final String PLATFORM_NAME;
     private final String PLATFORM_VERSION;
+    private final String PLUGIN_VERSION;
     private final int CORE_COUNT;
     private final String SYSTEM_ARCHITECTURE;
     private final Gson gson = new Gson();
@@ -23,13 +27,33 @@ public class StatSender {
 
     public StatSender(MineStoreCommon common) {
         this.common = common;
-        SERVERUUID = UUID.fromString((String) common.configReader().get(ConfigKey.SERVER_UUID));
+        SERVERUUID = generateUUIDFromStrings(common, (String) common.configReader().get(ConfigKey.STORE_URL), (String) common.configReader().get(ConfigKey.API_KEY), (String) common.configReader().get(ConfigKey.SECRET_KEY));
         JAVA_VERSION = System.getProperty("java.version");
         PLATFORM_TYPE = common.getPlatform();
         PLATFORM_NAME = common.getPlatformName();
         PLATFORM_VERSION = common.getPlatformVersion();
+        PLUGIN_VERSION = common.jarFile().getName().substring(common.jarFile().getName().indexOf("-") + 1, common.jarFile().getName().indexOf(".jar"));
         CORE_COUNT = Runtime.getRuntime().availableProcessors();
         SYSTEM_ARCHITECTURE = System.getProperty("os.arch");
+    }
+
+    public static UUID generateUUIDFromStrings(MineStoreCommon common, String... strings) {
+        try {
+            // Combine the strings
+            StringBuilder combined = new StringBuilder();
+            for (String s : strings) {
+                combined.append(s);
+            }
+
+            // Create a hash of the combined string
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(combined.toString().getBytes(StandardCharsets.UTF_8));
+
+            return UUID.nameUUIDFromBytes(hash);
+        } catch (NoSuchAlgorithmException e) {
+            common.log("SHA-256 algorithm not found, generating random UUID");
+            return UUID.randomUUID();
+        }
     }
 
     public void stop() {
@@ -43,8 +67,10 @@ public class StatSender {
         thread = new Thread(() -> {
             while (true) {
                 int playerCount = common.userGetter().getAllPlayers().size();
-                StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE);
-                statJson.send(playerCount);
+                StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE);
+                statJson.setPlayerCount(playerCount);
+                String json = gson.toJson(statJson);
+                common.debug("Sending stat json: " + json);
                 HttpsURLConnection connection = null;
                 try {
                     connection = (HttpsURLConnection) new java.net.URL("https://api.chrommob.fun/minestore/data").openConnection();
@@ -52,7 +78,7 @@ public class StatSender {
                     connection.setRequestProperty("Content-Type", "application/json");
                     connection.setDoOutput(true);
                     connection.setDoInput(true);
-                    connection.getOutputStream().write(gson.toJson(statJson).getBytes());
+                    connection.getOutputStream().write(json.getBytes());
                     connection.getOutputStream().flush();
                     connection.getOutputStream().close();
                     connection.getInputStream().close();

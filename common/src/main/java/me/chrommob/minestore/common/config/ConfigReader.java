@@ -295,11 +295,8 @@ public class ConfigReader {
         return configYaml.get(location);
     }
 
-    private String encodedApiKey = null;
     public String getEncodedApiKey() {
-        if (encodedApiKey != null) return encodedApiKey;
-        encodedApiKey = URLEncoder.encode((String) (get(ConfigKey.API_KEY)));
-        return encodedApiKey;
+        return URLEncoder.encode((String) (get(ConfigKey.API_KEY)));
     }
 
     public void set(ConfigKey key, Object value) {

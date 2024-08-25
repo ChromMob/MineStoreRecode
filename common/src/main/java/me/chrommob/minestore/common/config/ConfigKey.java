@@ -48,9 +48,7 @@ public enum ConfigKey
 
     SUBSCRIPTION_TITLE(new Configuration("subscription.title", "<red><bold>Subscriptions:</red>")),
     SUBSCRIPTION_MESSAGE(new Configuration("subscription.status", "<dark_green>%message%</dark_green>")),
-    SUBSCRIPTION_URL(new Configuration("subscription.url", "<click:open_url:%url%><yellow>%url%</yellow></click>")),
-
-    SERVER_UUID(new Configuration("server-uuid", UUID.randomUUID().toString()));
+    SUBSCRIPTION_URL(new Configuration("subscription.url", "<click:open_url:%url%><yellow>%url%</yellow></click>"));
 
     private final Configuration configuration;
 

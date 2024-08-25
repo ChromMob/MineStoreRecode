@@ -10,6 +10,12 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
+import org.incendo.cloud.annotations.suggestion.Suggestions;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.context.CommandInput;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class SetupCommand {
@@ -19,9 +25,8 @@ public class SetupCommand {
     }
 
     @Permission("minestore.setup")
-    @Command("minestore|ms setup [key] [value]")
-//    @CommandCompletion("@configKeys")
-    public void onSetupCommand(AbstractUser user, @Argument("key") String key, @Argument("value") String value) {
+    @Command("minestore|ms setup [configKey] [value]")
+    public void onSetupCommand(AbstractUser user, @Argument(value = "configKey", suggestions = "configKeys") String key, @Argument("value") String value) {
         CommonUser commonUser = user.user();
         if (key == null || value == null) {
             for (ConfigKey configKey : ConfigKey.values()) {
@@ -69,4 +74,14 @@ public class SetupCommand {
         commonUser.sendMessage(Component.text("Successfully set ").color(NamedTextColor.GREEN).append(Component.text(key.toUpperCase()).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD)).append(Component.text(" to ").color(NamedTextColor.GREEN)).append(Component.text(value).color(NamedTextColor.WHITE).decorate(TextDecoration.BOLD)));
         plugin.reload();
     }
+
+    @Suggestions("configKeys")
+    public Set<String> suggestions(CommandContext<AbstractUser> context, CommandInput input) {
+        Set<String> keys = new HashSet<>();
+        for (ConfigKey key : ConfigKey.values()) {
+            keys.add(key.name().toUpperCase());
+        }
+        return keys;
+    }
+
 }

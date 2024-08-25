@@ -35,19 +35,27 @@ import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.annotations.suggestion.SuggestionProviderFactory;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.context.CommandInput;
+import org.incendo.cloud.injection.ParameterInjectorRegistry;
+import org.incendo.cloud.suggestion.Suggestion;
+import org.incendo.cloud.suggestion.SuggestionProvider;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class MineStoreCommon {
-    private static MineStoreCommon instance;
     private ConfigReader configReader;
     private File configFile;
     private CommandExecuterCommon commandExecuterCommon;
@@ -148,13 +156,13 @@ public class MineStoreCommon {
         this.commandStorage = commandStorage;
     }
 
-    private final Set<MineStoreAddon> addons = new HashSet<>();
+    private final Set<String> addons = new HashSet<>();
 
     private boolean initialized = false;
 
     public void init(boolean reload) {
-        statsSender = new StatSender(this);
         registerAddons();
+        statsSender = new StatSender(this);
         new MineStoreLoadEvent().call();
         miniMessage = MiniMessage.miniMessage();
         commandDumper = new CommandDumper(this);
@@ -194,8 +202,8 @@ public class MineStoreCommon {
             if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
                 databaseManager.start();
             }
-            registerCommands();
         }
+        registerCommands();
         initialized = true;
         statsSender.start();
         guiData.start();
@@ -216,8 +224,7 @@ public class MineStoreCommon {
             if (!file.getName().endsWith(".jar")) {
                 continue;
             }
-            try {
-                ZipFile zipFile = new ZipFile(file);
+            try (ZipFile zipFile = new ZipFile(file)) {
                 if (zipFile.getEntry("addon.yml") == null) {
                     log("Addon " + file.getName() + " does not contain addon.yml!");
                     continue;
@@ -235,9 +242,17 @@ public class MineStoreCommon {
                 URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
                 Class<?> cls = urlClassLoader.loadClass(mainClass);
+                if (!MineStoreAddon.class.isAssignableFrom(cls)) {
+                    log("Addon " + file.getName() + " does not implement MineStoreAddon!");
+                    continue;
+                }
+                if (addons.contains(mainClass)) {
+                    log("Addon " + file.getName() + " is already loaded!");
+                    continue;
+                }
+                addons.add(mainClass);
                 try {
-                    MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
-                    addons.add(addon);
+                    cls.getConstructor().newInstance();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -268,12 +283,13 @@ public class MineStoreCommon {
         if (commandManager == null) {
             return;
         }
-        this.annotationParser = new AnnotationParser<>(
+        annotationParser = new AnnotationParser<>(
                 /* Manager */ this.commandManager,
                 /* Command sender type */ AbstractUser.class);
-        this.annotationParser.parse(new AutoSetupCommand(this));
-        this.annotationParser.parse(new ReloadCommand(this));
-        this.annotationParser.parse(new DumpCommand(this));
+        annotationParser.parse(new AutoSetupCommand(this));
+        annotationParser.parse(new ReloadCommand(this));
+        annotationParser.parse(new DumpCommand(this));
+        annotationParser.parse(new SetupCommand(this));
     }
 
     private AnnotationParser<AbstractUser> annotationParser;
@@ -291,7 +307,6 @@ public class MineStoreCommon {
         // return keys;
         // });
         annotationParser.parse(new AuthCommand(this));
-        annotationParser.parse(new SetupCommand(this));
         annotationParser.parse(new VersionCommand());
         if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
             annotationParser.parse(new StoreCommand(this));
@@ -348,6 +363,10 @@ public class MineStoreCommon {
     }
 
     private boolean verify() {
+        if (playerEventListener == null) {
+            log("PlayerEventListener is not registered.");
+            return false;
+        }
         if (commandManager == null) {
             log("CommandManager is not registered.");
             return false;
