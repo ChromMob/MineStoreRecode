@@ -9,7 +9,10 @@ import org.incendo.cloud.annotations.Permission;
 
 @SuppressWarnings("unused")
 public class BuyCommand {
-
+    private final MineStoreCommon plugin;
+    public BuyCommand(MineStoreCommon plugin) {
+        this.plugin = plugin;
+    }
     @Permission("minestore.buy")
     @Command("buy")
     public void onBuy(AbstractUser user) {
@@ -18,6 +21,6 @@ public class BuyCommand {
             commonUser.sendMessage("[MineStore] You can't use this command from console!");
             return;
         }
-        MineStoreCommon.getInstance().runOnMainThread(() -> MineStoreCommon.getInstance().guiData().getGuiInfo().handleInventoryClick(commonUser, null));
+        plugin.runOnMainThread(() -> plugin.guiData().getGuiInfo().handleInventoryClick(commonUser, null));
     }
 }

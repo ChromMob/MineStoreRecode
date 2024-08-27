@@ -9,6 +9,11 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import java.util.UUID;
 
 public class CommonConsoleUser extends CommonUser {
+    private final MineStoreCommon plugin;
+    public CommonConsoleUser(MineStoreCommon plugin) {
+        super(plugin);
+        this.plugin = plugin;
+    }
 
     @Override
     public String getName() {
@@ -17,12 +22,12 @@ public class CommonConsoleUser extends CommonUser {
 
     @Override
     public void sendMessage(String message) {
-        MineStoreCommon.getInstance().log(message);
+        plugin.log(message);
     }
 
     @Override
     public void sendMessage(Component message) {
-        MineStoreCommon.getInstance().log(PlainTextComponentSerializer.plainText().serialize(message));
+        plugin.log(PlainTextComponentSerializer.plainText().serialize(message));
     }
 
     @Override
@@ -42,12 +47,12 @@ public class CommonConsoleUser extends CommonUser {
 
     @Override
     public void openInventory(CommonInventory inventory) {
-        MineStoreCommon.getInstance().log("Console can't open inventory");
+        plugin.log("Console can't open inventory");
     }
 
     @Override
     public void closeInventory() {
-        MineStoreCommon.getInstance().log("Console can't close inventory");
+        plugin.log("Console can't close inventory");
     }
 
     @Override

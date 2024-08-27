@@ -11,14 +11,14 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 public class VaultEconomyProvider implements PlayerEconomyProvider {
     private final MineStoreBukkit mineStoreBukkit;
     private final Economy economy;
-    public VaultEconomyProvider(MineStoreBukkit mineStoreBukkit) {
+    public VaultEconomyProvider(MineStoreBukkit mineStoreBukkit, MineStoreCommon plugin) {
         this.mineStoreBukkit = mineStoreBukkit;
         Economy economy = null;
         try {
             RegisteredServiceProvider<Economy> rsp = mineStoreBukkit.getServer().getServicesManager().getRegistration(Economy.class);
             economy = rsp.getProvider();
         } catch (Exception e) {
-            MineStoreCommon.getInstance().log("No economy plugin is installed.");
+            plugin.log("No economy plugin is installed.");
         }
         this.economy = economy;
     }

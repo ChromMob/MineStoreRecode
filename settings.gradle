@@ -27,10 +27,12 @@ include "bukkit"
 include "velocity"
 include "bungee"
 //include "sponge"
-//include "fabric"
+include "fabric"
+include 'addon-api'
 
 project(":bukkit").name = "MineStore-Bukkit"
 project(":velocity").name = "MineStore-Velocity"
 project(":bungee").name = "MineStore-Bungee"
 //project(":sponge").name = "MineStore-Sponge"
-//project(":fabric").name = "MineStore-Fabric"
+project(":fabric").name = "MineStore-Fabric"
+project(':addon-api').name = 'MineStoreAddonApi'

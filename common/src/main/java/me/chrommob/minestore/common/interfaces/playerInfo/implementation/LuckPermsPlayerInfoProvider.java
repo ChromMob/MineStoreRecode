@@ -8,11 +8,11 @@ import net.luckperms.api.LuckPermsProvider;
 
 public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
     private final LuckPerms luckPerms;
-    public LuckPermsPlayerInfoProvider() {
+    public LuckPermsPlayerInfoProvider(MineStoreCommon plugin) {
         try {
             Class.forName("net.luckperms.api.LuckPermsProvider");
         } catch (ClassNotFoundException e) {
-            MineStoreCommon.getInstance().debug("LuckPerms are not installed on this server.");
+            plugin.debug("LuckPerms are not installed on this server.");
             luckPerms = null;
             return;
         }
@@ -21,7 +21,7 @@ public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
         try {
             luckPerms = LuckPermsProvider.get();
         } catch (IllegalStateException e) {
-            MineStoreCommon.getInstance().debug("LuckPerms are not installed on this server.");
+            plugin.debug("LuckPerms are not installed on this server.");
         }
         this.luckPerms = luckPerms;
     }

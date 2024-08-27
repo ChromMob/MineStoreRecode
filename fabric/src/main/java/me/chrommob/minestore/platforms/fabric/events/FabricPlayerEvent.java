@@ -5,12 +5,12 @@ import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 
 public class FabricPlayerEvent implements PlayerEventListener {
-    public FabricPlayerEvent() {
+    public FabricPlayerEvent(MineStoreCommon pl) {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            MineStoreCommon.getInstance().onPlayerJoin(handler.getPlayer().getName().getString());
+            pl.onPlayerJoin(handler.getPlayer().getName().getString());
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            MineStoreCommon.getInstance().onPlayerQuit(handler.getPlayer().getName().getString());
+            pl.onPlayerQuit(handler.getPlayer().getName().getString());
         });
     }
 }

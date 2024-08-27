@@ -1,6 +1,5 @@
 package me.chrommob.minestore.common.dumper;
 
-import com.sun.jna.platform.FileUtils;
 import me.chrommob.minestore.common.MineStoreCommon;
 
 import java.io.BufferedReader;
@@ -9,21 +8,24 @@ import java.io.FileReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Set;
 
 @SuppressWarnings("FieldCanBeLocal unused")
 public class DumpData {
-    private final String version = MineStoreCommon.getInstance().jarFile().getAbsolutePath();
-    private final String platform = MineStoreCommon.getInstance().getPlatform();
-    private final String plaformName = MineStoreCommon.getInstance().getPlatformName();
-    private final String platformVersion = MineStoreCommon.getInstance().getPlatformVersion();
+    private final String version;
+    private final String platform;
+    private final String plaformName;
+    private final String platformVersion;
     private final Map<String, Object> config;
     private String log = "Log file not found or too large to dump.";
 
-    public DumpData(boolean includeLog) {
-        this.config = MineStoreCommon.getInstance().configReader().getLoadedConfig();
+    public DumpData(boolean includeLog, MineStoreCommon plugin) {
+        this.config = plugin.configReader().getLoadedConfig();
+        this.version = plugin.jarFile().getAbsolutePath();
+        this.platform = plugin.getPlatform();
+        this.plaformName = plugin.getPlatformName();
+        this.platformVersion = plugin.getPlatformVersion();
         Path logPath = Paths.get(
-                MineStoreCommon.getInstance().jarFile().getParentFile().getParentFile().getAbsolutePath(), "logs",
+                plugin.jarFile().getParentFile().getParentFile().getAbsolutePath(), "logs",
                 "latest.log");
         if (!includeLog) {
             return;

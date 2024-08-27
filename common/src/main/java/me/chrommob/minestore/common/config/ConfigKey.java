@@ -5,6 +5,7 @@ import java.util.UUID;
 public enum ConfigKey
 {
     DEBUG(new Configuration("debug", false)),
+    COMMAND_LOGGING(new Configuration("command-execution-logging", false)),
     LANGUAGE(new Configuration("language", "en_US")),
 
     STORE_URL(new Configuration("store-url", "https://store.example.com")),
@@ -44,8 +45,10 @@ public enum ConfigKey
     MYSQL_DATABASE(new Configuration("mysql.database", "minestore")),
     MYSQL_USERNAME(new Configuration("mysql.username", "root")),
     MYSQL_PASSWORD(new Configuration("mysql.password", "password")),
-    SERVER_UUID(new Configuration("server-uuid", UUID.randomUUID().toString()));
 
+    SUBSCRIPTION_TITLE(new Configuration("subscription.title", "<red><bold>Subscriptions:</red>")),
+    SUBSCRIPTION_MESSAGE(new Configuration("subscription.status", "<dark_green>%message%</dark_green>")),
+    SUBSCRIPTION_URL(new Configuration("subscription.url", "<click:open_url:%url%><yellow>%url%</yellow></click>"));
 
     private final Configuration configuration;
 

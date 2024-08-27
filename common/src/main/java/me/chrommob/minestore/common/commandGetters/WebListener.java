@@ -2,6 +2,7 @@ package me.chrommob.minestore.common.commandGetters;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import me.chrommob.minestore.addons.events.types.MineStorePurchaseEvent;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
@@ -15,29 +16,40 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WebListener implements CommandGetter {
-    private final MineStoreCommon mineStoreCommon;
+    private final MineStoreCommon plugin;
     private final ConfigReader configReader;
     private final Gson gson = new Gson();
     private boolean wasEmpty = false;
     private URL queueUrl;
     private URL executedUrl;
+    private URL deliveredUrl;
     private Thread thread = null;
+    private final Set<String> toPostExecuted = new HashSet<>();
     public Runnable runnable = new Runnable() {
         @Override
         public void run() {
             while (true) {
                 if (wasEmpty) {
                     try {
-                        Thread.sleep(25000);
+                        Thread.sleep(9000);
                         wasEmpty = false;
                     } catch (InterruptedException e) {
                         break;
                     }
                     continue;
                 }
-                mineStoreCommon.debug("[WebListener] Running...");
+                if (!toPostExecuted.isEmpty()) {
+                    Set<String> toPostExecutedCopy = new HashSet<>(toPostExecuted);
+                    toPostExecuted.clear();
+                    for (String id : toPostExecutedCopy) {
+                        postExecutedAsync(id);
+                    }
+                }
+                plugin.debug("[WebListener] Running...");
                 try {
                     ParsedResponse parsedResponse = null;
                     GsonReponse response;
@@ -56,7 +68,7 @@ public class WebListener implements CommandGetter {
                         }
                     }
                     if (wasEmpty || parsedResponse == null || parsedResponse.username() == null) {
-                        mineStoreCommon.debug("Got empty response from server");
+                        plugin.debug("Got empty response from server");
                         wasEmpty = true;
                     }
                     reader.close();
@@ -65,9 +77,14 @@ public class WebListener implements CommandGetter {
                     if (!wasEmpty) {
                         switch (parsedResponse.type()) {
                             case COMMAND:
-                                mineStoreCommon.listener().onPurchase(parsedResponse.clone());
-                                mineStoreCommon.commandStorage().listener(parsedResponse);
-                                mineStoreCommon.debug("Got command: " + "\"" + parsedResponse.command() + "\""
+                                MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStorePurchaseEvent.COMMAND_TYPE.ONLINE : MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
+                                event.call();
+                                if (event.isCancelled()) {
+                                    return;
+                                }
+                                ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStorePurchaseEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
+                                plugin.commandStorage().listener(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
+                                plugin.debug("Got command: " + "\"" + parsedResponse.command() + "\""
                                         + " with id: " + parsedResponse.commandId() + " for player: "
                                         + parsedResponse.username() + " requires online: "
                                         + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
@@ -75,18 +92,25 @@ public class WebListener implements CommandGetter {
                                                 : "false"));
                                 break;
                             case AUTH:
-                                mineStoreCommon.debug("Got auth for player: " + parsedResponse.username() + " with id: "
+                                plugin.debug("Got auth for player: " + parsedResponse.username() + " with id: "
                                         + parsedResponse.authId());
-                                mineStoreCommon.authHolder().listener(parsedResponse);
+                                plugin.authHolder().listener(parsedResponse);
                                 break;
                         }
-                        post(parsedResponse);
+                        if (MineStoreCommon.version().requires("3.0.0")) {
+                            postDelivered(String.valueOf(parsedResponse.commandId()));
+                            if (parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.OFFLINE) {
+                                postExecuted(String.valueOf(parsedResponse.commandId()));
+                            }
+                        } else {
+                            postExecuted(String.valueOf(parsedResponse.commandId()));
+                        }
                     }
                 } catch (IOException e) {
-                    MineStoreCommon.getInstance().debug(e);
+                    plugin.debug(e);
                 }
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     break;
                 }
@@ -94,15 +118,16 @@ public class WebListener implements CommandGetter {
         }
     };
 
-    public WebListener(MineStoreCommon mineStoreCommon) {
-        this.mineStoreCommon = mineStoreCommon;
-        configReader = mineStoreCommon.configReader();
+    public WebListener(MineStoreCommon plugin) {
+        this.plugin = plugin;
+        configReader = plugin.configReader();
     }
 
     @Override
     public boolean load() {
         String finalQueueUrl;
         String finalExecutedUrl;
+        String finalDeliveredUrl;
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
@@ -111,16 +136,20 @@ public class WebListener implements CommandGetter {
             finalQueueUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/queue";
             finalExecutedUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY)
                     + "/commands/executed/";
+            finalDeliveredUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY)
+                    + "/commands/delivered/";
         } else {
             finalQueueUrl = storeUrl + "/api/servers/commands/queue";
             finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
+            finalDeliveredUrl = storeUrl + "/api/servers/commands/delivered/";
         }
         try {
             queueUrl = new URL(finalQueueUrl);
             executedUrl = new URL(finalExecutedUrl);
+            deliveredUrl = new URL(finalDeliveredUrl);
         } catch (Exception e) {
-            mineStoreCommon.log("Store URL is not a valid URL!");
-            MineStoreCommon.getInstance().debug(e);
+            plugin.log("Store URL is not a valid URL!");
+            plugin.debug(e);
             return false;
         }
         try {
@@ -136,20 +165,20 @@ public class WebListener implements CommandGetter {
                     if (line.equals("{}")) {
                         wasEmpty = true;
                     } else {
-                        MineStoreCommon.getInstance().debug(e);
-                        mineStoreCommon.debug(e);
-                        mineStoreCommon.log("SECRET KEY is invalid!");
+                        plugin.debug(e);
+                        plugin.debug(e);
+                        plugin.log("SECRET KEY is invalid!");
                         return false;
                     }
                 }
             }
         } catch (IOException e) {
-            mineStoreCommon.log("SECRET KEY is invalid!");
-            MineStoreCommon.getInstance().debug(e);
+            plugin.log("SECRET KEY is invalid!");
+            plugin.debug(e);
             return false;
         } catch (ClassCastException e) {
-            mineStoreCommon.log("STORE URL has to start with https://");
-            MineStoreCommon.getInstance().debug(e);
+            plugin.log("STORE URL has to start with https://");
+            plugin.debug(e);
             return false;
         }
         return true;
@@ -171,11 +200,10 @@ public class WebListener implements CommandGetter {
         }
     }
 
-    private void post(ParsedResponse response) {
+    private void postDelivered(String id) {
         try {
-            String id = String.valueOf(response.commandId());
-            URL url = new URL(executedUrl + id);
-            MineStoreCommon.getInstance().debug("Posting to: " + url);
+            URL url = new URL(deliveredUrl + id);
+            plugin.debug("Posting to: " + url);
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
             urlConnection.setRequestMethod("POST");
             urlConnection.setDoOutput(true);
@@ -186,7 +214,29 @@ public class WebListener implements CommandGetter {
             urlConnection.getInputStream();
             urlConnection.disconnect();
         } catch (IOException e) {
-            MineStoreCommon.getInstance().debug(e);
+            plugin.debug(e);
+        }
+    }
+
+    public void postExecuted(String id) {
+        toPostExecuted.add(id);
+    }
+
+    public void postExecutedAsync(String id) {
+        try {
+            URL url = new URL(executedUrl + id);
+            plugin.debug("Posting to: " + url);
+            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setDoOutput(true);
+            urlConnection.connect();
+            try (final OutputStream os = urlConnection.getOutputStream()) {
+                os.write(id.getBytes());
+            }
+            urlConnection.getInputStream();
+            urlConnection.disconnect();
+        } catch (IOException e) {
+            plugin.debug(e);
         }
     }
 

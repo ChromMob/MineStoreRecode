@@ -1,0 +1,17 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    compileOnly "me.chrommob:MineStore:3.0.0"
+}

@@ -10,17 +10,24 @@ import org.incendo.cloud.annotations.Permission;
 
 @SuppressWarnings("unused")
 public class AutoSetupCommand {
+    private final MineStoreCommon plugin;
+    public AutoSetupCommand(MineStoreCommon plugin) {
+        this.plugin = plugin;
+    }
     @Permission("minestore.autosetup")
     @Command("minestore|ms autosetup <storeUrl> <apiKey> <secretKey>")
     public void onAutoSetup(AbstractUser abstractUser, @Argument("storeUrl") String storeUrl, @Argument("apiKey") String apiKey, @Argument("secretKey") String secretKey) {
         CommonUser user = abstractUser.user();
         user.sendMessage("Auto setup started!");
         user.sendMessage("Store URL: " + storeUrl);
-        MineStoreCommon.getInstance().configReader().set(ConfigKey.STORE_URL, storeUrl);
-        MineStoreCommon.getInstance().configReader().set(ConfigKey.API_ENABLED, true);
-        MineStoreCommon.getInstance().configReader().set(ConfigKey.API_KEY, apiKey);
-        MineStoreCommon.getInstance().configReader().set(ConfigKey.SECRET_ENABLED, true);
-        MineStoreCommon.getInstance().configReader().set(ConfigKey.SECRET_KEY, secretKey);
-        MineStoreCommon.getInstance().reload();
+        if (!storeUrl.endsWith("/")) {
+            storeUrl += "/";
+        }
+        plugin.configReader().set(ConfigKey.STORE_URL, storeUrl);
+        plugin.configReader().set(ConfigKey.API_ENABLED, true);
+        plugin.configReader().set(ConfigKey.API_KEY, apiKey);
+        plugin.configReader().set(ConfigKey.SECRET_ENABLED, true);
+        plugin.configReader().set(ConfigKey.SECRET_KEY, secretKey);
+        plugin.reload();
     }
 }

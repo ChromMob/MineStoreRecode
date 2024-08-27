@@ -9,17 +9,19 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class BukkitPlayerEvent implements Listener, PlayerEventListener {
-    public BukkitPlayerEvent(MineStoreBukkit plugin) {
+    private final MineStoreCommon plugin;
+    public BukkitPlayerEvent(MineStoreBukkit plugin, MineStoreCommon pl) {
+        this.plugin = pl;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        MineStoreCommon.getInstance().onPlayerJoin(event.getPlayer().getName());
+        plugin.onPlayerJoin(event.getPlayer().getName());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        MineStoreCommon.getInstance().onPlayerQuit(event.getPlayer().getName());
+        plugin.onPlayerQuit(event.getPlayer().getName());
     }
 }

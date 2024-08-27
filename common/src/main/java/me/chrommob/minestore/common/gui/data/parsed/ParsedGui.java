@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParsedGui {
+    private final MineStoreCommon plugin;
     private final List<ParsedCategory> categories = new ArrayList<>();
     private final CommonInventory inventory;
-    public ParsedGui(List<Category> categories) {
+    public ParsedGui(List<Category> categories, MineStoreCommon plugin) {
+        this.plugin = plugin;
         for (Category category : categories) {
-            this.categories.add(new ParsedCategory(category));
+            this.categories.add(new ParsedCategory(category, plugin));
         }
         this.inventory = this.getInventory();
     }
@@ -36,8 +38,8 @@ public class ParsedGui {
         for (ParsedCategory category : this.categories) {
             items.add(category.getItem());
         }
-        CommonInventory inventory = new CommonInventory(MineStoreCommon.getInstance().miniMessage().deserialize((String) MineStoreCommon.getInstance().configReader().get(ConfigKey.BUY_GUI_CATEGORY_TITLE)), 54, items);
-        MineStoreCommon.getInstance().guiData().getGuiInfo().formatInventory(inventory, true);
+        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize((String) plugin.configReader().get(ConfigKey.BUY_GUI_CATEGORY_TITLE)), 54, items);
+        plugin.guiData().getGuiInfo().formatInventory(inventory, true);
         return inventory;
     }
 

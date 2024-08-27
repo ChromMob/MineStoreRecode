@@ -57,7 +57,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '1.1.7'
+    version = '3.0.0'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -84,6 +84,8 @@ allprojects {
     processResources {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
+
+
 }
 
 subprojects {
@@ -92,10 +94,14 @@ subprojects {
         apply plugin: 'io.github.goooler.shadow'
     }
 
-    if (project.name != "common") {
+    if (project.name != "common" && project.name != "MineStoreAddonApi") {
         dependencies {
             implementation project(path: ':common', configuration: 'shadow')
         }
+    }
+
+    dependencies {
+        testImplementation 'junit:junit:4.13.2'
     }
 
     processResources {
@@ -116,7 +122,7 @@ subprojects {
 
 
 
-//def fabricProject = project(":MineStore-Fabric")
+def fabricProject = project(":MineStore-Fabric")
 def velocityProject = project(":MineStore-Velocity")
 def finalJar = tasks.register('finalJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -126,13 +132,13 @@ def finalJar = tasks.register('finalJar', Jar) {
     destinationDirectory = file("${projectDir}/build/libs/")
 }
 
-//fabricProject.afterEvaluate {
-//    finalJar.configure {
-//        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
-//            it.archiveFile
-//        })
-//    }
-//}
+fabricProject.afterEvaluate {
+    finalJar.configure {
+        from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
+            it.archiveFile
+        })
+    }
+}
 
 
 velocityProject.afterEvaluate {
@@ -143,26 +149,23 @@ velocityProject.afterEvaluate {
     }
 }
 
-assemble.dependsOn(finalJar)
-
+def addonApiProject = project(":MineStoreAddonApi")
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
-
-            artifact finalJar
+            from addonApiProject.components.java
         }
     }
     repositories {
         mavenLocal()
     }
 }
-tasks.generateMetadataFileForMavenJavaPublication.dependsOn assemble
+tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.jar
 
 
 
 shadowJar {
-    relocate "cloud.commandframework", "me.chrommob.minestore.libs.cloud.commandframework"
+    relocate "org.incendo", "me.chrommob.minestore.libs.org.incendo"
     relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
     relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
@@ -173,6 +176,7 @@ shadowJar {
     }
     exclude "META-INF/*.SF"
 }
+
 
 dependencies {
     implementation project(path: ':common', configuration: 'shadow')

@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BukkitInventoryEvent implements Listener {
-    public BukkitInventoryEvent(MineStoreBukkit plugin) {
+    private final MineStoreCommon plugin;
+    public BukkitInventoryEvent(MineStoreBukkit plugin, MineStoreCommon pl) {
+        this.plugin = pl;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -23,8 +25,8 @@ public class BukkitInventoryEvent implements Listener {
         if (eventTitle == null) return;
         if (event.getCurrentItem() == null) return;
         boolean isMineStoreGui = false;
-        if (MineStoreCommon.getInstance().guiData() == null || MineStoreCommon.getInstance().guiData().getGuiInfo() == null || MineStoreCommon.getInstance().guiData().getGuiInfo().getTitles() == null) return;
-        for (Component title : MineStoreCommon.getInstance().guiData().getGuiInfo().getTitles()) {
+        if (plugin.guiData() == null || plugin.guiData().getGuiInfo() == null || plugin.guiData().getGuiInfo().getTitles() == null) return;
+        for (Component title : plugin.guiData().getGuiInfo().getTitles()) {
             String titleString = BukkitComponentSerializer.legacy().serialize(title);
             if (eventTitle.equals(titleString)) {
                 isMineStoreGui = true;
@@ -33,11 +35,10 @@ public class BukkitInventoryEvent implements Listener {
             }
         }
         if (!isMineStoreGui) {
-            for (Component title : MineStoreCommon.getInstance().guiData().getGuiInfo().getCustomTitles()) {
+            for (Component title : plugin.guiData().getGuiInfo().getCustomTitles()) {
                 String titleString = BukkitComponentSerializer.legacy().serialize(title);
                 if (eventTitle.equals(titleString)) {
                     event.setCancelled(true);
-                    MineStoreCommon.getInstance().listener().onClick(new CommonItem(BukkitComponentSerializer.legacy().deserialize(event.getCurrentItem().getItemMeta().getDisplayName()), event.getCurrentItem().getType().toString(), new ArrayList<>()), MineStoreCommon.getInstance().userGetter().get(event.getWhoClicked().getUniqueId()), title);
                     return;
                 }
             }
@@ -53,6 +54,6 @@ public class BukkitInventoryEvent implements Listener {
             }
         }
         CommonItem item = new CommonItem(name, event.getCurrentItem().getType().toString(), lore);
-        MineStoreCommon.getInstance().guiData().getGuiInfo().handleInventoryClick(MineStoreCommon.getInstance().userGetter().get(event.getWhoClicked().getUniqueId()), item);
+        plugin.guiData().getGuiInfo().handleInventoryClick(plugin.userGetter().get(event.getWhoClicked().getUniqueId()), item);
     }
 }

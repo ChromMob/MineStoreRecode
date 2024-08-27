@@ -8,15 +8,16 @@ import org.bukkit.Bukkit;
 public class CommandExecuterBukkit implements CommandExecuterCommon {
 
     private final MineStoreBukkit plugin;
+    private final MineStoreCommon pl;
 
-
-    public CommandExecuterBukkit(MineStoreBukkit plugin) {
+    public CommandExecuterBukkit(MineStoreBukkit plugin, MineStoreCommon pl) {
         this.plugin = plugin;
+        this.pl = pl;
     }
 
     @Override
     public void execute(String command) {
-        MineStoreCommon.getInstance().runOnMainThread(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+        pl.runOnMainThread(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
     }
 
     @Override

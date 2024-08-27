@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.placeholder;
 
+import me.chrommob.minestore.addons.placeholder.PlaceHolderManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProvider;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
@@ -11,16 +12,18 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+import java.util.function.BiFunction;
 public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements CommonPlaceHolderProvider {
-    private final MineStoreBukkit plugin;
-    public BukkitPlaceHolderProvider(MineStoreBukkit plugin) {
-        this.plugin = plugin;
+    private final MineStoreCommon plugin;
+    public BukkitPlaceHolderProvider(MineStoreBukkit plugin, MineStoreCommon pl) {
+        this.plugin = pl;
     }
 
     @Override
     public void init() {
         if (!this.register()) {
-            MineStoreCommon.getInstance().log("Failed to register PlaceHolderAPI expansion!");
+            plugin.log("Failed to register PlaceHolderAPI expansion!");
         }
     }
 
@@ -46,15 +49,31 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
 
     @Override
     public String onPlaceholderRequest(Player p, @NotNull String params) {
-        PlaceHolderData data = MineStoreCommon.getInstance().placeHolderData();
-        MineStoreCommon.getInstance().debug("Placeholder: " + params);
+        PlaceHolderData data = plugin.placeHolderData();
+        plugin.debug("Placeholder: " + params);
         if (data == null) {
             return "";
         }
         try {
+            Map<String, BiFunction<String, String, String>> placeHolders = PlaceHolderManager.getInstance().getPlaceHolders();
+            if (placeHolders.containsKey(params)) {
+                String value = placeHolders.get(params).apply(p.getName(), params);
+                plugin.debug("Placeholder: " + params + " = " + value);
+                return value;
+            } else {
+                String regexTest = placeHolders.keySet().stream()
+                        .filter(stringStringFunction -> stringStringFunction.matches(params))
+                        .findFirst()
+                        .orElse(null);
+                if (regexTest != null) {
+                    String value = placeHolders.get(regexTest).apply(p.getName(), params);
+                    plugin.debug("Placeholder: " + params + " = " + value);
+                    return value;
+                }
+            }
             if (params.contains("top_donator_username_")) {
                 int arg = Integer.parseInt(params.replaceFirst("top_donator_username_", ""));
-                MineStoreCommon.getInstance().debug("Top donator username: " + data.getTopDonators().get(arg - 1).getUserName() + " (" + arg + ")");
+                plugin.debug("Top donator username: " + data.getTopDonators().get(arg - 1).getUserName() + " (" + arg + ")");
                 return data.getTopDonators().get(arg - 1).getUserName();
             }
             if (params.contains("top_donator_price_")) {
@@ -111,7 +130,7 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
                 return serializer.serialize(component);
             }
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug("Placeholder error: " + e.getMessage());
+            plugin.debug("Placeholder error: " + e.getMessage());
             return "";
         }
         return "";

@@ -10,6 +10,14 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
+import org.incendo.cloud.annotations.suggestion.Suggestions;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.context.CommandInput;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class SetupCommand {
@@ -19,22 +27,22 @@ public class SetupCommand {
     }
 
     @Permission("minestore.setup")
-    @Command("minestore|ms setup [key] [value]")
-//    @CommandCompletion("@configKeys")
-    public void onSetupCommand(AbstractUser user, @Argument("key") String key, @Argument("value") String value) {
+    @Command("minestore|ms setup [configKey] [value]")
+    public void onSetupCommand(AbstractUser user, @Argument(value = "configKey", suggestions = "configKeys") String key, @Argument("value")  String value) {
         CommonUser commonUser = user.user();
-        if (key == null || value == null) {
-            for (ConfigKey configKey : ConfigKey.values()) {
-                String keyName = configKey.name().toUpperCase();
-                String keyValue = plugin.configReader().get(configKey).toString();
-                commonUser.sendMessage(Component.text(keyName).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD));
-                commonUser.sendMessage(Component.text("Current value: ").color(NamedTextColor.GRAY).append(Component.text(keyValue).color(NamedTextColor.WHITE)).append(Component.text(" | ").color(NamedTextColor.GRAY)).append(Component.text("CHANGE VALUE: /minestore setup " + keyName + " <value>").color(NamedTextColor.RED)).decorate(TextDecoration.BOLD));
-            }
+        if (key == null) {
+            commonUser.sendMessage(Component.text("Config keys: ").color(NamedTextColor.GRAY).append(Component.text(Arrays.stream(ConfigKey.values()).map(ConfigKey::name).map(String::toUpperCase).collect(Collectors.joining(", "))).color(NamedTextColor.WHITE)).append(Component.text(" | ").color(NamedTextColor.GRAY)).append(Component.text("CHANGE VALUE: /minestore setup <configKey> <value>").color(NamedTextColor.RED)).decorate(TextDecoration.BOLD));
             return;
         }
-        ConfigKey configKey = ConfigKey.valueOf(key.toUpperCase());
-        if (configKey == null) {
+        ConfigKey configKey;
+        try {
+            configKey = ConfigKey.valueOf(key.toUpperCase());
+        } catch (IllegalArgumentException e) {
             commonUser.sendMessage(Component.text("Invalid key!").color(NamedTextColor.RED));
+            return;
+        }
+        if (value == null) {
+            commonUser.sendMessage(Component.text("Current value: ").color(NamedTextColor.GRAY).append(Component.text(plugin.configReader().get(configKey).toString()).color(NamedTextColor.WHITE)).append(Component.text(" | ").color(NamedTextColor.GRAY)).append(Component.text("CHANGE VALUE: /minestore setup " + key.toUpperCase() + " <value>").color(NamedTextColor.RED)).decorate(TextDecoration.BOLD));
             return;
         }
         //Cast value to the correct type
@@ -67,6 +75,16 @@ public class SetupCommand {
             return;
         }
         commonUser.sendMessage(Component.text("Successfully set ").color(NamedTextColor.GREEN).append(Component.text(key.toUpperCase()).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD)).append(Component.text(" to ").color(NamedTextColor.GREEN)).append(Component.text(value).color(NamedTextColor.WHITE).decorate(TextDecoration.BOLD)));
-        MineStoreCommon.getInstance().reload();
+        plugin.reload();
     }
+
+    @Suggestions("configKeys")
+    public Set<String> suggestions(CommandContext<AbstractUser> context, CommandInput input) {
+        Set<String> keys = new HashSet<>();
+        for (ConfigKey key : ConfigKey.values()) {
+            keys.add(key.name().toUpperCase());
+        }
+        return keys;
+    }
+
 }

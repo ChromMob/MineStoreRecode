@@ -9,17 +9,19 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 public class PlayerEventListenerBungee implements Listener, PlayerEventListener {
-    public PlayerEventListenerBungee(MineStoreBungee mineStoreBungee) {
+    private final MineStoreCommon plugin;
+    public PlayerEventListenerBungee(MineStoreBungee mineStoreBungee, MineStoreCommon pl) {
+        this.plugin = pl;
         mineStoreBungee.getProxy().getPluginManager().registerListener(mineStoreBungee, this);
     }
 
     @EventHandler
     public void onPlayerJoin(PostLoginEvent event) {
-        MineStoreCommon.getInstance().onPlayerJoin(event.getPlayer().getName());
+        plugin.onPlayerJoin(event.getPlayer().getName());
     }
 
     @EventHandler
     public void onPlayerQuit(ServerDisconnectEvent event ) {
-        MineStoreCommon.getInstance().onPlayerQuit(event.getPlayer().getName());
+        plugin.onPlayerQuit(event.getPlayer().getName());
     }
 }

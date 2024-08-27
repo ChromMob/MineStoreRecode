@@ -18,21 +18,24 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class PlaceHolderData {
     private DonationGoal donationGoal;
+    private MineStoreCommon plugin;
     private List<LastDonator> lastDonators;
     private List<TopDonator> topDonators;
-    private final List<URI> apiUrls = new ArrayList<>();
+    private final URI[] apiUrls = new URI[3];
 
     private final Gson gson = new Gson();
     private Thread thread = null;
+    
+    public PlaceHolderData(MineStoreCommon plugin) {
+        this.plugin = plugin;
+    }
 
     public boolean load() {
-        ConfigReader configReader = MineStoreCommon.getInstance().configReader();
+        ConfigReader configReader = plugin.configReader();
         String finalDonationGoalUrl;
         String finalLastDonatorsUrl;
         String finalTopDonatorsUrl;
@@ -56,16 +59,16 @@ public class PlaceHolderData {
             URI donationGoalUrl = new URI(finalDonationGoalUrl);
             URI lastDonatorsUrl = new URI(finalLastDonatorsUrl);
             URI topDonatorsUrl = new URI(finalTopDonatorsUrl);
-            apiUrls.add(donationGoalUrl);
-            apiUrls.add(lastDonatorsUrl);
-            apiUrls.add(topDonatorsUrl);
+            apiUrls[0] = donationGoalUrl;
+            apiUrls[1] = lastDonatorsUrl;
+            apiUrls[2] = topDonatorsUrl;
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
-            MineStoreCommon.getInstance().log("STORE URL has invalid format!");
+            plugin.debug(e);
+            plugin.log("STORE URL has invalid format!");
             return false;
         }
         try {
-            MineStoreCommon.getInstance().debug("Loading placeholder data...");
+            plugin.debug("Loading placeholder data...");
             for (URI apiUrl : apiUrls) {
                 URL url = apiUrl.toURL();
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -76,44 +79,51 @@ public class PlaceHolderData {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    if (apiUrl.equals(apiUrls.toArray()[0])) {
+                    plugin.debug("Received: " + line);
+                    if (apiUrl.equals(apiUrls[0])) {
                         try {
-                            donationGoal = gson.fromJson(line, DonationGoal.class);
+                            if (!MineStoreCommon.version().requires("3.0.0")) {
+                                donationGoal = gson.fromJson(line, DonationGoal.class);
+                            } else {
+                                Type listType = new TypeToken<List<DonationGoal>>() {
+                                }.getType();
+                                List<DonationGoal> donationGoals = gson.fromJson(line, listType);
+                                if (!donationGoals.isEmpty()) {
+                                    donationGoal = donationGoals.get(0);
+                                }
+                            }
                         } catch (JsonSyntaxException e) {
-                            MineStoreCommon.getInstance().debug("Error while parsing donation goal from: " + line);
-                            MineStoreCommon.getInstance().debug(e);
+                            plugin.debug(e);
                             donationGoal = new DonationGoal();
                         }
-                    } else if (apiUrl.equals(apiUrls.toArray()[1])) {
+                    } else if (apiUrl.equals(apiUrls[1])) {
                         Type listType = new TypeToken<List<LastDonator>>() {
                         }.getType();
                         try {
                             lastDonators = gson.fromJson(line, listType);
                         } catch (JsonSyntaxException e) {
-                            MineStoreCommon.getInstance().debug("Error while parsing lastDonators goal from " + line);
-                            MineStoreCommon.getInstance().debug(e);
+                            plugin.debug(e);
                             lastDonators = new ArrayList<>();
                         }
-                    } else if (apiUrl.equals(apiUrls.toArray()[2])) {
+                    } else if (apiUrl.equals(apiUrls[2])) {
                         Type listType = new TypeToken<List<TopDonator>>() {
                         }.getType();
                         try {
                             topDonators = gson.fromJson(line, listType);
                         } catch (JsonSyntaxException e) {
-                            MineStoreCommon.getInstance().debug("Error while parsing topDonators goal from " + line);
-                            MineStoreCommon.getInstance().debug(e);
+                            plugin.debug(e);
                             topDonators = new ArrayList<>();
                         }
                     }
                 }
             }
         } catch (IOException e) {
-            MineStoreCommon.getInstance().debug(e);
-            MineStoreCommon.getInstance().log("API KEY is invalid!");
+            plugin.debug(e);
+            plugin.log("API KEY is invalid!");
             return false;
         } catch (ClassCastException e) {
-            MineStoreCommon.getInstance().debug(e);
-            MineStoreCommon.getInstance().log("STORE URL has to start with https://");
+            plugin.debug(e);
+            plugin.log("STORE URL has to start with https://");
             return false;
         }
         return true;
@@ -130,10 +140,10 @@ public class PlaceHolderData {
     private Runnable runnable = () -> {
         while (true) {
             if (!load()) {
-                MineStoreCommon.getInstance().debug("Failed to load placeholder data!");
+                plugin.debug("Failed to load placeholder data!");
             }
             try {
-                Thread.sleep(1000 * 10);
+                Thread.sleep(1000 * 60);
             } catch (InterruptedException e) {
                 break;
             }

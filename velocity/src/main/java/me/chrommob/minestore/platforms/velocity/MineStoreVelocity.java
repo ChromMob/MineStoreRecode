@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.velocity;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -19,8 +20,8 @@ import me.chrommob.minestore.platforms.velocity.webCommand.CommandExecuterVeloci
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.velocity.VelocityCommandManager;
+import org.jetbrains.annotations.NotNull;
 
-import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -46,18 +47,18 @@ public class MineStoreVelocity {
         common.setPlatformVersion(server.getVersion().getVersion());
         common.registerLogger(new VelocityLogger(logger));
         common.registerScheduler(new VelocityScheduler(this));
-        common.registerUserGetter(new VelocityUserGetter(server));
+        common.registerUserGetter(new VelocityUserGetter(server, common));
 
-        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null);
-        final Function<AbstractUser, CommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getConsoleCommandSource() : getServer().getPlayer(abstractUser.user().getUUID()).get();
+        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null, common, commandSource);
+        final Function<AbstractUser, CommandSource> aToC = abstractUser -> (CommandSource) abstractUser.nativeCommandSender();
         final SenderMapper<CommandSource, AbstractUser> senderMapper = new SenderMapper<CommandSource, AbstractUser>() {
             @Override
-            public AbstractUser map(CommandSource base) {
+            public @NotNull AbstractUser map(CommandSource base) {
                 return cToA.apply(base);
             }
 
             @Override
-            public CommandSource reverse(AbstractUser mapped) {
+            public @NotNull CommandSource reverse(AbstractUser mapped) {
                 return aToC.apply(mapped);
             }
         };
@@ -70,7 +71,7 @@ public class MineStoreVelocity {
 
         common.registerCommandExecuter(new CommandExecuterVelocity(server));
         common.setConfigLocation(dataPath.resolve("config.yml").toFile());
-        common.registerPlayerJoinListener(new VelocityPlayerEvent(this, server));
+        common.registerPlayerJoinListener(new VelocityPlayerEvent(this, server, common));
         System.out.println("MineStore has been enabled!");
         common.init(false);
     }

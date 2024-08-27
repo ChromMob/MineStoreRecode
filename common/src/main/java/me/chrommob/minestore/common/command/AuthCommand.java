@@ -11,6 +11,10 @@ import org.incendo.cloud.annotations.Permission;
 
 @SuppressWarnings("unused")
 public class AuthCommand {
+    private final MineStoreCommon plugin;
+    public AuthCommand(MineStoreCommon plugin) {
+        this.plugin = plugin;
+    }
     @Permission("minestore.auth")
     @Command("minestore|ms auth")
     public void onAuth(AbstractUser abstractUser) {
@@ -19,12 +23,12 @@ public class AuthCommand {
             user.sendMessage("[MineStore] You can't use this command from console!");
             return;
         }
-        AuthUser authUser = MineStoreCommon.getInstance().authHolder().getAuthUser(user.getName());
+        AuthUser authUser = plugin.authHolder().getAuthUser(user.getName().toLowerCase());
         if (authUser == null) {
-            user.sendMessage((MineStoreCommon.getInstance().miniMessage()).deserialize((String)MineStoreCommon.getInstance().configReader().get(ConfigKey.AUTH_FAILURE_MESSAGE)));
+            user.sendMessage((plugin.miniMessage()).deserialize((String)plugin.configReader().get(ConfigKey.AUTH_FAILURE_MESSAGE)));
             return;
         }
         authUser.confirmAuth();
-        user.sendMessage((MineStoreCommon.getInstance().miniMessage()).deserialize((String)MineStoreCommon.getInstance().configReader().get(ConfigKey.AUTH_SUCCESS_MESSAGE)));
+        user.sendMessage((plugin.miniMessage()).deserialize((String)plugin.configReader().get(ConfigKey.AUTH_SUCCESS_MESSAGE)));
     }
 }

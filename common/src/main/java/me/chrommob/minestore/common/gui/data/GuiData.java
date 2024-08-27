@@ -19,16 +19,21 @@ import java.net.URL;
 import java.util.List;
 
 public class GuiData {
+    private MineStoreCommon plugin;
+    public GuiData(MineStoreCommon plugin) {
+        this.plugin = plugin;
+        guiOpenener = new GuiOpenener(this);
+    }
     private List<Category> parsedResponse;
     private URL packageURL;
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
-    private GuiOpenener guiOpenener = new GuiOpenener(this);
+    private final GuiOpenener guiOpenener;
     private ParsedGui parsedGui;
     private Thread thread = null;
 
     public boolean load() {
-        ConfigReader configReader = MineStoreCommon.getInstance().configReader();
+        ConfigReader configReader = plugin.configReader();
         String finalUrl;
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
@@ -41,12 +46,12 @@ public class GuiData {
         try {
             packageURL = new URL(finalUrl);
         } catch (Exception e) {
-            MineStoreCommon.getInstance().debug(e);
-            MineStoreCommon.getInstance().log("STORE URL format is invalid!");
+            plugin.debug(e);
+            plugin.log("STORE URL format is invalid!");
             return false;
         }
         try {
-            MineStoreCommon.getInstance().debug("[GuiData] Loading data from " + finalUrl);
+            plugin.debug("[GuiData] Loading data from " + finalUrl);
             HttpsURLConnection urlConnection = (HttpsURLConnection) packageURL.openConnection();
             InputStream in = urlConnection.getInputStream();
 
@@ -55,7 +60,7 @@ public class GuiData {
             String line;
 
             if (urlConnection.getResponseCode() == 403) {
-                MineStoreCommon.getInstance().log("The request was denied by the server! Probably Cloudflare protection.");
+                plugin.log("The request was denied by the server! Probably Cloudflare protection.");
                 return false;
             }
 
@@ -65,26 +70,26 @@ public class GuiData {
                     }.getType();
                     parsedResponse = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
-                    MineStoreCommon.getInstance().debug(e);
-                    MineStoreCommon.getInstance().log("API key is invalid!");
+                    plugin.debug(e);
+                    plugin.log("API key is invalid!");
                     parsedResponse = null;
                     return false;
                 }
             }
         } catch (ClassCastException e) {
-            MineStoreCommon.getInstance().log("STORE URL has to start with https://");
-            MineStoreCommon.getInstance().debug(e);
+            plugin.log("STORE URL has to start with https://");
+            plugin.debug(e);
             return false;
         } catch (IOException e) {
-            MineStoreCommon.getInstance().debug(e);
-            MineStoreCommon.getInstance().log("API key is invalid!");
+            plugin.debug(e);
+            plugin.log("API key is invalid!");
             return false;
         }
         if (parsedResponse == null) {
-            MineStoreCommon.getInstance().log("API key is invalid!");
+            plugin.log("API key is invalid!");
             return false;
         }
-        parsedGui = new ParsedGui(parsedResponse);
+        parsedGui = new ParsedGui(parsedResponse, plugin);
         return true;
     }
 
@@ -105,7 +110,7 @@ public class GuiData {
     private Runnable runnable = () -> {
         while (true) {
             if (!load()) {
-                MineStoreCommon.getInstance().debug("[GuiData] Error loading data!");
+                plugin.debug("[GuiData] Error loading data!");
             }
             try {
                 Thread.sleep(1000 * 60 * 5);
@@ -121,5 +126,9 @@ public class GuiData {
 
     public GuiOpenener getGuiInfo() {
         return guiOpenener;
+    }
+
+    public MineStoreCommon getPlugin() {
+        return plugin;
     }
 }
