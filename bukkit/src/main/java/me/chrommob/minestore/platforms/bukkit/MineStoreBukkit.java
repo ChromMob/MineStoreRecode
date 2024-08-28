@@ -1,6 +1,7 @@
 package me.chrommob.minestore.platforms.bukkit;
 
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.command.types.CommonConsoleUser;
 import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.platforms.bukkit.db.VaultEconomyProvider;
 import me.chrommob.minestore.platforms.bukkit.db.VaultPlayerInfoProvider;
@@ -18,9 +19,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.incendo.cloud.CloudCapability;
 import org.incendo.cloud.SenderMapper;
-import org.incendo.cloud.bukkit.CloudBukkitCapabilities;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
@@ -73,17 +72,10 @@ public final class MineStoreBukkit extends JavaPlugin {
             }
         };
         try {
-            LegacyPaperCommandManager<AbstractUser> commandManager = new LegacyPaperCommandManager<>(
+            common.registerCommandManager(new LegacyPaperCommandManager<>(
                     /* Owning plugin */ this,
                     /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
-                    /* Command Sender -> C */ senderMapper);
-            if (commandManager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER)) {
-                commandManager.registerBrigadier();
-            }
-            if (commandManager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION)) {
-                commandManager.registerAsynchronousCompletions();
-            }
-            common.registerCommandManager(commandManager);
+                    /* Command Sender -> C */ senderMapper));
         } catch (Exception e) {
             e.printStackTrace();
         }
