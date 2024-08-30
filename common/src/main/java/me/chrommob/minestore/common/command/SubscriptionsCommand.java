@@ -10,6 +10,7 @@ import me.chrommob.minestore.common.subsription.json.ReturnSubscriptionObject;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 
+@SuppressWarnings("unused")
 public class SubscriptionsCommand {
     private final MineStoreCommon plugin;
     public SubscriptionsCommand(MineStoreCommon plugin) {
