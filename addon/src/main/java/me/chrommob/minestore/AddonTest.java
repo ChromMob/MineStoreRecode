@@ -9,9 +9,7 @@ import me.chrommob.minestore.addons.api.generic.MineStoreAddon;
 
 public class AddonTest implements MineStoreAddon {
     public AddonTest() {
-        MineStoreEventBus.registerListener(this, MineStoreLoadEvent.class, event -> {
-            System.out.println("HELLO FROM ADDON");
-        });
+        MineStoreEventBus.registerListener(this, MineStoreLoadEvent.class, event -> System.out.println("HELLO FROM ADDON"));
 
         MineStoreEventBus.registerListener(this, MineStoreEnableEvent.class, event -> {
             GiftCardManager.CreateGiftCardResponse response = WebApiAccessor.couponManager().createGiftCard("Test", "Test", 100, 2022, 1, 1, 0, 0, 0);

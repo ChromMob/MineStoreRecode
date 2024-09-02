@@ -1,4 +1,4 @@
-package me.chrommob.minestore.addons.webApi.data;
+package me.chrommob.minestore.addons.api.generic;
 
 import java.net.MalformedURLException;
 import java.net.URL;

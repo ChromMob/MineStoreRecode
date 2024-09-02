@@ -1,7 +1,7 @@
 package me.chrommob.minestore.addons.api;
 
 import me.chrommob.minestore.addons.api.giftcard.GiftCardManager;
-import me.chrommob.minestore.addons.webApi.data.AuthData;
+import me.chrommob.minestore.addons.api.generic.AuthData;
 import me.chrommob.minestore.addons.api.generic.MineStoreVersion;
 import me.chrommob.minestore.addons.api.generic.OnlySupportedSince;
 

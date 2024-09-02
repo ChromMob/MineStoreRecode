@@ -1,7 +1,5 @@
 package me.chrommob.minestore.addons.api.generic;
 
-import me.chrommob.minestore.addons.webApi.data.AuthData;
-
 public class FeatureManager {
     private final AuthData authData;
 

@@ -3,7 +3,7 @@ package me.chrommob.minestore.addons.api.giftcard;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.chrommob.minestore.addons.api.generic.ParamBuilder;
-import me.chrommob.minestore.addons.webApi.data.AuthData;
+import me.chrommob.minestore.addons.api.generic.AuthData;
 import me.chrommob.minestore.addons.api.generic.FeatureManager;
 
 import javax.net.ssl.HttpsURLConnection;
