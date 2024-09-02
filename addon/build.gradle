@@ -9,9 +9,16 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io/"
+    }
 }
 
 dependencies {
-    compileOnly "me.chrommob:MineStore:3.0.0"
+    compileOnly "com.github.ChromMob:MineStoreRecode:master-SNAPSHOT"
+}
+
+configurations.configureEach {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
