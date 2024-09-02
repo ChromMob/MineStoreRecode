@@ -2,10 +2,7 @@ package me.chrommob;
 
 import me.chrommob.minestore.addons.api.generic.MineStoreAddon;
 import me.chrommob.minestore.addons.api.event.types.*;
-import me.chrommob.minestore.addons.events.*;
-import me.chrommob.minestore.addons.events.types.*;
 import me.chrommob.minestore.addons.api.event.MineStoreEventBus;
-import me.chrommob.minestore.addons.api.types.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,7 +14,12 @@ public class EventBusTest {
     private boolean reload = false;
     private boolean customEvent = false;
 
-    private MineStoreAddon addon = () -> "test";
+    private final MineStoreAddon addon = new MineStoreAddon() {
+        @Override
+        public String getName() {
+            return "test";
+        }
+    };
 
     @Test
     public void testDisable() {
