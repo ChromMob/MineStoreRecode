@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.placeholder;
 
-import me.chrommob.minestore.addons.placeholder.PlaceHolderManager;
+import me.chrommob.minestore.addons.api.placeholder.PlaceHolderManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProvider;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;

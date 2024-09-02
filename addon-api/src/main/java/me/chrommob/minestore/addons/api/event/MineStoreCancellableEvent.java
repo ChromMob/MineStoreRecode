@@ -1,4 +1,4 @@
-package me.chrommob.minestore.addons.events;
+package me.chrommob.minestore.addons.api.event;
 
 public class MineStoreCancellableEvent extends MineStoreEvent {
     private boolean isCancelled = false;

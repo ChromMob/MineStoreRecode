@@ -1,8 +1,11 @@
 package me.chrommob;
 
-import me.chrommob.minestore.addons.MineStoreAddon;
+import me.chrommob.minestore.addons.api.generic.MineStoreAddon;
+import me.chrommob.minestore.addons.api.event.types.*;
 import me.chrommob.minestore.addons.events.*;
 import me.chrommob.minestore.addons.events.types.*;
+import me.chrommob.minestore.addons.api.event.MineStoreEventBus;
+import me.chrommob.minestore.addons.api.types.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,10 +30,10 @@ public class EventBusTest {
 
     @Test
     public void testEnable() {
-        MineStoreEventBus.registerListener(addon,MineStoreEnableEvent.class, event -> {
+        MineStoreEventBus.registerListener(addon, MineStoreEnableEvent.class, event -> {
             enabled = true;
         });
-        new MineStoreEnableEvent().call();
+        new MineStoreEnableEvent("test", "test").call();
         Assert.assertTrue(enabled);
     }
 

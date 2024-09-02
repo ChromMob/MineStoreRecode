@@ -1,10 +1,10 @@
 package me.chrommob.minestore.common;
 
-import me.chrommob.minestore.addons.MineStoreAddon;
-import me.chrommob.minestore.addons.events.types.MineStoreDisableEvent;
-import me.chrommob.minestore.addons.events.types.MineStoreEnableEvent;
-import me.chrommob.minestore.addons.events.types.MineStoreLoadEvent;
-import me.chrommob.minestore.addons.events.types.MineStoreReloadEvent;
+import me.chrommob.minestore.addons.api.generic.MineStoreAddon;
+import me.chrommob.minestore.addons.api.event.types.MineStoreDisableEvent;
+import me.chrommob.minestore.addons.api.event.types.MineStoreEnableEvent;
+import me.chrommob.minestore.addons.api.event.types.MineStoreLoadEvent;
+import me.chrommob.minestore.addons.api.event.types.MineStoreReloadEvent;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.commandGetters.WebListener;
@@ -13,7 +13,7 @@ import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.commandHolder.NewCommandDumper;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
-import me.chrommob.minestore.common.config.MineStoreVersion;
+import me.chrommob.minestore.addons.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
@@ -165,7 +165,7 @@ public class MineStoreCommon {
         commandStorage.init();
         commandGetter = new WebListener(this);
         guiData = new GuiData(this);
-        version = MineStoreVersion.getMineStoreVersion(this);
+        version = MineStoreVersion.getMineStoreVersion((String) configReader.get(ConfigKey.STORE_URL));
         placeHolderData = new PlaceHolderData(this);
         SubscriptionUtil.init(this);
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
@@ -202,7 +202,7 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         commandGetter.start();
-        new MineStoreEnableEvent().call();
+        new MineStoreEnableEvent((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)).call();
     }
 
     private void registerAddons() {

@@ -1,6 +1,4 @@
-package me.chrommob.minestore.common.config;
-
-import me.chrommob.minestore.common.MineStoreCommon;
+package me.chrommob.minestore.addons.api.generic;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -78,8 +76,11 @@ public class MineStoreVersion {
         return this.major + "." + this.minor + "." + this.patch;
     }
 
-    public static MineStoreVersion getMineStoreVersion(MineStoreCommon plugin) {
-        String storeUrl = (String) plugin.configReader().get(ConfigKey.STORE_URL);
+    public static MineStoreVersion dummy() {
+        return new MineStoreVersion(0, 0, 0);
+    }
+
+    public static MineStoreVersion getMineStoreVersion(String storeUrl) {
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
@@ -89,25 +90,17 @@ public class MineStoreVersion {
             InputStream in = urlConnection.getInputStream();
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
             String line;
-            plugin.debug("Getting version...");
             if ((line = reader.readLine()) != null) {
-                plugin.debug("Got version: " + line);
                 String[] split = line.split("\\.");
                 try {
                     Integer.parseInt(split[0]);
                 } catch (NumberFormatException e) {
-                    plugin.debug(e);
                     return MineStoreVersion.dummy();
                 }
                 return new MineStoreVersion(line);
             }
-        } catch (IOException e) {
-            plugin.debug(e);
+        } catch (IOException ignored) {
         }
         return MineStoreVersion.dummy();
-    }
-
-    public static MineStoreVersion dummy() {
-        return new MineStoreVersion(0, 0, 0);
     }
 }

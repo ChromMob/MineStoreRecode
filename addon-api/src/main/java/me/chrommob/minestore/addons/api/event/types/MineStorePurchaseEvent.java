@@ -1,6 +1,6 @@
-package me.chrommob.minestore.addons.events.types;
+package me.chrommob.minestore.addons.api.event.types;
 
-import me.chrommob.minestore.addons.events.MineStoreCancellableEvent;
+import me.chrommob.minestore.addons.api.event.MineStoreCancellableEvent;
 
 public class MineStorePurchaseEvent extends MineStoreCancellableEvent {
     public enum COMMAND_TYPE {

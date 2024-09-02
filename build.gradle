@@ -57,7 +57,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.0.0'
+    version = '3.0.1'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -84,14 +84,16 @@ allprojects {
     processResources {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
-
-
 }
 
 subprojects {
     apply plugin: 'java'
     if (project.name != "MineStore-Fabric") {
         apply plugin: 'io.github.goooler.shadow'
+    }
+
+    dependencies {
+        implementation 'com.google.code.gson:gson:2.8.9'
     }
 
     if (project.name != "common" && project.name != "MineStoreAddonApi") {

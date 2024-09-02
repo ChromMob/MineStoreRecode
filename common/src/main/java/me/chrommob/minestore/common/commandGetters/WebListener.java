@@ -2,7 +2,7 @@ package me.chrommob.minestore.common.commandGetters;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import me.chrommob.minestore.addons.events.types.MineStorePurchaseEvent;
+import me.chrommob.minestore.addons.api.event.types.MineStorePurchaseEvent;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
