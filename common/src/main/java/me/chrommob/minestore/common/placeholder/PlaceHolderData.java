@@ -6,9 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
-import me.chrommob.minestore.common.placeholder.json.DonationGoal;
-import me.chrommob.minestore.common.placeholder.json.LastDonator;
-import me.chrommob.minestore.common.placeholder.json.TopDonator;
+import me.chrommob.minestore.common.placeholder.json.*;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -83,18 +81,19 @@ public class PlaceHolderData {
                     if (apiUrl.equals(apiUrls[0])) {
                         try {
                             if (!MineStoreCommon.version().requires("3.0.0")) {
-                                donationGoal = gson.fromJson(line, DonationGoal.class);
+                                DonationGoalJsonOld donationGoalJsonOld = gson.fromJson(line, DonationGoalJsonOld.class);
+                                donationGoal = donationGoalJsonOld.getDonationGoal();
                             } else {
-                                Type listType = new TypeToken<List<DonationGoal>>() {
+                                Type listType = new TypeToken<List<DonationGoalJson>>() {
                                 }.getType();
-                                List<DonationGoal> donationGoals = gson.fromJson(line, listType);
+                                List<DonationGoalJson> donationGoals = gson.fromJson(line, listType);
                                 if (!donationGoals.isEmpty()) {
-                                    donationGoal = donationGoals.get(0);
+                                    donationGoal = donationGoals.get(0).getDonationGoal();
                                 }
                             }
                         } catch (JsonSyntaxException e) {
                             plugin.debug(e);
-                            donationGoal = new DonationGoal();
+                            donationGoal = new DonationGoal(0, 0);
                         }
                     } else if (apiUrl.equals(apiUrls[1])) {
                         Type listType = new TypeToken<List<LastDonator>>() {

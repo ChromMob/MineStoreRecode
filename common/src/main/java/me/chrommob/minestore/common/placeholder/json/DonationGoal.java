@@ -4,11 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 @SuppressWarnings("unused")
 public class DonationGoal {
-    @SerializedName("goal")
-    private double donationGoalAmount = 0;
-
-    @SerializedName("goal_sum")
-    private double donationGoalCurrentAmount = 0;
+    private final double donationGoalAmount;
+    private final double donationGoalCurrentAmount;
+    public DonationGoal(double donationGoalAmount, double donationGoalCurrentAmount) {
+        this.donationGoalAmount = donationGoalAmount;
+        this.donationGoalCurrentAmount = donationGoalCurrentAmount;
+    }
 
     public double getDonationGoalAmount() {
         return donationGoalAmount;
