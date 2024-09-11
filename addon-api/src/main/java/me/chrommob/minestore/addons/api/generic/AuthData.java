@@ -39,4 +39,18 @@ public class AuthData {
             return null;
         }
     }
+
+    public URL createNonKeyUrl(String path, String query) {
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        try {
+            return new URL(storeUrl + "api/" + path + query);
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
 }
