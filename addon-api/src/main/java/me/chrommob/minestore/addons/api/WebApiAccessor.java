@@ -4,9 +4,11 @@ import me.chrommob.minestore.addons.api.giftcard.GiftCardManager;
 import me.chrommob.minestore.addons.api.generic.AuthData;
 import me.chrommob.minestore.addons.api.generic.MineStoreVersion;
 import me.chrommob.minestore.addons.api.generic.OnlySupportedSince;
+import me.chrommob.minestore.addons.api.profile.ProfileManager;
 
 public class WebApiAccessor {
     private static GiftCardManager giftCardManager;
+    private static ProfileManager profileManager;
     private static MineStoreVersion version;
     private static AuthData authData;
     public static void setAuthData(String storeUrl, String apiKey) {
@@ -27,6 +29,22 @@ public class WebApiAccessor {
      * @throws IllegalStateException If the authData is not initialized.
     **/
     public static GiftCardManager giftCardManager() throws IllegalStateException, OnlySupportedSince {
+        isVersionChecked();
+        if (giftCardManager == null || !giftCardManager.authData().equals(authData)) {
+            giftCardManager = new GiftCardManager(authData);
+        }
+        return giftCardManager;
+    }
+
+    public static ProfileManager profileManager() throws IllegalStateException, OnlySupportedSince {
+        isVersionChecked();
+        if (profileManager == null || !profileManager.authData().equals(authData)) {
+            profileManager = new ProfileManager(authData);
+        }
+        return profileManager;
+    }
+
+    private static void isVersionChecked() throws OnlySupportedSince {
         if (version == null) {
             throw new IllegalStateException("Version is not initialized!");
         }
@@ -36,9 +54,5 @@ public class WebApiAccessor {
         if (authData == null) {
             throw new IllegalStateException("AuthData is not initialized!");
         }
-        if (giftCardManager == null || !giftCardManager.authData().equals(authData)) {
-            giftCardManager = new GiftCardManager(authData);
-        }
-        return giftCardManager;
     }
 }
