@@ -121,6 +121,9 @@ buy-gui:
 - **minestore.addons**
   - Allows the player to use the `/minestore addons` command. This command allows the player to see all loaded addons.
 ## Placeholders
+- Profile
+  - **%ms_player_spent%**
+    - Example: %ms_player_spent% will return the amount of money the player has spent.
 - TopDonators
   - **%ms_top_donator_username_number%**
     - Example: %ms_top_donator_username_1% will return the username with the most amount of money donated.
