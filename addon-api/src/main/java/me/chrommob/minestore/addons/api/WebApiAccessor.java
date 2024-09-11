@@ -26,7 +26,7 @@ public class WebApiAccessor {
      * @throws OnlySupportedSince If the version is not supported.
      * @throws IllegalStateException If the authData is not initialized.
     **/
-    public static GiftCardManager couponManager() throws IllegalStateException, OnlySupportedSince {
+    public static GiftCardManager giftCardManager() throws IllegalStateException, OnlySupportedSince {
         if (version == null) {
             throw new IllegalStateException("Version is not initialized!");
         }
