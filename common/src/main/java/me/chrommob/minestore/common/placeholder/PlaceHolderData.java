@@ -136,7 +136,7 @@ public class PlaceHolderData {
         thread.start();
     }
 
-    private Runnable runnable = () -> {
+    private final Runnable runnable = () -> {
         while (true) {
             if (!load()) {
                 plugin.debug("Failed to load placeholder data!");

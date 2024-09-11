@@ -1,6 +1,8 @@
 package me.chrommob.minestore.platforms.bukkit.placeholder;
 
+import me.chrommob.minestore.addons.api.WebApiAccessor;
 import me.chrommob.minestore.addons.api.placeholder.PlaceHolderManager;
+import me.chrommob.minestore.addons.api.profile.ProfileManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProvider;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
@@ -128,6 +130,14 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
                 }
                 LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
                 return serializer.serialize(component);
+            }
+            if (params.contains("player_spent")) {
+                String name = p.getName();
+                ProfileManager.Profile profile = WebApiAccessor.profileManager().getCachedProfile(name);
+                if (profile == null) {
+                    return "";
+                }
+                return String.valueOf(profile.moneySpent());
             }
         } catch (Exception e) {
             plugin.debug("Placeholder error: " + e.getMessage());
