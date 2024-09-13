@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GuiData {
@@ -68,6 +69,10 @@ public class GuiData {
                 try {
                     Type listType = new TypeToken<List<Category>>() {
                     }.getType();
+                    if (line.equals("[]")) {
+                        parsedResponse = new ArrayList<>();
+                        return true;
+                    }
                     parsedResponse = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
                     plugin.debug(e);
