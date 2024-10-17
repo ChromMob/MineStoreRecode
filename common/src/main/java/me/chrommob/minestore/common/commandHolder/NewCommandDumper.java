@@ -31,7 +31,7 @@ public class NewCommandDumper {
                 old.forEach((key, value) -> {
                     List<StoredCommand> storedCommands = new ArrayList<>();
                     value.forEach(command -> storedCommands.add(new StoredCommand(command, -1)));
-                    commands.put(key, storedCommands);
+                    commands.put(key.toLowerCase(), storedCommands);
                 });
                 update(commands);
                 plugin.commandDumper().delete();

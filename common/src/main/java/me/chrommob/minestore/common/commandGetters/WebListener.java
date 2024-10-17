@@ -35,7 +35,7 @@ public class WebListener implements CommandGetter {
             while (true) {
                 if (wasEmpty) {
                     try {
-                        Thread.sleep(9000);
+                        Thread.sleep(9500);
                         wasEmpty = false;
                     } catch (InterruptedException e) {
                         break;
@@ -110,7 +110,7 @@ public class WebListener implements CommandGetter {
                     plugin.debug(e);
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     break;
                 }

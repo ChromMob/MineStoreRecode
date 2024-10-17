@@ -53,6 +53,7 @@ public class CommandStorage implements CommandStorageInterface {
 
     @Override
     public void onPlayerJoin(String username) {
+        username = username.toLowerCase();
         if (MineStoreCommon.version().requires("3.0.0")) {
             if (newCommands.containsKey(username)) {
                 plugin.debug("Executing new commands for " + username);
@@ -89,6 +90,7 @@ public class CommandStorage implements CommandStorageInterface {
     }
 
     private void handleOnlineCommand(String command, String username, int requestId) {
+        username = username.toLowerCase();
         boolean isOnline = plugin.commandExecuter().isOnline(username);
         if (isOnline) {
             if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
