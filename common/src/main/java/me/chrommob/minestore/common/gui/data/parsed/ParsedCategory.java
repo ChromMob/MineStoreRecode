@@ -4,6 +4,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
+import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.common.gui.data.json.old.Package;
 import me.chrommob.minestore.common.gui.data.json.old.SubCategory;
 import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
@@ -15,14 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParsedCategory {
+    private final ParsedCategory root;
     private final MineStoreCommon plugin;
     private int id;
     private String name;
     private Component displayName;
     private String url;
     private String material;
-    private List<ParsedSubCategory> subcategories = new ArrayList<>();
-    private List<ParsedPackage> packages = new ArrayList<>();
+    private final List<ParsedSubCategory> subcategories = new ArrayList<>();
+    private final List<ParsedCategory> newCategories = new ArrayList<>();
+    private final List<ParsedPackage> packages = new ArrayList<>();
     private final CommonItem item;
     private final CommonInventory inventory;
 
@@ -48,10 +51,47 @@ public class ParsedCategory {
         }
         this.item = this.getItem();
         this.inventory = this.getInventory();
+        this.root = null;
+    }
+
+    public ParsedCategory(NewCategory category, MineStoreCommon plugin) {
+        this(null, category, plugin);
+    }
+
+    public ParsedCategory(ParsedCategory root, NewCategory category, MineStoreCommon plugin) {
+        this.plugin = plugin;
+        this.id = category.getId();
+        this.name = category.getName();
+        this.url = category.getUrl();
+        this.material = category.getGui_item_id();
+        this.displayName = plugin.miniMessage().deserialize(((String) plugin.configReader().get(ConfigKey.BUY_GUI_CATEGORY_NAME)).replace("%category%", this.name));
+        if (category.getSubcategories() != null && !category.getSubcategories().isEmpty()) {
+            for (NewCategory subCategory : category.getSubcategories()) {
+                this.newCategories.add(new ParsedCategory(this, subCategory, plugin));
+            }
+        } else {
+            if (category.getPackages() != null && !category.getPackages().isEmpty()) {
+                for (Package pack : category.getPackages()) {
+                    if (pack.getActive() == 0)
+                        continue;
+                    this.packages.add(new ParsedPackage(pack, this, plugin));
+                }
+            }
+        }
+        this.item = this.getItem();
+        this.inventory = this.getInventory();
+        this.root = root;
     }
 
     public Object getByItem(CommonItem item) {
-        if (subcategories != null && !subcategories.isEmpty()) {
+        if (!newCategories.isEmpty()) {
+            for (ParsedCategory category : this.newCategories) {
+                if (category.getItem() != null && category.getItem().equals(item)) {
+                    return category;
+                }
+            }
+        }
+        if (!subcategories.isEmpty()) {
             for (ParsedSubCategory subCategory : this.subcategories) {
                 if (subCategory.getItem() != null && subCategory.getItem().equals(item)) {
                     return subCategory;
@@ -83,7 +123,7 @@ public class ParsedCategory {
     }
 
     public boolean hasSubcategories() {
-        return subcategories != null && !subcategories.isEmpty();
+        return !subcategories.isEmpty() || !newCategories.isEmpty();
     }
 
     public CommonInventory getInventory() {
@@ -91,13 +131,23 @@ public class ParsedCategory {
             return this.inventory;
         }
         if (hasSubcategories()) {
-            List<CommonItem> items = new ArrayList<>();
-            for (ParsedSubCategory subcategory : subcategories) {
-                items.add(subcategory.getItem());
+            if (!subcategories.isEmpty()) {
+                List<CommonItem> items = new ArrayList<>();
+                for (ParsedSubCategory subcategory : subcategories) {
+                    items.add(subcategory.getItem());
+                }
+                CommonInventory inventory = new CommonInventory(displayName, 54, items);
+                plugin.guiData().getGuiInfo().formatInventory(inventory, false);
+                return inventory;
+            } else {
+                List<CommonItem> items = new ArrayList<>();
+                for (ParsedCategory subcategory : newCategories) {
+                    items.add(subcategory.getItem());
+                }
+                CommonInventory inventory = new CommonInventory(displayName, 54, items);
+                plugin.guiData().getGuiInfo().formatInventory(inventory, false);
+                return inventory;
             }
-            CommonInventory inventory = new CommonInventory(displayName, 54, items);
-            plugin.guiData().getGuiInfo().formatInventory(inventory, false);
-            return inventory;
         }
         List<CommonItem> items = new ArrayList<>();
         for (ParsedPackage pack : packages) {
@@ -114,5 +164,16 @@ public class ParsedCategory {
         } else {
             return new ArrayList<>();
         }
+    }
+    public List<ParsedCategory> getNewCategories() {
+        if (hasSubcategories()) {
+            return newCategories;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public ParsedCategory getRoot() {
+        return root;
     }
 }

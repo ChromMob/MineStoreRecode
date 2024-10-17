@@ -8,6 +8,7 @@ import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.GuiOpenener;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
+import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -25,7 +26,7 @@ public class GuiData {
         this.plugin = plugin;
         guiOpenener = new GuiOpenener(this);
     }
-    private List<Category> parsedResponse;
+    private List parsedResponse;
     private URL packageURL;
     private final Gson gson = new Gson();
 
@@ -67,8 +68,14 @@ public class GuiData {
 
             while ((line = reader.readLine()) != null) {
                 try {
-                    Type listType = new TypeToken<List<Category>>() {
-                    }.getType();
+                    Type listType;
+                    if (MineStoreCommon.version().requires(3,0,0)) {
+                        listType = new TypeToken<List<NewCategory>>() {
+                        }.getType();
+                    } else {
+                        listType = new TypeToken<List<Category>>() {
+                        }.getType();
+                    }
                     if (line.equals("[]")) {
                         parsedResponse = new ArrayList<>();
                         return true;

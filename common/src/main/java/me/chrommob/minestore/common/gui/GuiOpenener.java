@@ -49,6 +49,9 @@ public class GuiOpenener {
                 if (object instanceof ParsedSubCategory) {
                     menuPage.put(user.getUUID(), ((ParsedSubCategory) object).getRoot());
                     menuType.put(user.getUUID(), MENU_TYPE.SUBCATEGORIES);
+                } else if (object instanceof ParsedCategory && ((ParsedCategory) object).getRoot() != null) {
+                    menuPage.put(user.getUUID(), ((ParsedCategory) object).getRoot());
+                    menuType.put(user.getUUID(), MENU_TYPE.SUBCATEGORIES);
                 } else {
                     menuPage.put(user.getUUID(), guiData.getParsedGui());
                     menuType.put(user.getUUID(), MENU_TYPE.CATEGORIES);
@@ -77,10 +80,11 @@ public class GuiOpenener {
                 openMenu(user);
                 break;
             case SUBCATEGORIES:
-                ParsedSubCategory parsedSubCategory = (ParsedSubCategory) ((ParsedCategory) menuPage.get(user.getUUID())).getByItem(item);
+                Object parsedSubCategory = ((ParsedCategory) menuPage.get(user.getUUID())).getByItem(item);
                 if (parsedSubCategory == null) {
                     return;
                 }
+                System.out.println(parsedSubCategory.getClass().getSimpleName());
                 menuPage.put(user.getUUID(), parsedSubCategory);
                 menuType.put(user.getUUID(), MENU_TYPE.PACKAGES);
                 openMenu(user);
@@ -206,6 +210,9 @@ public class GuiOpenener {
             titles.add(parsedCategory.getInventory().getTitle());
             for (ParsedSubCategory parsedSubCategory : parsedCategory.getSubCategories()) {
                 titles.add(parsedSubCategory.getInventory().getTitle());
+            }
+            for (ParsedCategory parsedCategory1 : parsedCategory.getNewCategories()) {
+                titles.add(parsedCategory1.getInventory().getTitle());
             }
         }
         return titles;

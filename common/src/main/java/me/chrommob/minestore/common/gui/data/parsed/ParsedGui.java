@@ -3,6 +3,7 @@ package me.chrommob.minestore.common.gui.data.parsed;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
+import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 
@@ -13,10 +14,21 @@ public class ParsedGui {
     private final MineStoreCommon plugin;
     private final List<ParsedCategory> categories = new ArrayList<>();
     private final CommonInventory inventory;
-    public ParsedGui(List<Category> categories, MineStoreCommon plugin) {
+    public ParsedGui(List categories, MineStoreCommon plugin) {
         this.plugin = plugin;
-        for (Category category : categories) {
-            this.categories.add(new ParsedCategory(category, plugin));
+        if (categories.isEmpty()) {
+            this.inventory = this.getInventory();
+            return;
+        }
+        Object first = categories.get(0);
+        if (first instanceof Category) {
+            for (Object category : categories) {
+                this.categories.add(new ParsedCategory((Category) category, plugin));
+            }
+        } else {
+            for (Object category : categories) {
+                this.categories.add(new ParsedCategory((NewCategory) category, plugin));
+            }
         }
         this.inventory = this.getInventory();
     }
