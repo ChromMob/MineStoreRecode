@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.fabric.webcommand;
 
-import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
+import me.chrommob.minestore.api.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.platforms.fabric.MineStoreFabric;
 import net.minecraft.server.MinecraftServer;
 

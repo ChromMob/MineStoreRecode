@@ -1,8 +1,8 @@
 package me.chrommob.minestore.platforms.fabric.logger;
 
+import me.chrommob.minestore.api.interfaces.logger.LoggerCommon;
 import org.slf4j.Logger;
 
-import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
 
 public class FabricLogger implements LoggerCommon {
     private final Logger logger;

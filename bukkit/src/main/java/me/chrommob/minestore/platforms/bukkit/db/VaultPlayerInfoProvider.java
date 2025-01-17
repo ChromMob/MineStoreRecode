@@ -1,8 +1,8 @@
 package me.chrommob.minestore.platforms.bukkit.db;
 
+import me.chrommob.minestore.api.interfaces.playerInfo.PlayerInfoProvider;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.playerInfo.PlayerInfoProvider;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;

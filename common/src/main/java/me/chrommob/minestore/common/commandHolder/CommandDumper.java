@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.commandHolder;
 
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
 import org.yaml.snakeyaml.Yaml;
 
@@ -15,7 +16,7 @@ public class CommandDumper {
 
     public CommandDumper(MineStoreCommon plugin) {
         this.plugin = plugin;
-        dumpedFile = new File(plugin.configFile().getParentFile(), "dumpedCommands.yml");
+        dumpedFile = new File(Registries.CONFIG_FILE.get().getParentFile(), "dumpedCommands.yml");
         if (!dumpedFile.getParentFile().exists()) {
             dumpedFile.getParentFile().mkdirs();
         }

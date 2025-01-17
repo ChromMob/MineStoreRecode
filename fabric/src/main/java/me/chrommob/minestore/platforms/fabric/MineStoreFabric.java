@@ -1,7 +1,8 @@
 package me.chrommob.minestore.platforms.fabric;
 
-import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
+import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -52,14 +53,14 @@ public class MineStoreFabric implements ModInitializer {
 		LOGGER.info("MineStore has been enabled!");
 		adventure = FabricServerAudiences.of(server);
 		common = new MineStoreCommon();
-		common.setPlatform("fabric");
-		common.setPlatformName("Fabric");
-		common.setPlatformVersion(server.getVersion());
-		common.registerLogger(new FabricLogger(LOGGER));
-		common.registerScheduler(new FabricScheduler());
-		common.registerUserGetter(new FabricUserGetter(server, common));
+		Registries.PLATFORM.set("fabric");
+		Registries.PLATFORM_NAME.set("Fabric");
+		Registries.PLATFORM_VERSION.set(server.getVersion());
+		Registries.LOGGER.set(new FabricLogger(LOGGER));
+		Registries.SCHEDULER.set(new FabricScheduler());
+		Registries.USER_GETTER.set(new FabricUserGetter(server));
 
-		final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource.isExecutedByPlayer() ? commandSource.getPlayer().getUuid() : null, common, commandSource);
+		final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource.isExecutedByPlayer() ? commandSource.getPlayer().getUuid() : null, commandSource);
 		final Function<AbstractUser, ServerCommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getCommandSource() : server.getPlayerManager().getPlayer(abstractUser.user().getUUID()).getCommandSource();
 		final SenderMapper<ServerCommandSource, AbstractUser> senderMapper = new SenderMapper<ServerCommandSource, AbstractUser>() {
 			@Override
@@ -73,14 +74,14 @@ public class MineStoreFabric implements ModInitializer {
 			}
 		};
 
-		common.registerCommandManager(new FabricServerCommandManager(
+		Registries.COMMAND_MANAGER.set(new FabricServerCommandManager(
 				ExecutionCoordinator.asyncCoordinator(),
 				senderMapper
 		));
 
-		common.registerCommandExecuter(new CommandExecuterFabric(server));
-		common.setConfigLocation(FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("config.yml").toFile());
-		common.registerPlayerJoinListener(new FabricPlayerEvent(common));
+		Registries.COMMAND_EXECUTER.set(new CommandExecuterFabric(server));
+		Registries.CONFIG_FILE.set(FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("config.yml").toFile());
+		Registries.PLAYER_JOIN_LISTENER.set(new FabricPlayerEvent(common));
 		common.init(false);
 	}
 

@@ -16,7 +16,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly "com.github.ChromMob:MineStoreRecode:master-SNAPSHOT"
+    project(":MineStore-API")
+    //compileOnly "com.github.ChromMob:MineStoreRecode:master-SNAPSHOT"
 }
 
 configurations.configureEach {

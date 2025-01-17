@@ -1,8 +1,8 @@
 package me.chrommob.minestore.platforms.bungee;
 
+import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.platforms.bungee.events.PlayerEventListenerBungee;
 import me.chrommob.minestore.platforms.bungee.logger.LoggerBungee;
 import me.chrommob.minestore.platforms.bungee.scheduler.BungeeScheduler;
@@ -31,17 +31,17 @@ public class MineStoreBungee extends Plugin {
         instance = this;
         this.adventure = BungeeAudiences.create(this);
         common = new MineStoreCommon();
-        common.setPlatform("bungee");
-        common.setPlatformName(getProxy().getName());
-        common.setPlatformVersion(getProxy().getVersion());
-        common.registerLogger(new LoggerBungee(this));
-        common.registerScheduler(new BungeeScheduler(this));
-        common.registerUserGetter(new BungeeUserGetter(this, common));
-        common.setConfigLocation(new File(getDataFolder(), "config.yml"));
-        common.registerCommandExecuter(new CommandExecuterBungee(this));
-        common.registerPlayerJoinListener(new PlayerEventListenerBungee(this, common));
+        Registries.PLATFORM.set("bungee");
+        Registries.PLATFORM_NAME.set(getProxy().getName());
+        Registries.PLATFORM_VERSION.set(getProxy().getVersion());
+        Registries.LOGGER.set(new LoggerBungee(this));
+        Registries.SCHEDULER.set(new BungeeScheduler(this));
+        Registries.USER_GETTER.set(new BungeeUserGetter(this));
+        Registries.COMMAND_EXECUTER.set(new CommandExecuterBungee(this));
+        Registries.CONFIG_FILE.set(new File(getDataFolder(), "config.yml"));
+        Registries.PLAYER_JOIN_LISTENER.set(new PlayerEventListenerBungee(this, common));
 
-        final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null, common, commandSender);
+        final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null, commandSender);
         final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.nativeCommandSender();
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
             @Override
@@ -54,7 +54,7 @@ public class MineStoreBungee extends Plugin {
                 return aToC.apply(mapped);
             }
         };
-        common.registerCommandManager(new BungeeCommandManager<>(
+        Registries.COMMAND_MANAGER.set(new BungeeCommandManager<>(
                 /* Owning plugin */ this,
                 /* Execution coordinator */ ExecutionCoordinator.asyncCoordinator(),
                 /* Sender mapper */ senderMapper

@@ -9,9 +9,9 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.platforms.velocity.events.VelocityPlayerEvent;
 import me.chrommob.minestore.platforms.velocity.logger.VelocityLogger;
 import me.chrommob.minestore.platforms.velocity.scheduler.VelocityScheduler;
@@ -42,14 +42,14 @@ public class MineStoreVelocity {
     @Subscribe
     private void onProxyInitialization(ProxyInitializeEvent event) {
         common = new MineStoreCommon();
-        common.setPlatform("velocity");
-        common.setPlatformName(server.getVersion().getName());
-        common.setPlatformVersion(server.getVersion().getVersion());
-        common.registerLogger(new VelocityLogger(logger));
-        common.registerScheduler(new VelocityScheduler(this));
-        common.registerUserGetter(new VelocityUserGetter(server, common));
+        Registries.PLATFORM.set("velocity");
+        Registries.PLATFORM_NAME.set(server.getVersion().getName());
+        Registries.PLATFORM_VERSION.set(server.getVersion().getVersion());
+        Registries.LOGGER.set(new VelocityLogger(logger));
+        Registries.SCHEDULER.set(new VelocityScheduler(this));
+        Registries.USER_GETTER.set(new VelocityUserGetter(server));
 
-        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null, common, commandSource);
+        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null, commandSource);
         final Function<AbstractUser, CommandSource> aToC = abstractUser -> (CommandSource) abstractUser.nativeCommandSender();
         final SenderMapper<CommandSource, AbstractUser> senderMapper = new SenderMapper<CommandSource, AbstractUser>() {
             @Override
@@ -62,16 +62,16 @@ public class MineStoreVelocity {
                 return aToC.apply(mapped);
             }
         };
-        common.registerCommandManager(new VelocityCommandManager<>(
+        Registries.COMMAND_MANAGER.set(new VelocityCommandManager<>(
                 getServer().getPluginManager().getPlugin("minestore").get(),
                 getServer(),
                 ExecutionCoordinator.asyncCoordinator(),
                 senderMapper
         ));
 
-        common.registerCommandExecuter(new CommandExecuterVelocity(server));
-        common.setConfigLocation(dataPath.resolve("config.yml").toFile());
-        common.registerPlayerJoinListener(new VelocityPlayerEvent(this, server, common));
+        Registries.COMMAND_EXECUTER.set(new CommandExecuterVelocity(server));
+        Registries.CONFIG_FILE.set(dataPath.resolve("config.yml").toFile());
+        Registries.PLAYER_JOIN_LISTENER.set(new VelocityPlayerEvent(this, server, common));
         System.out.println("MineStore has been enabled!");
         common.init(false);
     }

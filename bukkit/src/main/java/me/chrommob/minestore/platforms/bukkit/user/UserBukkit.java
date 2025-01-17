@@ -1,9 +1,9 @@
 package me.chrommob.minestore.platforms.bukkit.user;
 
+import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
+import me.chrommob.minestore.api.interfaces.gui.CommonItem;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
-import me.chrommob.minestore.common.interfaces.gui.CommonItem;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
@@ -28,7 +28,6 @@ public class UserBukkit extends CommonUser {
     private LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
 
     public UserBukkit(UUID uuid, MineStoreBukkit mineStoreBukkit, MineStoreCommon plugin) {
-        super(plugin);
         this.plugin = plugin;
         player = mineStoreBukkit.getServer().getPlayer(uuid);
         this.uuid = uuid;
@@ -40,7 +39,6 @@ public class UserBukkit extends CommonUser {
     }
 
     public UserBukkit(String username, MineStoreBukkit mineStoreBukkit, MineStoreCommon plugin) {
-        super(plugin);
         this.plugin = plugin;
         player = mineStoreBukkit.getServer().getPlayer(username);
         name = username;

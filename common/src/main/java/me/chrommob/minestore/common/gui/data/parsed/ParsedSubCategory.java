@@ -5,8 +5,8 @@ import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.data.json.old.Package;
 import me.chrommob.minestore.common.gui.data.json.old.SubCategory;
-import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
-import me.chrommob.minestore.common.interfaces.gui.CommonItem;
+import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
+import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 

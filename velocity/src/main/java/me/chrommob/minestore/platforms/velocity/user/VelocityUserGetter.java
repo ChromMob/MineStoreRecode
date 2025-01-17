@@ -1,10 +1,10 @@
 package me.chrommob.minestore.platforms.velocity.user;
 
 import com.velocitypowered.api.proxy.ProxyServer;
+import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.api.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
-import me.chrommob.minestore.common.interfaces.user.UserGetter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,25 +12,23 @@ import java.util.UUID;
 
 public class VelocityUserGetter implements UserGetter {
     private final ProxyServer server;
-    private final MineStoreCommon common;
 
-    public VelocityUserGetter(ProxyServer server, MineStoreCommon common) {
+    public VelocityUserGetter(ProxyServer server) {
         this.server = server;
-        this.common = common;
     }
 
     @Override
     public CommonUser get(UUID uuid) {
         if (server.getPlayer(uuid).isPresent()) {
-            return new VelocityUser(uuid, server, common);
+            return new VelocityUser(uuid, server);
         } else {
-            return new CommonConsoleUser(common);
+            return new CommonConsoleUser();
         }
     }
 
     @Override
     public CommonUser get(String username) {
-        return new VelocityUser(username, server, common);
+        return new VelocityUser(username, server);
     }
 
     @Override

@@ -2,6 +2,7 @@ package me.chrommob.minestore.common.commandHolder;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
 
@@ -19,7 +20,7 @@ public class NewCommandDumper {
     private final File dumpedFile;
     public NewCommandDumper(MineStoreCommon plugin) {
         this.plugin = plugin;
-        dumpedFile = new File(plugin.configFile().getParentFile(), "savedCommands.json");
+        dumpedFile = new File(Registries.CONFIG_FILE.get().getParentFile(), "savedCommands.json");
     }
     
     private final Gson gson = new Gson();

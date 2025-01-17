@@ -2,8 +2,8 @@ package me.chrommob.minestore.common.command;
 
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import org.incendo.cloud.annotation.specifier.Quoted;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
@@ -15,6 +15,7 @@ public class AutoSetupCommand {
     public AutoSetupCommand(MineStoreCommon plugin) {
         this.plugin = plugin;
     }
+
     @Permission("minestore.autosetup")
     @Command("minestore|ms autosetup <storeUrl> <apiKey> <secretKey>")
     public void onAutoSetup(AbstractUser abstractUser, @Argument("storeUrl") @Quoted String storeUrl, @Argument("apiKey") String apiKey, @Argument("secretKey") String secretKey) {

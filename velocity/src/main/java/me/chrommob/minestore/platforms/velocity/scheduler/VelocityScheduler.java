@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.velocity.scheduler;
 
-import me.chrommob.minestore.common.interfaces.scheduler.CommonScheduler;
+import me.chrommob.minestore.api.interfaces.scheduler.CommonScheduler;
 import me.chrommob.minestore.platforms.velocity.MineStoreVelocity;
 
 public class VelocityScheduler implements CommonScheduler {

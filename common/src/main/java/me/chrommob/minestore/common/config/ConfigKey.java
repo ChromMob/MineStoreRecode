@@ -1,11 +1,9 @@
 package me.chrommob.minestore.common.config;
 
-import java.util.UUID;
-
 public enum ConfigKey
 {
     DEBUG(new Configuration("debug", false)),
-    COMMAND_LOGGING(new Configuration("command-execution-logging", false)),
+    COMMAND_LOGGING(new Configuration("command-execution-logging", true)),
     LANGUAGE(new Configuration("language", "en_US")),
 
     STORE_URL(new Configuration("store-url", "https://store.example.com")),

@@ -1,10 +1,11 @@
 package me.chrommob.minestore.common.commandHolder;
 
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.commandGetters.dataTypes.ParsedResponse;
+import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
 import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.interfaces.commands.CommandStorageInterface;
+import me.chrommob.minestore.api.interfaces.commands.CommandStorageInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,8 +62,8 @@ public class CommandStorage implements CommandStorageInterface {
                     if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
                         plugin.log("Executing command: " + storedCommand.command());
                     }
-                    plugin.commandExecuter().execute(storedCommand.command());
-                    plugin.commandGetter().postExecuted(String.valueOf(storedCommand.requestId()));
+                    Registries.COMMAND_EXECUTER.get().execute(storedCommand.command());
+                    plugin.webListener().postExecuted(String.valueOf(storedCommand.requestId()));
                 });
                 removeNewCommand(username);
             }
@@ -74,7 +75,7 @@ public class CommandStorage implements CommandStorageInterface {
                 if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
                     plugin.log("Executing command: " + command);
                 }
-                plugin.commandExecuter().execute(command);
+                Registries.COMMAND_EXECUTER.get().execute(command);
             });
             remove(username);
         }
@@ -91,14 +92,14 @@ public class CommandStorage implements CommandStorageInterface {
 
     private void handleOnlineCommand(String command, String username, int requestId) {
         username = username.toLowerCase();
-        boolean isOnline = plugin.commandExecuter().isOnline(username);
+        boolean isOnline = Registries.COMMAND_EXECUTER.get().isOnline(username);
         if (isOnline) {
             if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
                 plugin.log("Executing command: " + command);
             }
-            plugin.commandExecuter().execute(command);
+            Registries.COMMAND_EXECUTER.get().execute(command);
             if (MineStoreCommon.version().requires("3.0.0")) {
-                plugin.commandGetter().postExecuted(String.valueOf(requestId));
+                plugin.webListener().postExecuted(String.valueOf(requestId));
             }
             return;
         }
@@ -113,7 +114,7 @@ public class CommandStorage implements CommandStorageInterface {
         if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
             plugin.log("Executing command: " + command);
         }
-        plugin.commandExecuter().execute(command);
+        Registries.COMMAND_EXECUTER.get().execute(command);
     }
 
     @Override

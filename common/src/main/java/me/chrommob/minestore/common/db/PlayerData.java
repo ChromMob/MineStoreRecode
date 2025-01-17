@@ -1,6 +1,6 @@
 package me.chrommob.minestore.common.db;
 
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 
 import java.util.UUID;
 

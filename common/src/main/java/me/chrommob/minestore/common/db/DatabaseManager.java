@@ -2,6 +2,7 @@ package me.chrommob.minestore.common.db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 
@@ -47,7 +48,7 @@ public class DatabaseManager {
     private final Map<String, PlayerData> playerData = new ConcurrentHashMap<>();
 
     public void onPlayerJoin(String name) {
-        playerData.put(name, new PlayerData(plugin.userGetter().get(name)));
+        playerData.put(name, new PlayerData(Registries.USER_GETTER.get().get(name)));
         plugin.debug("Added " + name + " to playerData");
     }
 

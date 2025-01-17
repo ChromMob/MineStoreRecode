@@ -2,9 +2,8 @@ package me.chrommob.minestore.platforms.velocity.user;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
+import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
@@ -12,13 +11,11 @@ import java.util.UUID;
 public class VelocityUser extends CommonUser {
     private final Player player;
 
-    public VelocityUser(UUID uuid, ProxyServer server, MineStoreCommon plugin) {
-        super(plugin);
+    public VelocityUser(UUID uuid, ProxyServer server) {
         player = server.getPlayer(uuid).get();
     }
 
-    public VelocityUser(String username, ProxyServer server, MineStoreCommon plugin) {
-        super(plugin);
+    public VelocityUser(String username, ProxyServer server) {
         player = server.getPlayer(username).get();
     }
 

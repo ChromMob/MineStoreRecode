@@ -4,8 +4,8 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
-import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
-import me.chrommob.minestore.common.interfaces.gui.CommonItem;
+import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
+import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 
 import java.util.ArrayList;
 import java.util.List;

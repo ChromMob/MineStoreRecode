@@ -1,10 +1,11 @@
 
 dependencies {
     //compileOnly "net.kyori:adventure-api:4.12.0"
-    implementation "net.kyori:adventure-text-serializer-plain:4.17.0"
-    implementation "net.kyori:adventure-text-serializer-legacy:4.17.0"
-    implementation "com.google.guava:guava:31.1-jre"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
+
+    implementation(project(path: ':MineStore-API'))
+
+    implementation "com.google.guava:guava:31.1-jre"
     implementation 'com.zaxxer:HikariCP:4.0.3'
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
     implementation "com.mysql:mysql-connector-j:8.0.33"
@@ -14,6 +15,4 @@ dependencies {
 
     implementation("org.incendo:cloud-annotations:2.0.0-SNAPSHOT")
     compileOnly("org.incendo:cloud-paper:2.0.0-SNAPSHOT")
-
-    implementation(project(path: ':MineStoreAddonApi'))
 }

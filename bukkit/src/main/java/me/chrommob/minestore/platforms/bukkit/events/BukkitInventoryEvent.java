@@ -1,7 +1,8 @@
 package me.chrommob.minestore.platforms.bukkit.events;
 
+import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.gui.CommonItem;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
@@ -54,6 +55,6 @@ public class BukkitInventoryEvent implements Listener {
             }
         }
         CommonItem item = new CommonItem(name, event.getCurrentItem().getType().toString(), lore);
-        plugin.guiData().getGuiInfo().handleInventoryClick(plugin.userGetter().get(event.getWhoClicked().getUniqueId()), item);
+        plugin.guiData().getGuiInfo().handleInventoryClick(Registries.USER_GETTER.get().get(event.getWhoClicked().getUniqueId()), item);
     }
 }

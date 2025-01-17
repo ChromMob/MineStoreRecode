@@ -1,12 +1,11 @@
 package me.chrommob.minestore.platforms.bukkit.placeholder;
 
-import me.chrommob.minestore.addons.api.WebApiAccessor;
-import me.chrommob.minestore.addons.api.placeholder.PlaceHolderManager;
-import me.chrommob.minestore.addons.api.profile.ProfileManager;
+import me.chrommob.minestore.api.WebApiAccessor;
+import me.chrommob.minestore.api.interfaces.placeholder.CommonPlaceHolderProvider;
+import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
+import me.chrommob.minestore.api.profile.ProfileManager;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProvider;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
-import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements CommonPlaceHolderProvider {
     private final MineStoreCommon plugin;
-    public BukkitPlaceHolderProvider(MineStoreBukkit plugin, MineStoreCommon pl) {
+    public BukkitPlaceHolderProvider(MineStoreCommon pl) {
         this.plugin = pl;
     }
 

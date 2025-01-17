@@ -1,8 +1,8 @@
 package me.chrommob.minestore.platforms.bukkit;
 
+import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.command.types.CommonConsoleUser;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
 import me.chrommob.minestore.platforms.bukkit.db.VaultEconomyProvider;
 import me.chrommob.minestore.platforms.bukkit.db.VaultPlayerInfoProvider;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitInventoryEvent;
@@ -44,20 +44,20 @@ public final class MineStoreBukkit extends JavaPlugin {
         this.adventure = BukkitAudiences.create(this);
         common = new MineStoreCommon();
         // Plugin startup logic
-        common.setPlatform("bukkit");
-        common.setPlatformName(Bukkit.getName());
-        common.setPlatformVersion(Bukkit.getVersion());
-        common.registerLogger(new BukkitLogger(this));
-        common.registerScheduler(new BukkitScheduler(this));
-        common.registerUserGetter(new BukkitUserGetter(this, common));
-        common.registerCommandExecuter(new CommandExecuterBukkit(this, common));
-        common.setConfigLocation(getDataFolder().toPath().resolve("config.yml").toFile());
-        common.registerPlayerJoinListener(new BukkitPlayerEvent(this, common));
+        Registries.PLATFORM.set("bukkit");
+        Registries.PLATFORM_NAME.set(Bukkit.getName());
+        Registries.PLATFORM_VERSION.set(Bukkit.getVersion());
+        Registries.LOGGER.set(new BukkitLogger(this));
+        Registries.SCHEDULER.set(new BukkitScheduler(this));
+        Registries.USER_GETTER.set(new BukkitUserGetter(this, common));
+        Registries.COMMAND_EXECUTER.set(new CommandExecuterBukkit(this, common));
+        Registries.CONFIG_FILE.set(getDataFolder().toPath().resolve("config.yml").toFile());
+        Registries.PLAYER_JOIN_LISTENER.set(new BukkitPlayerEvent(this, common));
         new BukkitInventoryEvent(this, common);
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
-                ? new AbstractUser((String) null, common, commandSender)
-                : new AbstractUser(((HumanEntity) commandSender).getUniqueId(), common, commandSender);
+                ? new AbstractUser((String) null, commandSender)
+                : new AbstractUser(((HumanEntity) commandSender).getUniqueId(), commandSender);
         final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.nativeCommandSender();
 
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
@@ -72,7 +72,7 @@ public final class MineStoreBukkit extends JavaPlugin {
             }
         };
         try {
-            common.registerCommandManager(new LegacyPaperCommandManager<>(
+            Registries.COMMAND_MANAGER.set(new LegacyPaperCommandManager<>(
                     /* Owning plugin */ this,
                     /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
                     /* Command Sender -> C */ senderMapper));
@@ -82,15 +82,15 @@ public final class MineStoreBukkit extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
             VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(this, common);
             if (vaultPlayerInfoProvider.isInstalled()) {
-                common.registerPlayerInfoProvider(vaultPlayerInfoProvider);
+                Registries.PLAYER_INFO_PROVIDER.set(vaultPlayerInfoProvider);
             }
             VaultEconomyProvider vaultEconomyProvider = new VaultEconomyProvider(this, common);
             if (vaultEconomyProvider.isInstalled()) {
-                common.registerPlayerEconomyProvider(vaultEconomyProvider);
+                Registries.PLAYER_ECONOMY_PROVIDER.set(vaultEconomyProvider);
             }
         }
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            common.registerPlaceHolderProvider(new BukkitPlaceHolderProvider(this, common));
+            Registries.PLACE_HOLDER_PROVIDER.set(new BukkitPlaceHolderProvider(common));
         }
         common.init(false);
     }

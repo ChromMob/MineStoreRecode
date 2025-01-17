@@ -1,8 +1,8 @@
 package me.chrommob.minestore.platforms.bukkit.db;
 
+import me.chrommob.minestore.api.interfaces.economyInfo.PlayerEconomyProvider;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.economyInfo.PlayerEconomyProvider;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;
@@ -31,5 +31,11 @@ public class VaultEconomyProvider implements PlayerEconomyProvider {
     public double getBalance(CommonUser commonUser) {
         Player player = mineStoreBukkit.getServer().getPlayer(commonUser.getUUID());
         return economy.getBalance(player);
+    }
+
+    @Override
+    public boolean takeMoney(CommonUser commonUser, double amount) {
+        Player player = mineStoreBukkit.getServer().getPlayer(commonUser.getUUID());
+        return economy.withdrawPlayer(player, amount).transactionSuccess();
     }
 }

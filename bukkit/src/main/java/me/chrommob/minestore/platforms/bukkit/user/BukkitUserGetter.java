@@ -1,8 +1,8 @@
 package me.chrommob.minestore.platforms.bukkit.user;
 
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.api.interfaces.user.UserGetter;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
-import me.chrommob.minestore.common.interfaces.user.UserGetter;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 
 import java.util.HashSet;

@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.dumper;
 
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
 
 import java.io.BufferedReader;
@@ -21,9 +22,9 @@ public class DumpData {
     public DumpData(boolean includeLog, MineStoreCommon plugin) {
         this.config = plugin.configReader().getLoadedConfig();
         this.version = plugin.jarFile().getAbsolutePath();
-        this.platform = plugin.getPlatform();
-        this.plaformName = plugin.getPlatformName();
-        this.platformVersion = plugin.getPlatformVersion();
+        this.platform = Registries.PLATFORM.get();
+        this.plaformName = Registries.PLATFORM_NAME.get();
+        this.platformVersion = Registries.PLATFORM_VERSION.get();
         Path logPath = Paths.get(
                 plugin.jarFile().getParentFile().getParentFile().getAbsolutePath(), "logs",
                 "latest.log");

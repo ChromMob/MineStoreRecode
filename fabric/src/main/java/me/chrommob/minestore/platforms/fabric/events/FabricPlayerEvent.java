@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.fabric.events;
 
+import me.chrommob.minestore.api.interfaces.event.PlayerEventListener;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 
 public class FabricPlayerEvent implements PlayerEventListener {

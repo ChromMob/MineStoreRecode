@@ -57,7 +57,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.0.6'
+    version = '3.1.0'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -96,7 +96,7 @@ subprojects {
         implementation 'com.google.code.gson:gson:2.8.9'
     }
 
-    if (project.name != "common" && project.name != "MineStoreAddonApi") {
+    if (project.name != "common" && project.name != "MineStore-API") {
         dependencies {
             implementation project(path: ':common', configuration: 'shadow')
         }
@@ -151,7 +151,7 @@ velocityProject.afterEvaluate {
     }
 }
 
-def addonApiProject = project(":MineStoreAddonApi")
+def addonApiProject = project(":MineStore-API")
 publishing {
     publications {
         mavenJava(MavenPublication) {

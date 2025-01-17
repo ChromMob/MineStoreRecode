@@ -2,6 +2,7 @@ package me.chrommob.minestore.common.stats;
 
 
 import com.google.gson.Gson;
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 
@@ -29,9 +30,9 @@ public class StatSender {
         this.common = common;
         SERVERUUID = generateUUIDFromStrings(common, (String) common.configReader().get(ConfigKey.STORE_URL), (String) common.configReader().get(ConfigKey.API_KEY), (String) common.configReader().get(ConfigKey.SECRET_KEY));
         JAVA_VERSION = System.getProperty("java.version");
-        PLATFORM_TYPE = common.getPlatform();
-        PLATFORM_NAME = common.getPlatformName();
-        PLATFORM_VERSION = common.getPlatformVersion();
+        PLATFORM_TYPE = Registries.PLATFORM.get();
+        PLATFORM_NAME = Registries.PLATFORM_NAME.get();
+        PLATFORM_VERSION = Registries.PLATFORM_VERSION.get();
         PLUGIN_VERSION = common.jarFile().getName().substring(common.jarFile().getName().indexOf("-") + 1, common.jarFile().getName().indexOf(".jar"));
         CORE_COUNT = Runtime.getRuntime().availableProcessors();
         SYSTEM_ARCHITECTURE = System.getProperty("os.arch");
@@ -66,7 +67,7 @@ public class StatSender {
     public void start() {
         thread = new Thread(() -> {
             while (true) {
-                int playerCount = common.userGetter().getAllPlayers().size();
+                int playerCount = Registries.USER_GETTER.get().getAllPlayers().size();
                 StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE);
                 statJson.setPlayerCount(playerCount);
                 String json = gson.toJson(statJson);

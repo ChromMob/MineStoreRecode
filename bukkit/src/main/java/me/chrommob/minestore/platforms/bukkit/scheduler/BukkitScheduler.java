@@ -1,6 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.scheduler;
 
-import me.chrommob.minestore.common.interfaces.scheduler.CommonScheduler;
+import me.chrommob.minestore.api.interfaces.scheduler.CommonScheduler;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;

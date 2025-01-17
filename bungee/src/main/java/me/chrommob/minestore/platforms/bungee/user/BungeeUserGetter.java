@@ -1,8 +1,7 @@
 package me.chrommob.minestore.platforms.bungee.user;
 
-import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
-import me.chrommob.minestore.common.interfaces.user.UserGetter;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.api.interfaces.user.UserGetter;
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 
 import java.util.HashSet;
@@ -11,21 +10,18 @@ import java.util.UUID;
 
 public class BungeeUserGetter implements UserGetter {
     private final MineStoreBungee mineStoreBungee;
-    private final MineStoreCommon plugin;
-
-    public BungeeUserGetter(MineStoreBungee mineStoreBungee, MineStoreCommon pl) {
+    public BungeeUserGetter(MineStoreBungee mineStoreBungee) {
         this.mineStoreBungee = mineStoreBungee;
-        this.plugin = pl;
     }
 
     @Override
     public CommonUser get(UUID uuid) {
-        return new BungeeUser(mineStoreBungee.getProxy().getPlayer(uuid), plugin);
+        return new BungeeUser(mineStoreBungee.getProxy().getPlayer(uuid));
     }
 
     @Override
     public CommonUser get(String username) {
-        return new BungeeUser(mineStoreBungee.getProxy().getPlayer(username), plugin);
+        return new BungeeUser(mineStoreBungee.getProxy().getPlayer(username));
     }
 
     @Override

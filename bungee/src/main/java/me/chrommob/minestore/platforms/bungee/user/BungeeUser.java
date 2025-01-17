@@ -1,8 +1,7 @@
 package me.chrommob.minestore.platforms.bungee.user;
 
-import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.interfaces.gui.CommonInventory;
-import me.chrommob.minestore.common.interfaces.user.CommonUser;
+import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -13,8 +12,7 @@ import java.util.UUID;
 public class BungeeUser extends CommonUser {
     private final ProxiedPlayer player;
 
-    public BungeeUser(ProxiedPlayer player, MineStoreCommon plugin) {
-        super(plugin);
+    public BungeeUser(ProxiedPlayer player) {
         this.player = player;
     }
 

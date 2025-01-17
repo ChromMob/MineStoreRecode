@@ -1,10 +1,11 @@
 package me.chrommob.minestore.common;
 
-import me.chrommob.minestore.addons.api.generic.MineStoreAddon;
-import me.chrommob.minestore.addons.api.event.types.MineStoreDisableEvent;
-import me.chrommob.minestore.addons.api.event.types.MineStoreEnableEvent;
-import me.chrommob.minestore.addons.api.event.types.MineStoreLoadEvent;
-import me.chrommob.minestore.addons.api.event.types.MineStoreReloadEvent;
+import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.generic.MineStoreAddon;
+import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
+import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
+import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
+import me.chrommob.minestore.api.event.types.MineStoreReloadEvent;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.commandGetters.WebListener;
@@ -13,29 +14,17 @@ import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.commandHolder.NewCommandDumper;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
-import me.chrommob.minestore.addons.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
-import me.chrommob.minestore.common.interfaces.commands.CommandExecuterCommon;
-import me.chrommob.minestore.common.interfaces.commands.CommandGetter;
-import me.chrommob.minestore.common.interfaces.commands.CommandStorageInterface;
-import me.chrommob.minestore.common.interfaces.economyInfo.DefaultPlayerEconomyProvider;
-import me.chrommob.minestore.common.interfaces.economyInfo.PlayerEconomyProvider;
-import me.chrommob.minestore.common.interfaces.event.PlayerEventListener;
-import me.chrommob.minestore.common.interfaces.logger.LoggerCommon;
-import me.chrommob.minestore.common.interfaces.placeholder.CommonPlaceHolderProvider;
-import me.chrommob.minestore.common.interfaces.playerInfo.DefaultPlayerInfoProvider;
-import me.chrommob.minestore.common.interfaces.playerInfo.PlayerInfoProvider;
-import me.chrommob.minestore.common.interfaces.playerInfo.implementation.LuckPermsPlayerInfoProvider;
-import me.chrommob.minestore.common.interfaces.scheduler.CommonScheduler;
-import me.chrommob.minestore.common.interfaces.user.AbstractUser;
-import me.chrommob.minestore.common.interfaces.user.UserGetter;
+import me.chrommob.minestore.api.interfaces.commands.CommandStorageInterface;
+import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.yaml.snakeyaml.Yaml;
 
@@ -49,103 +38,21 @@ import java.util.zip.ZipFile;
 
 public class MineStoreCommon {
     private ConfigReader configReader;
-    private File configFile;
-    private CommandExecuterCommon commandExecuterCommon;
-    private LoggerCommon logger;
-    private PlayerEventListener playerEventListener;
     private DatabaseManager databaseManager;
-    private CommandManager commandManager;
     private MiniMessage miniMessage;
-    private UserGetter userGetter;
-    private CommandGetter commandGetter;
+    private WebListener webListener;
     private CommandStorageInterface commandStorage;
     private CommandDumper commandDumper;
     private NewCommandDumper newCommandDumper;
     private AuthHolder authHolder;
     private GuiData guiData;
     private PlaceHolderData placeHolderData;
-    private PlayerInfoProvider playerInfoProvider;
-    private PlayerEconomyProvider playerEconomyProvider;
-    private CommonPlaceHolderProvider placeHolderProvider;
-    private CommonScheduler scheduler;
     private StatSender statsSender;
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
 
-    public void setConfigLocation(File configFile) {
-        this.configFile = configFile;
-        configReader = new ConfigReader(configFile, this);
-    }
-
-    private String platformType;
-
-    public void setPlatform(String platform) {
-        this.platformType = platform;
-    }
-
-    private String platformName;
-
-    public void setPlatformName(String platformName) {
-        this.platformName = platformName;
-    }
-
-    private String platformVersion;
-
-    public void setPlatformVersion(String platformVersion) {
-        this.platformVersion = platformVersion;
-    }
-
-    public String getPlatform() {
-        return platformType;
-    }
-
-    public String getPlatformName() {
-        return platformName;
-    }
-
-    public String getPlatformVersion() {
-        return platformVersion;
-    }
-
-    public void registerCommandExecuter(CommandExecuterCommon commandExecuter) {
-        this.commandExecuterCommon = commandExecuter;
-    }
-
-    public void registerScheduler(CommonScheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    public void registerLogger(LoggerCommon logger) {
-        this.logger = logger;
-    }
-
-    public void registerPlayerJoinListener(PlayerEventListener playerEventListener) {
-        this.playerEventListener = playerEventListener;
-    }
-
-    public void registerCommandManager(CommandManager commandManager) {
-        this.commandManager = commandManager;
-    }
-
-    public void registerUserGetter(UserGetter userGetter) {
-        this.userGetter = userGetter;
-    }
-
-    public void registerPlayerInfoProvider(PlayerInfoProvider playerInfoProvider) {
-        this.playerInfoProvider = playerInfoProvider;
-    }
-
-    public void registerPlayerEconomyProvider(PlayerEconomyProvider playerEconomyProvider) {
-        this.playerEconomyProvider = playerEconomyProvider;
-    }
-
-    public void registerPlaceHolderProvider(CommonPlaceHolderProvider placeHolderProvider) {
-        this.placeHolderProvider = placeHolderProvider;
-    }
-
-    @SuppressWarnings("unused")
-    public void overrideCommandStorage(CommandStorageInterface commandStorage) {
-        this.commandStorage = commandStorage;
+    public MineStoreCommon() {
+        Registries.CONFIG_FILE.listen(configFile -> configReader = new ConfigReader(configFile, this));
     }
 
     private final Set<MineStoreAddon> addons = new HashSet<>();
@@ -163,7 +70,7 @@ public class MineStoreCommon {
         commandStorage = new CommandStorage(this);
         authHolder = new AuthHolder(this);
         commandStorage.init();
-        commandGetter = new WebListener(this);
+        webListener = new WebListener(this);
         guiData = new GuiData(this);
         version = MineStoreVersion.getMineStoreVersion((String) configReader.get(ConfigKey.STORE_URL));
         placeHolderData = new PlaceHolderData(this);
@@ -189,8 +96,8 @@ public class MineStoreCommon {
             return;
         }
         if (!reload) {
-            if (placeHolderProvider != null) {
-                placeHolderProvider.init();
+            if (Registries.PLACE_HOLDER_PROVIDER.get() != null) {
+                Registries.PLACE_HOLDER_PROVIDER.get().init();
             }
             if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
                 databaseManager.start();
@@ -201,12 +108,12 @@ public class MineStoreCommon {
         statsSender.start();
         guiData.start();
         placeHolderData.start();
-        commandGetter.start();
+        webListener.start();
         new MineStoreEnableEvent((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)).call();
     }
 
     private void registerAddons() {
-        File addonFolder = new File(configFile.getParentFile(), "addons");
+        File addonFolder = new File(Registries.CONFIG_FILE.get().getParentFile(), "addons");
         if (!addonFolder.exists()) {
             addonFolder.mkdir();
         }
@@ -279,16 +186,16 @@ public class MineStoreCommon {
             authHolder.stop();
         if (databaseManager != null)
             databaseManager.stop();
-        if (commandGetter != null)
-            commandGetter.stop();
+        if (webListener != null)
+            webListener.stop();
     }
 
     private void registerEssentialCommands() {
-        if (commandManager == null) {
+        if (Registries.COMMAND_MANAGER.get() == null) {
             return;
         }
         annotationParser = new AnnotationParser<>(
-                /* Manager */ this.commandManager,
+                /* Manager */ Registries.COMMAND_MANAGER.get(),
                 /* Command sender type */ AbstractUser.class);
         annotationParser.parse(new AutoSetupCommand(this));
         annotationParser.parse(new ReloadCommand(this));
@@ -297,10 +204,10 @@ public class MineStoreCommon {
         annotationParser.parse(new AddonCommand(this));
     }
 
-    private AnnotationParser<AbstractUser> annotationParser;
+    private AnnotationParser annotationParser;
 
     private void registerCommands() {
-        if (commandManager == null) {
+        if (Registries.COMMAND_MANAGER.get() == null) {
             return;
         }
         // commandManager.commandSuggestionProcessor().registerAsyncCompletion("configKeys",
@@ -322,6 +229,9 @@ public class MineStoreCommon {
         if (version.requires(new MineStoreVersion(3, 0, 8))) {
             annotationParser.parse(new SubscriptionsCommand(this));
         }
+        if (version.requires(new MineStoreVersion(3, 2, 5))) {
+            annotationParser.parse(new ChargeBalanceCommand(this));
+        }
     }
 
     public void reload() {
@@ -332,9 +242,9 @@ public class MineStoreCommon {
             init(true);
             return;
         }
-        if (commandGetter.load()) {
+        if (webListener.load()) {
             log("Config reloaded.");
-            commandGetter.start();
+            webListener.start();
         }
         if (guiData.load()) {
             log("GuiData reloaded.");
@@ -368,11 +278,11 @@ public class MineStoreCommon {
     }
 
     private boolean verify() {
-        if (playerEventListener == null) {
+        if (Registries.PLAYER_JOIN_LISTENER.get() == null) {
             log("PlayerEventListener is not registered.");
             return false;
         }
-        if (commandManager == null) {
+        if (Registries.COMMAND_MANAGER.get() == null) {
             log("CommandManager is not registered.");
             return false;
         }
@@ -380,26 +290,26 @@ public class MineStoreCommon {
             log("ConfigReader is not registered.");
             return false;
         }
-        if (commandExecuterCommon == null) {
+        if (Registries.COMMAND_EXECUTER.get() == null) {
             log("CommandExecuter is not registered.");
             return false;
         }
-        if (logger == null) {
+        if (Registries.LOGGER.get() == null) {
             log("Logger is not registered.");
             return false;
         }
-        if (commandGetter == null) {
+        if (webListener == null) {
             log("CommandGetter is not registered.");
             return false;
         }
-        if (userGetter == null) {
+        if (Registries.USER_GETTER.get() == null) {
             log("UserGetter is not registered.");
             return false;
         }
-        if (!guiData.load() || !placeHolderData.load() || !commandGetter.load()) {
+        if (!guiData.load() || !placeHolderData.load() || !webListener.load()) {
             return false;
         }
-        if (scheduler == null) {
+        if (Registries.SCHEDULER.get() == null) {
             log("Scheduler is not registered.");
             return false;
         }
@@ -412,17 +322,11 @@ public class MineStoreCommon {
                 log("Database is not configured correctly.");
                 return false;
             }
-            if (playerInfoProvider == null) {
+            if (Registries.PLAYER_INFO_PROVIDER.get() == null) {
                 LuckPermsPlayerInfoProvider luckPermsPlayerInfoProvider = new LuckPermsPlayerInfoProvider(this);
                 if (luckPermsPlayerInfoProvider.isInstalled()) {
-                    playerInfoProvider = luckPermsPlayerInfoProvider;
-                } else {
-                    log("PlayerInfoProvider is not registered.");
-                    playerInfoProvider = new DefaultPlayerInfoProvider();
+                    Registries.PLAYER_INFO_PROVIDER.set(luckPermsPlayerInfoProvider);
                 }
-            }
-            if (playerEconomyProvider == null) {
-                playerEconomyProvider = new DefaultPlayerEconomyProvider();
             }
         }
         return true;
@@ -432,16 +336,8 @@ public class MineStoreCommon {
         return configReader;
     }
 
-    public CommandExecuterCommon commandExecuter() {
-        return commandExecuterCommon;
-    }
-
-    public UserGetter userGetter() {
-        return userGetter;
-    }
-
     public void log(String message) {
-        logger.log(message);
+        Registries.LOGGER.get().log(message);
     }
 
     public void debug(String message) {
@@ -449,7 +345,7 @@ public class MineStoreCommon {
             String[] lines = message.split(", ");
             for (String line : lines) {
                 try {
-                    logger.log("[DEBUG] " + line);
+                    Registries.LOGGER.get().log("[DEBUG] " + line);
                 } catch (Exception ignored) {
                     System.out.println("[DEBUG] " + line);
                 }
@@ -501,24 +397,12 @@ public class MineStoreCommon {
         return authHolder;
     }
 
-    public File configFile() {
-        return configFile;
-    }
-
     public MiniMessage miniMessage() {
         return miniMessage;
     }
 
     public DatabaseManager databaseManager() {
         return databaseManager;
-    }
-
-    public PlayerInfoProvider playerInfoProvider() {
-        return playerInfoProvider;
-    }
-
-    public PlayerEconomyProvider playerEconomyProvider() {
-        return playerEconomyProvider;
     }
 
     public GuiData guiData() {
@@ -533,16 +417,12 @@ public class MineStoreCommon {
         return dumper;
     }
 
-    public CommandGetter commandGetter() {
-        return commandGetter;
-    }
-
-    public AnnotationParser<AbstractUser> annotationParser() {
-        return annotationParser;
+    public WebListener webListener() {
+        return webListener;
     }
 
     public void runOnMainThread(Runnable runnable) {
-        scheduler.run(runnable);
+        Registries.SCHEDULER.get().run(runnable);
     }
 
     public File jarFile() {
