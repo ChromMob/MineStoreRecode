@@ -1,5 +1,7 @@
 package me.chrommob.minestore.common.gui;
 
+import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
@@ -102,7 +104,12 @@ public class GuiOpenener {
                 if (storeUrl.endsWith("/")) {
                     storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
                 }
-                String url = storeUrl + "/category/";
+                String url;
+                if (MineStoreCommon.version().requires(new MineStoreVersion(3, 0, 0))) {
+                    url = storeUrl + "/categories/";
+                } else {
+                    url = storeUrl + "/category/";
+                }
                 if (parsedPackage.getRoot() instanceof ParsedCategory) {
                     url += ((ParsedCategory) parsedPackage.getRoot()).getUrl();
                 } else if (parsedPackage.getRoot() instanceof ParsedSubCategory) {
