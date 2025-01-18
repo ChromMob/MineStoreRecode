@@ -61,6 +61,7 @@ public class WebListener {
                 }
                 Set<Integer> toPostDelivered = new HashSet<>();
                 for (ParsedResponse parsedResponse : parsedResponses) {
+                    toPostDelivered.add(parsedResponse.commandId());
                     switch (parsedResponse.type()) {
                         case COMMAND:
                             MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStorePurchaseEvent.COMMAND_TYPE.ONLINE : MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
@@ -68,7 +69,6 @@ public class WebListener {
                             if (event.isCancelled()) {
                                 continue;
                             }
-                            toPostDelivered.add(parsedResponse.commandId());
                             ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStorePurchaseEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
                             plugin.commandStorage().listener(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
                             plugin.debug("Got command: " + "\"" + parsedResponse.command() + "\""
@@ -95,7 +95,7 @@ public class WebListener {
                         postExecuted(String.valueOf(parsedResponse.commandId()));
                     }
                 }
-                if (MineStoreCommon.version().requires(arraySupportedSince)) {
+                if (MineStoreCommon.version().requires(arraySupportedSince) && !toPostDelivered.isEmpty()) {
                     int[] toPostDeliveredArray = new int[toPostDelivered.size()];
                     int i = 0;
                     for (Integer id : toPostDelivered) {
@@ -123,6 +123,7 @@ public class WebListener {
             while ((line = reader.readLine()) != null) {
                 responseString.append(line);
             }
+            plugin.debug("Received: " + responseString);
             try {
                 if (MineStoreCommon.version().requires(arraySupportedSince)) {
                     Type listType = new TypeToken<List<GsonReponse>>(){}.getType();
