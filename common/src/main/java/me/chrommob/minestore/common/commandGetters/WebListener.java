@@ -48,7 +48,7 @@ public class WebListener {
                 plugin.debug("[WebListener] Running...");
                 List<ParsedResponse> parsedResponses = fetchData();
                 if (wasEmpty || parsedResponses.isEmpty()) {
-                    plugin.debug("Got empty response from server");
+                    plugin.debug(wasEmpty ? "Issue while parsing json" : "Parsed responses is empty");
                     wasEmpty = true;
                 }
                 if (wasEmpty) {
@@ -95,7 +95,7 @@ public class WebListener {
                         postExecuted(String.valueOf(parsedResponse.commandId()));
                     }
                 }
-                if (MineStoreCommon.version().requires(arraySupportedSince) && !toPostDelivered.isEmpty()) {
+                if (MineStoreCommon.version().requires(arraySupportedSince)) {
                     int[] toPostDeliveredArray = new int[toPostDelivered.size()];
                     int i = 0;
                     for (Integer id : toPostDelivered) {
@@ -132,13 +132,14 @@ public class WebListener {
                         parsedResponses.add(parseGson(response));
                     }
                 } else {
-                    GsonReponse response = gson.fromJson(line, GsonReponse.class);
+                    GsonReponse response = gson.fromJson(responseString.toString(), GsonReponse.class);
                     if (response != null) {
                         ParsedResponse parsedResponse = parseGson(response);
                         parsedResponses.add(parsedResponse);
                     }
                 }
             } catch (JsonSyntaxException e) {
+                plugin.debug(e);
                 wasEmpty = true;
             }
         } catch (IOException e) {
