@@ -133,7 +133,7 @@ public class WebListener {
                     }
                 } else {
                     GsonReponse response = gson.fromJson(responseString.toString(), GsonReponse.class);
-                    if (response != null) {
+                    if (response != null && response.username() != null) {
                         ParsedResponse parsedResponse = parseGson(response);
                         parsedResponses.add(parsedResponse);
                     }
