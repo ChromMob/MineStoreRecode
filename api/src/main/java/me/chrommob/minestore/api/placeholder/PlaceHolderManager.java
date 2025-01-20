@@ -28,4 +28,19 @@ public class PlaceHolderManager {
     public Map<String, BiFunction<String, String, String>> getPlaceHolders() {
         return placeHolders;
     }
+
+    public String getResult(String name, String params) {
+        if (placeHolders.containsKey(params)) {
+            return placeHolders.get(params).apply(name, params);
+        } else {
+            String regexTest = placeHolders.keySet().stream()
+                    .filter(params::matches)
+                    .findFirst()
+                    .orElse(null);
+            if (regexTest != null) {
+                return placeHolders.get(regexTest).apply(name, params);
+            }
+        }
+        return "";
+    }
 }

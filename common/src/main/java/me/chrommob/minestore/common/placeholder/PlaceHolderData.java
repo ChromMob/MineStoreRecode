@@ -1,12 +1,18 @@
 package me.chrommob.minestore.common.placeholder;
 
+import me.chrommob.minestore.api.WebApiAccessor;
+import me.chrommob.minestore.api.profile.ProfileManager;
+import net.kyori.adventure.text.Component;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.placeholder.json.*;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -30,6 +36,81 @@ public class PlaceHolderData {
     
     public PlaceHolderData(MineStoreCommon plugin) {
         this.plugin = plugin;
+        registerNativePlaceholders();
+    }
+
+    private void registerNativePlaceholders() {
+        //Regex that matches top_donator_username_1, top_donator_username_2, etc.
+        PlaceHolderManager.getInstance().registerPlaceHolder("top_donator_username_(\\d+)", (name, param) -> {
+            param = param.replaceFirst("top_donator_username_", "");
+            int arg = Integer.parseInt(param);
+            plugin.debug("Top donator username: " + topDonators.get(arg - 1).getUserName() + " (" + arg + ")");
+            return topDonators.get(arg - 1).getUserName();
+        });
+        //Regex that matches top_donator_price_1, top_donator_price_2, etc.
+        PlaceHolderManager.getInstance().registerPlaceHolder("top_donator_price_(\\d+)", (name, param) -> {
+            param = param.replaceFirst("top_donator_price_", "");
+            int arg = Integer.parseInt(param);
+            return String.valueOf(topDonators.get(arg - 1).getPrice());
+        });
+        //Regex that matches last_donator_username_1, last_donator_username_2, etc.
+        PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_username_(\\d+)", (name, param) -> {
+            param = param.replaceFirst("last_donator_username_", "");
+            int arg = Integer.parseInt(param);
+            return lastDonators.get(arg - 1).getUserName();
+        });
+        //Regex that matches last_donator_price_1, last_donator_price_2, etc.
+        PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_price_(\\d+)", (name, param) -> {
+            param = param.replaceFirst("last_donator_price_", "");
+            int arg = Integer.parseInt(param);
+            return String.valueOf(lastDonators.get(arg - 1).getPrice());
+        });
+        //Regex that matches last_donator_package_1, last_donator_package_2, etc.
+        PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_package_(\\d+)", (name, param) -> {
+            param = param.replaceFirst("last_donator_package_", "");
+            int arg = Integer.parseInt(param);
+            return lastDonators.get(arg - 1).getPackageName();
+        });
+        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_current", (name, param) -> String.valueOf(donationGoal.getDonationGoalCurrentAmount()));
+        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_target", (name, param) -> String.valueOf(donationGoal.getDonationGoalAmount()));
+        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_percentage", (name, param) -> String.valueOf(donationGoal.getDonationGoalPercentage()));
+        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_bar_(\\d+)", (name, param) -> {
+            param = param.replaceFirst("donation_goal_bar_", "");
+            int amount = Integer.parseInt(param);
+            Component component = Component.text("");
+            if (donationGoal.getDonationGoalPercentage() > 100) {
+                for (int i = 0; i < amount; i++) {
+                    component = component.append(Component.text("█").color(NamedTextColor.GREEN));
+                }
+                LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
+                return serializer.serialize(component);
+            }
+            if (donationGoal.getDonationGoalPercentage() < 0) {
+                for (int i = 0; i < amount; i++) {
+                    component = component.append(Component.text("█").color(NamedTextColor.RED));
+                }
+                LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
+                return serializer.serialize(component);
+            }
+            int step = 100 / amount;
+            for (int i = 0; i < amount; i++) {
+                if ((i + 1) * step <= donationGoal.getDonationGoalPercentage()) {
+                    component = component.append(Component.text("█").color(NamedTextColor.GREEN));
+                    continue;
+                }
+                component = component.append(Component.text("█").color(NamedTextColor.RED));
+            }
+            LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
+            return serializer.serialize(component);
+        });
+        //Regex that matches player_spent
+        PlaceHolderManager.getInstance().registerPlaceHolder("player_spent", (name, param) -> {
+            ProfileManager.Profile profile = WebApiAccessor.profileManager().getCachedProfile(name);
+            if (profile == null) {
+                return "";
+            }
+            return String.valueOf(profile.moneySpent());
+        });
     }
 
     public boolean load() {
@@ -153,17 +234,5 @@ public class PlaceHolderData {
         if (thread != null && thread.isAlive()) {
             thread.interrupt();
         }
-    }
-
-    public DonationGoal getDonationGoal() {
-        return donationGoal;
-    }
-
-    public List<LastDonator> getLastDonators() {
-        return lastDonators;
-    }
-
-    public List<TopDonator> getTopDonators() {
-        return topDonators;
     }
 }
