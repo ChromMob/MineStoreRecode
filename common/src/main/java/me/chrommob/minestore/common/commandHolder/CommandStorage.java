@@ -1,6 +1,7 @@
 package me.chrommob.minestore.common.commandHolder;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.event.types.MineStoreExecuteEvent;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
@@ -58,7 +59,10 @@ public class CommandStorage implements CommandStorageInterface {
         if (MineStoreCommon.version().requires("3.0.0")) {
             if (newCommands.containsKey(username)) {
                 plugin.debug("Executing new commands for " + username);
+                String finalUsername = username;
                 newCommands.get(username).forEach(storedCommand -> {
+                    MineStoreExecuteEvent event = new MineStoreExecuteEvent(finalUsername, storedCommand.command(), storedCommand.requestId());
+                    event.call();
                     if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
                         plugin.log("Executing command: " + storedCommand.command());
                     }

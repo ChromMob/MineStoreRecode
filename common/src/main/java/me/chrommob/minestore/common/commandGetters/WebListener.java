@@ -10,15 +10,13 @@ import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
+import me.chrommob.minestore.common.verification.VerificationResult;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class WebListener {
     private final MineStoreVersion arraySupportedSince = new MineStoreVersion(3, 2, 5);
@@ -66,7 +64,7 @@ public class WebListener {
                         case COMMAND:
                             MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStorePurchaseEvent.COMMAND_TYPE.ONLINE : MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
                             event.call();
-                            if (event.isCancelled()) {
+                            if (event.doNotExecute()) {
                                 continue;
                             }
                             ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStorePurchaseEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
@@ -168,7 +166,7 @@ public class WebListener {
         configReader = plugin.configReader();
     }
 
-    public boolean load() {
+    public VerificationResult load() {
         String finalQueueUrl;
         String finalExecutedUrl;
         String finalDeliveredUrl;
@@ -192,9 +190,8 @@ public class WebListener {
             executedUrl = new URL(finalExecutedUrl);
             deliveredUrl = new URL(finalDeliveredUrl);
         } catch (Exception e) {
-            plugin.log("Store URL is not a valid URL!");
             plugin.debug(e);
-            return false;
+            return new VerificationResult(false, Collections.singletonList("Store URL is not a valid URL!"), VerificationResult.TYPE.STORE_URL);
         }
         try {
             HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
@@ -213,7 +210,7 @@ public class WebListener {
                     if (list.isEmpty()) {
                         wasEmpty = true;
                     }
-                    return true;
+                    return VerificationResult.valid();
                 }
                 gson.fromJson(responseString.toString(), GsonReponse.class);
             } catch (JsonSyntaxException e) {
@@ -222,20 +219,18 @@ public class WebListener {
                 } else {
                     plugin.debug(e);
                     plugin.debug(e);
-                    plugin.log("SECRET KEY is invalid!");
-                    return false;
+                    return new VerificationResult(false, Collections.singletonList("SECRET KEY is invalid!"), VerificationResult.TYPE.SECRET_KEY);
                 }
             }
         } catch (IOException e) {
-            plugin.log("SECRET KEY is invalid!");
             plugin.debug(e);
-            return false;
+            return new VerificationResult(false, Collections.singletonList("SECRET KEY is invalid!"), VerificationResult.TYPE.SECRET_KEY);
         } catch (ClassCastException e) {
             plugin.log("STORE URL has to start with https://");
             plugin.debug(e);
-            return false;
+            return new VerificationResult(false, Collections.singletonList("STORE URL has to start with https://"), VerificationResult.TYPE.STORE_URL);
         }
-        return true;
+        return VerificationResult.valid();
     }
 
     public void start() {

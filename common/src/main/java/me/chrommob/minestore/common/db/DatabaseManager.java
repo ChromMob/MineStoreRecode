@@ -5,10 +5,12 @@ import com.zaxxer.hikari.HikariDataSource;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
+import me.chrommob.minestore.common.verification.VerificationResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +59,7 @@ public class DatabaseManager {
         plugin.debug("Removed " + name + " from playerData");
     }
 
-    public boolean load() {
+    public VerificationResult load() {
         host = (String) plugin.configReader().get(ConfigKey.MYSQL_HOST);
         port = (int) plugin.configReader().get(ConfigKey.MYSQL_PORT);
         database = (String) plugin.configReader().get(ConfigKey.MYSQL_DATABASE);
@@ -78,10 +80,10 @@ public class DatabaseManager {
         }
         if (hikari == null) {
             plugin.log("Could not connect to database!");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("Could not connect to database!"), VerificationResult.TYPE.DATABASE);
         } else {
             plugin.log("Connected to database!");
-            return true;
+            return VerificationResult.valid();
         }
     }
 

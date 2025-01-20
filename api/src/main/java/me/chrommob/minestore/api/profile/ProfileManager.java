@@ -1,33 +1,16 @@
 package me.chrommob.minestore.api.profile;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import me.chrommob.minestore.api.generic.AuthData;
-import me.chrommob.minestore.api.generic.FeatureManager;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
-public class ProfileManager extends FeatureManager {
-    private final Gson gson = new Gson();
-    public ProfileManager(AuthData authData) {
-        super(authData);
-    }
-
+public class ProfileManager {
     private final Map<String, Profile> profiles = new ConcurrentHashMap<>();
-    public Profile getProfile(String username) {
-        URL url = authData().createNonKeyUrl("profile/" + username, "");
-        try {
-            return gson.fromJson(new BufferedReader(new InputStreamReader(url.openStream())), Profile.class);
-        } catch (Exception e) {
-            return null;
-        }
-    }
+    private Function<String, Profile> function;
 
     public Profile getCachedProfile(String username) {
         if (profiles.containsKey(username)) {
@@ -42,13 +25,17 @@ public class ProfileManager extends FeatureManager {
 
     private void updateProfile(String username) {
         CompletableFuture.runAsync(() -> {
-            Profile profile = getProfile(username);
+            Profile profile = function.apply(username);
             if (profile == null) {
                 return;
             }
             profile.fetched();
             profiles.put(username, profile);
         });
+    }
+
+    public void registerFunction(Function<String, Profile> function) {
+        this.function = function;
     }
 
     public static class Profile {

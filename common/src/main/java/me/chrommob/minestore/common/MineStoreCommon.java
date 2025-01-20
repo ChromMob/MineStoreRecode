@@ -1,11 +1,14 @@
 package me.chrommob.minestore.common;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.WebApiAccessor;
+import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
 import me.chrommob.minestore.api.event.types.MineStoreReloadEvent;
+import me.chrommob.minestore.common.api.ApiHandler;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.commandGetters.WebListener;
@@ -24,6 +27,8 @@ import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
+import me.chrommob.minestore.common.verification.VerificationManager;
+import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.yaml.snakeyaml.Yaml;
@@ -50,6 +55,8 @@ public class MineStoreCommon {
     private StatSender statsSender;
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
+    private VerificationManager verificationManager;
+    private ApiHandler apiHandler;
 
     public MineStoreCommon() {
         Registries.CONFIG_FILE.listen(configFile -> configReader = new ConfigReader(configFile, this));
@@ -92,8 +99,9 @@ public class MineStoreCommon {
                 storeUrl = "https://" + storeUrl;
             configReader.set(ConfigKey.STORE_URL, storeUrl);
         }
-        if (!verify()) {
-            log("Your plugin is not configured correctly. Please check your config.yml");
+        VerificationResult lastVerificationResult = verify();
+        verificationManager = new VerificationManager(lastVerificationResult);
+        if (!verificationManager.isValid()) {
             return;
         }
         if (!reload) {
@@ -110,7 +118,8 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         webListener.start();
-        new MineStoreEnableEvent((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)).call();
+        new MineStoreEnableEvent().call();
+        apiHandler = new ApiHandler(new AuthData((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)));
     }
 
     private void registerAddons() {
@@ -243,15 +252,15 @@ public class MineStoreCommon {
             init(true);
             return;
         }
-        if (webListener.load()) {
+        if (webListener.load().isValid()) {
             log("Config reloaded.");
             webListener.start();
         }
-        if (guiData.load()) {
+        if (guiData.load().isValid()) {
             log("GuiData reloaded.");
             guiData.start();
         }
-        if (placeHolderData.load()) {
+        if (placeHolderData.load().isValid()) {
             log("PlaceHolderData reloaded.");
             placeHolderData.start();
         }
@@ -262,14 +271,14 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
-                if (!databaseManager().load()) {
+                if (!databaseManager().load().isValid()) {
                     log("Failed to initialize database.");
                     return;
                 }
                 databaseManager.start();
             } else {
                 databaseManager.stop();
-                if (!databaseManager().load()) {
+                if (!databaseManager().load().isValid()) {
                     log("Failed to reload database.");
                     return;
                 }
@@ -278,50 +287,51 @@ public class MineStoreCommon {
         }
     }
 
-    private boolean verify() {
+    private VerificationResult verify() {
         if (Registries.PLAYER_JOIN_LISTENER.get() == null) {
-            log("PlayerEventListener is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("PlayerEventListener is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.COMMAND_MANAGER.get() == null) {
-            log("CommandManager is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("CommandManager is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (configReader == null) {
-            log("ConfigReader is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("ConfigReader is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.COMMAND_EXECUTER.get() == null) {
-            log("CommandExecuter is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("CommandExecuter is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.LOGGER.get() == null) {
-            log("Logger is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("Logger is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (webListener == null) {
-            log("CommandGetter is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("CommandGetter is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.USER_GETTER.get() == null) {
-            log("UserGetter is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("UserGetter is not registered."), VerificationResult.TYPE.SUPPORT);
         }
-        if (!guiData.load() || !placeHolderData.load() || !webListener.load()) {
-            return false;
+        VerificationResult guiDataVerification = guiData.load();
+        if (!guiDataVerification.isValid()) {
+            return guiDataVerification;
+        }
+        VerificationResult placeHolderDataVerification = placeHolderData.load();
+        if (!placeHolderDataVerification.isValid()) {
+            return placeHolderDataVerification;
+        }
+        VerificationResult webListenerVerification = webListener.load();
+        if (!webListenerVerification.isValid()) {
+            return webListenerVerification;
         }
         if (Registries.SCHEDULER.get() == null) {
             log("Scheduler is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("Scheduler is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             if (databaseManager == null) {
-                log("DatabaseManager is not registered.");
-                return false;
+                return new VerificationResult(false, Collections.singletonList("DatabaseManager is not registered."), VerificationResult.TYPE.SUPPORT);
             }
-            if (!databaseManager.load()) {
-                log("Database is not configured correctly.");
-                return false;
+            VerificationResult databaseVerification = databaseManager.load();
+            if (!databaseVerification.isValid()) {
+                return databaseVerification;
             }
             if (Registries.PLAYER_INFO_PROVIDER.get() == null) {
                 LuckPermsPlayerInfoProvider luckPermsPlayerInfoProvider = new LuckPermsPlayerInfoProvider(this);
@@ -330,7 +340,7 @@ public class MineStoreCommon {
                 }
             }
         }
-        return true;
+        return VerificationResult.valid();
     }
 
     public ConfigReader configReader() {
@@ -368,6 +378,9 @@ public class MineStoreCommon {
     }
 
     public void onPlayerJoin(String name) {
+        if (verificationManager != null) {
+            verificationManager.onJoin(name);
+        }
         if (!initialized) {
             return;
         }

@@ -11,6 +11,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.placeholder.json.*;
+import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -113,7 +114,8 @@ public class PlaceHolderData {
         });
     }
 
-    public boolean load() {
+    public VerificationResult load() {
+        List<String> errors = new ArrayList<>();
         ConfigReader configReader = plugin.configReader();
         String finalDonationGoalUrl;
         String finalLastDonatorsUrl;
@@ -143,8 +145,8 @@ public class PlaceHolderData {
             apiUrls[2] = topDonatorsUrl;
         } catch (Exception e) {
             plugin.debug(e);
-            plugin.log("STORE URL has invalid format!");
-            return false;
+            errors.add("STORE URL has invalid format!");
+            return new VerificationResult(false, errors, VerificationResult.TYPE.STORE_URL);
         }
         try {
             plugin.debug("Loading placeholder data...");
@@ -199,14 +201,14 @@ public class PlaceHolderData {
             }
         } catch (IOException e) {
             plugin.debug(e);
-            plugin.log("API KEY is invalid!");
-            return false;
+            errors.add("API KEY is invalid!");
+            return new VerificationResult(false, errors, VerificationResult.TYPE.API_KEY);
         } catch (ClassCastException e) {
             plugin.debug(e);
-            plugin.log("STORE URL has to start with https://");
-            return false;
+            errors.add("STORE URL has to start with https://");
+            return new VerificationResult(false, errors, VerificationResult.TYPE.STORE_URL);
         }
-        return true;
+        return VerificationResult.valid();
     }
 
     public void start() {
@@ -219,7 +221,7 @@ public class PlaceHolderData {
 
     private final Runnable runnable = () -> {
         while (true) {
-            if (!load()) {
+            if (!load().isValid()) {
                 plugin.debug("Failed to load placeholder data!");
             }
             try {

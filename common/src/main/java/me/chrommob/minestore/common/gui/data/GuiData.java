@@ -10,6 +10,7 @@ import me.chrommob.minestore.common.gui.GuiOpenener;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
+import me.chrommob.minestore.common.verification.VerificationResult;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -34,7 +35,8 @@ public class GuiData {
     private ParsedGui parsedGui;
     private Thread thread = null;
 
-    public boolean load() {
+    public VerificationResult load() {
+        List<String> messages = new ArrayList<>();
         ConfigReader configReader = plugin.configReader();
         String finalUrl;
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
@@ -49,8 +51,9 @@ public class GuiData {
             packageURL = new URL(finalUrl);
         } catch (Exception e) {
             plugin.debug(e);
-            plugin.log("STORE URL format is invalid!");
-            return false;
+            messages.add("Store URL: " + finalUrl);
+            messages.add("STORE URL format is invalid!");
+            return new VerificationResult(false, messages, VerificationResult.TYPE.STORE_URL);
         }
         try {
             plugin.debug("[GuiData] Loading data from " + finalUrl);
@@ -61,9 +64,17 @@ public class GuiData {
 
             String line;
 
-            if (urlConnection.getResponseCode() == 403) {
-                plugin.log("The request was denied by the server! Probably Cloudflare protection.");
-                return false;
+            if (urlConnection.getResponseCode() != 200) {
+                messages.add("The request was denied by the server with code: " + urlConnection.getResponseCode() + "!");
+                switch (urlConnection.getResponseCode()) {
+                    case 403:
+                        messages.add("Probably Cloudflare protection.");
+                        break;
+                    case 404:
+                        messages.add("The server returned a 404 error.");
+                        break;
+                }
+                return new VerificationResult(false, messages, VerificationResult.TYPE.WEBSTORE);
             }
 
             while ((line = reader.readLine()) != null) {
@@ -78,31 +89,31 @@ public class GuiData {
                     }
                     if (line.equals("[]")) {
                         parsedResponse = new ArrayList<>();
-                        return true;
+                        return VerificationResult.valid();
                     }
                     parsedResponse = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
                     plugin.debug(e);
-                    plugin.log("API key is invalid!");
+                    messages.add("API key is invalid!");
                     parsedResponse = null;
-                    return false;
+                    return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
                 }
             }
         } catch (ClassCastException e) {
-            plugin.log("STORE URL has to start with https://");
+            messages.add("STORE URL has to start with https://");
             plugin.debug(e);
-            return false;
+            return new VerificationResult(false, messages, VerificationResult.TYPE.STORE_URL);
         } catch (IOException e) {
             plugin.debug(e);
-            plugin.log("API key is invalid!");
-            return false;
+            messages.add("API key is invalid!");
+            return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
         }
         if (parsedResponse == null) {
-            plugin.log("API key is invalid!");
-            return false;
+            messages.add("API key is invalid!");
+            return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
         }
         parsedGui = new ParsedGui(parsedResponse, plugin);
-        return true;
+        return VerificationResult.valid();
     }
 
     public void start() {
@@ -121,7 +132,7 @@ public class GuiData {
 
     private Runnable runnable = () -> {
         while (true) {
-            if (!load()) {
+            if (!load().isValid()) {
                 plugin.debug("[GuiData] Error loading data!");
             }
             try {
