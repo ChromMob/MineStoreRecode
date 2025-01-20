@@ -4,7 +4,7 @@ import me.chrommob.minestore.api.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.platforms.fabric.MineStoreFabric;
 import net.minecraft.server.MinecraftServer;
 
-public class CommandExecuterFabric implements CommandExecuterCommon {
+public class CommandExecuterFabric extends CommandExecuterCommon {
     private final MinecraftServer server;
 
     public CommandExecuterFabric(MinecraftServer server) {

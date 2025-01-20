@@ -6,14 +6,13 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
 import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.api.interfaces.commands.CommandStorageInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class CommandStorage implements CommandStorageInterface {
+public class CommandStorage {
     private final MineStoreCommon plugin;
     public CommandStorage(MineStoreCommon plugin) {
         this.plugin = plugin;
@@ -53,7 +52,6 @@ public class CommandStorage implements CommandStorageInterface {
         plugin.newCommandDumper().update(newCommands);
     }
 
-    @Override
     public void onPlayerJoin(String username) {
         username = username.toLowerCase();
         if (MineStoreCommon.version().requires("3.0.0")) {
@@ -61,12 +59,12 @@ public class CommandStorage implements CommandStorageInterface {
                 plugin.debug("Executing new commands for " + username);
                 String finalUsername = username;
                 newCommands.get(username).forEach(storedCommand -> {
-                    MineStoreExecuteEvent event = new MineStoreExecuteEvent(finalUsername, storedCommand.command(), storedCommand.requestId());
-                    event.call();
                     if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
                         plugin.log("Executing command: " + storedCommand.command());
                     }
-                    Registries.COMMAND_EXECUTER.get().execute(storedCommand.command());
+                    MineStoreExecuteEvent event = new MineStoreExecuteEvent(finalUsername, storedCommand.command(), storedCommand.requestId());
+                    event.call();
+                    Registries.COMMAND_EXECUTER.get().execute(event);
                     plugin.webListener().postExecuted(String.valueOf(storedCommand.requestId()));
                 });
                 removeNewCommand(username);
@@ -75,22 +73,25 @@ public class CommandStorage implements CommandStorageInterface {
         }
         if (commands.containsKey(username)) {
             plugin.debug("Executing commands for " + username);
+            String finalUsername = username;
             commands.get(username).forEach(command -> {
+                int requestId = 0;
                 if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
                     plugin.log("Executing command: " + command);
                 }
-                Registries.COMMAND_EXECUTER.get().execute(command);
+                MineStoreExecuteEvent event = new MineStoreExecuteEvent(finalUsername, command, requestId);
+                event.call();
+                Registries.COMMAND_EXECUTER.get().execute(event);
             });
             remove(username);
         }
     }
 
-    @Override
     public void listener(ParsedResponse command) {
         if (command.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE) {
             handleOnlineCommand(command.command(), command.username(), command.commandId());
         } else {
-            handleOfflineCommand(command.command());
+            handleOfflineCommand(command.command(), command.username(), command.commandId());
         }
     }
 
@@ -101,7 +102,9 @@ public class CommandStorage implements CommandStorageInterface {
             if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
                 plugin.log("Executing command: " + command);
             }
-            Registries.COMMAND_EXECUTER.get().execute(command);
+            MineStoreExecuteEvent event = new MineStoreExecuteEvent(username, command, requestId);
+            event.call();
+            Registries.COMMAND_EXECUTER.get().execute(event);
             if (MineStoreCommon.version().requires("3.0.0")) {
                 plugin.webListener().postExecuted(String.valueOf(requestId));
             }
@@ -114,14 +117,15 @@ public class CommandStorage implements CommandStorageInterface {
         add(username, command);
     }
 
-    private void handleOfflineCommand(String command) {
+    private void handleOfflineCommand(String command, String username, int requestId) {
         if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
             plugin.log("Executing command: " + command);
         }
-        Registries.COMMAND_EXECUTER.get().execute(command);
+        MineStoreExecuteEvent event = new MineStoreExecuteEvent(username, command, requestId);
+        event.call();
+        Registries.COMMAND_EXECUTER.get().execute(event);
     }
 
-    @Override
     public void init() {
         commands = plugin.commandDumper().load();
         newCommands = plugin.newCommandDumper().load();

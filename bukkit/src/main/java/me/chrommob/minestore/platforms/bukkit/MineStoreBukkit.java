@@ -19,9 +19,11 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
+import org.incendo.cloud.setting.ManagerSetting;
 
 import java.util.function.Function;
 
@@ -71,14 +73,10 @@ public final class MineStoreBukkit extends JavaPlugin {
                 return aToC.apply(mapped);
             }
         };
-        try {
-            Registries.COMMAND_MANAGER.set(new LegacyPaperCommandManager<>(
-                    /* Owning plugin */ this,
-                    /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
-                    /* Command Sender -> C */ senderMapper));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Registries.COMMAND_MANAGER.set(new LegacyPaperCommandManager<>(
+                /* Owning plugin */ this,
+                /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
+                /* Command Sender -> C */ senderMapper));
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
             VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(this, common);
             if (vaultPlayerInfoProvider.isInstalled()) {

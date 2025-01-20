@@ -1,7 +1,6 @@
 package me.chrommob.minestore.common;
 
 import me.chrommob.minestore.api.Registries;
-import me.chrommob.minestore.api.WebApiAccessor;
 import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
@@ -21,7 +20,6 @@ import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
-import me.chrommob.minestore.api.interfaces.commands.CommandStorageInterface;
 import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
@@ -31,6 +29,7 @@ import me.chrommob.minestore.common.verification.VerificationManager;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.setting.ManagerSetting;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -46,7 +45,7 @@ public class MineStoreCommon {
     private DatabaseManager databaseManager;
     private MiniMessage miniMessage;
     private WebListener webListener;
-    private CommandStorageInterface commandStorage;
+    private CommandStorage commandStorage;
     private CommandDumper commandDumper;
     private NewCommandDumper newCommandDumper;
     private AuthHolder authHolder;
@@ -56,10 +55,10 @@ public class MineStoreCommon {
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
     private VerificationManager verificationManager;
-    private ApiHandler apiHandler;
 
     public MineStoreCommon() {
         Registries.CONFIG_FILE.listen(configFile -> configReader = new ConfigReader(configFile, this));
+        Registries.COMMAND_MANAGER.listen(commandManager -> commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true));
     }
 
     private final Set<MineStoreAddon> addons = new HashSet<>();
@@ -79,8 +78,8 @@ public class MineStoreCommon {
         commandStorage.init();
         webListener = new WebListener(this);
         guiData = new GuiData(this);
-        version = new MineStoreVersion("3.2.5");
-        //version = MineStoreVersion.getMineStoreVersion((String) configReader.get(ConfigKey.STORE_URL));
+        //version = new MineStoreVersion("3.2.5");
+        version = MineStoreVersion.getMineStoreVersion((String) configReader.get(ConfigKey.STORE_URL));
         placeHolderData = new PlaceHolderData(this);
         SubscriptionUtil.init(this);
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
@@ -119,7 +118,7 @@ public class MineStoreCommon {
         placeHolderData.start();
         webListener.start();
         new MineStoreEnableEvent().call();
-        apiHandler = new ApiHandler(new AuthData((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)));
+        new ApiHandler(new AuthData((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)));
     }
 
     private void registerAddons() {
@@ -399,7 +398,7 @@ public class MineStoreCommon {
         }
     }
 
-    public CommandStorageInterface commandStorage() {
+    public CommandStorage commandStorage() {
         return commandStorage;
     }
 

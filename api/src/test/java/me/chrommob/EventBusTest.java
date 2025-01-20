@@ -52,7 +52,7 @@ public class EventBusTest {
     @Test
     public void testPurchase() {
         MineStoreEventBus.registerListener(addon, MineStorePurchaseEvent.class, event -> {
-            event.setCancelled(true);
+            event.setDoNotExecute(true);
             Assert.assertEquals("test", event.username());
             Assert.assertEquals("test", event.command());
             Assert.assertEquals(0, event.id());
@@ -63,7 +63,7 @@ public class EventBusTest {
         });
         MineStorePurchaseEvent event = new MineStorePurchaseEvent("test", "test", 0, MineStorePurchaseEvent.COMMAND_TYPE.ONLINE);
         event.call();
-        if (!event.isCancelled()) {
+        if (!event.doNotExecute()) {
             Assert.fail("Event should be cancelled");
         }
         Assert.assertEquals("test 2", event.command());

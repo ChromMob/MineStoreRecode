@@ -3,7 +3,7 @@ package me.chrommob.minestore.platforms.bungee.webCommand;
 import me.chrommob.minestore.api.interfaces.commands.CommandExecuterCommon;
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 
-public class CommandExecuterBungee implements CommandExecuterCommon {
+public class CommandExecuterBungee extends CommandExecuterCommon {
     private final MineStoreBungee mineStoreBungee;
 
     public CommandExecuterBungee(MineStoreBungee mineStoreBungee) {
