@@ -15,10 +15,8 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
     }
 
     @Override
-    public void init() {
-        if (!this.register()) {
-            plugin.log("Failed to register PlaceHolderAPI expansion!");
-        }
+    public boolean init() {
+        return this.register();
     }
 
     @Override
