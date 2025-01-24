@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class Registry<T> {
-    private Set<Consumer<T>> listeners = new HashSet<>();
+    private final Set<Consumer<T>> listeners = new HashSet<>();
     private T value = null;
 
     public Registry() {
