@@ -12,7 +12,7 @@ public class Registry<T> {
     }
 
     public Registry(T value) {
-        this.value = value;
+        set(value);
     }
 
     public void set(T value) {
