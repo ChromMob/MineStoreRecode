@@ -83,8 +83,7 @@ public class MineStoreCommon {
         commandStorage.init();
         webListener = new WebListener(this);
         guiData = new GuiData(this);
-        version = new MineStoreVersion("3.2.5");
-        //version = MineStoreVersion.getMineStoreVersion((String) configReader.get(ConfigKey.STORE_URL));
+        version = MineStoreVersion.getMineStoreVersion((String) configReader.get(ConfigKey.STORE_URL));
         placeHolderData = new PlaceHolderData(this);
         SubscriptionUtil.init(this);
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
