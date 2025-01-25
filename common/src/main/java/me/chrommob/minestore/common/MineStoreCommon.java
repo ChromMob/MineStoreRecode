@@ -355,8 +355,28 @@ public class MineStoreCommon {
         Registries.LOGGER.get().log(message);
     }
 
-    public void debug(String message) {
+    private int differentCharacters(String s1, String s2) {
+        int count = 0;
+        for (int i = 0; i < s1.length(); i++) {
+            if (i >= s2.length()) {
+                return count + s1.length() - s2.length();
+            }
+            if (s1.charAt(i) != s2.charAt(i)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private Class previousClass = null;
+    public void debug(Class c,String message) {
         if ((boolean) configReader.get(ConfigKey.DEBUG)) {
+            if (previousClass == null || (!previousClass.equals(c) && differentCharacters(previousClass.getName(), c.getName()) > 2)) {
+                log("================================================================================");
+                log(c.getName());
+                log("================================================================================");
+                previousClass = c;
+            }
             String[] lines = message.split(", ");
             for (String line : lines) {
                 try {
@@ -368,16 +388,15 @@ public class MineStoreCommon {
         }
     }
 
-    public void debug(Exception e) {
-        debug(e.getClass().getTypeName());
+    public void debug(Class c,Exception e) {
         if (e.getMessage() != null) {
-            debug(e.getMessage());
+            debug(c, e.getMessage());
         }
         if (e.getStackTrace() != null) {
-            debug(Arrays.toString(e.getStackTrace()));
+            debug(c, Arrays.toString(e.getStackTrace()));
         }
         if (e.getCause() != null) {
-            debug(e.getCause().toString());
+            debug(c, e.getCause().toString());
         }
     }
 

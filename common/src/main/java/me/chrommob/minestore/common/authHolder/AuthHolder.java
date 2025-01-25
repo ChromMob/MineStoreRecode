@@ -54,7 +54,7 @@ public final class AuthHolder {
             This is to prevent memory leaks.
              */
                 if (isExpired(authUser) || !authUser.user().isOnline()) {
-                    plugin.debug("Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
+                    plugin.debug(this.getClass(), "Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
                     if (authUser.user().isOnline()) {
                         authUser.user().sendMessage((this.plugin.miniMessage()).deserialize((String)this.plugin.configReader().get(ConfigKey.AUTH_TIMEOUT_MESSAGE)));
                     }
@@ -70,7 +70,7 @@ public final class AuthHolder {
     };
 
     private void postAuthCompleted(ParsedResponse parsedResponse) {
-        plugin.debug("Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
+        plugin.debug(this.getClass(), "Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
         try {
             HttpsURLConnection urlConnection;
             String link = url + parsedResponse.authId();
@@ -86,7 +86,7 @@ public final class AuthHolder {
             }
             urlConnection.getInputStream();
         } catch (Exception e) {
-            this.plugin.debug("Error while posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
+            this.plugin.debug(this.getClass(), "Error while posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
         }
     }
 

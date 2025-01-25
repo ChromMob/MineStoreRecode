@@ -30,7 +30,7 @@ public class CommandDumper {
         try {
             inputStream = new FileInputStream(dumpedFile);
         } catch (FileNotFoundException e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
             return new ConcurrentHashMap<>();
         }
         return new ConcurrentHashMap<>(yaml.load(inputStream));
@@ -41,7 +41,7 @@ public class CommandDumper {
         try {
             fileOutputStream = new FileWriter(dumpedFile);
         } catch (IOException e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
         yaml.dump(commands, fileOutputStream);
     }

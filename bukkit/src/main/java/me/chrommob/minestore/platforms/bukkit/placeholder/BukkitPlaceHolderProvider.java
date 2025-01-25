@@ -42,12 +42,12 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
     @Override
     public String onPlaceholderRequest(Player p, @NotNull String params) {
         PlaceHolderData data = plugin.placeHolderData();
-        plugin.debug("Placeholder: " + params);
+        plugin.debug(this.getClass(), "Placeholder: " + params);
         if (data == null) {
             return "";
         }
         String result = PlaceHolderManager.getInstance().getResult(p.getName(), params);
-        plugin.debug("Placeholder: " + params + " = " + result);
+        plugin.debug(this.getClass(), "Placeholder: " + params + " = " + result);
         return result;
     }
 }

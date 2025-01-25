@@ -14,7 +14,7 @@ public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
         try {
             Class.forName("net.luckperms.api.LuckPermsProvider");
         } catch (ClassNotFoundException e) {
-            plugin.debug("LuckPerms are not installed on this server.");
+            plugin.debug(this.getClass(), "LuckPerms are not installed on this server.");
             luckPerms = null;
             return;
         }
@@ -23,7 +23,7 @@ public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
         try {
             luckPerms = LuckPermsProvider.get();
         } catch (IllegalStateException e) {
-            plugin.debug("LuckPerms are not installed on this server.");
+            plugin.debug(this.getClass(), "LuckPerms are not installed on this server.");
         }
         this.luckPerms = luckPerms;
     }

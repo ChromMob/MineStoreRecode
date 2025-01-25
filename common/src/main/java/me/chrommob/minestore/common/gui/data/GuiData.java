@@ -50,13 +50,13 @@ public class GuiData {
         try {
             packageURL = new URL(finalUrl);
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
             messages.add("Store URL: " + finalUrl);
             messages.add("STORE URL format is invalid!");
             return new VerificationResult(false, messages, VerificationResult.TYPE.STORE_URL);
         }
         try {
-            plugin.debug("[GuiData] Loading data from " + finalUrl);
+            plugin.debug(this.getClass(), "[GuiData] Loading data from " + finalUrl);
             HttpsURLConnection urlConnection = (HttpsURLConnection) packageURL.openConnection();
             InputStream in = urlConnection.getInputStream();
 
@@ -93,7 +93,7 @@ public class GuiData {
                     }
                     parsedResponse = gson.fromJson(line, listType);
                 } catch (JsonSyntaxException e) {
-                    plugin.debug(e);
+                    plugin.debug(this.getClass(), e);
                     messages.add("API key is invalid!");
                     parsedResponse = null;
                     return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
@@ -101,10 +101,10 @@ public class GuiData {
             }
         } catch (ClassCastException e) {
             messages.add("STORE URL has to start with https://");
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
             return new VerificationResult(false, messages, VerificationResult.TYPE.STORE_URL);
         } catch (IOException e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
             messages.add("API key is invalid!");
             return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
         }
@@ -133,7 +133,7 @@ public class GuiData {
     private Runnable runnable = () -> {
         while (true) {
             if (!load().isValid()) {
-                plugin.debug("[GuiData] Error loading data!");
+                plugin.debug(this.getClass(), "[GuiData] Error loading data!");
             }
             try {
                 Thread.sleep(1000 * 60 * 5);

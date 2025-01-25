@@ -45,7 +45,7 @@ public class PlaceHolderData {
         PlaceHolderManager.getInstance().registerPlaceHolder("top_donator_username_(\\d+)", (name, param) -> {
             param = param.replaceFirst("top_donator_username_", "");
             int arg = Integer.parseInt(param);
-            plugin.debug("Top donator username: " + topDonators.get(arg - 1).getUserName() + " (" + arg + ")");
+            plugin.debug(this.getClass(), "Top donator username: " + topDonators.get(arg - 1).getUserName() + " (" + arg + ")");
             return topDonators.get(arg - 1).getUserName();
         });
         //Regex that matches top_donator_price_1, top_donator_price_2, etc.
@@ -144,12 +144,12 @@ public class PlaceHolderData {
             apiUrls[1] = lastDonatorsUrl;
             apiUrls[2] = topDonatorsUrl;
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
             errors.add("STORE URL has invalid format!");
             return new VerificationResult(false, errors, VerificationResult.TYPE.STORE_URL);
         }
         try {
-            plugin.debug("Loading placeholder data...");
+            plugin.debug(this.getClass(), "Loading placeholder data...");
             for (URI apiUrl : apiUrls) {
                 URL url = apiUrl.toURL();
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -160,7 +160,7 @@ public class PlaceHolderData {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    plugin.debug("Received: " + line);
+                    plugin.debug(this.getClass(), "Received: " + line);
                     if (apiUrl.equals(apiUrls[0])) {
                         try {
                             if (!MineStoreCommon.version().requires("3.0.0")) {
@@ -175,7 +175,7 @@ public class PlaceHolderData {
                                 }
                             }
                         } catch (JsonSyntaxException e) {
-                            plugin.debug(e);
+                            plugin.debug(this.getClass(), e);
                             donationGoal = new DonationGoal(0, 0);
                         }
                     } else if (apiUrl.equals(apiUrls[1])) {
@@ -184,7 +184,7 @@ public class PlaceHolderData {
                         try {
                             lastDonators = gson.fromJson(line, listType);
                         } catch (JsonSyntaxException e) {
-                            plugin.debug(e);
+                            plugin.debug(this.getClass(), e);
                             lastDonators = new ArrayList<>();
                         }
                     } else if (apiUrl.equals(apiUrls[2])) {
@@ -193,18 +193,18 @@ public class PlaceHolderData {
                         try {
                             topDonators = gson.fromJson(line, listType);
                         } catch (JsonSyntaxException e) {
-                            plugin.debug(e);
+                            plugin.debug(this.getClass(), e);
                             topDonators = new ArrayList<>();
                         }
                     }
                 }
             }
         } catch (IOException e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
             errors.add("API KEY is invalid!");
             return new VerificationResult(false, errors, VerificationResult.TYPE.API_KEY);
         } catch (ClassCastException e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
             errors.add("STORE URL has to start with https://");
             return new VerificationResult(false, errors, VerificationResult.TYPE.STORE_URL);
         }
@@ -222,7 +222,7 @@ public class PlaceHolderData {
     private final Runnable runnable = () -> {
         while (true) {
             if (!load().isValid()) {
-                plugin.debug("Failed to load placeholder data!");
+                plugin.debug(this.getClass(), "Failed to load placeholder data!");
             }
             try {
                 Thread.sleep(1000 * 60);
