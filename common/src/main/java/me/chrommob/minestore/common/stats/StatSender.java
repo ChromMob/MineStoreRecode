@@ -71,7 +71,7 @@ public class StatSender {
                 StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE);
                 statJson.setPlayerCount(playerCount);
                 String json = gson.toJson(statJson);
-                common.debug("Sending stat json: " + json);
+                common.debug(this.getClass(), "Sending stat json: " + json);
                 HttpsURLConnection connection = null;
                 try {
                     connection = (HttpsURLConnection) new java.net.URL("https://api.chrommob.fun/minestore/data").openConnection();

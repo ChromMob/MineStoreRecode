@@ -1,11 +1,13 @@
 package me.chrommob.minestore.common;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
 import me.chrommob.minestore.api.event.types.MineStoreReloadEvent;
+import me.chrommob.minestore.common.api.ApiHandler;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.commandGetters.WebListener;
@@ -18,14 +20,16 @@ import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
-import me.chrommob.minestore.api.interfaces.commands.CommandStorageInterface;
 import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
+import me.chrommob.minestore.common.verification.VerificationManager;
+import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.setting.ManagerSetting;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -41,7 +45,7 @@ public class MineStoreCommon {
     private DatabaseManager databaseManager;
     private MiniMessage miniMessage;
     private WebListener webListener;
-    private CommandStorageInterface commandStorage;
+    private CommandStorage commandStorage;
     private CommandDumper commandDumper;
     private NewCommandDumper newCommandDumper;
     private AuthHolder authHolder;
@@ -50,9 +54,16 @@ public class MineStoreCommon {
     private StatSender statsSender;
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
+    private VerificationManager verificationManager;
 
     public MineStoreCommon() {
         Registries.CONFIG_FILE.listen(configFile -> configReader = new ConfigReader(configFile, this));
+        Registries.COMMAND_MANAGER.listen(commandManager -> {
+            commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
+            annotationParser = new AnnotationParser<>(
+                    /* Manager */ Registries.COMMAND_MANAGER.get(),
+                    /* Command sender type */ AbstractUser.class);
+        });
     }
 
     private final Set<MineStoreAddon> addons = new HashSet<>();
@@ -91,13 +102,17 @@ public class MineStoreCommon {
                 storeUrl = "https://" + storeUrl;
             configReader.set(ConfigKey.STORE_URL, storeUrl);
         }
-        if (!verify()) {
-            log("Your plugin is not configured correctly. Please check your config.yml");
+        VerificationResult lastVerificationResult = verify();
+        verificationManager = new VerificationManager(lastVerificationResult);
+        if (!verificationManager.isValid()) {
             return;
         }
         if (!reload) {
             if (Registries.PLACE_HOLDER_PROVIDER.get() != null) {
-                Registries.PLACE_HOLDER_PROVIDER.get().init();
+                boolean init = Registries.PLACE_HOLDER_PROVIDER.get().init();
+                if (!init) {
+                    log("Failed to register PlaceHolderAPI expansion!");
+                }
             }
             if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
                 databaseManager.start();
@@ -109,7 +124,8 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         webListener.start();
-        new MineStoreEnableEvent((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)).call();
+        new MineStoreEnableEvent().call();
+        new ApiHandler(new AuthData((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)));
     }
 
     private void registerAddons() {
@@ -194,9 +210,6 @@ public class MineStoreCommon {
         if (Registries.COMMAND_MANAGER.get() == null) {
             return;
         }
-        annotationParser = new AnnotationParser<>(
-                /* Manager */ Registries.COMMAND_MANAGER.get(),
-                /* Command sender type */ AbstractUser.class);
         annotationParser.parse(new AutoSetupCommand(this));
         annotationParser.parse(new ReloadCommand(this));
         annotationParser.parse(new DumpCommand(this));
@@ -242,15 +255,15 @@ public class MineStoreCommon {
             init(true);
             return;
         }
-        if (webListener.load()) {
+        if (webListener.load().isValid()) {
             log("Config reloaded.");
             webListener.start();
         }
-        if (guiData.load()) {
+        if (guiData.load().isValid()) {
             log("GuiData reloaded.");
             guiData.start();
         }
-        if (placeHolderData.load()) {
+        if (placeHolderData.load().isValid()) {
             log("PlaceHolderData reloaded.");
             placeHolderData.start();
         }
@@ -261,14 +274,14 @@ public class MineStoreCommon {
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
-                if (!databaseManager().load()) {
+                if (!databaseManager().load().isValid()) {
                     log("Failed to initialize database.");
                     return;
                 }
                 databaseManager.start();
             } else {
                 databaseManager.stop();
-                if (!databaseManager().load()) {
+                if (!databaseManager().load().isValid()) {
                     log("Failed to reload database.");
                     return;
                 }
@@ -277,50 +290,51 @@ public class MineStoreCommon {
         }
     }
 
-    private boolean verify() {
+    private VerificationResult verify() {
         if (Registries.PLAYER_JOIN_LISTENER.get() == null) {
-            log("PlayerEventListener is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("PlayerEventListener is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.COMMAND_MANAGER.get() == null) {
-            log("CommandManager is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("CommandManager is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (configReader == null) {
-            log("ConfigReader is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("ConfigReader is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.COMMAND_EXECUTER.get() == null) {
-            log("CommandExecuter is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("CommandExecuter is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.LOGGER.get() == null) {
-            log("Logger is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("Logger is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (webListener == null) {
-            log("CommandGetter is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("CommandGetter is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.USER_GETTER.get() == null) {
-            log("UserGetter is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("UserGetter is not registered."), VerificationResult.TYPE.SUPPORT);
         }
-        if (!guiData.load() || !placeHolderData.load() || !webListener.load()) {
-            return false;
+        VerificationResult guiDataVerification = guiData.load();
+        if (!guiDataVerification.isValid()) {
+            return guiDataVerification;
+        }
+        VerificationResult placeHolderDataVerification = placeHolderData.load();
+        if (!placeHolderDataVerification.isValid()) {
+            return placeHolderDataVerification;
+        }
+        VerificationResult webListenerVerification = webListener.load();
+        if (!webListenerVerification.isValid()) {
+            return webListenerVerification;
         }
         if (Registries.SCHEDULER.get() == null) {
             log("Scheduler is not registered.");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("Scheduler is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
             if (databaseManager == null) {
-                log("DatabaseManager is not registered.");
-                return false;
+                return new VerificationResult(false, Collections.singletonList("DatabaseManager is not registered."), VerificationResult.TYPE.SUPPORT);
             }
-            if (!databaseManager.load()) {
-                log("Database is not configured correctly.");
-                return false;
+            VerificationResult databaseVerification = databaseManager.load();
+            if (!databaseVerification.isValid()) {
+                return databaseVerification;
             }
             if (Registries.PLAYER_INFO_PROVIDER.get() == null) {
                 LuckPermsPlayerInfoProvider luckPermsPlayerInfoProvider = new LuckPermsPlayerInfoProvider(this);
@@ -329,7 +343,7 @@ public class MineStoreCommon {
                 }
             }
         }
-        return true;
+        return VerificationResult.valid();
     }
 
     public ConfigReader configReader() {
@@ -340,8 +354,28 @@ public class MineStoreCommon {
         Registries.LOGGER.get().log(message);
     }
 
-    public void debug(String message) {
+    private int differentCharacters(String s1, String s2) {
+        int count = 0;
+        for (int i = 0; i < s1.length(); i++) {
+            if (i >= s2.length()) {
+                return count + s1.length() - s2.length();
+            }
+            if (s1.charAt(i) != s2.charAt(i)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private Class previousClass = null;
+    public void debug(Class c,String message) {
         if ((boolean) configReader.get(ConfigKey.DEBUG)) {
+            if (previousClass == null || (!previousClass.equals(c) && differentCharacters(previousClass.getName(), c.getName()) > 2)) {
+                log("================================================================================");
+                log(c.getName());
+                log("================================================================================");
+                previousClass = c;
+            }
             String[] lines = message.split(", ");
             for (String line : lines) {
                 try {
@@ -353,20 +387,22 @@ public class MineStoreCommon {
         }
     }
 
-    public void debug(Exception e) {
-        debug(e.getClass().getTypeName());
+    public void debug(Class c,Exception e) {
         if (e.getMessage() != null) {
-            debug(e.getMessage());
+            debug(c, e.getMessage());
         }
         if (e.getStackTrace() != null) {
-            debug(Arrays.toString(e.getStackTrace()));
+            debug(c, Arrays.toString(e.getStackTrace()));
         }
         if (e.getCause() != null) {
-            debug(e.getCause().toString());
+            debug(c, e.getCause().toString());
         }
     }
 
     public void onPlayerJoin(String name) {
+        if (verificationManager != null) {
+            verificationManager.onJoin(name);
+        }
         if (!initialized) {
             return;
         }
@@ -385,7 +421,7 @@ public class MineStoreCommon {
         }
     }
 
-    public CommandStorageInterface commandStorage() {
+    public CommandStorage commandStorage() {
         return commandStorage;
     }
 

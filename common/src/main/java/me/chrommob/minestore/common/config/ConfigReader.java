@@ -46,7 +46,7 @@ public class ConfigReader {
             try {
                 Files.copy(cs_CZ, new File(languageFile.getParentFile(), "cs_CZ.lang").toPath());
             } catch (IOException e) {
-                plugin.debug(e);
+                plugin.debug(this.getClass(), e);
             }
         }
         if (!new File(languageFile.getParentFile(), "ru_RU.lang").exists()) {
@@ -54,7 +54,7 @@ public class ConfigReader {
             try {
                 Files.copy(ru_RU, new File(languageFile.getParentFile(), "ru_RU.lang").toPath());
             } catch (IOException e) {
-                plugin.debug(e);
+                plugin.debug(this.getClass(), e);
             }
         }
         if (!new File(languageFile.getParentFile(), "ua_UA.lang").exists()) {
@@ -62,7 +62,7 @@ public class ConfigReader {
             try {
                 Files.copy(ua_UA, new File(languageFile.getParentFile(), "ua_UA.lang").toPath());
             } catch (IOException e) {
-                plugin.debug(e);
+                plugin.debug(this.getClass(), e);
             }
         }
         reload();
@@ -165,14 +165,14 @@ public class ConfigReader {
             reader = new FileReader(configFile);
             configYaml = yaml.load(reader);
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
         try {
             if (reader != null) {
                 reader.close();
             }
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
         for (final ConfigKey key : ConfigKey.values()) {
             final Configuration configuration = key.getConfiguration();
@@ -211,14 +211,14 @@ public class ConfigReader {
             reader = new FileReader(languageFile);
             languageYaml = yaml.load(reader);
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
         try {
             if (reader != null) {
                 reader.close();
             }
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
         for (final ConfigKey key : ConfigKey.values()) {
             if (!key.name().toLowerCase().contains("message")) {
@@ -304,7 +304,7 @@ public class ConfigReader {
         String location = configuration.getLocation();
         Class<?> type = configuration.getDefaultValue().getClass();
         if (value.getClass() != type) {
-            plugin.debug("Invalid type for config value: " + location + " (expected " + type.getSimpleName() + ", got " + value.getClass().getSimpleName() + ")");
+            plugin.debug(this.getClass(), "Invalid type for config value: " + location + " (expected " + type.getSimpleName() + ", got " + value.getClass().getSimpleName() + ")");
         }
         if (location.split("\\.").length > 1) {
             String[] split = location.split("\\.");
@@ -325,7 +325,7 @@ public class ConfigReader {
             configYaml.put(location, value);
         }
         saveDefaultConfig();
-        plugin.debug("Set config value: " + location + " to " + value);
+        plugin.debug(this.getClass(), "Set config value: " + location + " to " + value);
     }
 
     public Map<String, Object> getLoadedConfig() {

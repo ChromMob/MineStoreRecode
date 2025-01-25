@@ -1,7 +1,16 @@
 package me.chrommob.minestore.api.interfaces.commands;
 
-public interface CommandExecuterCommon {
-    public void execute(String command);
+import me.chrommob.minestore.api.event.types.MineStoreExecuteEvent;
 
-    public boolean isOnline(String username);
+public abstract class CommandExecuterCommon {
+    public void execute(MineStoreExecuteEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+        execute(event.command());
+    }
+
+    public abstract void execute(String command);
+
+    public abstract boolean isOnline(String username);
 }

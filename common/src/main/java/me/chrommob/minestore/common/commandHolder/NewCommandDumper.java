@@ -46,7 +46,7 @@ public class NewCommandDumper {
             }.getType();
             commands = gson.fromJson(reader, listType);
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
         return commands;
     }
@@ -56,7 +56,7 @@ public class NewCommandDumper {
         try (FileWriter writer = new FileWriter(dumpedFile, false)) {
             writer.write(json);
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
     }
 }

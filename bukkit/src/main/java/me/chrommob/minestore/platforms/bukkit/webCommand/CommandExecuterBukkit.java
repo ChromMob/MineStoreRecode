@@ -5,7 +5,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import org.bukkit.Bukkit;
 
-public class CommandExecuterBukkit implements CommandExecuterCommon {
+public class CommandExecuterBukkit extends CommandExecuterCommon {
 
     private final MineStoreBukkit plugin;
     private final MineStoreCommon pl;

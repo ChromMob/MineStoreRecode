@@ -5,10 +5,12 @@ import com.zaxxer.hikari.HikariDataSource;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
+import me.chrommob.minestore.common.verification.VerificationResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,15 +51,15 @@ public class DatabaseManager {
 
     public void onPlayerJoin(String name) {
         playerData.put(name, new PlayerData(Registries.USER_GETTER.get().get(name)));
-        plugin.debug("Added " + name + " to playerData");
+        plugin.debug(this.getClass(), "Added " + name + " to playerData");
     }
 
     public void onPlayerQuit(String name) {
         playerData.remove(name);
-        plugin.debug("Removed " + name + " from playerData");
+        plugin.debug(this.getClass(), "Removed " + name + " from playerData");
     }
 
-    public boolean load() {
+    public VerificationResult load() {
         host = (String) plugin.configReader().get(ConfigKey.MYSQL_HOST);
         port = (int) plugin.configReader().get(ConfigKey.MYSQL_PORT);
         database = (String) plugin.configReader().get(ConfigKey.MYSQL_DATABASE);
@@ -78,10 +80,10 @@ public class DatabaseManager {
         }
         if (hikari == null) {
             plugin.log("Could not connect to database!");
-            return false;
+            return new VerificationResult(false, Collections.singletonList("Could not connect to database!"), VerificationResult.TYPE.DATABASE);
         } else {
             plugin.log("Connected to database!");
-            return true;
+            return VerificationResult.valid();
         }
     }
 
@@ -110,8 +112,8 @@ public class DatabaseManager {
         try (HikariDataSource hikariDataSource = new HikariDataSource(hikari); Connection ignored = hikariDataSource.getConnection()) {
             return true;
         } catch (Exception e) {
-            plugin.debug("Could not connect to database using " + type.name());
-            plugin.debug(e);
+            plugin.debug(this.getClass(), "Could not connect to database using " + type.name());
+            plugin.debug(this.getClass(), e);
             return false;
         }
     }
@@ -152,13 +154,13 @@ public class DatabaseManager {
                 changed.add(data);
             }
         }
-        plugin.debug("Updating " + changed.size() + " players out of total " + playerData.size());
+        plugin.debug(this.getClass(), "Updating " + changed.size() + " players out of total " + playerData.size());
         if (changed.isEmpty()) {
             return;
         }
         try (Connection conn = hikari.getConnection()) {
             for (PlayerData data : changed) {
-                plugin.debug("Updating " + data.getName());
+                plugin.debug(this.getClass(), "Updating " + data.getName());
                 String update = "INSERT INTO playerdata (uuid, username, prefix, suffix, balance, player_group) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE username = ?, prefix = ?, suffix = ?, balance = ?, player_group = ?";
                 try (PreparedStatement ps = conn.prepareStatement(update)) {
                     ps.setString(1, data.getUuid().toString());
@@ -176,7 +178,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
     }
 
@@ -190,10 +192,10 @@ public class DatabaseManager {
                 + "   player_group          VARCHAR(255) NOT NULL default 0,"
                 + "   PRIMARY KEY  (uuid));";
         try (Connection conn = hikari.getConnection(); PreparedStatement ps = conn.prepareStatement(createTable)) {
-            plugin.debug(hikari == null ? "Connection is null" : "Connection is not null");
+            plugin.debug(this.getClass(), hikari == null ? "Connection is null" : "Connection is not null");
             ps.executeUpdate();
         } catch (SQLException e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
     }
 }

@@ -68,6 +68,7 @@ public class ChargeBalanceCommand {
             urlConnection.setDoOutput(true);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(urlConnection.getOutputStream()));
             String json = gson.toJson(responseData);
+            plugin.debug(this.getClass(), "Sending payment: " + json);
             writer.write(json);
             writer.flush();
             writer.close();
@@ -78,6 +79,7 @@ public class ChargeBalanceCommand {
                 responseString.append(line);
             }
 
+            plugin.debug(this.getClass(), "Received: " + responseString);
             urlConnection.disconnect();
 
             Received received = gson.fromJson(responseString.toString(), Received.class);
@@ -88,7 +90,7 @@ public class ChargeBalanceCommand {
             }
 
         } catch (IOException | JsonSyntaxException e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
     }
 
@@ -132,7 +134,7 @@ public class ChargeBalanceCommand {
             }
             return hexString.toString();
         } catch (Exception e) {
-            plugin.debug(e);
+            plugin.debug(this.getClass(), e);
         }
         return null;
     }

@@ -49,10 +49,6 @@ public class MineStoreEventBus {
 
     @SuppressWarnings("unchecked")
     static <T extends MineStoreEvent> void fireEvent(T event) {
-        if (event instanceof MineStoreEnableEvent) {
-            MineStoreEnableEvent enableEvent = (MineStoreEnableEvent) event;
-            WebApiAccessor.setAuthData(enableEvent.getStoreUrl(), enableEvent.getApiKey());
-        }
         for (AddonListeners addonListeners : listeners.values()) {
             if (addonListeners != null) {
                 Set<Consumer<? extends MineStoreEvent>> consumers = addonListeners.listeners.get(event.getClass());
