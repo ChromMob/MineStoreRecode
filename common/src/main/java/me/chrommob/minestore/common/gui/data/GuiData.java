@@ -73,6 +73,9 @@ public class GuiData {
                     case 404:
                         messages.add("The server returned a 404 error.");
                         break;
+                    default:
+                        messages.add("The server returned an error with code: " + urlConnection.getResponseCode() + "!");
+                        break;
                 }
                 return new VerificationResult(false, messages, VerificationResult.TYPE.WEBSTORE);
             }
@@ -109,6 +112,7 @@ public class GuiData {
             return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
         }
         if (parsedResponse == null) {
+            messages.add("Parsed response is null!");
             messages.add("API key is invalid!");
             return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
         }

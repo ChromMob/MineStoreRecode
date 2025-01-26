@@ -279,6 +279,9 @@ public class WebListener {
     }
 
     private void postDelivered(int[] ids) {
+        if (ids.length == 0) {
+            return;
+        }
         try {
             plugin.debug(this.getClass(), "Posting to: " + deliveredUrl);
             HttpsURLConnection urlConnection = (HttpsURLConnection) deliveredUrl.openConnection();

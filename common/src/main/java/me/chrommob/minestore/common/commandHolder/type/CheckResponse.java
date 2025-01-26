@@ -14,6 +14,7 @@ public class CheckResponse {
 
     private boolean status;
     private List<CheckResponses> results;
+    private String error;
     public static class CheckResponses {
         private int cmd_id;
         private boolean status;
@@ -38,5 +39,9 @@ public class CheckResponse {
 
     public List<CheckResponses> results() {
         return results;
+    }
+
+    public String error() {
+        return error;
     }
 }

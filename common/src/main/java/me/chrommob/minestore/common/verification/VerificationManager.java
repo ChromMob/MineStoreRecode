@@ -6,6 +6,7 @@ import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public class VerificationManager {
     private final VerificationResult verificationResult;
@@ -13,6 +14,23 @@ public class VerificationManager {
     public VerificationManager(VerificationResult verificationResult) {
         this.verificationResult = verificationResult;
         log();
+    }
+
+    private Component getMessage(VerificationResult.TYPE type) {
+        switch (type) {
+            case STORE_URL:
+                return Component.text("[MineStore] ERROR: Store URL is not configured correctly. Please check your config.yml").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
+            case API_KEY:
+                return Component.text("[MineStore] ERROR: API key is not configured correctly. Please check your config.yml").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
+            case SECRET_KEY:
+                return Component.text("[MineStore] ERROR: The secret key you entered is not valid. Please check your config.yml and use /ms setup secret-key <secretKey> to set it.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
+            case WEBSTORE:
+                return Component.text("[MineStore] ERROR: The server returned an error. Make sure it is accessible from your MC server and that Cloudflare is not blocking it.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
+            case DATABASE:
+                return Component.text("[MineStore] ERROR: Database is not configured correctly. Please check your config.yml and make sure the database is accessible from your MC server.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
+            default:
+                return Component.text("[MineStore] ERROR: There has been an internal error in the MineStore plugin. Please contact the support.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
+        }
     }
 
     public void onJoin(String username) {
@@ -24,26 +42,7 @@ public class VerificationManager {
         if (!user.hasPermission("minestore.admin")) {
             return;
         }
-        switch (verificationResult.type()) {
-            case STORE_URL:
-                user.sendMessage(Component.text("[MineStore] ERROR: Store URL is not configured correctly. Please check your config.yml").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
-                break;
-            case API_KEY:
-                user.sendMessage(Component.text("[MineStore] ERROR: API key is not configured correctly. Please check your config.yml").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
-                break;
-            case SECRET_KEY:
-                user.sendMessage(Component.text("[MineStore] ERROR: The secret key you entered is not valid. Please check your config.yml and use /ms setup secret-key <secretKey> to set it.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
-                break;
-            case WEBSTORE:
-                user.sendMessage(Component.text("[MineStore] ERROR: The server returned an error. Make sure it is accessible from your MC server and that Cloudflare is not blocking it.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
-                break;
-            case SUPPORT:
-                user.sendMessage(Component.text("[MineStore] ERROR: There has been an internal error in the MineStore plugin. Please contact the support.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
-                break;
-            case DATABASE:
-                user.sendMessage(Component.text("[MineStore] ERROR: Database is not configured correctly. Please check your config.yml and make sure the database is accessible from your MC server.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
-                break;
-        }
+        user.sendMessage(getMessage(verificationResult.type()));
         for (String message : verificationResult.messages()) {
             user.sendMessage("- " + message);
         }
@@ -53,26 +52,7 @@ public class VerificationManager {
         if (verificationResult.isValid()) {
             return;
         }
-        switch (verificationResult.type()) {
-            case STORE_URL:
-                Registries.LOGGER.get().log("ERROR: Store URL is not configured correctly. Please check your config.yml");
-                break;
-            case API_KEY:
-                Registries.LOGGER.get().log("ERROR: API key is not configured correctly. Please check your config.yml");
-                break;
-            case SECRET_KEY:
-                Registries.LOGGER.get().log("ERROR: The secret key you entered is not valid. Please check your config.yml and use /ms setup secret-key <secretKey> to set it.");
-                break;
-            case WEBSTORE:
-                Registries.LOGGER.get().log("ERROR: The server returned an error. Make sure it is accessible from your MC server and that Cloudflare is not blocking it.");
-                break;
-            case SUPPORT:
-                Registries.LOGGER.get().log("ERROR: There has been an internal error in the MineStore plugin. Please contact the support.");
-                break;
-            case DATABASE:
-                Registries.LOGGER.get().log("ERROR: Database is not configured correctly. Please check your config.yml and make sure the database is accessible from your MC server.");
-                break;
-        }
+        Registries.LOGGER.get().log(PlainTextComponentSerializer.plainText().serialize(getMessage(verificationResult.type())));
         for (String message : verificationResult.messages()) {
             Registries.LOGGER.get().log(message);
         }

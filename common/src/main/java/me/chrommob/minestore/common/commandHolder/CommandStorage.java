@@ -138,9 +138,12 @@ public class CommandStorage {
             }
             return;
         }
+        if (toCheck.isEmpty()) {
+            return;
+        }
         plugin.webListener().checkCommands(toCheckIds).thenAcceptAsync(checkResponses -> {
             if (!checkResponses.status()) {
-                plugin.log("Failed to check commands!");
+                plugin.log("Failed to check commands: " + checkResponses.error());
                 return;
             }
             Set<Integer> successIds = new HashSet<>();
