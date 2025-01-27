@@ -26,7 +26,7 @@ import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-@Plugin(id = "minestore", name = "MineStore", version = "0.1", description = "MineStore plugin for Velocity", authors = {"chrommob"})
+@Plugin(id = "minestore", name = "MineStore", version = "@version@", description = "MineStore plugin for Velocity", authors = {"chrommob"})
 public class MineStoreVelocity {
 
     @Inject

@@ -60,7 +60,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.1.5'
+    version = '3.1.6'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -117,12 +117,21 @@ subprojects {
             expand props
         }
 
-        inputs.property "version", project.version
-
         filesMatching("fabric.mod.json") {
-            expand "version": project.version
+            expand props
         }
     }
+
+    tasks.register('processJavaSources', Copy) {
+        from 'src/main/java'
+        into "${layout.buildDirectory.get()}/generated/sources/java"
+        filter { line -> line.replaceAll("@version@", project.version) }
+        filteringCharset = 'UTF-8'
+    }
+
+    // Use the processed Java sources instead of the original ones
+    sourceSets.main.java.srcDirs = ["${layout.buildDirectory.get()}/generated/sources/java"]
+    compileJava.dependsOn processJavaSources
 }
 
 

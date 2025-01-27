@@ -33,7 +33,7 @@ public class StatSender {
         PLATFORM_TYPE = Registries.PLATFORM.get();
         PLATFORM_NAME = Registries.PLATFORM_NAME.get();
         PLATFORM_VERSION = Registries.PLATFORM_VERSION.get();
-        PLUGIN_VERSION = common.jarFile().getName().substring(common.jarFile().getName().indexOf("-") + 1, common.jarFile().getName().indexOf(".jar"));
+        PLUGIN_VERSION = "@version@";
         CORE_COUNT = Runtime.getRuntime().availableProcessors();
         SYSTEM_ARCHITECTURE = System.getProperty("os.arch");
     }
