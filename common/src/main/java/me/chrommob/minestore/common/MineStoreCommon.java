@@ -59,7 +59,7 @@ public class MineStoreCommon {
     public MineStoreCommon() {
         Registries.CONFIG_FILE.listen(configFile -> configReader = new ConfigReader(configFile, this));
         Registries.COMMAND_MANAGER.listen(commandManager -> {
-            commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
+            //commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
             annotationParser = new AnnotationParser<>(
                     /* Manager */ Registries.COMMAND_MANAGER.get(),
                     /* Command sender type */ AbstractUser.class);

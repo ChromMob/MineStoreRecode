@@ -26,10 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlaceHolderData {
-    private DonationGoal donationGoal;
+    private DonationGoal donationGoal = new DonationGoal(0, 0);
     private MineStoreCommon plugin;
-    private List<LastDonator> lastDonators;
-    private List<TopDonator> topDonators;
+    private List<LastDonator> lastDonators = new ArrayList<>();
+    private List<TopDonator> topDonators = new ArrayList<>();
+
     private final URI[] apiUrls = new URI[3];
 
     private final Gson gson = new Gson();
@@ -40,37 +41,50 @@ public class PlaceHolderData {
         registerNativePlaceholders();
     }
 
+    private TopDonator getTopDonator(int index) {
+        if (topDonators.size() > index) {
+            return topDonators.get(index);
+        }
+        return TopDonator.getDefault();
+    }
+
+    private LastDonator getLastDonator(int index) {
+        if (lastDonators.size() > index) {
+            return lastDonators.get(index);
+        }
+        return LastDonator.getDefault();
+    }
+
     private void registerNativePlaceholders() {
         //Regex that matches top_donator_username_1, top_donator_username_2, etc.
         PlaceHolderManager.getInstance().registerPlaceHolder("top_donator_username_(\\d+)", (name, param) -> {
             param = param.replaceFirst("top_donator_username_", "");
             int arg = Integer.parseInt(param);
-            plugin.debug(this.getClass(), "Top donator username: " + topDonators.get(arg - 1).getUserName() + " (" + arg + ")");
-            return topDonators.get(arg - 1).getUserName();
+            return getTopDonator(arg - 1).getUserName();
         });
         //Regex that matches top_donator_price_1, top_donator_price_2, etc.
         PlaceHolderManager.getInstance().registerPlaceHolder("top_donator_price_(\\d+)", (name, param) -> {
             param = param.replaceFirst("top_donator_price_", "");
             int arg = Integer.parseInt(param);
-            return String.valueOf(topDonators.get(arg - 1).getPrice());
+            return String.valueOf(getTopDonator(arg - 1).getPrice());
         });
         //Regex that matches last_donator_username_1, last_donator_username_2, etc.
         PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_username_(\\d+)", (name, param) -> {
             param = param.replaceFirst("last_donator_username_", "");
             int arg = Integer.parseInt(param);
-            return lastDonators.get(arg - 1).getUserName();
+            return getLastDonator(arg - 1).getUserName();
         });
         //Regex that matches last_donator_price_1, last_donator_price_2, etc.
         PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_price_(\\d+)", (name, param) -> {
             param = param.replaceFirst("last_donator_price_", "");
             int arg = Integer.parseInt(param);
-            return String.valueOf(lastDonators.get(arg - 1).getPrice());
+            return String.valueOf(getLastDonator(arg - 1).getPrice());
         });
         //Regex that matches last_donator_package_1, last_donator_package_2, etc.
         PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_package_(\\d+)", (name, param) -> {
             param = param.replaceFirst("last_donator_package_", "");
             int arg = Integer.parseInt(param);
-            return lastDonators.get(arg - 1).getPackageName();
+            return getLastDonator(arg - 1).getPackageName();
         });
         PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_current", (name, param) -> String.valueOf(donationGoal.getDonationGoalCurrentAmount()));
         PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_target", (name, param) -> String.valueOf(donationGoal.getDonationGoalAmount()));

@@ -4,6 +4,18 @@ import com.google.gson.annotations.SerializedName;
 
 @SuppressWarnings("unused")
 public class LastDonator {
+    public LastDonator() {
+        this.userName = "";
+        this.price = 0;
+        this.packageName = "";
+    }
+
+    private static final LastDonator DEFAULT = new LastDonator();
+
+    public static LastDonator getDefault() {
+        return DEFAULT;
+    }
+
     @SerializedName("user")
     private String userName;
 

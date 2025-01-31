@@ -2,7 +2,9 @@ package me.chrommob.minestore.api.profile;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,6 +12,7 @@ import java.util.function.Function;
 
 public class ProfileManager {
     private final Map<String, Profile> profiles = new ConcurrentHashMap<>();
+    private final Set<String> fetching = ConcurrentHashMap.newKeySet();
     private Function<String, Profile> function;
 
     public Profile getCachedProfile(String username) {
@@ -24,6 +27,10 @@ public class ProfileManager {
     }
 
     private void updateProfile(String username) {
+        if (fetching.contains(username)) {
+            return;
+        }
+        fetching.add(username);
         CompletableFuture.runAsync(() -> {
             Profile profile = function.apply(username);
             if (profile == null) {
@@ -31,6 +38,7 @@ public class ProfileManager {
             }
             profile.fetched();
             profiles.put(username, profile);
+            fetching.remove(username);
         });
     }
 
