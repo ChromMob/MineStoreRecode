@@ -186,6 +186,8 @@ public class PlaceHolderData {
                                 List<DonationGoalJson> donationGoals = gson.fromJson(line, listType);
                                 if (!donationGoals.isEmpty()) {
                                     donationGoal = donationGoals.get(0).getDonationGoal();
+                                } else {
+                                    donationGoal = new DonationGoal(0, 0);
                                 }
                             }
                         } catch (JsonSyntaxException e) {
