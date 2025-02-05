@@ -11,6 +11,7 @@ import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.config.ConfigReader;
+import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -30,6 +31,7 @@ public class WebListener {
     private URL executedUrl;
     private URL deliveredUrl;
     private URL checkUrl;
+    private URL paymentUrl;
     private Thread thread = null;
     private final Set<String> toPostExecuted = new HashSet<>();
     public Runnable runnable = new Runnable() {
@@ -180,6 +182,7 @@ public class WebListener {
         String finalExecutedUrl;
         String finalDeliveredUrl;
         String finalCheckUrl;
+        String finalPaymentUrl;
         String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
@@ -191,17 +194,20 @@ public class WebListener {
             finalDeliveredUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY)
                     + "/commands/delivered/";
             finalCheckUrl = storeUrl + "/api/servers/" + configReader.get(ConfigKey.SECRET_KEY) + "/commands/validated/";
+            finalPaymentUrl = storeUrl + "/api/rest/v2/" + configReader.get(ConfigKey.API_KEY) + "/payment/create";
         } else {
             finalQueueUrl = storeUrl + "/api/servers/commands/queue";
             finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
             finalDeliveredUrl = storeUrl + "/api/servers/commands/delivered/";
             finalCheckUrl = storeUrl + "/api/servers/commands/validated/";
+            finalPaymentUrl = storeUrl + "/api/rest/v2/payment/create";
         }
         try {
             queueUrl = new URL(finalQueueUrl);
             executedUrl = new URL(finalExecutedUrl);
             deliveredUrl = new URL(finalDeliveredUrl);
             checkUrl = new URL(finalCheckUrl);
+            paymentUrl = new URL(finalPaymentUrl);
         } catch (Exception e) {
             plugin.debug(this.getClass(), e);
             return new VerificationResult(false, Collections.singletonList("Store URL is not a valid URL!"), VerificationResult.TYPE.STORE_URL);
@@ -446,6 +452,39 @@ public class WebListener {
             } catch (IOException e) {
                 plugin.debug(this.getClass(), e);
                 return CheckResponse.empty();
+            }
+        });
+    }
+
+    //https://v3.minestorecms.com/api/rest/v2/payment/create?username=superuser123456&item_id=1&virtual_currency=true
+    public CompletableFuture<PaymentCreationResponse> createPayment(String username, int itemId) {
+        return CompletableFuture.supplyAsync(() -> {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("username", username);
+            jsonObject.addProperty("item_id", itemId);
+            jsonObject.addProperty("virtual_currency", true);
+            String json = jsonObject.toString();
+            try {
+                HttpsURLConnection urlConnection = (HttpsURLConnection) paymentUrl.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.connect();
+                OutputStream os = urlConnection.getOutputStream();
+                os.write(json.getBytes());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                StringBuilder responseString = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseString.append(line);
+                }
+                urlConnection.disconnect();
+                plugin.debug(this.getClass(), "Received: " + responseString);
+                return gson.fromJson(responseString.toString(), PaymentCreationResponse.class);
+            } catch (IOException e) {
+                plugin.debug(this.getClass(), e);
+                return null;
             }
         });
     }

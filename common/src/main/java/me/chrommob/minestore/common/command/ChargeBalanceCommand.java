@@ -59,6 +59,7 @@ public class ChargeBalanceCommand {
         }
 
         ResponseData responseData = getResponseData(username, amount, paymentInternalId, generatedSignature);
+        plugin.paymentHandler().handlePayment(responseData);
 
         try {
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -139,11 +140,11 @@ public class ChargeBalanceCommand {
         return null;
     }
 
-    static class ResponseData {
+    public static class ResponseData {
         public String status;
         public Data data;
 
-        static class Data {
+        public static class Data {
             public String username;
             public double price;
             public String payment_internal_id;

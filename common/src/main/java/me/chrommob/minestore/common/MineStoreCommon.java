@@ -20,6 +20,7 @@ import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
+import me.chrommob.minestore.common.gui.payment.PaymentHandler;
 import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
@@ -52,6 +53,7 @@ public class MineStoreCommon {
     private GuiData guiData;
     private PlaceHolderData placeHolderData;
     private StatSender statsSender;
+    private final PaymentHandler paymentHandler = new PaymentHandler(this);
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
     private VerificationManager verificationManager;
@@ -471,5 +473,9 @@ public class MineStoreCommon {
 
     public NewCommandDumper newCommandDumper() {
         return newCommandDumper;
+    }
+
+    public PaymentHandler paymentHandler() {
+        return paymentHandler;
     }
 }

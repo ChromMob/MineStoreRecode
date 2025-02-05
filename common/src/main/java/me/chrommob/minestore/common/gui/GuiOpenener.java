@@ -3,6 +3,7 @@ package me.chrommob.minestore.common.gui;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKey;
+import me.chrommob.minestore.common.gui.payment.ConfirmationInv;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
@@ -12,6 +13,7 @@ import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +29,8 @@ public class GuiOpenener {
     public enum MENU_TYPE {
         CATEGORIES,
         SUBCATEGORIES,
-        PACKAGES
+        PACKAGES,
+        CONFIRMATION
     }
 
     private final CommonItem backItem;
@@ -85,7 +88,6 @@ public class GuiOpenener {
                 if (parsedSubCategory == null) {
                     return;
                 }
-                System.out.println(parsedSubCategory.getClass().getSimpleName());
                 menuPage.put(user.getUUID(), parsedSubCategory);
                 menuType.put(user.getUUID(), MENU_TYPE.PACKAGES);
                 openMenu(user);
@@ -97,6 +99,12 @@ public class GuiOpenener {
                 Class<?> clazz = menuPage.get(user.getUUID()).getClass();
                 ParsedPackage parsedPackage = clazz == ParsedCategory.class ? (ParsedPackage) ((ParsedCategory) menuPage.get(user.getUUID())).getByItem(item) : ((ParsedSubCategory) menuPage.get(user.getUUID())).getByItem(item);
                 if (parsedPackage == null) {
+                    return;
+                }
+                if (parsedPackage.isVirtualCurrency()) {
+                    menuPage.put(user.getUUID(), new ConfirmationInv(parsedPackage, guiData.getPlugin()));
+                    menuType.put(user.getUUID(), MENU_TYPE.CONFIRMATION);
+                    openMenu(user);
                     return;
                 }
                 String config = (String) guiData.getPlugin().configReader().get(ConfigKey.BUY_GUI_MESSAGE);
@@ -120,6 +128,25 @@ public class GuiOpenener {
                 user.closeInventory();
                 user.sendMessage(component);
                 break;
+            case CONFIRMATION:
+                ConfirmationInv confirmationInv = (ConfirmationInv) menuPage.get(user.getUUID());
+                if (item.equals(confirmationInv.getConfirmationItem())) {
+                    user.closeInventory();
+                    guiData.getPlugin().paymentHandler().createPayment(user.getName(), confirmationInv.getItem().getId()).thenAccept(success -> {
+                        if (success) {
+                            user.sendMessage(Component.text("Successfully created payment!").color(NamedTextColor.GREEN));
+                        } else {
+                            user.sendMessage(Component.text("Failed to create payment!").color(NamedTextColor.RED));
+                        }
+                    });
+                    return;
+                }
+                if (item.equals(confirmationInv.getDenyItem())) {
+                    user.closeInventory();
+                    user.sendMessage(Component.text("Denied!"));
+                    return;
+                }
+                break;
         }
     }
 
@@ -137,6 +164,10 @@ public class GuiOpenener {
                 Class<?> clazz = menuPage.get(user.getUUID()).getClass();
                 CommonInventory inventory = clazz == ParsedCategory.class ? ((ParsedCategory) menuPage.get(user.getUUID())).getInventory() : ((ParsedSubCategory) menuPage.get(user.getUUID())).getInventory();
                 user.openInventory(inventory);
+                break;
+            case CONFIRMATION:
+                ConfirmationInv confirmationInv = (ConfirmationInv) menuPage.get(user.getUUID());
+                user.openInventory(confirmationInv.getInventory());
                 break;
         }
     }
@@ -221,6 +252,7 @@ public class GuiOpenener {
                 titles.add(parsedCategory1.getInventory().getTitle());
             }
         }
+        titles.add(Component.text("Confirmation").color(NamedTextColor.GREEN));
         return titles;
     }
 
