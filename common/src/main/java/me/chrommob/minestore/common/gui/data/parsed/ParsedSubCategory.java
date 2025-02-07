@@ -1,8 +1,6 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.data.json.old.Package;
 import me.chrommob.minestore.common.gui.data.json.old.SubCategory;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
@@ -63,9 +61,8 @@ public class ParsedSubCategory {
         if (item != null) {
             return item;
         }
-        ConfigReader config = plugin.configReader();
         MiniMessage miniMessage = plugin.miniMessage();
-        String configName = (String) config.get(ConfigKey.BUY_GUI_SUBCATEGORY_NAME);
+        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("subcategory").getKey("name").getAsString();
         configName = configName.replace("%subcategory%", this.name);
         Component name = miniMessage.deserialize(configName);
         return new CommonItem(name, material, new ArrayList<>());
@@ -79,7 +76,7 @@ public class ParsedSubCategory {
         for (ParsedPackage pack : this.packages) {
             items.add(pack.getItem());
         }
-        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(((String) plugin.configReader().get(ConfigKey.BUY_GUI_PACKAGE_TITLE)).replace("%subcategory%", name)), 54, items);
+        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("title").getAsString().replace("%subcategory%", name)), 54, items);
         plugin.guiData().getGuiInfo().formatInventory(inventory, false);
         return inventory;
     }

@@ -3,7 +3,6 @@ package me.chrommob.minestore.common.authHolder;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -14,18 +13,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class AuthHolder {
     private MineStoreCommon plugin;
-    private int authTimeout;
-    private Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
-    private Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
-    private String url;
+    private final int authTimeout;
+    private final Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
+    private final Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
+    private final String url;
     private Thread thread = null;
     
     public AuthHolder(MineStoreCommon plugin) {
         this.plugin = plugin;
-        authTimeout = (int) plugin.configReader().get(ConfigKey.AUTH_TIMEOUT) * 1000;
+        authTimeout = plugin.pluginConfig().getKey("auth").getKey("timeout").getAsInt() * 1000;
         thread = new Thread(removeAndPost);
         thread.start();
-        String storeUrl = (String) this.plugin.configReader().get(ConfigKey.STORE_URL);
+        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
@@ -56,7 +55,7 @@ public final class AuthHolder {
                 if (isExpired(authUser) || !authUser.user().isOnline()) {
                     plugin.debug(this.getClass(), "Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
                     if (authUser.user().isOnline()) {
-                        authUser.user().sendMessage((this.plugin.miniMessage()).deserialize((String)this.plugin.configReader().get(ConfigKey.AUTH_TIMEOUT_MESSAGE)));
+                        authUser.user().sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("timeout-message").getAsString()));
                     }
                     authUsers.remove(s);
                 }

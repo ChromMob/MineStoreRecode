@@ -1,7 +1,6 @@
 package me.chrommob.minestore.common.command;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import org.incendo.cloud.annotation.specifier.Quoted;
@@ -25,11 +24,12 @@ public class AutoSetupCommand {
         if (!storeUrl.endsWith("/")) {
             storeUrl += "/";
         }
-        plugin.configReader().set(ConfigKey.STORE_URL, storeUrl);
-        plugin.configReader().set(ConfigKey.API_ENABLED, true);
-        plugin.configReader().set(ConfigKey.API_KEY, apiKey);
-        plugin.configReader().set(ConfigKey.SECRET_ENABLED, true);
-        plugin.configReader().set(ConfigKey.SECRET_KEY, secretKey);
+        plugin.pluginConfig().getKey("store-url").setValue(storeUrl);
+        plugin.pluginConfig().getKey("api").getKey("key").setValue(apiKey);
+        plugin.pluginConfig().getKey("api").getKey("key-enabled").setValue(true);
+        plugin.pluginConfig().getKey("weblistener").getKey("secret-key").setValue(secretKey);
+        plugin.pluginConfig().getKey("weblistener").getKey("secret-enabled").setValue(true);
+        plugin.pluginConfig().saveConfig();
         plugin.reload();
     }
 }

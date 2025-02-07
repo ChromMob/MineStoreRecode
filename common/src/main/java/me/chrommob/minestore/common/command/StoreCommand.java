@@ -1,7 +1,6 @@
 package me.chrommob.minestore.common.command;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.annotations.Command;
@@ -16,7 +15,11 @@ public class StoreCommand  {
     @Permission("minestore.store")
     @SuppressWarnings("unused")
     public void onStore(final AbstractUser abstractUser) {
-        final Component message = (plugin.miniMessage()).deserialize(((String)plugin.configReader().get(ConfigKey.STORE_COMMAND_MESSAGE)).replaceAll("%store_url%", (String)plugin.configReader().get(ConfigKey.STORE_URL)));
+        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+        if (storeUrl.endsWith("/")) {
+            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
+        }
+        final Component message = plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("store-command").getKey("message").getAsString().replaceAll("%store_url%", storeUrl));
         abstractUser.user().sendMessage(message);
     }
 }

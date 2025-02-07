@@ -2,7 +2,6 @@ package me.chrommob.minestore.common.command;
 
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
@@ -29,13 +28,13 @@ public class SubscriptionsCommand {
             commonUser.sendMessage("[MineStore] The plugin is not successfully connected to the store! Contact the server owner!");
             return;
         }
-        commonUser.sendMessage(plugin.miniMessage().deserialize(((String)plugin.configReader().get(ConfigKey.SUBSCRIPTION_TITLE))));
-        commonUser.sendMessage(plugin.miniMessage().deserialize(((String)plugin.configReader().get(ConfigKey.SUBSCRIPTION_MESSAGE)).replaceAll("%message%", returnSubscriptionObject.message())));
+        commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("title").getAsString()));
+        commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("status").getAsString().replaceAll("%message%", returnSubscriptionObject.message())));
         if (!returnSubscriptionObject.isSuccess()) {
             return;
         }
         for (String url : returnSubscriptionObject.urls()) {
-            commonUser.sendMessage(plugin.miniMessage().deserialize(((String)plugin.configReader().get(ConfigKey.SUBSCRIPTION_URL)).replaceAll("%url%", url)));
+            commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("url").getAsString().replaceAll("%url%", url)));
         }
     }
 }

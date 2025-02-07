@@ -1,8 +1,6 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.data.json.old.Package;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import net.kyori.adventure.text.Component;
@@ -48,26 +46,25 @@ public class ParsedPackage {
         if (this.item != null) {
             return this.item;
         }
-        ConfigReader config = plugin.configReader();
         MiniMessage miniMessage = plugin.miniMessage();
         List<Component> lore = new ArrayList<>();
         if (this.item_lore != null && !this.item_lore.isEmpty()) {
             String item_lore = this.item_lore;
-            String configLore = (String) config.get(ConfigKey.BUY_GUI_PACKAGE_LORE);
+            String configLore = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("description").getAsString();
             configLore = configLore.replace("%description%", item_lore);
             lore.add(miniMessage.deserialize(configLore));
         }
         String configPrice;
         if (this.virtual_currency) {
-            configPrice = (String) config.get(ConfigKey.BUY_GUI_PACKAGE_PRICE_VIRTUAL);
+            configPrice = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("price").getKey("virtual").getAsString();
         } else {
-            configPrice = (String) config.get(ConfigKey.BUY_GUI_PACKAGE_PRICE);
+            configPrice = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("price").getKey("normal").getAsString();
         }
         double price = (this.price - (this.price * (this.discount / 100)));
         price = Math.round(price * 100.0) / 100.0;
         configPrice = configPrice.replace("%price%", String.valueOf(price));
         lore.add(miniMessage.deserialize(configPrice));
-        String configName = (String) config.get(ConfigKey.BUY_GUI_PACKAGE_NAME);
+        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("name").getAsString();
         configName = configName.replace("%package%", this.name);
         Component name = miniMessage.deserialize(configName);
         return new CommonItem(name, material, lore, featured == 1, sorting);

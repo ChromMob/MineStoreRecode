@@ -1,7 +1,6 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
@@ -50,7 +49,7 @@ public class ParsedGui {
         for (ParsedCategory category : this.categories) {
             items.add(category.getItem());
         }
-        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize((String) plugin.configReader().get(ConfigKey.BUY_GUI_CATEGORY_TITLE)), 54, items);
+        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("title").getAsString()), 54, items);
         plugin.guiData().getGuiInfo().formatInventory(inventory, true);
         return inventory;
     }

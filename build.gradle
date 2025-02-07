@@ -60,7 +60,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.1.9'
+    version = '3.2.0'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -189,6 +189,7 @@ shadowJar {
     relocate ("net.kyori", "me.chrommob.minestore.libs.net.kyori") {
         exclude "net.kyori.adventure.platform.fabric.**"
     }
+    relocate "me.chrommob.config", "me.chrommob.minestore.libs.me.chrommob.config"
     exclude "META-INF/*.SF"
 }
 

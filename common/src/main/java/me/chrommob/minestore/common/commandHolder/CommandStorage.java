@@ -6,7 +6,6 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
-import me.chrommob.minestore.common.config.ConfigKey;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -174,7 +173,7 @@ public class CommandStorage {
         String command = parsedResponse.command();
         String username = parsedResponse.username();
         int requestId = parsedResponse.commandId();
-        if ((boolean) plugin.configReader().get(ConfigKey.COMMAND_LOGGING)) {
+        if (plugin.pluginConfig().getKey("command-execution-logging").getAsBoolean()) {
             plugin.log("Executing command: " + command);
         }
         MineStoreExecuteEvent event = new MineStoreExecuteEvent(username, command, requestId);

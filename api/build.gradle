@@ -1,5 +1,5 @@
 dependencies {
-    implementation "net.kyori:adventure-text-serializer-plain:4.17.0"
-    implementation "net.kyori:adventure-text-serializer-legacy:4.17.0"
+    implementation "net.kyori:adventure-text-serializer-plain:4.18.0"
+    implementation "net.kyori:adventure-text-serializer-legacy:4.18.0"
     compileOnly("org.incendo:cloud-paper:2.0.0-SNAPSHOT")
 }

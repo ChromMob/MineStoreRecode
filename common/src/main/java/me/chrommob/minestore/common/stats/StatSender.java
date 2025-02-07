@@ -4,7 +4,6 @@ package me.chrommob.minestore.common.stats;
 import com.google.gson.Gson;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class StatSender {
 
     public StatSender(MineStoreCommon common) {
         this.common = common;
-        SERVERUUID = generateUUIDFromStrings(common, (String) common.configReader().get(ConfigKey.STORE_URL), (String) common.configReader().get(ConfigKey.API_KEY), (String) common.configReader().get(ConfigKey.SECRET_KEY));
+        SERVERUUID = generateUUIDFromStrings(common, common.pluginConfig().getKey("store-url").getAsString(), common.pluginConfig().getKey("api").getKey("key").getAsString(), common.pluginConfig().getKey("weblistener").getKey("secret-key").getAsString());
         JAVA_VERSION = System.getProperty("java.version");
         PLATFORM_TYPE = Registries.PLATFORM.get();
         PLATFORM_NAME = Registries.PLATFORM_NAME.get();

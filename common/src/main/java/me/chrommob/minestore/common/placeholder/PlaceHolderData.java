@@ -8,8 +8,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.placeholder.json.*;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -130,25 +128,24 @@ public class PlaceHolderData {
 
     public VerificationResult load() {
         List<String> errors = new ArrayList<>();
-        ConfigReader configReader = plugin.configReader();
         String finalDonationGoalUrl;
         String finalLastDonatorsUrl;
         String finalTopDonatorsUrl;
-        String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
+        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         finalDonationGoalUrl = storeUrl + "/api/"
-                + ((boolean) configReader.get(ConfigKey.API_ENABLED)
-                        ? configReader.getEncodedApiKey() + "/donation_goal"
+                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
+                        ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/donation_goal"
                         : "donation_goal");
         finalLastDonatorsUrl = storeUrl + "/api/"
-                + ((boolean) configReader.get(ConfigKey.API_ENABLED)
-                        ? configReader.getEncodedApiKey() + "/getTotalPayments"
+                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
+                        ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/getTotalPayments"
                         : "getTotalPayments");
         finalTopDonatorsUrl = storeUrl + "/api/"
-                + ((boolean) configReader.get(ConfigKey.API_ENABLED)
-                        ? configReader.getEncodedApiKey() + "/top_donators"
+                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
+                        ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/top_donators"
                         : "top_donators");
         try {
             URI donationGoalUrl = new URI(finalDonationGoalUrl);

@@ -3,7 +3,6 @@ package me.chrommob.minestore.common.gui.payment;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedPackage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,7 +20,7 @@ public class ConfirmationInv {
 
     public ConfirmationInv(ParsedPackage parsedPackage, MineStoreCommon plugin) {
         this.parsedPackage = parsedPackage;
-        background = new CommonItem(Component.text(" "), (String) plugin.configReader().get(ConfigKey.BUY_GUI_BACKGROUND_ITEM), Collections.emptyList(), true);
+        background = new CommonItem(Component.text(" "), plugin.pluginConfig().getKey("buy-gui").getKey("back").getKey("item").getAsString(), Collections.emptyList(), true);
     }
 
     public CommonInventory getInventory() {

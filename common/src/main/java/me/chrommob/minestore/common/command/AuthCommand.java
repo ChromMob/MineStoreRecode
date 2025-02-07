@@ -3,7 +3,6 @@ package me.chrommob.minestore.common.command;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.authHolder.AuthUser;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import org.incendo.cloud.annotations.Command;
@@ -25,10 +24,10 @@ public class AuthCommand {
         }
         AuthUser authUser = plugin.authHolder().getAuthUser(user.getName().toLowerCase());
         if (authUser == null) {
-            user.sendMessage((plugin.miniMessage()).deserialize((String)plugin.configReader().get(ConfigKey.AUTH_FAILURE_MESSAGE)));
+            user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("failure-message").getAsString()));
             return;
         }
         authUser.confirmAuth();
-        user.sendMessage((plugin.miniMessage()).deserialize((String)plugin.configReader().get(ConfigKey.AUTH_SUCCESS_MESSAGE)));
+        user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("success-message").getAsString()));
     }
 }

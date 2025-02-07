@@ -20,7 +20,7 @@ public class DumpData {
     private String log = "Log file not found or too large to dump.";
 
     public DumpData(boolean includeLog, MineStoreCommon plugin) {
-        this.config = plugin.configReader().getLoadedConfig();
+        this.config = plugin.pluginConfig().getConfig();
         this.version = plugin.jarFile().getAbsolutePath();
         this.platform = Registries.PLATFORM.get();
         this.plaformName = Registries.PLATFORM_NAME.get();
@@ -38,7 +38,7 @@ public class DumpData {
                 BufferedReader reader = new BufferedReader(
                         new FileReader(logFile));
                 char[] buf = new char[1024];
-                int numRead = 0;
+                int numRead;
                 while ((numRead = reader.read(buf)) != -1) {
                     String readData = String.valueOf(buf, 0, numRead);
                     fileData.append(readData);

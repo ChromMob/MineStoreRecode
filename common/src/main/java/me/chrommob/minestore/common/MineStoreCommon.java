@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common;
 
+import me.chrommob.config.ConfigManager;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
@@ -14,9 +15,8 @@ import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.commandHolder.NewCommandDumper;
-import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.common.config.PluginConfig;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
@@ -30,7 +30,6 @@ import me.chrommob.minestore.common.verification.VerificationManager;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.incendo.cloud.annotations.AnnotationParser;
-import org.incendo.cloud.setting.ManagerSetting;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -42,7 +41,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class MineStoreCommon {
-    private ConfigReader configReader;
+    private ConfigManager configManager;
+    private PluginConfig pluginConfig;
     private DatabaseManager databaseManager;
     private MiniMessage miniMessage;
     private WebListener webListener;
@@ -59,7 +59,14 @@ public class MineStoreCommon {
     private VerificationManager verificationManager;
 
     public MineStoreCommon() {
-        Registries.CONFIG_FILE.listen(configFile -> configReader = new ConfigReader(configFile, this));
+        Registries.CONFIG_FILE.listen(configFile -> {
+            if (!configFile.getParentFile().exists()) {
+                new File(configFile.getParentFile(), "lang").mkdirs();
+            }
+            configManager = new ConfigManager(configFile.getParentFile());
+            pluginConfig = new PluginConfig(configManager, configFile);
+            configManager.addConfig(pluginConfig);
+        });
         Registries.COMMAND_MANAGER.listen(commandManager -> {
             //commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
             annotationParser = new AnnotationParser<>(
@@ -85,24 +92,25 @@ public class MineStoreCommon {
         commandStorage.init();
         webListener = new WebListener(this);
         guiData = new GuiData(this);
-        version = MineStoreVersion.getMineStoreVersion((String) configReader.get(ConfigKey.STORE_URL));
+        version = MineStoreVersion.getMineStoreVersion(pluginConfig.getKey("store-url").getAsString());
         placeHolderData = new PlaceHolderData(this);
         SubscriptionUtil.init(this);
-        if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
             }
         }
         if (!reload)
             registerEssentialCommands();
-        String storeUrl = (String) configReader.get(ConfigKey.STORE_URL);
+        String storeUrl = pluginConfig.getKey("store-url").getAsString();
         if (!storeUrl.startsWith("https://")) {
             if (storeUrl.contains("://")) {
                 String[] prefix = storeUrl.split("://");
                 storeUrl = "https://" + prefix[1];
             } else
                 storeUrl = "https://" + storeUrl;
-            configReader.set(ConfigKey.STORE_URL, storeUrl);
+            pluginConfig.getKey("store-url").setValue(storeUrl);
+            pluginConfig.saveConfig();
         }
         VerificationResult lastVerificationResult = verify();
         verificationManager = new VerificationManager(lastVerificationResult);
@@ -116,7 +124,7 @@ public class MineStoreCommon {
                     log("Failed to register PlaceHolderAPI expansion!");
                 }
             }
-            if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+            if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
                 databaseManager.start();
             }
         }
@@ -127,7 +135,7 @@ public class MineStoreCommon {
         placeHolderData.start();
         webListener.start();
         new MineStoreEnableEvent().call();
-        new ApiHandler(new AuthData((String) configReader.get(ConfigKey.STORE_URL), (String) configReader.get(ConfigKey.API_KEY)));
+        new ApiHandler(new AuthData(pluginConfig.getKey("store-url").getAsString(), pluginConfig.getKey("api").getKey("key").getAsString()));
     }
 
     private void registerAddons() {
@@ -235,10 +243,10 @@ public class MineStoreCommon {
         // });
         annotationParser.parse(new AuthCommand(this));
         annotationParser.parse(new VersionCommand());
-        if (configReader.get(ConfigKey.STORE_ENABLED).equals(true)) {
+        if (pluginConfig.getKey("store-command").getKey("enabled").getAsBoolean()) {
             annotationParser.parse(new StoreCommand(this));
         }
-        if (configReader.get(ConfigKey.BUY_GUI_ENABLED).equals(true)) {
+        if (pluginConfig.getKey("buy-gui").getKey("enabled").getAsBoolean()) {
             annotationParser.parse(new BuyCommand(this));
         }
         if (version.requires(new MineStoreVersion(3, 0, 8))) {
@@ -252,7 +260,7 @@ public class MineStoreCommon {
     public void reload() {
         new MineStoreReloadEvent().call();
         log("Reloading...");
-        configReader.reload();
+        pluginConfig.reload();
         if (!initialized) {
             init(true);
             return;
@@ -273,7 +281,7 @@ public class MineStoreCommon {
             statsSender.stop();
             statsSender.start();
         }
-        if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
                 if (!databaseManager().load().isValid()) {
@@ -299,8 +307,8 @@ public class MineStoreCommon {
         if (Registries.COMMAND_MANAGER.get() == null) {
             return new VerificationResult(false, Collections.singletonList("CommandManager is not registered."), VerificationResult.TYPE.SUPPORT);
         }
-        if (configReader == null) {
-            return new VerificationResult(false, Collections.singletonList("ConfigReader is not registered."), VerificationResult.TYPE.SUPPORT);
+        if (configManager == null) {
+            return new VerificationResult(false, Collections.singletonList("ConfigManager is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (Registries.COMMAND_EXECUTER.get() == null) {
             return new VerificationResult(false, Collections.singletonList("CommandExecuter is not registered."), VerificationResult.TYPE.SUPPORT);
@@ -330,7 +338,7 @@ public class MineStoreCommon {
             log("Scheduler is not registered.");
             return new VerificationResult(false, Collections.singletonList("Scheduler is not registered."), VerificationResult.TYPE.SUPPORT);
         }
-        if (configReader.get(ConfigKey.MYSQL_ENABLED).equals(true)) {
+        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
             if (databaseManager == null) {
                 return new VerificationResult(false, Collections.singletonList("DatabaseManager is not registered."), VerificationResult.TYPE.SUPPORT);
             }
@@ -348,8 +356,8 @@ public class MineStoreCommon {
         return VerificationResult.valid();
     }
 
-    public ConfigReader configReader() {
-        return configReader;
+    public PluginConfig pluginConfig() {
+        return pluginConfig;
     }
 
     public void log(String message) {
@@ -371,7 +379,7 @@ public class MineStoreCommon {
 
     private Class previousClass = null;
     public void debug(Class c,String message) {
-        if ((boolean) configReader.get(ConfigKey.DEBUG)) {
+        if (pluginConfig.getKey("debug").getAsBoolean()) {
             if (previousClass == null || (!previousClass.equals(c) && differentCharacters(previousClass.getName(), c.getName()) > 2)) {
                 log("================================================================================");
                 log(c.getName());

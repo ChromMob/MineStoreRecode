@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.ParamBuilder;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import org.incendo.cloud.annotations.Argument;
@@ -29,13 +28,13 @@ public class ChargeBalanceCommand {
     public ChargeBalanceCommand(MineStoreCommon plugin) {
         this.plugin = plugin;
 
-        String storeUrl = (String) plugin.configReader().get(ConfigKey.STORE_URL);
+        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         storeUrl = storeUrl + "/api/payments/handle/";
-        if (plugin.configReader().get(ConfigKey.API_ENABLED).equals(true)) {
-            storeUrl += plugin.configReader().get(ConfigKey.API_KEY) + "/virtualcurrency";
+        if (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()) {
+            storeUrl += plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/virtualcurrency";
         } else {
             storeUrl += "virtualcurrency";
         }
@@ -51,7 +50,7 @@ public class ChargeBalanceCommand {
     @Permission("minestore.admin.chargeBalance")
     @Command("minestore|ms chargeBalance <username> <amount> <payment_internal_id> <signature>")
     public void onCharge(AbstractUser user, @Argument("username") String username, @Argument("amount") String amount, @Argument("payment_internal_id") String paymentInternalId, @Argument("signature") String signature) {
-        String secretKey = (boolean) plugin.configReader().get(ConfigKey.API_ENABLED) ? (String) plugin.configReader().get(ConfigKey.API_KEY) : "";
+        String secretKey = plugin.pluginConfig().getKey("api").getKey("key").getAsString();
         String generatedSignature = getSignature(amount, paymentInternalId, username, secretKey);
         boolean verifySignature = generatedSignature.equals(signature);
         if (!verifySignature) {

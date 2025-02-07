@@ -1,8 +1,6 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKey;
-import me.chrommob.minestore.common.config.ConfigReader;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.common.gui.data.json.old.Package;
@@ -35,7 +33,7 @@ public class ParsedCategory {
         this.name = category.getName();
         this.url = category.getUrl();
         this.material = category.getGui_item_id();
-        this.displayName = plugin.miniMessage().deserialize(((String) plugin.configReader().get(ConfigKey.BUY_GUI_CATEGORY_NAME)).replace("%category%", this.name));
+        this.displayName = plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getAsString().replace("%category%", this.name));
         if (category.getSubcategories() != null && !category.getSubcategories().isEmpty()) {
             for (SubCategory subCategory : category.getSubcategories()) {
                 this.subcategories.add(new ParsedSubCategory(subCategory, category.getPackages(), this, plugin));
@@ -64,7 +62,7 @@ public class ParsedCategory {
         this.name = category.getName();
         this.url = category.getUrl();
         this.material = category.getGui_item_id();
-        this.displayName = plugin.miniMessage().deserialize(((String) plugin.configReader().get(ConfigKey.BUY_GUI_CATEGORY_NAME)).replace("%category%", this.name));
+        this.displayName = plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getAsString().replace("%category%", this.name));
         if (category.getSubcategories() != null && !category.getSubcategories().isEmpty()) {
             for (NewCategory subCategory : category.getSubcategories()) {
                 this.newCategories.add(new ParsedCategory(this, subCategory, plugin));
@@ -114,9 +112,8 @@ public class ParsedCategory {
         if (this.item != null) {
             return this.item;
         }
-        ConfigReader config = plugin.configReader();
         MiniMessage miniMessage = plugin.miniMessage();
-        String configName = (String) config.get(ConfigKey.BUY_GUI_CATEGORY_NAME);
+        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getAsString();
         configName = configName.replace("%category%", this.name);
         Component name = miniMessage.deserialize(configName);
         return new CommonItem(name, material, new ArrayList<>());

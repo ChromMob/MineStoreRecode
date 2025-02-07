@@ -2,7 +2,6 @@ package me.chrommob.minestore.common.authHolder;
 
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
-import me.chrommob.minestore.common.config.ConfigKey;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 
 public class AuthUser {
@@ -16,7 +15,7 @@ public class AuthUser {
         this.user = user;
         this.parsedResponse = parsedResponse;
         this.time = time;
-        user.sendMessage(plugin.miniMessage().deserialize((String)plugin.configReader().get(ConfigKey.AUTH_INIT_MESSAGE)));
+        user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("initial-message").getAsString()));
     }
 
     public long time() {
