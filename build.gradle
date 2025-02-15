@@ -121,17 +121,6 @@ subprojects {
             expand props
         }
     }
-
-    tasks.register('processJavaSources', Copy) {
-        from 'src/main/java'
-        into "${layout.buildDirectory.get()}/generated/sources/java"
-        filter { line -> line.replaceAll("@version@", project.version) }
-        filteringCharset = 'UTF-8'
-    }
-
-    // Use the processed Java sources instead of the original ones
-    sourceSets.main.java.srcDirs = ["${layout.buildDirectory.get()}/generated/sources/java"]
-    compileJava.dependsOn processJavaSources
 }
 
 
