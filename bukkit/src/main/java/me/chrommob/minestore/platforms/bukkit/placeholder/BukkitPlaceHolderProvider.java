@@ -5,6 +5,7 @@ import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,13 +41,19 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
     }
 
     @Override
-    public String onPlaceholderRequest(Player p, @NotNull String params) {
+    public String onRequest(OfflinePlayer p, @NotNull String params) {
         PlaceHolderData data = plugin.placeHolderData();
         plugin.debug(this.getClass(), "Placeholder: " + params);
         if (data == null) {
             return "";
         }
-        String result = PlaceHolderManager.getInstance().getResult(p.getName(), params);
+        String name;
+        if (p == null) {
+            name = "";
+        } else {
+            name = p.getName();
+        }
+        String result = PlaceHolderManager.getInstance().getResult(name, params);
         plugin.debug(this.getClass(), "Placeholder: " + params + " = " + result);
         return result;
     }
