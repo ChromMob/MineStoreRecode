@@ -8,9 +8,8 @@ import net.luckperms.api.LuckPermsProvider;
 
 public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
     private final LuckPerms luckPerms;
-    private final MineStoreCommon plugin;
+
     public LuckPermsPlayerInfoProvider(MineStoreCommon plugin) {
-        this.plugin = plugin;
         try {
             Class.forName("net.luckperms.api.LuckPermsProvider");
         } catch (ClassNotFoundException e) {

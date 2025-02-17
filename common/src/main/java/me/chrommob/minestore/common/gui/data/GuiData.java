@@ -131,10 +131,11 @@ public class GuiData {
         }
     }
 
-    private Runnable runnable = () -> {
+    private final Runnable runnable = () -> {
         while (true) {
             if (!load().isValid()) {
                 plugin.debug(this.getClass(), "[GuiData] Error loading data!");
+                plugin.handleError();
             }
             try {
                 Thread.sleep(1000 * 60 * 5);

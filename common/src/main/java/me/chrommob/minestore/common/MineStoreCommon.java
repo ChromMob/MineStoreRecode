@@ -205,6 +205,22 @@ public class MineStoreCommon {
         return addons.stream().map(MineStoreAddon::getName).collect(Collectors.joining(", "));
     }
 
+    public void handleError() {
+        if (statsSender != null)
+            statsSender.stop();
+        if (guiData != null)
+            guiData.stop();
+        if (placeHolderData != null)
+            placeHolderData.stop();
+        if (authHolder != null)
+            authHolder.stop();
+        if (databaseManager != null)
+            databaseManager.stop();
+        if (webListener != null)
+            webListener.stop();
+        reload();
+    }
+
     public void stop() {
         new MineStoreDisableEvent().call();
         log("Shutting down...");
@@ -271,36 +287,22 @@ public class MineStoreCommon {
             init(true);
             return;
         }
-        if (webListener.load().isValid()) {
-            log("Config reloaded.");
-            webListener.start();
+        verificationManager = null;
+        VerificationResult verificationResult = verify();
+        verificationManager = new VerificationManager(this, verificationResult);
+        if (!verificationManager.isValid()) {
+            return;
         }
-        if (guiData.load().isValid()) {
-            log("GuiData reloaded.");
-            guiData.start();
-        }
-        if (placeHolderData.load().isValid()) {
-            log("PlaceHolderData reloaded.");
-            placeHolderData.start();
-        }
-        if (statsSender != null) {
-            statsSender.stop();
-            statsSender.start();
-        }
+        webListener.start();
+        guiData.start();
+        placeHolderData.start();
+        statsSender.start();
         if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
-                if (!databaseManager().load().isValid()) {
-                    log("Failed to initialize database.");
-                    return;
-                }
                 databaseManager.start();
             } else {
                 databaseManager.stop();
-                if (!databaseManager().load().isValid()) {
-                    log("Failed to reload database.");
-                    return;
-                }
                 databaseManager.start();
             }
         }

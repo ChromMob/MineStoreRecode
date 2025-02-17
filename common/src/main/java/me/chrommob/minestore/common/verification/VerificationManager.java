@@ -26,7 +26,7 @@ public class VerificationManager {
             case API_KEY:
                 return Component.text("[MineStore] ERROR: API key is not configured correctly. Please check your config.yml").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
             case SECRET_KEY:
-                return Component.text("[MineStore] ERROR: The secret key you entered is not valid. Please check your config.yml and use /ms setup secret-key <secretKey> to set it.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
+                return Component.text("[MineStore] ERROR: The secret key you entered is not valid. Please check your config.yml and use /ms setup WEBLISTENER.SECRET-KEY secretKey to set it.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
             case WEBSTORE:
                 return Component.text("[MineStore] ERROR: The server returned an error. Make sure it is accessible from your MC server and that Cloudflare is not blocking it.").color(NamedTextColor.RED).decorate(TextDecoration.BOLD);
             case DATABASE:

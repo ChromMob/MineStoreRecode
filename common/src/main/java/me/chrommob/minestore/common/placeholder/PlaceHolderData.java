@@ -236,6 +236,7 @@ public class PlaceHolderData {
         while (true) {
             if (!load().isValid()) {
                 plugin.debug(this.getClass(), "Failed to load placeholder data!");
+                plugin.handleError();
             }
             try {
                 Thread.sleep(1000 * 60);

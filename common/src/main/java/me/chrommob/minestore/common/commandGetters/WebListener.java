@@ -150,6 +150,7 @@ public class WebListener {
             }
         } catch (IOException e) {
             plugin.debug(this.getClass(), e);
+            plugin.handleError();
         }
         return parsedResponses;
     }
