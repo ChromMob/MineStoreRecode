@@ -55,6 +55,7 @@ public class MineStoreCommon {
     private StatSender statsSender;
     private final PaymentHandler paymentHandler = new PaymentHandler(this);
     private final Dumper dumper = new Dumper();
+    private final StringBuilder debugLog = new StringBuilder();
     private static MineStoreVersion version;
     private VerificationManager verificationManager;
 
@@ -113,8 +114,13 @@ public class MineStoreCommon {
             pluginConfig.saveConfig();
         }
         VerificationResult lastVerificationResult = verify();
-        verificationManager = new VerificationManager(lastVerificationResult);
+        verificationManager = new VerificationManager(this, lastVerificationResult);
         if (!verificationManager.isValid()) {
+            if (debugLog.length() > 0) {
+                String dump = dumper().dump(debugLog.toString(), this);
+                log("If you need assitance with debugging please send the following log to the support: " + dump);
+                debugLog.delete(0, debugLog.length());
+            }
             return;
         }
         if (!reload) {
@@ -361,6 +367,9 @@ public class MineStoreCommon {
     }
 
     public void log(String message) {
+        if (verificationManager == null) {
+            debugLog.append(message).append("\n");
+        }
         Registries.LOGGER.get().log(message);
     }
 
@@ -379,21 +388,22 @@ public class MineStoreCommon {
 
     private Class<?> previousClass = null;
     public void debug(Class<?> c,String message) {
+        StringBuilder debugLog = new StringBuilder();
+        if (previousClass == null || (!previousClass.equals(c) && differentCharacters(previousClass.getName(), c.getName()) > 2)) {
+            debugLog.append("================================================================================").append("\n");
+            debugLog.append(c.getName()).append("\n");
+            debugLog.append("================================================================================").append("\n");
+            previousClass = c;
+        }
+        String[] lines = message.split(", ");
+        for (String line : lines) {
+            debugLog.append(line).append("\n");
+        }
         if (pluginConfig.getKey("debug").getAsBoolean()) {
-            if (previousClass == null || (!previousClass.equals(c) && differentCharacters(previousClass.getName(), c.getName()) > 2)) {
-                log("================================================================================");
-                log(c.getName());
-                log("================================================================================");
-                previousClass = c;
-            }
-            String[] lines = message.split(", ");
-            for (String line : lines) {
-                try {
-                    Registries.LOGGER.get().log("[DEBUG] " + line);
-                } catch (Exception ignored) {
-                    System.out.println("[DEBUG] " + line);
-                }
-            }
+            log(debugLog.toString());
+        }
+        if (verificationManager == null) {
+            this.debugLog.append(debugLog);
         }
     }
 

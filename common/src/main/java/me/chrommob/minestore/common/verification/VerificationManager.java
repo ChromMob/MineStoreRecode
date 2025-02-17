@@ -3,15 +3,18 @@ package me.chrommob.minestore.common.verification;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.common.MineStoreCommon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public class VerificationManager {
+    private final MineStoreCommon plugin;
     private final VerificationResult verificationResult;
 
-    public VerificationManager(VerificationResult verificationResult) {
+    public VerificationManager(MineStoreCommon plugin, VerificationResult verificationResult) {
+        this.plugin = plugin;
         this.verificationResult = verificationResult;
         log();
     }
@@ -52,17 +55,13 @@ public class VerificationManager {
         if (verificationResult.isValid()) {
             return;
         }
-        Registries.LOGGER.get().log(PlainTextComponentSerializer.plainText().serialize(getMessage(verificationResult.type())));
+        plugin.log(PlainTextComponentSerializer.plainText().serialize(getMessage(verificationResult.type())));
         for (String message : verificationResult.messages()) {
-            Registries.LOGGER.get().log(message);
+            plugin.log(message);
         }
     }
 
     public boolean isValid() {
         return verificationResult.isValid();
-    }
-
-    public String[] messages() {
-        return verificationResult.messages().toArray(new String[0]);
     }
 }
