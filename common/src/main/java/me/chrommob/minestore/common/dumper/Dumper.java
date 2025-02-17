@@ -46,12 +46,12 @@ public class Dumper {
     }
 
     public String dump(boolean includeLog, MineStoreCommon plugin) {
-        // Do post request with "randomData" as the body to dumpLink
-        Path logPath = Paths.get(
-                plugin.jarFile().getParentFile().getParentFile().getAbsolutePath(), "logs",
-                "latest.log");
-        File logFile = logPath.toFile();
-        if (logFile.exists()) {
+        File logFile = plugin.jarFile().getParentFile();
+        while (!logFile.getAbsolutePath().endsWith("plugins") && !logFile.getAbsolutePath().endsWith("mods")) {
+            logFile = logFile.getParentFile();
+        }
+        logFile = new File(logFile.getParentFile(), "logs" + File.separator + "latest.log");
+        if (logFile.exists() && includeLog) {
             try {
                 StringBuilder fileData = new StringBuilder();
                 BufferedReader reader = new BufferedReader(
@@ -68,6 +68,9 @@ public class Dumper {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        if (!logFile.exists()) {
+            System.out.println("Log file does not exist: " + logFile.getAbsolutePath());
         }
         return dump(LOG, plugin);
     }
