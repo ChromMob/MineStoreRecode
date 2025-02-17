@@ -25,8 +25,7 @@ public class GuiData {
         this.plugin = plugin;
         guiOpenener = new GuiOpenener(this);
     }
-    private List parsedResponse;
-    private URL packageURL;
+    private List<?> parsedResponse;
     private final Gson gson = new Gson();
 
     private final GuiOpenener guiOpenener;
@@ -44,6 +43,7 @@ public class GuiData {
                 + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
                         ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/gui/packages_new"
                         : "gui/packages_new");
+        URL packageURL;
         try {
             packageURL = new URL(finalUrl);
         } catch (Exception e) {

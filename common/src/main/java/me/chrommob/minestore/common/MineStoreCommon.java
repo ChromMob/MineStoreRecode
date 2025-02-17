@@ -69,7 +69,7 @@ public class MineStoreCommon {
         });
         Registries.COMMAND_MANAGER.listen(commandManager -> {
             //commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
-            annotationParser = new AnnotationParser<>(
+            annotationParser = new AnnotationParser(
                     /* Manager */ Registries.COMMAND_MANAGER.get(),
                     /* Command sender type */ AbstractUser.class);
         });
@@ -227,7 +227,7 @@ public class MineStoreCommon {
         annotationParser.parse(new AddonCommand(this));
     }
 
-    private AnnotationParser annotationParser;
+    private AnnotationParser<?> annotationParser;
 
     private void registerCommands() {
         if (Registries.COMMAND_MANAGER.get() == null) {
@@ -377,8 +377,8 @@ public class MineStoreCommon {
         return count;
     }
 
-    private Class previousClass = null;
-    public void debug(Class c,String message) {
+    private Class<?> previousClass = null;
+    public void debug(Class<?> c,String message) {
         if (pluginConfig.getKey("debug").getAsBoolean()) {
             if (previousClass == null || (!previousClass.equals(c) && differentCharacters(previousClass.getName(), c.getName()) > 2)) {
                 log("================================================================================");
@@ -397,7 +397,7 @@ public class MineStoreCommon {
         }
     }
 
-    public void debug(Class c,Exception e) {
+    public void debug(Class<?> c,Exception e) {
         if (e.getMessage() != null) {
             debug(c, e.getMessage());
         }

@@ -28,6 +28,6 @@ public class Registries {
     public static final Registry<PlayerEconomyProvider> PLAYER_ECONOMY_PROVIDER = new Registry<>(new DefaultPlayerEconomyProvider());
     public static final Registry<File> CONFIG_FILE = new Registry<>();
     public static final Registry<PlayerEventListener> PLAYER_JOIN_LISTENER = new Registry<>();
-    public static final Registry<CommandManager> COMMAND_MANAGER = new Registry<>();
+    public static final Registry<CommandManager<?>> COMMAND_MANAGER = new Registry<>();
     public static final Registry<CommonPlaceHolderProvider> PLACE_HOLDER_PROVIDER = new Registry<>();
 }

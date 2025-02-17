@@ -13,7 +13,7 @@ public class ParsedGui {
     private final MineStoreCommon plugin;
     private final List<ParsedCategory> categories = new ArrayList<>();
     private final CommonInventory inventory;
-    public ParsedGui(List categories, MineStoreCommon plugin) {
+    public ParsedGui(List<?> categories, MineStoreCommon plugin) {
         this.plugin = plugin;
         if (categories.isEmpty()) {
             this.inventory = this.getInventory();
