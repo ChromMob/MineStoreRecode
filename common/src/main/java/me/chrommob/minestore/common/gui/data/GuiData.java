@@ -136,6 +136,8 @@ public class GuiData {
             if (!load().isValid()) {
                 plugin.debug(this.getClass(), "[GuiData] Error loading data!");
                 plugin.handleError();
+            } else {
+                plugin.notError();
             }
             try {
                 Thread.sleep(1000 * 60 * 5);

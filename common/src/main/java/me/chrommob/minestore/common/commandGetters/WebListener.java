@@ -148,6 +148,7 @@ public class WebListener {
                 plugin.debug(this.getClass(), e);
                 wasEmpty = true;
             }
+            plugin.notError();
         } catch (IOException e) {
             plugin.debug(this.getClass(), e);
             plugin.handleError();

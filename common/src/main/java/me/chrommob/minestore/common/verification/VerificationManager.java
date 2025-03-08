@@ -12,11 +12,39 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 public class VerificationManager {
     private final MineStoreCommon plugin;
     private final VerificationResult verificationResult;
+    private long errorCount = 0;
+    private long successCount = 0;
+    private float errorRate = 0;
 
-    public VerificationManager(MineStoreCommon plugin, VerificationResult verificationResult) {
+    private final String log;
+
+    public VerificationManager(MineStoreCommon plugin, VerificationResult verificationResult, String log) {
         this.plugin = plugin;
         this.verificationResult = verificationResult;
+        this.log = log;
         log();
+    }
+
+    public void safeIncrementError() {
+        if (++errorCount == Long.MAX_VALUE) {
+            errorCount = 0L;
+            successCount = 0L;
+        }
+        errorCount += 1;
+        errorRate = (float) errorCount / successCount;
+    }
+
+    public void safeIncrementSuccess() {
+        if (++successCount == Long.MAX_VALUE) {
+            errorCount = 0L;
+            successCount = 0L;
+        }
+        successCount += 1;
+        errorRate =  (float) errorCount / successCount;
+    }
+
+    public float getErrorRate() {
+        return errorRate;
     }
 
     private Component getMessage(VerificationResult.TYPE type) {
@@ -49,6 +77,10 @@ public class VerificationManager {
         for (String message : verificationResult.messages()) {
             user.sendMessage("- " + message);
         }
+        if (log == null) {
+            return;
+        }
+        user.sendMessage(log);
     }
 
     public void log() {
@@ -59,6 +91,10 @@ public class VerificationManager {
         for (String message : verificationResult.messages()) {
             plugin.log(message);
         }
+        if (log == null) {
+            return;
+        }
+        plugin.log(log);
     }
 
     public boolean isValid() {

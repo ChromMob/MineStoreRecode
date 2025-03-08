@@ -15,7 +15,6 @@ import java.nio.file.Paths;
 
 public class Dumper {
     private final Gson gson = new Gson();
-    private final String LOG = "Log file not found or too large to dump.";
 
     public String dump(String log, MineStoreCommon plugin) {
         try {
@@ -69,9 +68,9 @@ public class Dumper {
                 e.printStackTrace();
             }
         }
-        if (!logFile.exists()) {
-            System.out.println("Log file does not exist: " + logFile.getAbsolutePath());
+        if (includeLog && !logFile.exists()) {
+            return dump("Log file not found at " + logFile.getAbsolutePath(), plugin);
         }
-        return dump(LOG, plugin);
+        return dump("Log file not included", plugin);
     }
 }

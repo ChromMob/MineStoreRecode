@@ -30,11 +30,17 @@ import me.chrommob.minestore.common.verification.VerificationManager;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.setting.ManagerSetting;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -53,9 +59,10 @@ public class MineStoreCommon {
     private GuiData guiData;
     private PlaceHolderData placeHolderData;
     private StatSender statsSender;
+    private BufferedWriter debugLogWriter;
+    private File debugLogFile;
     private final PaymentHandler paymentHandler = new PaymentHandler(this);
     private final Dumper dumper = new Dumper();
-    private final StringBuilder debugLog = new StringBuilder();
     private static MineStoreVersion version;
     private VerificationManager verificationManager;
 
@@ -64,12 +71,22 @@ public class MineStoreCommon {
             if (!configFile.getParentFile().exists()) {
                 new File(configFile.getParentFile(), "lang").mkdirs();
             }
+            debugLogFile = new File(configFile.getParentFile(), "debug.log");
+            if (debugLogFile.exists()) {
+                debugLogFile.delete();
+            }
+            try {
+                debugLogFile.createNewFile();
+                debugLogWriter = new BufferedWriter(new FileWriter(debugLogFile));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             configManager = new ConfigManager(configFile.getParentFile());
             pluginConfig = new PluginConfig(configManager, configFile);
             configManager.addConfig(pluginConfig);
         });
         Registries.COMMAND_MANAGER.listen(commandManager -> {
-            //commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
+            commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
             annotationParser = new AnnotationParser(
                     /* Manager */ Registries.COMMAND_MANAGER.get(),
                     /* Command sender type */ AbstractUser.class);
@@ -114,13 +131,13 @@ public class MineStoreCommon {
             pluginConfig.saveConfig();
         }
         VerificationResult lastVerificationResult = verify();
-        verificationManager = new VerificationManager(this, lastVerificationResult);
+        String message = null;
+        if (!lastVerificationResult.isValid()) {
+            String dump = dumper().dump(readDebugLog(), this);
+            message = "If you need assitance with debugging please send the following log to the support: " + dump;
+        }
+        verificationManager = new VerificationManager(this, lastVerificationResult, message);
         if (!verificationManager.isValid()) {
-            if (debugLog.length() > 0) {
-                String dump = dumper().dump(debugLog.toString(), this);
-                log("If you need assitance with debugging please send the following log to the support: " + dump);
-                debugLog.delete(0, debugLog.length());
-            }
             return;
         }
         if (!reload) {
@@ -134,7 +151,11 @@ public class MineStoreCommon {
                 databaseManager.start();
             }
         }
-        registerCommands();
+        if (Registries.COMMAND_MANAGER.get() != null && Registries.COMMAND_MANAGER.get().isCommandRegistrationAllowed()) {
+            registerCommands();
+        } else {
+            log("Command registration is not allowed at this point. Please restart the server.");
+        }
         initialized = true;
         statsSender.start();
         guiData.start();
@@ -205,7 +226,23 @@ public class MineStoreCommon {
         return addons.stream().map(MineStoreAddon::getName).collect(Collectors.joining(", "));
     }
 
+    public void notError() {
+        if (verificationManager == null) {
+            return;
+        }
+        verificationManager.safeIncrementSuccess();
+    }
+
     public void handleError() {
+        if (verificationManager == null) {
+            return;
+        }
+        verificationManager.safeIncrementError();
+        if (verificationManager.getErrorRate() < 0.1) {
+            debug(this.getClass(), "[VerificationManager] Error rate is is: " + verificationManager.getErrorRate() + ", continuing...");
+            return;
+        }
+        debug(this.getClass(), "[VerificationManager] Error rate is is: " + verificationManager.getErrorRate() + ", restarting...");
         if (statsSender != null)
             statsSender.stop();
         if (guiData != null)
@@ -289,7 +326,11 @@ public class MineStoreCommon {
         }
         verificationManager = null;
         VerificationResult verificationResult = verify();
-        verificationManager = new VerificationManager(this, verificationResult);
+        String message = null;
+        if (!verificationResult.isValid()) {
+            message = "If you need assitance with debugging please send the following log to the support: " + dumper().dump(readDebugLog(), this);
+        }
+        verificationManager = new VerificationManager(this, verificationResult, message);
         if (!verificationManager.isValid()) {
             return;
         }
@@ -369,8 +410,10 @@ public class MineStoreCommon {
     }
 
     public void log(String message) {
-        if (verificationManager == null) {
-            debugLog.append(message).append("\n");
+        try {
+            debugLogWriter.write(message + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         Registries.LOGGER.get().log(message);
     }
@@ -403,9 +446,12 @@ public class MineStoreCommon {
         }
         if (pluginConfig.getKey("debug").getAsBoolean()) {
             log(debugLog.toString());
-        }
-        if (verificationManager == null) {
-            this.debugLog.append(debugLog);
+        } else {
+            try {
+                debugLogWriter.write(debugLog.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -497,5 +543,14 @@ public class MineStoreCommon {
 
     public PaymentHandler paymentHandler() {
         return paymentHandler;
+    }
+
+    public String readDebugLog() {
+        try {
+            return new String(Files.readAllBytes(Paths.get(debugLogFile.getAbsolutePath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
