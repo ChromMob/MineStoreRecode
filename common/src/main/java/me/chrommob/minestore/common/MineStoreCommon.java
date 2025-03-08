@@ -135,6 +135,7 @@ public class MineStoreCommon {
         if (!lastVerificationResult.isValid()) {
             String dump = dumper().dump(readDebugLog(), this);
             message = "If you need assitance with debugging please send the following log to the support: " + dump;
+            resetDebugLog();
         }
         verificationManager = new VerificationManager(this, lastVerificationResult, message);
         if (!verificationManager.isValid()) {
@@ -329,6 +330,7 @@ public class MineStoreCommon {
         String message = null;
         if (!verificationResult.isValid()) {
             message = "If you need assitance with debugging please send the following log to the support: " + dumper().dump(readDebugLog(), this);
+            resetDebugLog();
         }
         verificationManager = new VerificationManager(this, verificationResult, message);
         if (!verificationManager.isValid()) {
@@ -410,11 +412,7 @@ public class MineStoreCommon {
     }
 
     public void log(String message) {
-        try {
-            debugLogWriter.write(message + "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeDebugLog(message);
         Registries.LOGGER.get().log(message);
     }
 
@@ -446,12 +444,16 @@ public class MineStoreCommon {
         }
         if (pluginConfig.getKey("debug").getAsBoolean()) {
             log(debugLog.toString());
-        } else {
-            try {
-                debugLogWriter.write(debugLog.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            return;
+        }
+        writeDebugLog(debugLog.toString());
+    }
+
+    private void writeDebugLog(String message) {
+        try {
+            debugLogWriter.write(message + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -545,7 +547,35 @@ public class MineStoreCommon {
         return paymentHandler;
     }
 
-    public String readDebugLog() {
+    private void resetDebugLog() {
+        try {
+            debugLogWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            Files.deleteIfExists(Paths.get(debugLogFile.getAbsolutePath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        debugLogFile = new File(Registries.CONFIG_FILE.get().getParentFile(), "debug.log");
+        if (debugLogFile.exists()) {
+            debugLogFile.delete();
+        }
+        try {
+            debugLogFile.createNewFile();
+            debugLogWriter = new BufferedWriter(new FileWriter(debugLogFile));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String readDebugLog() {
+        try {
+            debugLogWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         try {
             return new String(Files.readAllBytes(Paths.get(debugLogFile.getAbsolutePath())));
         } catch (IOException e) {
