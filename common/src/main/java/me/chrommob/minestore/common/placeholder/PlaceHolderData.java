@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public class PlaceHolderData {
     private DonationGoal donationGoal = new DonationGoal(0, 0);
@@ -165,50 +166,55 @@ public class PlaceHolderData {
                 URL url = apiUrl.toURL();
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 InputStream in = urlConnection.getInputStream();
+                if ("gzip".equals(urlConnection.getContentEncoding())) {
+                    in = new GZIPInputStream(in);
+                }
 
                 BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
 
+                StringBuilder response = new StringBuilder();
                 String line;
-
                 while ((line = reader.readLine()) != null) {
-                    plugin.debug(this.getClass(), "Received: " + line);
-                    if (apiUrl.equals(apiUrls[0])) {
-                        try {
-                            if (!MineStoreCommon.version().requires("3.0.0")) {
-                                DonationGoalJsonOld donationGoalJsonOld = gson.fromJson(line, DonationGoalJsonOld.class);
-                                donationGoal = donationGoalJsonOld.getDonationGoal();
+                    response.append(line);
+                }
+
+                plugin.debug(this.getClass(), "Received: " + response);
+                if (apiUrl.equals(apiUrls[0])) {
+                    try {
+                        if (!MineStoreCommon.version().requires("3.0.0")) {
+                            DonationGoalJsonOld donationGoalJsonOld = gson.fromJson(response.toString(), DonationGoalJsonOld.class);
+                            donationGoal = donationGoalJsonOld.getDonationGoal();
+                        } else {
+                            Type listType = new TypeToken<List<DonationGoalJson>>() {
+                            }.getType();
+                            List<DonationGoalJson> donationGoals = gson.fromJson(response.toString(), listType);
+                            if (!donationGoals.isEmpty()) {
+                                donationGoal = donationGoals.get(0).getDonationGoal();
                             } else {
-                                Type listType = new TypeToken<List<DonationGoalJson>>() {
-                                }.getType();
-                                List<DonationGoalJson> donationGoals = gson.fromJson(line, listType);
-                                if (!donationGoals.isEmpty()) {
-                                    donationGoal = donationGoals.get(0).getDonationGoal();
-                                } else {
-                                    donationGoal = new DonationGoal(0, 0);
-                                }
+                                donationGoal = new DonationGoal(0, 0);
                             }
-                        } catch (JsonSyntaxException e) {
-                            plugin.debug(this.getClass(), e);
-                            donationGoal = new DonationGoal(0, 0);
                         }
-                    } else if (apiUrl.equals(apiUrls[1])) {
-                        Type listType = new TypeToken<List<LastDonator>>() {
-                        }.getType();
-                        try {
-                            lastDonators = gson.fromJson(line, listType);
-                        } catch (JsonSyntaxException e) {
-                            plugin.debug(this.getClass(), e);
-                            lastDonators = new ArrayList<>();
-                        }
-                    } else if (apiUrl.equals(apiUrls[2])) {
-                        Type listType = new TypeToken<List<TopDonator>>() {
-                        }.getType();
-                        try {
-                            topDonators = gson.fromJson(line, listType);
-                        } catch (JsonSyntaxException e) {
-                            plugin.debug(this.getClass(), e);
-                            topDonators = new ArrayList<>();
-                        }
+                    } catch (JsonSyntaxException e) {
+                        plugin.debug(this.getClass(), e);
+                        donationGoal = new DonationGoal(0, 0);
+                    }
+                } else if (apiUrl.equals(apiUrls[1])) {
+                    Type listType = new TypeToken<List<LastDonator>>() {
+                    }.getType();
+                    try {
+                        lastDonators = gson.fromJson(response.toString(), listType);
+                    } catch (JsonSyntaxException e) {
+                        plugin.debug(this.getClass(), e);
+                        lastDonators = new ArrayList<>();
+                    }
+                } else if (apiUrl.equals(apiUrls[2])) {
+                    Type listType = new TypeToken<List<TopDonator>>() {
+                    }.getType();
+                    try {
+                        topDonators = gson.fromJson(response.toString(), listType);
+                    } catch (JsonSyntaxException e) {
+                        plugin.debug(this.getClass(), e);
+                        topDonators = new ArrayList<>();
                     }
                 }
             }

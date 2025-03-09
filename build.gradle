@@ -60,7 +60,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.3.4'
+    version = '3.3.5'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -110,7 +110,7 @@ subprojects {
     }
 
     processResources {
-        def props = [version: project.version]
+        def props = [version: project.version, "@version@": project.version]
         inputs.properties props
         filteringCharset 'UTF-8'
         filesMatching('plugin.yml') {
@@ -119,6 +119,10 @@ subprojects {
 
         filesMatching("fabric.mod.json") {
             expand props
+        }
+
+        fileTree(dir: 'src/main/java', include: '**/*.java').each { file ->
+            file.text = file.text.replaceAll('@version@', project.version.toString())
         }
     }
 }

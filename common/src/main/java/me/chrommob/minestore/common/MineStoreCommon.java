@@ -452,6 +452,7 @@ public class MineStoreCommon {
     private void writeDebugLog(String message) {
         try {
             debugLogWriter.write(message + "\n");
+            debugLogWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -7,6 +7,8 @@ import me.chrommob.minestore.common.MineStoreCommon;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +34,7 @@ public class StatSender {
         PLATFORM_TYPE = Registries.PLATFORM.get();
         PLATFORM_NAME = Registries.PLATFORM_NAME.get();
         PLATFORM_VERSION = Registries.PLATFORM_VERSION.get();
-        PLUGIN_VERSION = "@version@";
+        PLUGIN_VERSION = "3.3.2";
         CORE_COUNT = Runtime.getRuntime().availableProcessors();
         SYSTEM_ARCHITECTURE = System.getProperty("os.arch");
     }
@@ -64,6 +66,9 @@ public class StatSender {
 
 
     public void start() {
+        if (thread != null) {
+            thread.interrupt();
+        }
         thread = new Thread(() -> {
             while (true) {
                 int playerCount = Registries.USER_GETTER.get().getAllPlayers().size();
