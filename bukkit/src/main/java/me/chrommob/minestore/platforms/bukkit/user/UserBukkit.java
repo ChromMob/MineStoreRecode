@@ -8,6 +8,7 @@ import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -60,6 +61,14 @@ public class UserBukkit extends CommonUser {
             return;
         }
         player.sendMessage(message);
+    }
+
+    @Override
+    public void sendTitle(Title title) {
+        if (player == null) {
+            return;
+        }
+        MineStoreBukkit.getInstance().adventure().player(player).showTitle(title);
     }
 
     @Override

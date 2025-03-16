@@ -5,6 +5,7 @@ import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.title.Title;
 
 import java.util.UUID;
 
@@ -18,6 +19,10 @@ public class CommonConsoleUser extends CommonUser {
     @Override
     public void sendMessage(String message) {
         Registries.LOGGER.get().log(message);
+    }
+
+    @Override
+    public void sendTitle(Title title) {
     }
 
     @Override

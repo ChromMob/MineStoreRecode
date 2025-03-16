@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
-import me.chrommob.minestore.common.MineStoreCommon;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class UserFabric extends CommonUser {
@@ -23,6 +23,11 @@ public class UserFabric extends CommonUser {
     @Override
     public void sendMessage(String message) {
         player.sendMessage(Component.text(message));
+    }
+
+    @Override
+    public void sendTitle(Title title) {
+        player.showTitle(title);
     }
 
     @Override

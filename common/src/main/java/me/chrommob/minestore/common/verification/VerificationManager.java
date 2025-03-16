@@ -8,6 +8,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.title.Title;
+
+import java.time.Duration;
 
 public class VerificationManager {
     private final MineStoreCommon plugin;
@@ -77,6 +80,10 @@ public class VerificationManager {
         for (String message : verificationResult.messages()) {
             user.sendMessage("- " + message);
         }
+        Component title = getMessage(verificationResult.type());
+        Component subtitle = Component.text("Please check your console or chat for more information.");
+        Title titleMessage = Title.title(title, subtitle, Title.Times.times(Duration.ofSeconds(2), Duration.ofSeconds(5), Duration.ofSeconds(2)));
+        user.sendTitle(titleMessage);
         if (log == null) {
             return;
         }

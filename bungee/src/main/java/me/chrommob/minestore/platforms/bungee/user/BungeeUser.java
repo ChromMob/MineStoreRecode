@@ -4,6 +4,7 @@ import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bungee.MineStoreBungee;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -24,6 +25,11 @@ public class BungeeUser extends CommonUser {
     @Override
     public void sendMessage(String message) {
         player.sendMessage(new TextComponent(message));
+    }
+
+    @Override
+    public void sendTitle(Title title) {
+        MineStoreBungee.getInstance().adventure().player(player).showTitle(title);
     }
 
     @Override
