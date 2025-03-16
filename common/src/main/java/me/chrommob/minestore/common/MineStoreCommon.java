@@ -331,6 +331,7 @@ public class MineStoreCommon {
             init(true);
             return;
         }
+        version = MineStoreVersion.getMineStoreVersion(pluginConfig.getKey("store-url").getAsString());
         verificationManager = null;
         VerificationResult verificationResult = verify();
         Component message = null;

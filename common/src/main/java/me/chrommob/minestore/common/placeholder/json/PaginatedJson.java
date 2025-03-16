@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class LastDonatorJson {
+public class PaginatedJson<T> {
     @SerializedName("data")
-    private List<LastDonator> lastDonators;
+    private List<T> getList;
 
     @SerializedName("per_page")
     private int perPage;
@@ -14,8 +14,8 @@ public class LastDonatorJson {
     @SerializedName("last_page")
     private int lastPage;
 
-    public List<LastDonator> getLastDonators() {
-        return lastDonators;
+    public List<T> getList() {
+        return getList;
     }
 
     public int getLastPage() {

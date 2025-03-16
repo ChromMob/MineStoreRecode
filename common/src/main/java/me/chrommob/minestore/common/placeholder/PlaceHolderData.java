@@ -13,6 +13,7 @@ import me.chrommob.minestore.common.placeholder.json.*;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -32,8 +33,11 @@ public class PlaceHolderData {
     private MineStoreCommon plugin;
     private List<TopDonator> topDonators = new ArrayList<>();
     private List<LastDonator> lastDonators = new ArrayList<>();
-    private LastDonatorJson lastDonatorJson;
+    private PaginatedJson<LastDonator> lastDonatorJson;
+    private PaginatedJson<TopDonator> topDonatorJson;
+    private final Map<Integer, TopDonator> topDonatorsMap =  new HashMap<>();
     private final SparseWriteOnlyBlockDeque<LastDonator> lastDonatorsDeque = new SparseWriteOnlyBlockDeque<>();
+    private final TreeMap<Long, Integer> indexesFetchedLately = new TreeMap<>();
 
     private final URI[] apiUrls = new URI[3];
 
@@ -45,7 +49,7 @@ public class PlaceHolderData {
         registerNativePlaceholders();
     }
 
-    private final Map<Integer, Long> fetching = new ConcurrentHashMap<>();
+    private final Map<Integer, Long> fetchingLast = new ConcurrentHashMap<>();
     private void fetchLastDonator(int index) {
         CompletableFuture.runAsync(() -> {
             if (!MineStoreCommon.version().requires(pagesSupportedSince)) {
@@ -59,10 +63,10 @@ public class PlaceHolderData {
             if (page > lastDonatorJson.getLastPage()) {
                 return;
             }
-            if (fetching.containsKey(page) && System.currentTimeMillis() - fetching.get(page) < 1000 * 60 * 2) {
+            if (fetchingLast.containsKey(page) && System.currentTimeMillis() - fetchingLast.get(page) < 1000 * 60) {
                 return;
             }
-            fetching.put(page, System.currentTimeMillis());
+            fetchingLast.put(page, System.currentTimeMillis());
             String finalLastDonatorsUrl;
             String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
             if (storeUrl.endsWith("/")) {
@@ -76,19 +80,7 @@ public class PlaceHolderData {
             plugin.debug(this.getClass(), "Fetching last donors page " + page);
             try {
                 HttpsURLConnection urlConnection = (HttpsURLConnection) new URL(finalLastDonatorsUrl).openConnection();
-                InputStream in = urlConnection.getInputStream();
-                if ("gzip".equals(urlConnection.getContentEncoding())) {
-                    in = new GZIPInputStream(in);
-                }
-                
-
-                BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
-
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
+                StringBuilder response = getResponse(urlConnection);
 
                 plugin.debug(this.getClass(), "Received: " + response);
                 if (urlConnection.getResponseCode() != 200) {
@@ -96,9 +88,10 @@ public class PlaceHolderData {
                     return;
                 }
 
-                LastDonatorJson lastDonatorJson = gson.fromJson(response.toString(), LastDonatorJson.class);
+                Type jsonType = new TypeToken<PaginatedJson<LastDonator>>(){}.getType();
+                PaginatedJson<LastDonator> lastDonatorJson = gson.fromJson(response.toString(), jsonType);
                 int pageIndex = --page * lastDonatorJson.getPerPage();
-                for (LastDonator lastDonator : lastDonatorJson.getLastDonators()) {
+                for (LastDonator lastDonator : lastDonatorJson.getList()) {
                     if (lastDonatorsDeque.has(pageIndex)) {
                         pageIndex++;
                         continue;
@@ -106,8 +99,58 @@ public class PlaceHolderData {
                     lastDonatorsDeque.set(pageIndex, lastDonator, false);
                     pageIndex++;
                 }
-                for (Map.Entry<Integer, LastDonator> lastDonator : lastDonatorsDeque) {
-                    System.out.println(lastDonator.getKey() + ": " + lastDonator.getValue());
+            } catch (Exception e) {
+                plugin.debug(this.getClass(), e);
+            }
+        });
+    }
+
+    private final Map<Integer, Long> fetchingTop = new HashMap<>();
+    private void fetchTopDonator(int index, boolean force) {
+        CompletableFuture.runAsync(() -> {
+            if (!MineStoreCommon.version().requires(pagesSupportedSince)) {
+                return;
+            }
+            if (topDonatorJson == null) {
+                return;
+            }
+            int page = (index + 1) / topDonatorJson.getPerPage();
+            page++;
+            if (page > topDonatorJson.getLastPage()) {
+                return;
+            }
+            if (!force && fetchingTop.containsKey(page) && System.currentTimeMillis() - fetchingTop.get(page) < 1000 * 60 * 2) {
+                return;
+            }
+            fetchingTop.put(page, System.currentTimeMillis());
+            indexesFetchedLately.put(System.currentTimeMillis(), page);
+            String finalTopDonatorsUrl;
+            String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+            if (storeUrl.endsWith("/")) {
+                storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
+            }
+            finalTopDonatorsUrl = storeUrl + "/api/"
+                    + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
+                    ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/top_donators/"
+                    : "top_donators/");
+            finalTopDonatorsUrl = finalTopDonatorsUrl + "?page=" + page;
+            plugin.debug(this.getClass(), "Fetching top donors page " + page);
+            try {
+                HttpsURLConnection urlConnection = (HttpsURLConnection) new URL(finalTopDonatorsUrl).openConnection();
+                StringBuilder response = getResponse(urlConnection);
+
+                plugin.debug(this.getClass(), "Received: " + response);
+                if (urlConnection.getResponseCode() != 200) {
+                    plugin.debug(this.getClass(), "Failed to fetch top donors page " + page);
+                    return;
+                }
+
+                Type jsonType = new TypeToken<PaginatedJson<TopDonator>>(){}.getType();
+                PaginatedJson<TopDonator> topDonatorJson = gson.fromJson(response.toString(), jsonType);
+                int pageIndex = --page * topDonatorJson.getPerPage();
+                for (TopDonator topDonator : topDonatorJson.getList()) {
+                    topDonatorsMap.put(pageIndex, topDonator);
+                    pageIndex++;
                 }
             } catch (Exception e) {
                 plugin.debug(this.getClass(), e);
@@ -115,20 +158,52 @@ public class PlaceHolderData {
         });
     }
 
+    private void refetchAllTopDonators() {
+        long tenMinutesAgo = System.currentTimeMillis() - 600_000;
+        indexesFetchedLately.headMap(tenMinutesAgo, true).clear();
+        for (int indexesFetchedLately : indexesFetchedLately.values()) {
+            fetchTopDonator(indexesFetchedLately, true);
+        }
+    }
+
+    private static @NotNull StringBuilder getResponse(HttpsURLConnection urlConnection) throws IOException {
+        InputStream in = urlConnection.getInputStream();
+        if ("gzip".equals(urlConnection.getContentEncoding())) {
+            in = new GZIPInputStream(in);
+        }
+
+
+        BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
+
+        StringBuilder response = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            response.append(line);
+        }
+        return response;
+    }
+
     private LastDonator getLastDonator(int index) {
         if (MineStoreCommon.version().requires(pagesSupportedSince)) {
             LastDonator lastDono = lastDonatorsDeque.get(index);
             if (lastDono != null) {
                 return lastDono;
-            } else {
-                fetchLastDonator(index);
-                return LastDonator.getDefault();
             }
+            fetchLastDonator(index);
+            return LastDonator.getDefault();
         }
         return getOrDefault(lastDonators, index, LastDonator.getDefault());
     }
 
     private TopDonator getTopDonator(int index) {
+        if (MineStoreCommon.version().requires(pagesSupportedSince)) {
+            TopDonator topDono = topDonatorsMap.get(index);
+            if (topDono != null) {
+                return topDono;
+            }
+            fetchTopDonator(index, false);
+            return TopDonator.getDefault();
+        }
         return getOrDefault(topDonators, index, TopDonator.getDefault());
     }
 
@@ -254,18 +329,7 @@ public class PlaceHolderData {
                 plugin.debug(this.getClass(), "Loading placeholder data from " + apiUrl);
                 URL url = apiUrl.toURL();
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                InputStream in = urlConnection.getInputStream();
-                if ("gzip".equals(urlConnection.getContentEncoding())) {
-                    in = new GZIPInputStream(in);
-                }
-
-                BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
-
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
+                StringBuilder response = getResponse(urlConnection);
 
                 plugin.debug(this.getClass(), "Received: " + response);
                 if (apiUrl.equals(apiUrls[0])) {
@@ -288,17 +352,13 @@ public class PlaceHolderData {
                         donationGoal = new DonationGoal(0, 0);
                     }
                 } else if (apiUrl.equals(apiUrls[1])) {
-                    Type listType = new TypeToken<List<LastDonator>>() {
-                    }.getType();
                     try {
                         if (MineStoreCommon.version().requires(pagesSupportedSince)) {
-                            LastDonatorJson lastDonatorJson = gson.fromJson(response.toString(), LastDonatorJson.class);
-                            if (this.lastDonatorJson == null) {
-                                this.lastDonatorJson = lastDonatorJson;
-                            }
+                            Type jsonType = new TypeToken<PaginatedJson<LastDonator>>(){}.getType();
+                            lastDonatorJson = gson.fromJson(response.toString(), jsonType);
                             List<LastDonator> newLastDonators = new ArrayList<>();
                             LastDonator fromQueue = lastDonatorsDeque.getFirst();
-                            for (LastDonator lastDonator : lastDonatorJson.getLastDonators()) {
+                            for (LastDonator lastDonator : lastDonatorJson.getList()) {
                                 int comparisonResult = fromQueue == null ? 1 : fromQueue.compareTo(lastDonator);
                                 if (comparisonResult == -1) {
                                     continue;
@@ -312,21 +372,34 @@ public class PlaceHolderData {
                                 for (int i = newLastDonators.size() - 1; i >= 0; i--) {
                                     lastDonatorsDeque.pushFront(newLastDonators.get(i));
                                 }
+                                refetchAllTopDonators();
                             }
                         } else {
+                            Type listType = new TypeToken<List<LastDonator>>() {
+                            }.getType();
                             lastDonators = gson.fromJson(response.toString(), listType);
                         }
                     } catch (JsonSyntaxException e) {
                         plugin.debug(this.getClass(), e);
                     }
                 } else if (apiUrl.equals(apiUrls[2])) {
-                    Type listType = new TypeToken<List<TopDonator>>() {
-                    }.getType();
-                    try {
-                        topDonators = gson.fromJson(response.toString(), listType);
-                    } catch (JsonSyntaxException e) {
-                        plugin.debug(this.getClass(), e);
-                        topDonators = new ArrayList<>();
+                    if (MineStoreCommon.version().requires(pagesSupportedSince)) {
+                        Type jsonType = new TypeToken<PaginatedJson<TopDonator>>(){}.getType();
+                        topDonatorJson = gson.fromJson(response.toString(), jsonType);
+                        int index = 0;
+                        for (TopDonator topDonator : topDonatorJson.getList()) {
+                            topDonatorsMap.put(index++, topDonator);
+                        }
+                        indexesFetchedLately.put(System.currentTimeMillis(), 1);
+                    } else {
+                        Type listType = new TypeToken<List<TopDonator>>() {
+                        }.getType();
+                        try {
+                            topDonators = gson.fromJson(response.toString(), listType);
+                        } catch (JsonSyntaxException e) {
+                            plugin.debug(this.getClass(), e);
+                            topDonators = new ArrayList<>();
+                        }
                     }
                 }
             }
@@ -368,6 +441,7 @@ public class PlaceHolderData {
 
     public void stop() {
         lastDonatorsDeque.clear();
+        topDonatorsMap.clear();
         if (thread != null && thread.isAlive()) {
             thread.interrupt();
         }
