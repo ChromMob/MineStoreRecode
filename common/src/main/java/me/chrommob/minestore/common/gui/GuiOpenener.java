@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class GuiOpenener {
+    private final MineStoreVersion newPathSince = new MineStoreVersion(3, 0, 0);
     private final GuiData guiData;
     public GuiOpenener(GuiData guiData) {
         this.guiData = guiData;
@@ -112,7 +113,7 @@ public class GuiOpenener {
                     storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
                 }
                 String url;
-                if (MineStoreCommon.version().requires(new MineStoreVersion(3, 0, 0))) {
+                if (MineStoreCommon.version().requires(newPathSince)) {
                     url = storeUrl + "/categories/";
                 } else {
                     url = storeUrl + "/category/";

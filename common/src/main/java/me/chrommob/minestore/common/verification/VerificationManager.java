@@ -16,9 +16,9 @@ public class VerificationManager {
     private long successCount = 0;
     private float errorRate = 0;
 
-    private final String log;
+    private final Component log;
 
-    public VerificationManager(MineStoreCommon plugin, VerificationResult verificationResult, String log) {
+    public VerificationManager(MineStoreCommon plugin, VerificationResult verificationResult, Component log) {
         this.plugin = plugin;
         this.verificationResult = verificationResult;
         this.log = log;
@@ -87,7 +87,7 @@ public class VerificationManager {
         if (verificationResult.isValid()) {
             return;
         }
-        plugin.log(PlainTextComponentSerializer.plainText().serialize(getMessage(verificationResult.type())));
+        plugin.log(getMessage(verificationResult.type()));
         for (String message : verificationResult.messages()) {
             plugin.log(message);
         }

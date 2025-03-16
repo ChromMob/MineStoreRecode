@@ -28,7 +28,10 @@ import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import me.chrommob.minestore.common.verification.VerificationManager;
 import me.chrommob.minestore.common.verification.VerificationResult;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.setting.ManagerSetting;
 import org.yaml.snakeyaml.Yaml;
@@ -65,6 +68,9 @@ public class MineStoreCommon {
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
     private VerificationManager verificationManager;
+
+    private final MineStoreVersion subscriptionCommandSince = new MineStoreVersion(3, 0, 8);
+    private final MineStoreVersion chargeBalanceSince = new MineStoreVersion(3, 2, 5);
 
     public MineStoreCommon() {
         Registries.CONFIG_FILE.listen(configFile -> {
@@ -131,10 +137,10 @@ public class MineStoreCommon {
             pluginConfig.saveConfig();
         }
         VerificationResult lastVerificationResult = verify();
-        String message = null;
+        Component message = null;
         if (!lastVerificationResult.isValid()) {
             String dump = dumper().dump(readDebugLog(), this);
-            message = "If you need assitance with debugging please send the following log to the support: " + dump;
+            message = Component.text("If you need assitance with debugging please send the following log to the support: ").append(Component.text(dump).clickEvent(ClickEvent.openUrl(dump)));
             resetDebugLog();
         }
         verificationManager = new VerificationManager(this, lastVerificationResult, message);
@@ -309,10 +315,10 @@ public class MineStoreCommon {
         if (pluginConfig.getKey("buy-gui").getKey("enabled").getAsBoolean()) {
             annotationParser.parse(new BuyCommand(this));
         }
-        if (version.requires(new MineStoreVersion(3, 0, 8))) {
+        if (version.requires(subscriptionCommandSince)) {
             annotationParser.parse(new SubscriptionsCommand(this));
         }
-        if (version.requires(new MineStoreVersion(3, 2, 5))) {
+        if (version.requires(chargeBalanceSince)) {
             annotationParser.parse(new ChargeBalanceCommand(this));
         }
     }
@@ -327,9 +333,10 @@ public class MineStoreCommon {
         }
         verificationManager = null;
         VerificationResult verificationResult = verify();
-        String message = null;
+        Component message = null;
         if (!verificationResult.isValid()) {
-            message = "If you need assitance with debugging please send the following log to the support: " + dumper().dump(readDebugLog(), this);
+            String dump = dumper().dump(readDebugLog(), this);
+            message = Component.text("If you need assitance with debugging please send the following log to the support: ").append(Component.text(dump).clickEvent(ClickEvent.openUrl(dump)));
             resetDebugLog();
         }
         verificationManager = new VerificationManager(this, verificationResult, message);
@@ -411,6 +418,10 @@ public class MineStoreCommon {
         return pluginConfig;
     }
 
+    public void log(Component message) {
+        log(PlainTextComponentSerializer.plainText().serialize(message));
+    }
+
     public void log(String message) {
         writeDebugLog(message);
         Registries.LOGGER.get().log(message);
@@ -451,7 +462,7 @@ public class MineStoreCommon {
 
     private void writeDebugLog(String message) {
         try {
-            debugLogWriter.write(message + "\n");
+            debugLogWriter.write(message);
             debugLogWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();

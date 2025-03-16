@@ -7,6 +7,9 @@ public abstract class CommandExecuterCommon {
         if (event.isCancelled()) {
             return;
         }
+        if (event.command().isEmpty()) {
+            return;
+        }
         execute(event.command());
     }
 

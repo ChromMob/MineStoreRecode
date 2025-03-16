@@ -43,7 +43,6 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
     @Override
     public String onRequest(OfflinePlayer p, @NotNull String params) {
         PlaceHolderData data = plugin.placeHolderData();
-        plugin.debug(this.getClass(), "Placeholder: " + params);
         if (data == null) {
             return "";
         }

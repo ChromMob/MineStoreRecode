@@ -36,7 +36,7 @@ public class EventBusTest {
         MineStoreEventBus.registerListener(addon, MineStoreEnableEvent.class, event -> {
             enabled = true;
         });
-        new MineStoreEnableEvent("test", "test").call();
+        new MineStoreEnableEvent().call();
         Assert.assertTrue(enabled);
     }
 
