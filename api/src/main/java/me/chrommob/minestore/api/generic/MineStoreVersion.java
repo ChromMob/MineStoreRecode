@@ -76,8 +76,9 @@ public class MineStoreVersion {
         return this.major + "." + this.minor + "." + this.patch;
     }
 
+    private static final MineStoreVersion dummy = new MineStoreVersion(0, 0, 0);
     public static MineStoreVersion dummy() {
-        return new MineStoreVersion(0, 0, 0);
+        return dummy;
     }
 
     public static MineStoreVersion getMineStoreVersion(String storeUrl) {

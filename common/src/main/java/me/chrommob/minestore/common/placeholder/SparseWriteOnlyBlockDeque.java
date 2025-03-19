@@ -61,7 +61,7 @@ public class SparseWriteOnlyBlockDeque<T> implements Iterable<Map.Entry<Integer,
                         entry.getValue().addBack(t);
                     }
                     return;
-                };
+                }
 
                 return;
             }

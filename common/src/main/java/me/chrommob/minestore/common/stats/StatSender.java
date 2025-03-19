@@ -3,6 +3,7 @@ package me.chrommob.minestore.common.stats;
 
 import com.google.gson.Gson;
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.MineStoreCommon;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -72,7 +73,7 @@ public class StatSender {
         thread = new Thread(() -> {
             while (true) {
                 int playerCount = Registries.USER_GETTER.get().getAllPlayers().size();
-                StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE);
+                StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE, MineStoreCommon.version() == MineStoreVersion.dummy() ? "Pre 3.0.0" : MineStoreCommon.version().toString());
                 statJson.setPlayerCount(playerCount);
                 String json = gson.toJson(statJson);
                 common.debug(this.getClass(), "Sending stat json: " + json);

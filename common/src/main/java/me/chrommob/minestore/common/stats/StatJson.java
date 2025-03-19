@@ -12,7 +12,8 @@ public class StatJson {
     private final int coreCount;
     private String systemArchitecture;
     private int playerCount;
-    public StatJson(UUID uuid, String javaVersion, String platformType, String platformName, String platformVersion, String pluginVersion, int coreCount, String systemArchitecture) {
+    private String mineStoreVersion;
+    public StatJson(UUID uuid, String javaVersion, String platformType, String platformName, String platformVersion, String pluginVersion, int coreCount, String systemArchitecture, String mineStoreVersion) {
         this.uuid = uuid;
         this.javaVersion = javaVersion;
         this.platformType = platformType;
@@ -21,6 +22,7 @@ public class StatJson {
         this.pluginVersion = pluginVersion;
         this.coreCount = coreCount;
         this.systemArchitecture = systemArchitecture;
+        this.mineStoreVersion = mineStoreVersion;
     }
 
     public void setPlayerCount(int playerCount) {
