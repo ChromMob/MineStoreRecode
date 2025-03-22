@@ -13,7 +13,7 @@ import net.kyori.adventure.title.Title;
 import java.time.Duration;
 
 public class VerificationManager {
-    private static final short SLIDING_WINDOW_SIZE = 50;
+    private static final short SLIDING_WINDOW_SIZE = 150;
     private final MineStoreCommon plugin;
     private final VerificationResult verificationResult;
     private short errorCount = 0;

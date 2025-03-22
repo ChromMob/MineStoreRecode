@@ -249,7 +249,7 @@ public class MineStoreCommon {
             debug(this.getClass(), "[VerificationManager] Error rate is: " + verificationManager.getErrorRate() + ", continuing...");
             return;
         }
-        debug(this.getClass(), "[VerificationManager] Error rate is: " + verificationManager.getErrorRate() + ", restarting...");
+        log("[VerificationManager] Error rate reached: " + verificationManager.getErrorRate() + ", restarting... in " + verificationManager.getErrorRate() * 100 + "s");
         if (statsSender != null)
             statsSender.stop();
         if (guiData != null)
@@ -262,7 +262,14 @@ public class MineStoreCommon {
             databaseManager.stop();
         if (webListener != null)
             webListener.stop();
-        reload();
+        new Thread(() -> {
+            try {
+                Thread.sleep((long) (verificationManager.getErrorRate() * 1000 * 100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            reload();
+        }).start();
     }
 
     public void stop() {
