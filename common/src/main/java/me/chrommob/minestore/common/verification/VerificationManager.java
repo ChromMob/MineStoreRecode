@@ -13,10 +13,11 @@ import net.kyori.adventure.title.Title;
 import java.time.Duration;
 
 public class VerificationManager {
+    private static final short SLIDING_WINDOW_SIZE = 50;
     private final MineStoreCommon plugin;
     private final VerificationResult verificationResult;
-    private long errorCount = 0;
-    private long successCount = 0;
+    private short errorCount = 0;
+    private short successCount = 0;
     private float errorRate = 0;
 
     private final Component log;
@@ -29,20 +30,24 @@ public class VerificationManager {
     }
 
     public void safeIncrementError() {
-        if (++errorCount == Long.MAX_VALUE) {
-            errorCount = 0L;
-            successCount = 0L;
-        }
         errorCount += 1;
+        if (errorCount == SLIDING_WINDOW_SIZE) {
+            if (successCount > 0) {
+                successCount--;
+            }
+            errorCount--;
+        }
         errorRate = (float) errorCount / successCount;
     }
 
     public void safeIncrementSuccess() {
-        if (++successCount == Long.MAX_VALUE) {
-            errorCount = 0L;
-            successCount = 0L;
-        }
         successCount += 1;
+        if (successCount == SLIDING_WINDOW_SIZE) {
+            if (errorCount > 0) {
+                errorCount--;
+            }
+            successCount--;
+        }
         errorRate =  (float) errorCount / successCount;
     }
 

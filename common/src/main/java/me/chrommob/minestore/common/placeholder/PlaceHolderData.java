@@ -161,7 +161,8 @@ public class PlaceHolderData {
     private void refetchAllTopDonators() {
         long tenMinutesAgo = System.currentTimeMillis() - 600_000;
         indexesFetchedLately.headMap(tenMinutesAgo, true).clear();
-        for (int indexesFetchedLately : indexesFetchedLately.values()) {
+        Set<Integer> toFetch = new HashSet<>(indexesFetchedLately.values());
+        for (int indexesFetchedLately : toFetch) {
             fetchTopDonator(indexesFetchedLately, true);
         }
     }
