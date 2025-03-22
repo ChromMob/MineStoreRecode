@@ -4,7 +4,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class GiftCardManager {
-    private Function<CreateGiftCardRequest, CompletableFuture<CreateGiftCardResponse>> function;
+    private Function<CreateGiftCardRequest, CompletableFuture<CreateGiftCardResponse>> createFunction;
+    private Function<String, CompletableFuture<ValidateGiftCardResponse>> validateFunction;
     public CompletableFuture<CreateGiftCardResponse> createGiftCardAsync(String name, String description, int amount, int expiryYear) {
         return createGiftCardAsync(name, description, amount, expiryYear + 1, 1, 1, 0, 0, 0);
     }
@@ -14,15 +15,27 @@ public class GiftCardManager {
     }
 
     public CompletableFuture<CreateGiftCardResponse> createGiftCardAsync(String name, String description, int amount, int expiryYear, int expiryMonth, int expiryDay, int expiryHour, int expiryMinute, int expirySecond) {
-        return function.apply(new CreateGiftCardRequest(name, description, amount, expiryYear, expiryMonth, expiryDay, expiryHour, expiryMinute, expirySecond));
+        return createFunction.apply(new CreateGiftCardRequest(name, description, amount, expiryYear, expiryMonth, expiryDay, expiryHour, expiryMinute, expirySecond));
     }
 
     public CreateGiftCardResponse createGiftCard(String name, String description, int amount, int expiryYear, int expiryMonth, int expiryDay, int expiryHour, int expiryMinute, int expirySecond) {
         return createGiftCardAsync(name, description, amount, expiryYear, expiryMonth, expiryDay, expiryHour, expiryMinute, expirySecond).join();
     }
 
-    public void registerFunction(Function<CreateGiftCardRequest, CompletableFuture<CreateGiftCardResponse>> function) {
-        this.function = function;
+    public CompletableFuture<ValidateGiftCardResponse> validateGiftCardAsync(String coupon) {
+        return validateFunction.apply(coupon);
+    }
+
+    public ValidateGiftCardResponse validateGiftCard(String coupon) {
+        return validateGiftCardAsync(coupon).join();
+    }
+
+    public void registerCreateFunction(Function<CreateGiftCardRequest, CompletableFuture<CreateGiftCardResponse>> function) {
+        this.createFunction = function;
+    }
+
+    public void registerValidateFunction(Function<String, CompletableFuture<ValidateGiftCardResponse>> function) {
+        this.validateFunction = function;
     }
 
     public static class CreateGiftCardResponse {
@@ -107,6 +120,19 @@ public class GiftCardManager {
 
         public int expirySecond() {
             return expirySecond;
+        }
+    }
+
+    public static class ValidateGiftCardResponse {
+        private String name;
+        private int amount;
+
+        public  String getName() {
+            return name;
+        }
+
+        public int getAmount() {
+            return amount;
         }
     }
 }

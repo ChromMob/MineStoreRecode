@@ -22,7 +22,8 @@ public class ApiHandler {
     private final AuthData authData;
     public ApiHandler(AuthData authData) {
         this.authData = authData;
-        WebApiAccessor.giftCardManager().registerFunction((createGiftCardRequest -> CompletableFuture.supplyAsync(() -> createGiftCard(createGiftCardRequest.name(), createGiftCardRequest.description(), createGiftCardRequest.amount(), createGiftCardRequest.expiryYear(), createGiftCardRequest.expiryMonth(), createGiftCardRequest.expiryDay(), createGiftCardRequest.expiryHour(), createGiftCardRequest.expiryMinute(), createGiftCardRequest.expirySecond()))));
+        WebApiAccessor.giftCardManager().registerCreateFunction((createGiftCardRequest -> CompletableFuture.supplyAsync(() -> createGiftCard(createGiftCardRequest.name(), createGiftCardRequest.description(), createGiftCardRequest.amount(), createGiftCardRequest.expiryYear(), createGiftCardRequest.expiryMonth(), createGiftCardRequest.expiryDay(), createGiftCardRequest.expiryHour(), createGiftCardRequest.expiryMinute(), createGiftCardRequest.expirySecond()))));
+        WebApiAccessor.giftCardManager().registerValidateFunction(coupon -> CompletableFuture.supplyAsync(() -> validateGiftCard(coupon)));
         WebApiAccessor.profileManager().registerFunction((this::getProfile));
     }
 
@@ -30,6 +31,17 @@ public class ApiHandler {
         URL url = authData.createNonKeyUrl("profile/" + username, "");
         try {
             return gson.fromJson(new BufferedReader(new InputStreamReader(url.openStream())), ProfileManager.Profile.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private GiftCardManager.ValidateGiftCardResponse validateGiftCard(String coupon) {
+        ParamBuilder paramBuilder = new ParamBuilder();
+        paramBuilder.append("code", coupon);
+        URL url = authData.createUrl("validGiftCard", paramBuilder.build());
+        try {
+            return gson.fromJson(new BufferedReader(new InputStreamReader(url.openStream())), GiftCardManager.ValidateGiftCardResponse.class);
         } catch (Exception e) {
             return null;
         }
