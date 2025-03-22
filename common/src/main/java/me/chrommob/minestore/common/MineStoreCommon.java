@@ -245,11 +245,12 @@ public class MineStoreCommon {
             return;
         }
         verificationManager.safeIncrementError();
-        if (verificationManager.getErrorRate() < 0.1) {
+        if (verificationManager.getErrorRate() < 0.15) {
             debug(this.getClass(), "[VerificationManager] Error rate is: " + verificationManager.getErrorRate() + ", continuing...");
             return;
         }
-        log("[VerificationManager] Error rate reached: " + verificationManager.getErrorRate() + ", restarting... in " + verificationManager.getErrorRate() * 100 + "s");
+        int percent = (int) (verificationManager.getErrorRate() * 100);
+        log("[VerificationManager] Error rate reached: " + percent +  ", restarting... in " + (int) (verificationManager.getErrorRate() * 100) + "s");
         if (statsSender != null)
             statsSender.stop();
         if (guiData != null)
