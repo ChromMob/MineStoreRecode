@@ -35,7 +35,7 @@ public class StatSender {
         PLATFORM_TYPE = Registries.PLATFORM.get();
         PLATFORM_NAME = Registries.PLATFORM_NAME.get();
         PLATFORM_VERSION = Registries.PLATFORM_VERSION.get();
-        PLUGIN_VERSION = "3.3.2";
+        PLUGIN_VERSION = BuildConstats.VERSION;
         CORE_COUNT = Runtime.getRuntime().availableProcessors();
         SYSTEM_ARCHITECTURE = System.getProperty("os.arch");
     }

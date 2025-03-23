@@ -12,6 +12,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.stats.BuildConstats;
 import me.chrommob.minestore.platforms.velocity.events.VelocityPlayerEvent;
 import me.chrommob.minestore.platforms.velocity.logger.VelocityLogger;
 import me.chrommob.minestore.platforms.velocity.scheduler.VelocityScheduler;
@@ -26,7 +27,7 @@ import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-@Plugin(id = "minestore", name = "MineStore", version = "3.3.2", description = "MineStore plugin for Velocity", authors = {"chrommob"})
+@Plugin(id = "minestore", name = "MineStore", version = BuildConstats.VERSION, description = "MineStore plugin for Velocity", authors = {"chrommob"})
 public class MineStoreVelocity {
 
     @Inject

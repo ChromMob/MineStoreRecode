@@ -20,3 +20,21 @@ dependencies {
     implementation("org.incendo:cloud-annotations:2.0.0-SNAPSHOT")
     compileOnly("org.incendo:cloud-core:2.0.0-SNAPSHOT")
 }
+
+def templateSource = file('src/main/templates')
+def templateDest = layout.buildDirectory.dir('generated/sources/templates')
+
+def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
+    def props = [
+            'version': project.version,
+    ]
+    task.inputs.properties props
+
+    task.from templateSource
+    task.into templateDest
+    task.expand props
+}
+
+compileJava.dependsOn generateTemplates
+
+sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
