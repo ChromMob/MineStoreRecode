@@ -36,7 +36,7 @@ public class PlaceHolderData {
     private PaginatedJson<LastDonator> lastDonatorJson;
     private PaginatedJson<TopDonator> topDonatorJson;
     private final Map<Integer, TopDonator> topDonatorsMap =  new HashMap<>();
-    private final SparseWriteOnlyBlockDeque<LastDonator> lastDonatorsDeque = new SparseWriteOnlyBlockDeque<>();
+    private final SparseIndexedBlockDeque<LastDonator> lastDonatorsDeque = new SparseIndexedBlockDeque<>();
     private final TreeMap<Long, Integer> indexesFetchedLately = new TreeMap<>();
 
     private final URI[] apiUrls = new URI[3];
@@ -371,7 +371,7 @@ public class PlaceHolderData {
                             }
                             if (!newLastDonators.isEmpty()) {
                                 for (int i = newLastDonators.size() - 1; i >= 0; i--) {
-                                    lastDonatorsDeque.pushFront(newLastDonators.get(i));
+                                    lastDonatorsDeque.pushFirst(newLastDonators.get(i));
                                 }
                                 refetchAllTopDonators();
                             }

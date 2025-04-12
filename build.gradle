@@ -19,6 +19,11 @@ allprojects {
     repositories {
         mavenCentral()
         maven {
+            name = "sonatype-oss-snapshots1"
+            url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            mavenContent { snapshotsOnly() }
+        }
+        maven {
             name = 'paper-repo'
             url = 'https://repo.papermc.io/repository/maven-public/'
         }
@@ -50,11 +55,6 @@ allprojects {
             }
         }
         maven {
-            name = "sonatype-oss-snapshots1"
-            url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            mavenContent { snapshotsOnly() }
-        }
-        maven {
             name = "jitpack"
             url = "https://jitpack.io"
         }
@@ -63,7 +63,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.3.8'
+    version = '3.3.9'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -139,6 +139,11 @@ def finalJar = tasks.register('finalJar', Jar) {
     destinationDirectory = file("${projectDir}/build/libs/")
 }
 
+finalJar.configure {
+    dependsOn fabricProject.tasks.remapJar
+    dependsOn velocityProject.tasks.shadowJar
+}
+
 fabricProject.afterEvaluate {
     finalJar.configure {
         from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
@@ -190,5 +195,6 @@ dependencies {
     implementation project(path: ':common', configuration: 'shadow')
     implementation project(path: ':MineStore-Bukkit', configuration: 'shadow')
     implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
+   // implementation project(path: ':MineStore-Fabric', configuration: 'shadow')
 //    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }

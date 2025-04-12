@@ -11,13 +11,6 @@ pluginManagement {
         }
         mavenCentral()
     }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "me.chrommob.skidfuscatorgradle") {
-                useModule("com.github.ChromMob.SkidFuscatorGradle:SkidFuscatorGradle:master-SNAPSHOT")
-            }
-        }
-    }
 }
 
 rootProject.name = 'MineStore'

@@ -31,6 +31,7 @@ public class MineStoreFabric implements ModInitializer {
 
 	private static MineStoreFabric instance;
 	private FabricServerAudiences adventure;
+	private MinecraftServer server;
 
 	public FabricServerAudiences adventure() {
 		if (this.adventure == null) {
@@ -44,21 +45,6 @@ public class MineStoreFabric implements ModInitializer {
 		instance = this;
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onEnable);
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onDisable);
-
-	}
-
-	private MineStoreCommon common;
-
-	private void onEnable(MinecraftServer server) {
-		LOGGER.info("MineStore has been enabled!");
-		adventure = FabricServerAudiences.of(server);
-		common = new MineStoreCommon();
-		Registries.PLATFORM.set("fabric");
-		Registries.PLATFORM_NAME.set("Fabric");
-		Registries.PLATFORM_VERSION.set(server.getVersion());
-		Registries.LOGGER.set(new FabricLogger(LOGGER));
-		Registries.SCHEDULER.set(new FabricScheduler());
-		Registries.USER_GETTER.set(new FabricUserGetter(server));
 
 		final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource.isExecutedByPlayer() ? commandSource.getPlayer().getUuid() : null, commandSource);
 		final Function<AbstractUser, ServerCommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getCommandSource() : server.getPlayerManager().getPlayer(abstractUser.user().getUUID()).getCommandSource();
@@ -78,7 +64,21 @@ public class MineStoreFabric implements ModInitializer {
 				ExecutionCoordinator.asyncCoordinator(),
 				senderMapper
 		));
+	}
 
+	private MineStoreCommon common;
+
+	private void onEnable(MinecraftServer server) {
+		this.server = server;
+		LOGGER.info("MineStore has been enabled!");
+		adventure = FabricServerAudiences.of(server);
+		common = new MineStoreCommon();
+		Registries.PLATFORM.set("fabric");
+		Registries.PLATFORM_NAME.set("Fabric");
+		Registries.PLATFORM_VERSION.set(server.getVersion());
+		Registries.LOGGER.set(new FabricLogger(LOGGER));
+		Registries.SCHEDULER.set(new FabricScheduler());
+		Registries.USER_GETTER.set(new FabricUserGetter(server));
 		Registries.COMMAND_EXECUTER.set(new CommandExecuterFabric(server));
 		Registries.CONFIG_FILE.set(FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("config.yml").toFile());
 		Registries.PLAYER_JOIN_LISTENER.set(new FabricPlayerEvent(common));
