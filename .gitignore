@@ -1,9 +1,15 @@
 # User-specific stuff
 .idea/
-
+.gradle_
 *.iml
 *.ipr
 *.iws
+
+**/org.eclipse.**
+**/.project
+**/.classpath
+**/.settings/
+**/.factorypath
 
 # IntelliJ
 out/
