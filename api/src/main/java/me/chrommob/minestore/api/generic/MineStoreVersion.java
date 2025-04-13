@@ -88,6 +88,8 @@ public class MineStoreVersion {
         storeUrl = storeUrl + "/api/getVersion";
         try {
             HttpsURLConnection urlConnection = (HttpsURLConnection) new URL(storeUrl).openConnection();
+            urlConnection.setConnectTimeout(1000);
+            urlConnection.setReadTimeout(1000);
             InputStream in = urlConnection.getInputStream();
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
             String line;

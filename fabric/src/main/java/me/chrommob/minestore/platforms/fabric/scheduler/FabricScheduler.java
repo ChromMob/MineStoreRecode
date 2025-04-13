@@ -8,13 +8,17 @@ import me.chrommob.minestore.api.interfaces.scheduler.CommonScheduler;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 public class FabricScheduler implements CommonScheduler {
-    private Set<Runnable> tasks = ConcurrentHashMap.newKeySet();
+    private final Set<Runnable> tasks = ConcurrentHashMap.newKeySet();
 
     public FabricScheduler() {
         ServerTickEvents.START_SERVER_TICK.register(server -> {
             Set<Runnable> running = new HashSet<>(this.tasks);
             this.tasks.clear();
-            running.forEach(Runnable::run);
+            try {
+                running.forEach(Runnable::run);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
 

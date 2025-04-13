@@ -1,12 +1,15 @@
 package me.chrommob.minestore.common.commandGetters;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import io.leangen.geantyref.TypeToken;
 import me.chrommob.minestore.api.event.types.MineStorePurchaseEvent;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
-import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
@@ -109,6 +112,7 @@ public class WebListener {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
+                    plugin.debug(this.getClass(), e);
                     break;
                 }
             }
@@ -456,6 +460,9 @@ public class WebListener {
                 plugin.debug(this.getClass(), e);
                 return CheckResponse.empty();
             }
+        }).exceptionally(e -> {
+            plugin.debug(getClass(), e);
+            return CheckResponse.empty();
         });
     }
 

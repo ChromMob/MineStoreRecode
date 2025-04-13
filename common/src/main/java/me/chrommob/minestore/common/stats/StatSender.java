@@ -5,11 +5,10 @@ import com.google.gson.Gson;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.api.stats.BuildConstats;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

@@ -13,8 +13,12 @@ public class CommandExecuterFabric extends CommandExecuterCommon {
 
     @Override
     public void execute(String command) {
-        MineStoreFabric.getInstance().getCommon().runOnMainThread(
-                () -> server.getCommandManager().executeWithPrefix(server.getCommandSource(), command));
+        try {
+            MineStoreFabric.getInstance().getCommon().runOnMainThread(
+                    () -> server.getCommandManager().executeWithPrefix(server.getCommandSource(), command));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

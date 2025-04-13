@@ -36,10 +36,6 @@ allprojects {
             url = "https://repo.spongepowered.org/repository/maven-public/"
         }
         maven {
-            name = "jitpack"
-            url = "https://jitpack.io/"
-        }
-        maven {
             name = 'placeholderapi-repo'
             url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
         }
@@ -99,12 +95,13 @@ subprojects {
     }
 
     dependencies {
-        implementation 'com.google.code.gson:gson:2.8.9'
+        compileOnly 'com.google.code.gson:gson:2.8.9'
     }
 
     if (project.name != "common" && project.name != "MineStore-API") {
         dependencies {
-            implementation project(path: ':common', configuration: 'shadow')
+            compileOnly project(path: ':common', configuration: 'shadow')
+            compileOnly project(path: ':MineStore-API', configuration: 'shadow')
         }
     }
 
@@ -120,6 +117,10 @@ subprojects {
             expand props
         }
 
+        filesMatching('bungee.yml') {
+            expand props
+        }
+
         filesMatching("fabric.mod.json") {
             expand props
         }
@@ -128,9 +129,11 @@ subprojects {
 
 
 
+/*
 def fabricProject = project(":MineStore-Fabric")
-def velocityProject = project(":MineStore-Velocity")
+*/
 def finalJar = tasks.register('finalJar', Jar) {
+    dependsOn processResources
     group = 'build'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from zipTree(shadowJar.archiveFile)
@@ -140,26 +143,19 @@ def finalJar = tasks.register('finalJar', Jar) {
 }
 
 finalJar.configure {
+/*
     dependsOn fabricProject.tasks.remapJar
-    dependsOn velocityProject.tasks.shadowJar
+*/
 }
 
-fabricProject.afterEvaluate {
+/*fabricProject.afterEvaluate {
     finalJar.configure {
         from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
             it.archiveFile
         })
     }
-}
+}*/
 
-
-velocityProject.afterEvaluate {
-    finalJar.configure {
-        from zipTree(velocityProject.tasks.named("shadowJar", AbstractArchiveTask).flatMap {
-            it.archiveFile
-        })
-    }
-}
 
 def addonApiProject = project(":MineStore-API")
 publishing {
@@ -172,29 +168,61 @@ publishing {
         mavenLocal()
     }
 }
+
 tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.jar
 
-
-
 shadowJar {
-    relocate "org.incendo", "me.chrommob.minestore.libs.org.incendo"
     relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
     relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
     relocate "org.mariadb", "me.chrommob.minestore.libs.org.mariadb"
     relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
-    relocate ("net.kyori", "me.chrommob.minestore.libs.net.kyori") {
-        exclude "net.kyori.adventure.platform.fabric.**"
-    }
     relocate "me.chrommob.config", "me.chrommob.minestore.libs.me.chrommob.config"
     exclude "META-INF/*.SF"
 }
 
 
+tasks.register("copyJar", Copy) {
+    dependsOn(":bukkit:bukkit-impl:shadowJar")
+    dependsOn(":bungee:bungee-impl:shadowJar")
+    dependsOn(":velocity:velocity-impl:shadowJar")
+    dependsOn(":common:shadowJar")
+
+    doFirst {
+        delete("src/main/resources/jars/**.jar")
+    }
+    from(project(":bukkit:bukkit-impl").tasks.named("shadowJar")) {
+        rename { "MineStore-Bukkit.jarjar" }
+    }
+
+    from(project(":bungee:bungee-impl").tasks.named("shadowJar")) {
+        rename { "MineStore-Bungee.jarjar" }
+    }
+
+    from(project(":velocity:velocity-impl").tasks.named("shadowJar")) {
+        rename { "MineStore-Velocity.jarjar" }
+    }
+
+    from(project(":common").tasks.named("shadowJar")) {
+        rename { "MineStore-Common.jarjar" }
+    }
+
+    into("src/main/resources/jars")
+}
+
+tasks.processResources {
+    dependsOn(copyJar)
+}
+
+
 dependencies {
-    implementation project(path: ':common', configuration: 'shadow')
-    implementation project(path: ':MineStore-Bukkit', configuration: 'shadow')
-    implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
+    implementation "org.incendo:cloud-velocity:2.0.0-SNAPSHOT"
+    implementation "org.incendo:cloud-annotations:2.0.0-SNAPSHOT"
+    implementation "org.incendo:cloud-core:2.0.0-SNAPSHOT"
+    implementation project(path: ':MineStore-API', configuration: 'shadow')
+    implementation project(path: ':bungee:bungee-plugin', configuration: 'shadow')
+    implementation project(path: ':bukkit:bukkit-plugin', configuration: 'shadow')
+    implementation project(path: ':velocity:velocity-plugin', configuration: 'shadow')
    // implementation project(path: ':MineStore-Fabric', configuration: 'shadow')
 //    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }

@@ -2,12 +2,14 @@ package me.chrommob.minestore.common;
 
 import me.chrommob.config.ConfigManager;
 import me.chrommob.minestore.api.Registries;
-import me.chrommob.minestore.api.generic.AuthData;
-import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
 import me.chrommob.minestore.api.event.types.MineStoreReloadEvent;
+import me.chrommob.minestore.api.generic.AuthData;
+import me.chrommob.minestore.api.generic.MineStoreAddon;
+import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.api.ApiHandler;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.command.*;
@@ -15,15 +17,13 @@ import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.commandHolder.NewCommandDumper;
-import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.common.config.PluginConfig;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.payment.PaymentHandler;
-import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
-import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
+import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import me.chrommob.minestore.common.verification.VerificationManager;
@@ -432,7 +432,7 @@ public class MineStoreCommon {
     }
 
     public void log(String message) {
-        writeDebugLog(message);
+        writeDebugLog(message + "\n");
         Registries.LOGGER.get().log(message);
     }
 
@@ -478,7 +478,7 @@ public class MineStoreCommon {
         }
     }
 
-    public void debug(Class<?> c,Exception e) {
+    public void debug(Class<?> c,Throwable e) {
         if (e.getMessage() != null) {
             debug(c, e.getMessage());
         }

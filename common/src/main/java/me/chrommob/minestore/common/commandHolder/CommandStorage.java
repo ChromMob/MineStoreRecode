@@ -2,8 +2,8 @@ package me.chrommob.minestore.common.commandHolder;
 
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.event.types.MineStoreExecuteEvent;
-import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
+import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
 
@@ -119,12 +119,10 @@ public class CommandStorage {
             List<ParsedResponse> parsedResponses = entry.getValue();
             username = username.toLowerCase();
             boolean isOnline = Registries.COMMAND_EXECUTER.get().isOnline(username);
-            if (isOnline) {
+            plugin.debug(this.getClass(), "Player " + username + " is " + (isOnline ? "online" : "offline"));
+            if (isOnline || !newCommands) {
                 toCheck.addAll(parsedResponses);
                 toCheckIds.addAll(parsedResponses.stream().map(ParsedResponse::commandId).collect(Collectors.toSet()));
-                continue;
-            }
-            if (!newCommands) {
                 continue;
             }
             for (ParsedResponse parsedResponse : parsedResponses) {
@@ -138,6 +136,10 @@ public class CommandStorage {
             return;
         }
         if (toCheck.isEmpty()) {
+            plugin.debug(this.getClass(), "Did not find any commands to check");
+            for (ParsedResponse parsedResponse : parsedCommands) {
+                plugin.debug(this.getClass(), "Possible options: " + parsedResponse.command() + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username());
+            }
             return;
         }
         plugin.webListener().checkCommands(toCheckIds).thenAcceptAsync(checkResponses -> {
@@ -151,6 +153,8 @@ public class CommandStorage {
                 if (!checkResponse.status()) {
                     if (checkResponse.error() != null) {
                         errors.put(checkResponse.cmd_id(), checkResponse.error());
+                    } else {
+                        errors.put(checkResponse.cmd_id(), "Unknown error");
                     }
                     continue;
                 }

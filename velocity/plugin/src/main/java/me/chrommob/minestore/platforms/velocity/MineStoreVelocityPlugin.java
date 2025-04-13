@@ -1,0 +1,79 @@
+package me.chrommob.minestore.platforms.velocity;
+
+import com.google.inject.Inject;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ProxyServer;
+import me.chrommob.minestore.api.classloader.MineStoreBootstrapper;
+import me.chrommob.minestore.api.classloader.MineStoreClassLoader;
+import me.chrommob.minestore.api.classloader.MineStorePlugin;
+import me.chrommob.minestore.api.classloader.dependency.MineStoreDependencies;
+import me.chrommob.minestore.api.classloader.dependency.MineStorePluginDependency;
+import me.chrommob.minestore.api.classloader.repository.MineStorePluginRepository;
+import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
+import me.chrommob.minestore.api.stats.BuildConstats;
+
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.logging.Logger;
+
+@Plugin(id = "minestore", name = "MineStore", version = BuildConstats.VERSION, description = "MineStore plugin for Velocity", authors = {"chrommob"})
+public class MineStoreVelocityPlugin implements MineStoreBootstrapper {
+    private static final String MAIN_CLASS = "me.chrommob.minestore.platforms.velocity.MineStoreVelocity";
+
+    @Inject
+    private Logger logger;
+    @Inject
+    private ProxyServer server;
+    @Inject
+    @DataDirectory
+    private Path dataPath;
+
+    private MineStorePlugin plugin;
+
+    @Subscribe
+    private void onProxyInitialization(ProxyInitializeEvent event) {
+        try (MineStoreClassLoader classLoader = new MineStoreClassLoader(getClass().getClassLoader(), dataPath.resolve("dependencies").toFile())) {
+            classLoader.loadDependencies(getDependencies());
+            File file = new File(dataPath.resolve("dependencies").toFile(), "MineStore-Velocity.jar");
+            try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Velocity.jarjar")) {
+                Files.copy(Objects.requireNonNull(in), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            classLoader.addJarToClassLoader(file.toURI().toURL());
+            classLoader.loadCommonJar();
+            classLoader.loadClass("org.incendo.cloud.velocity.VelocityContextKeys");
+            Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
+            plugin = mainClass.getDeclaredConstructor(Object.class, ProxyServer.class, Logger.class, Path.class).newInstance(this, server, logger, dataPath);
+            plugin.onEnable();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Subscribe
+    public void onServerStop(ProxyShutdownEvent event) {
+        plugin.onDisable();
+    }
+
+    @Override
+    public MineStoreDependencies getDependencies() {
+        Set<MineStorePluginDependency> dependencies = new HashSet<>();
+        Set<MineStorePluginRepository> repositories = new HashSet<>();
+        repositories.add(RepositoryRegistry.SONATYPE.getRepository());
+        repositories.add(RepositoryRegistry.MAVEN.getRepository());
+/*
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-velocity", "2.0.0-beta.10"));
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-brigadier", "2.0.0-beta.10"));
+*/
+        return new MineStoreDependencies(repositories, dependencies);
+    }
+}
