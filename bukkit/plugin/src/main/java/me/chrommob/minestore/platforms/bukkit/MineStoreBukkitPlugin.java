@@ -10,6 +10,7 @@ import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -19,10 +20,12 @@ import java.util.Set;
 public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootstrapper {
     private static final String MAIN_CLASS = "me.chrommob.minestore.platforms.bukkit.MineStoreBukkit";
     private MineStorePlugin plugin;
+    private MineStoreClassLoader classLoader;
 
     @Override
     public void onEnable() {
-        try (MineStoreClassLoader classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile())) {
+        try {
+            classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile());
             classLoader.loadDependencies(getDependencies());
             File file = new File(getDataFolder().toPath().resolve("dependencies").toFile(), "MineStore-Bukkit.jar");
             try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Bukkit.jarjar")) {
@@ -45,6 +48,13 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
             return;
         }
         plugin.onDisable();
+        if (classLoader != null) {
+            try {
+                classLoader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public MineStoreDependencies getDependencies() {

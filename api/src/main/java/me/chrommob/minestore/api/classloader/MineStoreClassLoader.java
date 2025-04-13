@@ -81,7 +81,12 @@ public class MineStoreClassLoader extends URLClassLoader {
     private MineStoreDependencies getGlobalDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
         Set<MineStorePluginRepository> repositories = new HashSet<>();
+
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-core", "2.0.0"));
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-annotations", "2.0.0"));
+
         repositories.add(RepositoryRegistry.MAVEN.getRepository());
+        repositories.add(RepositoryRegistry.SONATYPE.getRepository());
         return new MineStoreDependencies(repositories, dependencies);
     }
 

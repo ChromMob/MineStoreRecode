@@ -216,9 +216,6 @@ tasks.processResources {
 
 
 dependencies {
-    implementation "org.incendo:cloud-velocity:2.0.0-SNAPSHOT"
-    implementation "org.incendo:cloud-annotations:2.0.0-SNAPSHOT"
-    implementation "org.incendo:cloud-core:2.0.0-SNAPSHOT"
     implementation project(path: ':MineStore-API', configuration: 'shadow')
     implementation project(path: ':bungee:bungee-plugin', configuration: 'shadow')
     implementation project(path: ':bukkit:bukkit-plugin', configuration: 'shadow')
