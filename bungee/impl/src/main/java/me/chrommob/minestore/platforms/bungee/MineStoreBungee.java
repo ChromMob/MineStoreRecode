@@ -1,9 +1,9 @@
 package me.chrommob.minestore.platforms.bungee;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.classloader.MineStorePlugin;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.api.classloader.MineStorePlugin;
 import me.chrommob.minestore.platforms.bungee.events.PlayerEventListenerBungee;
 import me.chrommob.minestore.platforms.bungee.logger.LoggerBungee;
 import me.chrommob.minestore.platforms.bungee.scheduler.BungeeScheduler;

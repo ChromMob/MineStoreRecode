@@ -19,6 +19,7 @@ include "common"
 include "bukkit:impl", "bukkit:plugin"
 include "velocity:impl", "velocity:plugin"
 include "bungee:impl", "bungee:plugin"
+include "fabric:impl", "fabric:plugin"
 include "api"
 include "addon"
 
@@ -39,6 +40,12 @@ project(":velocity:plugin").name = "velocity-plugin"
 
 project(":velocity:impl").projectDir = file("velocity/impl")
 project(":velocity:impl").name = "velocity-impl"
+
+project(":fabric:plugin").projectDir = file("fabric/plugin")
+project(":fabric:plugin").name = "fabric-plugin"
+
+project(":fabric:impl").projectDir = file("fabric/impl")
+project(":fabric:impl").name = "fabric-impl"
 
 //project(":sponge").name = "MineStore-Sponge"
 //project(":fabric").name = "MineStore-Fabric"

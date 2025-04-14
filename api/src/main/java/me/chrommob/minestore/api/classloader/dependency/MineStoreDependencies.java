@@ -24,8 +24,7 @@ public class MineStoreDependencies {
         return dependencies;
     }
 
-    public boolean downloadToFolder(File folder) {
-        Set<File> used = new HashSet<>();
+    public boolean downloadToFolder(File folder, Set<File> used) {
         for (MineStorePluginDependency dependency : dependencies) {
             File file = new File(folder, dependency.getName() + "-" + dependency.getVersion() + ".jar");
             boolean found = false;
@@ -57,20 +56,14 @@ public class MineStoreDependencies {
                 return false;
             }
         }
-        for (File file : Objects.requireNonNull(folder.listFiles())) {
-            if (used.contains(file)) {
-                continue;
-            }
-            file.delete();
-        }
         return true;
     }
 
-    public List<URI> getDependencyJars(File folder) {
+    public List<URI> getDependencyJars(File folder, Set<File> used) {
         if (!folder.exists()) {
             folder.mkdirs();
         }
-        boolean download = downloadToFolder(folder);
+        boolean download = downloadToFolder(folder, used);
         if (!download) {
             System.out.println("Could not download dependencies!");
             return Collections.emptyList();

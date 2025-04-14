@@ -1,16 +1,16 @@
 package me.chrommob.minestore.common.placeholder;
 
-import me.chrommob.minestore.api.WebApiAccessor;
-import me.chrommob.minestore.api.generic.MineStoreVersion;
-import me.chrommob.minestore.api.profile.ProfileManager;
-import net.kyori.adventure.text.Component;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import me.chrommob.minestore.api.WebApiAccessor;
+import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
+import me.chrommob.minestore.api.profile.ProfileManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.placeholder.json.*;
 import me.chrommob.minestore.common.verification.VerificationResult;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.NotNull;

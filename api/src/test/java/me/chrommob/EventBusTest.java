@@ -1,9 +1,8 @@
 package me.chrommob;
 
-import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
-import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.*;
+import me.chrommob.minestore.api.generic.MineStoreAddon;
 import org.junit.Assert;
 import org.junit.Test;
 

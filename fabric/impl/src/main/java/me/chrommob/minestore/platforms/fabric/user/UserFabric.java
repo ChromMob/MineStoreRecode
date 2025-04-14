@@ -1,12 +1,12 @@
 package me.chrommob.minestore.platforms.fabric.user;
 
-import java.util.UUID;
-
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.minecraft.server.network.ServerPlayerEntity;
+
+import java.util.UUID;
 
 public class UserFabric extends CommonUser {
     private final ServerPlayerEntity player;

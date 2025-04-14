@@ -1,9 +1,9 @@
 package me.chrommob.minestore.common.authHolder;
 
-import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.common.MineStoreCommon;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.OutputStream;

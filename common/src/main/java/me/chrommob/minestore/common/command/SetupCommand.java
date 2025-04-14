@@ -1,9 +1,9 @@
 package me.chrommob.minestore.common.command;
 
 import me.chrommob.config.ConfigKey;
-import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.PluginConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,7 +15,10 @@ import org.incendo.cloud.annotations.suggestion.Suggestions;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class SetupCommand {

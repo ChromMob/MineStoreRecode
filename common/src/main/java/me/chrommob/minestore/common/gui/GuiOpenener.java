@@ -1,16 +1,16 @@
 package me.chrommob.minestore.common.gui;
 
 import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
+import me.chrommob.minestore.api.interfaces.gui.CommonItem;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.gui.payment.ConfirmationInv;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedPackage;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedSubCategory;
-import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
-import me.chrommob.minestore.api.interfaces.gui.CommonItem;
-import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.common.gui.payment.ConfirmationInv;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 

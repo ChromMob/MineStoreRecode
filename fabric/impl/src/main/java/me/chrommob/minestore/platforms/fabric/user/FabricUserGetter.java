@@ -1,15 +1,14 @@
 package me.chrommob.minestore.platforms.fabric.user;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.api.interfaces.user.UserGetter;
-import me.chrommob.minestore.common.MineStoreCommon;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class FabricUserGetter implements UserGetter {
     private PlayerManager pManager;

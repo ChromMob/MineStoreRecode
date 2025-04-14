@@ -129,9 +129,7 @@ subprojects {
 
 
 
-/*
-def fabricProject = project(":MineStore-Fabric")
-*/
+def fabricProject = project(":fabric:fabric-plugin")
 def finalJar = tasks.register('finalJar', Jar) {
     dependsOn processResources
     group = 'build'
@@ -143,18 +141,28 @@ def finalJar = tasks.register('finalJar', Jar) {
 }
 
 finalJar.configure {
-/*
     dependsOn fabricProject.tasks.remapJar
-*/
+    dependsOn project(":fabric:fabric-impl").tasks.named("remapJar")
 }
 
-/*fabricProject.afterEvaluate {
+fabricProject.afterEvaluate {
     finalJar.configure {
         from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
             it.archiveFile
         })
     }
-}*/
+}
+
+project(":fabric:fabric-impl").afterEvaluate {
+    finalJar.configure {
+        copy {
+            from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
+                rename { "MineStore-Fabric.jarjar" }
+            }
+            into("src/main/resources/jars")
+        }
+    }
+}
 
 
 def addonApiProject = project(":MineStore-API")

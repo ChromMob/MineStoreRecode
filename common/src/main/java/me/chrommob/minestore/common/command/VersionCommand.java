@@ -1,7 +1,7 @@
 package me.chrommob.minestore.common.command;
 
-import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.common.MineStoreCommon;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 

@@ -1,11 +1,11 @@
 package me.chrommob.minestore;
 
 import me.chrommob.minestore.api.WebApiAccessor;
-import me.chrommob.minestore.api.giftcard.GiftCardManager;
 import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
+import me.chrommob.minestore.api.giftcard.GiftCardManager;
 
 public class AddonTest implements MineStoreAddon {
     public AddonTest() {

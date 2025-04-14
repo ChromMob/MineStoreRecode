@@ -10,6 +10,7 @@ import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -19,17 +20,22 @@ import java.util.Set;
 public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapper {
     private static final String MAIN_CLASS = "me.chrommob.minestore.platforms.bungee.MineStoreBungee";
     private MineStorePlugin plugin;
+    private MineStoreClassLoader classLoader;
     @Override
     public void onEnable() {
-        try (MineStoreClassLoader classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile())) {
-            classLoader.loadDependencies(getDependencies());
+        try {
+            classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile());
+
+            classLoader.add(getDependencies());
+            classLoader.loadDependencies();
+            classLoader.loadCommonJar();
+
             File file = new File(getDataFolder().toPath().resolve("dependencies").toFile(), "MineStore-Bungee.jar");
             try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Bungee.jarjar")) {
                 Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             classLoader.addJarToClassLoader(file.toURI().toURL());
-            classLoader.loadCommonJar();
-            classLoader.loadClass("org.incendo.cloud.bungee.BungeeContextKeys");
+
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(Plugin.class).newInstance(this);
             plugin.onEnable();
@@ -44,6 +50,13 @@ public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapp
             return;
         }
         plugin.onDisable();
+        if (classLoader != null) {
+            try {
+                classLoader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -52,6 +65,7 @@ public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapp
         Set<MineStorePluginRepository> repositories = new HashSet<>();
         repositories.add(RepositoryRegistry.MAVEN.getRepository());
         repositories.add(RepositoryRegistry.SONATYPE.getRepository());
+        dependencies.add(new MineStorePluginDependency("io.leangen.geantyref", "geantyref", "1.3.15"));
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-bungee", "2.0.0-beta.10"));
 
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bungeecord", "4.3.4"));

@@ -1,8 +1,8 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
+import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.gui.data.json.old.Package;
-import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 

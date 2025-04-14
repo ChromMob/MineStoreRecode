@@ -2,7 +2,6 @@ package me.chrommob.minestore.api.profile;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;

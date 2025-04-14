@@ -17,6 +17,7 @@ import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
 import me.chrommob.minestore.api.stats.BuildConstats;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,18 +40,23 @@ public class MineStoreVelocityPlugin implements MineStoreBootstrapper {
     private Path dataPath;
 
     private MineStorePlugin plugin;
+    private MineStoreClassLoader classLoader;
 
     @Subscribe
     private void onProxyInitialization(ProxyInitializeEvent event) {
-        try (MineStoreClassLoader classLoader = new MineStoreClassLoader(getClass().getClassLoader(), dataPath.resolve("dependencies").toFile())) {
-            classLoader.loadDependencies(getDependencies());
+        try {
+            classLoader = new MineStoreClassLoader(getClass().getClassLoader(), dataPath.resolve("dependencies").toFile());
+
+            classLoader.add(getDependencies());
+            classLoader.loadDependencies();
+            classLoader.loadCommonJar();
+
             File file = new File(dataPath.resolve("dependencies").toFile(), "MineStore-Velocity.jar");
             try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Velocity.jarjar")) {
                 Files.copy(Objects.requireNonNull(in), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             classLoader.addJarToClassLoader(file.toURI().toURL());
-            classLoader.loadCommonJar();
-            classLoader.loadClass("org.incendo.cloud.velocity.VelocityContextKeys");
+
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(Object.class, ProxyServer.class, Logger.class, Path.class).newInstance(this, server, logger, dataPath);
             plugin.onEnable();
@@ -62,6 +68,13 @@ public class MineStoreVelocityPlugin implements MineStoreBootstrapper {
     @Subscribe
     public void onServerStop(ProxyShutdownEvent event) {
         plugin.onDisable();
+        if (classLoader != null) {
+            try {
+                classLoader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -70,10 +83,8 @@ public class MineStoreVelocityPlugin implements MineStoreBootstrapper {
         Set<MineStorePluginRepository> repositories = new HashSet<>();
         repositories.add(RepositoryRegistry.SONATYPE.getRepository());
         repositories.add(RepositoryRegistry.MAVEN.getRepository());
-/*
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-velocity", "2.0.0-beta.10"));
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-brigadier", "2.0.0-beta.10"));
-*/
         return new MineStoreDependencies(repositories, dependencies);
     }
 }

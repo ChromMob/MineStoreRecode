@@ -26,14 +26,16 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
     public void onEnable() {
         try {
             classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile());
-            classLoader.loadDependencies(getDependencies());
+
+            classLoader.add(getDependencies());
+            classLoader.loadDependencies();
+            classLoader.loadCommonJar();
+
             File file = new File(getDataFolder().toPath().resolve("dependencies").toFile(), "MineStore-Bukkit.jar");
             try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Bukkit.jarjar")) {
                 Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
-            classLoader.loadCommonJar();
             classLoader.addJarToClassLoader(file.toURI().toURL());
-            classLoader.loadClass("org.incendo.cloud.bukkit.BukkitCommandContextKeys");
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(JavaPlugin.class).newInstance(this);
             plugin.onEnable();
@@ -63,6 +65,10 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bukkit", "4.3.4"));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4"));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4"));
+        //net.kyori:adventure-text-serializer-gson-legacy-impl:4.13.1
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson-legacy-impl", "4.13.1"));
+        //pkg:maven/net.kyori/adventure-nbt@4.13.1
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-nbt", "4.13.1"));
 
         MineStorePluginDependency cloudPaper = MineStorePluginDependency.fromGradle("org.incendo:cloud-paper:2.0.0-beta.10");
         MineStorePluginDependency cloudBukkit = MineStorePluginDependency.fromGradle("org.incendo:cloud-bukkit:2.0.0-beta.10");

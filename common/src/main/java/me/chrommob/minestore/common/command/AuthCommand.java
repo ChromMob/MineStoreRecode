@@ -1,10 +1,10 @@
 package me.chrommob.minestore.common.command;
 
-import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.authHolder.AuthUser;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.authHolder.AuthUser;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 
