@@ -1,6 +1,10 @@
-package me.chrommob.minestore.api.profile;
+package me.chrommob.minestore.api.web.profile;
 
 import com.google.gson.annotations.SerializedName;
+import me.chrommob.minestore.api.web.Result;
+import me.chrommob.minestore.api.web.WebApiRequest;
+import me.chrommob.minestore.api.web.Wrapper;
+import me.chrommob.minestore.api.web.giftcard.FeatureManager;
 
 import java.util.Map;
 import java.util.Set;
@@ -9,10 +13,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public class ProfileManager {
+public class ProfileManager extends FeatureManager {
+    public ProfileManager(Wrapper<Function<WebApiRequest<?>, Result<?, ? extends Exception>>> requestHandler) {
+        super(requestHandler);
+    }
+
     private final Map<String, Profile> profiles = new ConcurrentHashMap<>();
     private final Set<String> fetching = ConcurrentHashMap.newKeySet();
-    private Function<String, Profile> function;
 
     public Profile getCachedProfile(String username) {
         if (profiles.containsKey(username)) {
@@ -31,18 +38,15 @@ public class ProfileManager {
         }
         fetching.add(username);
         CompletableFuture.runAsync(() -> {
-            Profile profile = function.apply(username);
-            if (profile == null) {
+            Result<Profile, Exception> result = request(new WebApiRequest<>("profile/" + username, WebApiRequest.Type.GET, Profile.class));
+            if (result.value() == null) {
                 return;
             }
+            Profile profile = result.value();
             profile.fetched();
             profiles.put(username, profile);
             fetching.remove(username);
         });
-    }
-
-    public void registerFunction(Function<String, Profile> function) {
-        this.function = function;
     }
 
     public static class Profile {

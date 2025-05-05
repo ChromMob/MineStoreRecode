@@ -94,10 +94,10 @@ public class DatabaseManager {
         hikari.setUsername(username);
         switch (type) {
             case MARIADB:
-                driverClass = "me.chrommob.minestore.libs.org.mariadb.jdbc.Driver";
+                driverClass = "org.mariadb.jdbc.Driver";
                 break;
             case MYSQL:
-                driverClass = "me.chrommob.minestore.libs.com.mysql.cj.jdbc.Driver";
+                driverClass = "com.mysql.cj.jdbc.Driver";
                 break;
         }
         hikari.setDriverClassName(driverClass);

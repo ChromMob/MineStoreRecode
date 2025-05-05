@@ -12,11 +12,11 @@ import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.api.ApiHandler;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
-import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.commandGetters.WebListener;
 import me.chrommob.minestore.common.commandHolder.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.commandHolder.NewCommandDumper;
+import me.chrommob.minestore.common.commands.*;
 import me.chrommob.minestore.common.config.PluginConfig;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
@@ -168,8 +168,8 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         webListener.start();
-        new MineStoreEnableEvent().call();
         new ApiHandler(new AuthData(pluginConfig.getKey("store-url").getAsString(), pluginConfig.getKey("api").getKey("key").getAsString()));
+        new MineStoreEnableEvent().call();
     }
 
     private void registerAddons() {
@@ -229,8 +229,8 @@ public class MineStoreCommon {
         }
     }
 
-    public String getAddons() {
-        return addons.stream().map(MineStoreAddon::getName).collect(Collectors.joining(", "));
+    public List<MineStoreAddon> getAddons() {
+        return new ArrayList<>(addons);
     }
 
     public void notError() {

@@ -1,4 +1,4 @@
-package me.chrommob.minestore.common.command;
+package me.chrommob.minestore.common.commands;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;

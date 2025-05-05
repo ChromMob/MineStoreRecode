@@ -1,4 +1,4 @@
-package me.chrommob.minestore.common.command;
+package me.chrommob.minestore.common.commands;
 
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;

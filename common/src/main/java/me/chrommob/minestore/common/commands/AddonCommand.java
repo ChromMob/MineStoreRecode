@@ -1,5 +1,7 @@
-package me.chrommob.minestore.common.command;
+package me.chrommob.minestore.common.commands;
 
+import me.chrommob.minestore.api.event.MineStoreEventBus;
+import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
@@ -16,6 +18,9 @@ public class AddonCommand {
     @Permission("minestore.addons")
     public void onAddons(AbstractUser abstractUser) {
         CommonUser user = abstractUser.user();
-        user.sendMessage("Loaded addons: " + plugin.getAddons());
+        for (MineStoreAddon addon : plugin.getAddons()) {
+            user.sendMessage(addon.getName());
+            MineStoreEventBus.getRegisteredEvents(addon).forEach(event -> user.sendMessage(" - " + event));
+        }
     }
 }

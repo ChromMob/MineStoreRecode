@@ -3,8 +3,12 @@ package me.chrommob;
 import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.*;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
+import me.chrommob.minestore.api.web.WebApiAccessor;
+import me.chrommob.minestore.api.web.giftcard.GiftCardManager;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.time.LocalDateTime;
 
 public class EventBusTest {
     private boolean disabled = false;
@@ -14,12 +18,7 @@ public class EventBusTest {
     private boolean reload = false;
     private boolean customEvent = false;
 
-    private final MineStoreAddon addon = new MineStoreAddon() {
-        @Override
-        public String getName() {
-            return "test";
-        }
-    };
+    private final MineStoreAddon addon = () -> "test";
 
     @Test
     public void testDisable() {
@@ -87,5 +86,12 @@ public class EventBusTest {
         });
         new CustomEventExample("test").call();
         Assert.assertTrue(customEvent);
+    }
+
+    @Test
+    public void testAPI() {
+        GiftCardManager.CreateGiftCardResponse response = WebApiAccessor.giftCardManager().createGiftCard("test", "test", 100, LocalDateTime.now().plusDays(1), "");
+        System.out.println(response.isSuccess());
+        System.out.println(response.message());
     }
 }

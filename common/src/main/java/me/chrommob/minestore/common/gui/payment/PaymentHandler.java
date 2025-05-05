@@ -2,7 +2,7 @@ package me.chrommob.minestore.common.gui.payment;
 
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.command.ChargeBalanceCommand;
+import me.chrommob.minestore.common.commands.ChargeBalanceCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
