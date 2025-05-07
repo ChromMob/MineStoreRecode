@@ -8,9 +8,16 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BukkitInventoryEvent implements Listener {
@@ -20,9 +27,34 @@ public class BukkitInventoryEvent implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
+    static final MethodHandle getView;
+    static final MethodHandle getTitle;
+    static {
+        MethodHandle getView1 = null;
+        MethodHandle getTitle1 = null;
+        try {
+            getView1 = MethodHandles.lookup().findVirtual(InventoryClickEvent.class, "getView", MethodType.methodType(InventoryView.class));
+            getTitle1 = MethodHandles.lookup().findVirtual(InventoryView.class, "getTitle", MethodType.methodType(String.class));
+        } catch (NoSuchMethodException | IllegalAccessException ignored) {
+        }
+        getView = getView1;
+        getTitle = getTitle1;
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        String eventTitle = event.getView().getTitle();
+        if (getView == null || getTitle == null) {
+            event.setCancelled(true);
+            return;
+        }
+        String eventTitle;
+        try {
+            Object view = getView.invoke(event);
+            eventTitle = getTitle.invoke(view).toString();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return;
+        }
         if (eventTitle == null) return;
         if (event.getCurrentItem() == null) return;
         boolean isMineStoreGui = false;
