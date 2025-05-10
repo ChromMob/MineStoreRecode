@@ -11,6 +11,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -18,6 +19,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -96,6 +99,16 @@ public class UserBukkit extends CommonUser {
         return player != null && player.isOnline();
     }
 
+    private Enchantment getDurabilityEnchantment() {
+        Enchantment enchantment = null;
+        if (Enchantment.getByName("DURABILITY") != null) {
+            enchantment = Enchantment.getByName("DURABILITY");
+        } else {
+            enchantment = Enchantment.getByName("UNBREAKING");
+        }
+        return enchantment;
+    }
+
     @Override
     public UUID getUUID() {
         return uuid;
@@ -142,7 +155,7 @@ public class UserBukkit extends CommonUser {
             meta.setLore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             if (item.isFeatured()) {
-                meta.addEnchant(org.bukkit.enchantments.Enchantment.DURABILITY, 1, true);
+                meta.addEnchant(getDurabilityEnchantment(), 1, true);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             bukkitItem.setItemMeta(meta);
