@@ -1,8 +1,4 @@
-package me.chrommob.minestore.api.web.giftcard;
-
-import me.chrommob.minestore.api.web.Result;
-import me.chrommob.minestore.api.web.WebApiRequest;
-import me.chrommob.minestore.api.web.Wrapper;
+package me.chrommob.minestore.api.web;
 
 import java.util.function.Function;
 

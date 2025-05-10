@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import me.chrommob.minestore.api.web.Result;
 import me.chrommob.minestore.api.web.WebApiRequest;
 import me.chrommob.minestore.api.web.Wrapper;
-import me.chrommob.minestore.api.web.giftcard.FeatureManager;
+import me.chrommob.minestore.api.web.FeatureManager;
 
 import java.util.Map;
 import java.util.Set;

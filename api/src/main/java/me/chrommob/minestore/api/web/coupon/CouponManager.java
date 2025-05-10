@@ -1,13 +1,11 @@
 package me.chrommob.minestore.api.web.coupon;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import me.chrommob.minestore.api.generic.ParamBuilder;
 import me.chrommob.minestore.api.web.Result;
 import me.chrommob.minestore.api.web.WebApiRequest;
 import me.chrommob.minestore.api.web.Wrapper;
-import me.chrommob.minestore.api.web.giftcard.FeatureManager;
+import me.chrommob.minestore.api.web.FeatureManager;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
