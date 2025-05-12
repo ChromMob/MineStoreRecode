@@ -220,6 +220,7 @@ public class MineStoreCommon {
                 try {
                     MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
                     addons.add(addon);
+
                     File loadedAddonFolder = new File(addonFolder, addon.getName());
                     loadedAddonFolder.mkdirs();
                     ConfigManager configManager = new ConfigManager(loadedAddonFolder);
