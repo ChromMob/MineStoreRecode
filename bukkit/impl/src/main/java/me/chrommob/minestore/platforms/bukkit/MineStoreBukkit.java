@@ -64,7 +64,7 @@ public final class MineStoreBukkit implements MineStorePlugin {
         final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
                 ? new AbstractUser((String) null, commandSender)
                 : new AbstractUser(((HumanEntity) commandSender).getUniqueId(), commandSender);
-        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.nativeCommandSender();
+        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.platformObject();
 
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
             @Override

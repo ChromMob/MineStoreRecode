@@ -48,7 +48,7 @@ public class MineStoreBungee implements MineStorePlugin {
         Registries.PLAYER_JOIN_LISTENER.set(new PlayerEventListenerBungee(plugin, common));
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> new AbstractUser(commandSender instanceof ProxiedPlayer ? ((ProxiedPlayer) commandSender).getUniqueId() : null, commandSender);
-        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.nativeCommandSender();
+        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.platformObject();
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
             @Override
             public @NonNull AbstractUser map(@NonNull CommandSender base) {

@@ -7,26 +7,26 @@ import java.util.UUID;
 
 public class AbstractUser {
     private final CommonUser user;
-    private final Object nativeCommandSender;
+    private final Object platformObject;
 
-    public AbstractUser(UUID uniqueId, Object nativeCommandSender) {
-        this.nativeCommandSender = nativeCommandSender;
+    public AbstractUser(UUID uniqueId, Object platformObject) {
+        this.platformObject = platformObject;
         if (uniqueId == null) {
             user = new CommonConsoleUser();
         } else
             user = Registries.USER_GETTER.get().get(uniqueId);
     }
 
-    public AbstractUser(String username, Object nativeCommandSender) {
-        this.nativeCommandSender = nativeCommandSender;
+    public AbstractUser(String username, Object platformObject) {
+        this.platformObject = platformObject;
         if (username == null) {
             user = new CommonConsoleUser();
         } else
             user = Registries.USER_GETTER.get().get(username);
     }
 
-    public Object nativeCommandSender() {
-        return nativeCommandSender;
+    public Object platformObject() {
+        return platformObject;
     }
 
     public CommonUser user() {
