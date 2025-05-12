@@ -9,6 +9,7 @@ import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class CommandStorage {
@@ -27,7 +28,7 @@ public class CommandStorage {
 
     private void removeNewCommand(StoredCommand storedCommand, String username) {
         plugin.debug(this.getClass(), "Removing " + storedCommand.command() + " for " + username + " from new command storage");
-        newCommands.remove(username);
+        newCommands.get(username).remove(storedCommand);
         plugin.newCommandDumper().update(newCommands);
     }
 
@@ -63,7 +64,7 @@ public class CommandStorage {
             return;
         }
         plugin.debug(this.getClass(), "Executing new commands for " + username);
-        handleOnlineCommands(parsedResponses, false);
+        executeWithOnlineCheck(parsedResponses, false);
     }
 
     private List<ParsedResponse> playerJoinNew(String username) {
@@ -72,11 +73,7 @@ public class CommandStorage {
             return parsedResponses;
         }
         for (StoredCommand storedCommand : newCommands.get(username)) {
-            if (!shouldExecute(storedCommand.toParsedResponse(username))) {
-                continue;
-            }
             parsedResponses.add(storedCommand.toParsedResponse(username));
-            removeNewCommand(storedCommand, username);
         }
         return parsedResponses;
     }
@@ -87,11 +84,7 @@ public class CommandStorage {
             return parsedResponses;
         }
         for (String storedCommand : commands.get(username)) {
-            if (!shouldExecute(new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, storedCommand, username, 0))) {
-                continue;
-            }
             parsedResponses.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, storedCommand, username, 0));
-            remove(username, storedCommand);
         }
         return parsedResponses;
     }
@@ -103,104 +96,108 @@ public class CommandStorage {
                 onlineCommands.add(command);
                 continue;
             }
-            handleOfflineCommand(command);
+            execute(command);
         }
-        handleOnlineCommands(onlineCommands, true);
+        handleOnlineCommands(onlineCommands);
     }
 
-    private void handleOnlineCommands(List<ParsedResponse> parsedCommands, boolean newCommands) {
-        if (!MineStoreCommon.version().requires(3, 0, 0)) {
-            for (ParsedResponse parsedResponse : parsedCommands) {
-                if (Registries.COMMAND_EXECUTER.get().isOnline(parsedResponse.username()) && shouldExecute(parsedResponse)) {
-                    handleOfflineCommand(parsedResponse);
-                    continue;
-                }
-                if (!newCommands) {
-                    continue;
-                }
-                add(parsedResponse.username(), parsedResponse.command());
-            }
-            return;
-        }
-        Map<String, List<ParsedResponse>> commands = new HashMap<>();
-        for (ParsedResponse parsedCommand : parsedCommands) {
-            String username = parsedCommand.username();
-            username = username.toLowerCase();
-            if (!commands.containsKey(username)) {
-                commands.put(username, new ArrayList<>(Collections.singletonList(parsedCommand)));
-            } else {
-                commands.get(username).add(parsedCommand);
-            }
-        }
-        List<ParsedResponse> toCheck = new ArrayList<>();
-        Set<Integer> toCheckIds = new HashSet<>();
-        for (Map.Entry<String, List<ParsedResponse>> entry : commands.entrySet()) {
-            String username = entry.getKey();
-            List<ParsedResponse> parsedResponses = entry.getValue();
-            username = username.toLowerCase();
-            boolean isOnline = Registries.COMMAND_EXECUTER.get().isOnline(username);
-            plugin.debug(this.getClass(), "Player " + username + " is " + (isOnline ? "online" : "offline"));
-            if (isOnline || !newCommands) {
-                if (!newCommands) {
-                    toCheck.addAll(parsedResponses);
-                    toCheckIds.addAll(parsedResponses.stream().map(ParsedResponse::commandId).collect(Collectors.toSet()));
-                } else {
-                    for (ParsedResponse parsedResponse : parsedResponses) {
-                        if (!shouldExecute(parsedResponse)) {
-                            addNewCommand(username, parsedResponse.command(), parsedResponse.commandId());
-                            continue;
-                        }
-                        toCheck.add(parsedResponse);
-                        toCheckIds.add(parsedResponse.commandId());
-                    }
-                }
+    /**
+     * Filters the given list of commands, if they are offline, they will be added to the new command storage.
+     * If they are online, they will be passed to {@link #executeWithOnlineCheck(List, boolean)} for further processing.
+     *
+     * @param parsedCommands The commands to filter.
+     */
+    private void handleOnlineCommands(List<ParsedResponse> parsedCommands) {
+        List<ParsedResponse> online = new ArrayList<>();
+        for (ParsedResponse parsedResponse : parsedCommands) {
+            if (Registries.COMMAND_EXECUTER.get().isOnline(parsedResponse.username())) {
+                online.add(parsedResponse);
                 continue;
             }
-            for (ParsedResponse parsedResponse : parsedResponses) {
-                addNewCommand(username, parsedResponse.command(), parsedResponse.commandId());
-            }
-        }
-        if (!MineStoreCommon.version().requires(3, 2, 5)) {
-            for (ParsedResponse parsedResponse : toCheck) {
-                if (handleOfflineCommand(parsedResponse)) {
-                    continue;
-                }
+            if (MineStoreCommon.version().requires(3, 0, 0)) {
                 addNewCommand(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId());
+            } else {
+                add(parsedResponse.username(), parsedResponse.command());
             }
+        }
+        executeWithOnlineCheck(online, true);
+    }
+
+    private void executeWithOnlineCheck(List<ParsedResponse> parsedCommands, boolean newCommands) {
+        if (parsedCommands.isEmpty()) {
             return;
         }
-        if (toCheck.isEmpty()) {
-            plugin.debug(this.getClass(), "Did not find any commands to check");
+        if (MineStoreCommon.version().requires(3, 2, 5)) {
+            Set<Integer> toCheckIds = new HashSet<>();
             for (ParsedResponse parsedResponse : parsedCommands) {
-                plugin.debug(this.getClass(), "Possible options: " + parsedResponse.command() + " with id: " + parsedResponse.commandId() + " for player: " + parsedResponse.username());
+                toCheckIds.add(parsedResponse.commandId());
             }
-            return;
+            plugin.webListener().checkCommands(toCheckIds).thenAcceptAsync(checkResponses -> {
+                List<ParsedResponse> successful = new ArrayList<>();
+                if (!checkResponses.status()) {
+                    plugin.log("Failed to check commands: " + checkResponses.error());
+                    return;
+                }
+                Set<Integer> successIds = new HashSet<>();
+                Map<Integer, String> errors = new HashMap<>();
+                for (CheckResponse.CheckResponses checkResponse : checkResponses.results()) {
+                    if (!checkResponse.status()) {
+                        if (checkResponse.error() != null) {
+                            errors.put(checkResponse.cmd_id(), checkResponse.error());
+                        } else {
+                            errors.put(checkResponse.cmd_id(), "Unknown error");
+                        }
+                        continue;
+                    }
+                    successIds.add(checkResponse.cmd_id());
+                }
+                for (ParsedResponse parsedResponse : parsedCommands) {
+                    if (!successIds.contains(parsedResponse.commandId()) && errors.containsKey(parsedResponse.commandId())) {
+                        removeNewCommand(StoredCommand.fromParsedResponse(parsedResponse), parsedResponse.username());
+                        plugin.debug(this.getClass(), "Command " + parsedResponse.command() + " with id " + parsedResponse.commandId() + " failed to execute. Error: " + errors.get(parsedResponse.commandId()));
+                        continue;
+                    }
+                    successful.add(parsedResponse);
+                }
+                executeWithApiCheck(successful, newCommands);
+            });
+        } else {
+            executeWithApiCheck(parsedCommands, newCommands);
         }
-        plugin.webListener().checkCommands(toCheckIds).thenAcceptAsync(checkResponses -> {
-            if (!checkResponses.status()) {
-                plugin.log("Failed to check commands: " + checkResponses.error());
-                return;
-            }
-            Set<Integer> successIds = new HashSet<>();
-            Map<Integer, String> errors = new HashMap<>();
-            for (CheckResponse.CheckResponses checkResponse : checkResponses.results()) {
-                if (!checkResponse.status()) {
-                    if (checkResponse.error() != null) {
-                        errors.put(checkResponse.cmd_id(), checkResponse.error());
+    }
+
+    private void executeWithApiCheck(List<ParsedResponse> parsedCommands, boolean newCommands) {
+        CompletableFuture.runAsync(() -> {
+            for (ParsedResponse parsedResponse : parsedCommands) {
+                if (!shouldExecute(parsedResponse)) {
+                    if (!newCommands) {
+                        continue;
+                    }
+                    if (MineStoreCommon.version().requires(3, 0, 0)) {
+                        addNewCommand(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId());
                     } else {
-                        errors.put(checkResponse.cmd_id(), "Unknown error");
+                        add(parsedResponse.username(), parsedResponse.command());
                     }
                     continue;
                 }
-                successIds.add(checkResponse.cmd_id());
-            }
-            for (ParsedResponse parsedResponse : toCheck) {
-                if (!successIds.contains(parsedResponse.commandId()) && errors.containsKey(parsedResponse.commandId())) {
-                    plugin.debug(this.getClass(), "Command " + parsedResponse.command() + " with id " + parsedResponse.commandId() + " failed to execute. Error: " + errors.get(parsedResponse.commandId()));
+                execute(parsedResponse);
+                try {
+                    //Give the server some time to process the command
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    break;
+                }
+                if (MineStoreCommon.version().requires(3, 0, 0)) {
+                    plugin.webListener().postExecuted(String.valueOf(parsedResponse.commandId()));
+                }
+                if (newCommands) {
                     continue;
                 }
-                plugin.webListener().postExecuted(String.valueOf(parsedResponse.commandId()));
-                handleOfflineCommand(parsedResponse);
+                if (MineStoreCommon.version().requires(3, 0, 0)) {
+                    removeNewCommand(StoredCommand.fromParsedResponse(parsedResponse), parsedResponse.username());
+                } else {
+                    remove(parsedResponse.username(), parsedResponse.command());
+                }
             }
         });
     }
@@ -211,7 +208,7 @@ public class CommandStorage {
         return !intent.isCancelled();
     }
 
-    private boolean handleOfflineCommand(ParsedResponse parsedResponse) {
+    private void execute(ParsedResponse parsedResponse) {
         String command = parsedResponse.command();
         String username = parsedResponse.username();
         int requestId = parsedResponse.commandId();
@@ -221,7 +218,6 @@ public class CommandStorage {
         MineStoreExecuteEvent event = new MineStoreExecuteEvent(username, command, requestId);
         event.call();
         Registries.COMMAND_EXECUTER.get().execute(event);
-        return true;
     }
 
     public void init() {

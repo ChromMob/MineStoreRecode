@@ -1,4 +1,4 @@
-package me.chrommob.minestore.common.commandHolder;
+package me.chrommob.minestore.common.commandHolder.storage;
 
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;

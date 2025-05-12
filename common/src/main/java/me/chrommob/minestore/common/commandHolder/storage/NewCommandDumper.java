@@ -1,4 +1,4 @@
-package me.chrommob.minestore.common.commandHolder;
+package me.chrommob.minestore.common.commandHolder.storage;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
