@@ -5,6 +5,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.classloader.MineStorePlugin;
+import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.velocity.events.VelocityPlayerEvent;
@@ -44,7 +45,9 @@ public class MineStoreVelocity implements MineStorePlugin {
         Registries.SCHEDULER.set(new VelocityScheduler(this));
         Registries.USER_GETTER.set(new VelocityUserGetter(server));
 
-        final Function<CommandSource, AbstractUser> cToA = commandSource -> Registries.USER_GETTER.get().get(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null);
+        final Function<CommandSource, AbstractUser> cToA = commandSource -> commandSource instanceof Player
+                ? Registries.USER_GETTER.get().get(((Player) commandSource).getUniqueId())
+                : new AbstractUser(new CommonConsoleUser(), commandSource);
         final Function<AbstractUser, CommandSource> aToC = abstractUser -> (CommandSource) abstractUser.platformObject();
         final SenderMapper<CommandSource, AbstractUser> senderMapper = new SenderMapper<CommandSource, AbstractUser>() {
             @Override

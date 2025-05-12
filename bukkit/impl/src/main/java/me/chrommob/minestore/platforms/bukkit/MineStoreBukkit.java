@@ -2,6 +2,7 @@ package me.chrommob.minestore.platforms.bukkit;
 
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.classloader.MineStorePlugin;
+import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.bukkit.db.VaultEconomyProvider;
@@ -62,7 +63,7 @@ public final class MineStoreBukkit implements MineStorePlugin {
         new BukkitInventoryEvent(plugin, common);
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
-                ? Registries.USER_GETTER.get().get("")
+                ? new AbstractUser(new CommonConsoleUser(), commandSender)
                 : Registries.USER_GETTER.get().get(((HumanEntity) commandSender).getUniqueId());
         final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.platformObject();
 
