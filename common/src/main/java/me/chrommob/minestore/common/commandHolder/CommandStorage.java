@@ -53,34 +53,47 @@ public class CommandStorage {
 
     public void onPlayerJoin(String username) {
         username = username.toLowerCase();
+        List<ParsedResponse> parsedResponses;
         if (MineStoreCommon.version().requires("3.0.0")) {
-            List<ParsedResponse> parsedResponses = new ArrayList<>();
-            if (!newCommands.containsKey(username)) {
-                return;
-            }
-            plugin.debug(this.getClass(), "Executing new commands for " + username);
-            for (StoredCommand storedCommand : newCommands.get(username)) {
-                if (!shouldExecute(storedCommand.toParsedResponse(username))) {
-                    continue;
-                }
-                parsedResponses.add(storedCommand.toParsedResponse(username));
-                removeNewCommand(storedCommand, username);
-            }
-            handleOnlineCommands(parsedResponses, false);
+            parsedResponses = playerJoinNew(username);
+        } else {
+            parsedResponses = playerJoinOld(username);
+        }
+        if (parsedResponses.isEmpty()) {
             return;
         }
-        if (commands.containsKey(username)) {
-            plugin.debug(this.getClass(), "Executing commands for " + username);
-            List<ParsedResponse> parsedResponses = new ArrayList<>();
-            for (String storedCommand : commands.get(username)) {
-                if (!shouldExecute(new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, storedCommand, username, 0))) {
-                    continue;
-                }
-                parsedResponses.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, storedCommand, username, 0));
-                remove(username, storedCommand);
-            }
-            handleOnlineCommands(parsedResponses, false);
+        plugin.debug(this.getClass(), "Executing new commands for " + username);
+        handleOnlineCommands(parsedResponses, false);
+    }
+
+    private List<ParsedResponse> playerJoinNew(String username) {
+        List<ParsedResponse> parsedResponses = new ArrayList<>();
+        if (!newCommands.containsKey(username)) {
+            return parsedResponses;
         }
+        for (StoredCommand storedCommand : newCommands.get(username)) {
+            if (!shouldExecute(storedCommand.toParsedResponse(username))) {
+                continue;
+            }
+            parsedResponses.add(storedCommand.toParsedResponse(username));
+            removeNewCommand(storedCommand, username);
+        }
+        return parsedResponses;
+    }
+
+    private List<ParsedResponse> playerJoinOld(String username) {
+        List<ParsedResponse> parsedResponses = new ArrayList<>();
+        if (!commands.containsKey(username)) {
+            return parsedResponses;
+        }
+        for (String storedCommand : commands.get(username)) {
+            if (!shouldExecute(new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, storedCommand, username, 0))) {
+                continue;
+            }
+            parsedResponses.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, storedCommand, username, 0));
+            remove(username, storedCommand);
+        }
+        return parsedResponses;
     }
 
     public void listener(List<ParsedResponse> commands) {
