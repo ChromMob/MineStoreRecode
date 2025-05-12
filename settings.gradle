@@ -47,6 +47,8 @@ project(":fabric:plugin").name = "fabric-plugin"
 project(":fabric:impl").projectDir = file("fabric/impl")
 project(":fabric:impl").name = "fabric-impl"
 
+project(":addon").name = "ConditionalExecuteAddon"
+
 //project(":sponge").name = "MineStore-Sponge"
 //project(":fabric").name = "MineStore-Fabric"
 project(':api').name = 'MineStore-API'
