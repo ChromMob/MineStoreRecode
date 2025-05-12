@@ -1,6 +1,7 @@
 package me.chrommob.minestore.common;
 
 import me.chrommob.config.ConfigManager;
+import me.chrommob.config.ConfigWrapper;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
@@ -171,6 +172,7 @@ public class MineStoreCommon {
         new MineStoreEnableEvent().call();
     }
 
+    private Map<MineStoreAddon, ConfigManager> addonConfigs = new HashMap<>();
     private void registerAddons() {
         File addonFolder = new File(Registries.CONFIG_FILE.get().getParentFile(), "addons");
         if (!addonFolder.exists()) {
@@ -218,6 +220,13 @@ public class MineStoreCommon {
                 try {
                     MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
                     addons.add(addon);
+                    File loadedAddonFolder = new File(addonFolder, addon.getName());
+                    loadedAddonFolder.mkdirs();
+                    ConfigManager configManager = new ConfigManager(loadedAddonFolder);
+                    configManager.addConfig(new ConfigWrapper("config", addon.getConfigKeys()));
+                    configManager.reloadConfig("config");
+                    addon.setConfigWrapper(configManager.getConfigWrapper("config"));
+                    addonConfigs.put((MineStoreAddon) cls.getConstructor().newInstance(), configManager);
                     log("Loaded addon " + addon.getName() + " from " + file.getName());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -331,6 +340,9 @@ public class MineStoreCommon {
     }
 
     public void reload() {
+        for (MineStoreAddon addon : addons) {
+            addonConfigs.get(addon).reloadConfig("config");
+        }
         new MineStoreReloadEvent().call();
         log("Reloading...");
         pluginConfig.reload();

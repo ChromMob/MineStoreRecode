@@ -1,19 +1,23 @@
 package me.chrommob.minestore;
 
+import me.chrommob.config.ConfigKey;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.MineStoreExecuteIntentEvent;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("unused")
-public class ConditionalExecuteAddon implements MineStoreAddon {
+public class ConditionalExecuteAddon extends MineStoreAddon {
     public ConditionalExecuteAddon() {
         MineStoreEventBus.registerListener(this, MineStoreExecuteIntentEvent.class, event -> {
             if (!event.command().startsWith("give") && !event.command().startsWith("/give")) {
@@ -40,7 +44,7 @@ public class ConditionalExecuteAddon implements MineStoreAddon {
             if (freeSlots > 0) {
                 return;
             }
-            user.commonUser().sendMessage("You do not have enough free slots to receive the item!");
+            user.commonUser().sendMessage(MiniMessage.miniMessage().deserialize(getConfigKey("message").getAsString()));
             event.setCancelled(true);
         });
     }
@@ -48,5 +52,12 @@ public class ConditionalExecuteAddon implements MineStoreAddon {
     @Override
     public String getName() {
         return "ConditionalExecuteAddon";
+    }
+
+    @Override
+    public List<ConfigKey> getConfigKeys() {
+        List<ConfigKey> keys = new ArrayList<>();
+        keys.add(new ConfigKey("message", "<red>You do not have enough free slots to receive the item!"));
+        return keys;
     }
 }

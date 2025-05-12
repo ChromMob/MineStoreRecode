@@ -19,7 +19,12 @@ public class EventBusTest {
     private boolean reload = false;
     private boolean customEvent = false;
 
-    private final MineStoreAddon addon = () -> "test";
+    private final MineStoreAddon addon = new MineStoreAddon() {
+        @Override
+        public String getName() {
+            return "TestAddon";
+        }
+    };
 
     @Test
     public void testDisable() {

@@ -12,7 +12,7 @@ dependencies {
     implementation "org.yaml:snakeyaml:2.2"
 
     compileOnly 'net.luckperms:api:5.4'
-    implementation 'com.github.ChromMob:ConfigManager:master-SNAPSHOT'
+    compileOnly 'com.github.ChromMob:ConfigManager:master-SNAPSHOT'
 
 
     compileOnly("org.incendo:cloud-annotations:2.0.0-SNAPSHOT")

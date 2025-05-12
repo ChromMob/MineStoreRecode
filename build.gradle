@@ -183,7 +183,6 @@ shadowJar {
     relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
     relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
     relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
-    relocate "me.chrommob.config", "me.chrommob.minestore.libs.me.chrommob.config"
     exclude "META-INF/*.SF"
 }
 
