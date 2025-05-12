@@ -128,8 +128,19 @@ public class CommandStorage {
             boolean isOnline = Registries.COMMAND_EXECUTER.get().isOnline(username);
             plugin.debug(this.getClass(), "Player " + username + " is " + (isOnline ? "online" : "offline"));
             if (isOnline || !newCommands) {
-                toCheck.addAll(parsedResponses);
-                toCheckIds.addAll(parsedResponses.stream().map(ParsedResponse::commandId).collect(Collectors.toSet()));
+                if (!newCommands) {
+                    toCheck.addAll(parsedResponses);
+                    toCheckIds.addAll(parsedResponses.stream().map(ParsedResponse::commandId).collect(Collectors.toSet()));
+                } else {
+                    for (ParsedResponse parsedResponse : parsedResponses) {
+                        if (!shouldExecute(parsedResponse)) {
+                            addNewCommand(username, parsedResponse.command(), parsedResponse.commandId());
+                            continue;
+                        }
+                        toCheck.add(parsedResponse);
+                        toCheckIds.add(parsedResponse.commandId());
+                    }
+                }
                 continue;
             }
             for (ParsedResponse parsedResponse : parsedResponses) {
