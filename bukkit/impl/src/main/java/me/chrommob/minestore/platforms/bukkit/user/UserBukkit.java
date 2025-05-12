@@ -26,32 +26,17 @@ import java.util.List;
 import java.util.UUID;
 
 public class UserBukkit extends CommonUser {
-    private final MineStoreCommon plugin;
     private final Player player;
     private final String name;
-    private final UUID uuid;
-    private LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
+    private final LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
 
-    public UserBukkit(UUID uuid, JavaPlugin mineStoreBukkit, MineStoreCommon plugin) {
-        this.plugin = plugin;
-        player = mineStoreBukkit.getServer().getPlayer(uuid);
-        this.uuid = uuid;
+    public UserBukkit(Player player) {
+        this.player = player;
         if (player == null) {
-            name = null;
+            name = "";
             return;
         }
         name = player.getName();
-    }
-
-    public UserBukkit(String username, JavaPlugin mineStoreBukkit, MineStoreCommon plugin) {
-        this.plugin = plugin;
-        player = mineStoreBukkit.getServer().getPlayer(username);
-        name = username;
-        if (player == null) {
-            uuid = null;
-            return;
-        }
-        uuid = player.getUniqueId();
     }
 
     @Override
@@ -96,7 +81,7 @@ public class UserBukkit extends CommonUser {
         if (player == null) {
             return false;
         }
-        return player != null && player.isOnline();
+        return player.isOnline();
     }
 
     private Enchantment getDurabilityEnchantment() {
@@ -111,7 +96,10 @@ public class UserBukkit extends CommonUser {
 
     @Override
     public UUID getUUID() {
-        return uuid;
+        if (player == null) {
+            return null;
+        }
+        return player.getUniqueId();
     }
 
     @Override
@@ -124,7 +112,7 @@ public class UserBukkit extends CommonUser {
         player.openInventory(bukkitInventory);
         List<ItemStack> bukkitItems = new ArrayList<>();
         for (CommonItem item : inventory.getItems()) {
-            Material material = null;
+            Material material;
             if (item.getMaterial() == null) {
                 if (item.isBackground()) {
                     material = Material.STAINED_GLASS_PANE;
@@ -135,7 +123,6 @@ public class UserBukkit extends CommonUser {
                 material = Material.matchMaterial(item.getMaterial());
             }
             if (material == null) {
-                plugin.log("Material " + item.getMaterial() + " is not valid!");
                 if (item.isBackground()) {
                     material = Material.STAINED_GLASS_PANE;
                     item.setMaterial("STAINED_GLASS_PANE");

@@ -20,6 +20,6 @@ public class StoreCommand  {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         final Component message = plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("store-command").getKey("message").getAsString().replaceAll("%store_url%", storeUrl));
-        abstractUser.user().sendMessage(message);
+        abstractUser.commonUser().sendMessage(message);
     }
 }

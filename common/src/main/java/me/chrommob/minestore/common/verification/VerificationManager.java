@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.verification;
 
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
@@ -74,8 +75,8 @@ public class VerificationManager {
         if (verificationResult.isValid()) {
             return;
         }
-        AbstractUser abstractUser = new AbstractUser(username, null);
-        CommonUser user = abstractUser.user();
+        AbstractUser abstractUser = Registries.USER_GETTER.get().get(username);
+        CommonUser user = abstractUser.commonUser();
         if (!user.hasPermission("minestore.admin")) {
             return;
         }

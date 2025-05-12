@@ -2,6 +2,7 @@ package me.chrommob.minestore.common.commandHolder;
 
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.event.types.MineStoreExecuteEvent;
+import me.chrommob.minestore.api.event.types.MineStoreExecuteIntentEvent;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
@@ -18,14 +19,14 @@ public class CommandStorage {
     private Map<String, List<String>> commands;
     private Map<String, List<StoredCommand>> newCommands;
 
-    private void remove(String username) {
-        plugin.debug(this.getClass(), "Removing " + username + " from command storage");
-        commands.remove(username);
+    private void remove(String username, String command) {
+        plugin.debug(this.getClass(), "Removing " + command + " for " + username + " from command storage");
+        commands.get(username).remove(command);
         plugin.commandDumper().update(commands);
     }
 
-    private void removeNewCommand(String username) {
-        plugin.debug(this.getClass(), "Removing " + username + " from new command storage");
+    private void removeNewCommand(StoredCommand storedCommand, String username) {
+        plugin.debug(this.getClass(), "Removing " + storedCommand.command() + " for " + username + " from new command storage");
         newCommands.remove(username);
         plugin.newCommandDumper().update(newCommands);
     }
@@ -59,20 +60,26 @@ public class CommandStorage {
             }
             plugin.debug(this.getClass(), "Executing new commands for " + username);
             for (StoredCommand storedCommand : newCommands.get(username)) {
+                if (!shouldExecute(storedCommand.toParsedResponse(username))) {
+                    continue;
+                }
                 parsedResponses.add(storedCommand.toParsedResponse(username));
+                removeNewCommand(storedCommand, username);
             }
             handleOnlineCommands(parsedResponses, false);
-            removeNewCommand(username);
             return;
         }
         if (commands.containsKey(username)) {
             plugin.debug(this.getClass(), "Executing commands for " + username);
             List<ParsedResponse> parsedResponses = new ArrayList<>();
             for (String storedCommand : commands.get(username)) {
+                if (!shouldExecute(new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, storedCommand, username, 0))) {
+                    continue;
+                }
                 parsedResponses.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, storedCommand, username, 0));
+                remove(username, storedCommand);
             }
             handleOnlineCommands(parsedResponses, false);
-            remove(username);
         }
     }
 
@@ -91,7 +98,7 @@ public class CommandStorage {
     private void handleOnlineCommands(List<ParsedResponse> parsedCommands, boolean newCommands) {
         if (!MineStoreCommon.version().requires(3, 0, 0)) {
             for (ParsedResponse parsedResponse : parsedCommands) {
-                if (Registries.COMMAND_EXECUTER.get().isOnline(parsedResponse.username())) {
+                if (Registries.COMMAND_EXECUTER.get().isOnline(parsedResponse.username()) && shouldExecute(parsedResponse)) {
                     handleOfflineCommand(parsedResponse);
                     continue;
                 }
@@ -131,7 +138,10 @@ public class CommandStorage {
         }
         if (!MineStoreCommon.version().requires(3, 2, 5)) {
             for (ParsedResponse parsedResponse : toCheck) {
-                handleOfflineCommand(parsedResponse);
+                if (handleOfflineCommand(parsedResponse)) {
+                    continue;
+                }
+                addNewCommand(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId());
             }
             return;
         }
@@ -171,9 +181,13 @@ public class CommandStorage {
         });
     }
 
+    public boolean shouldExecute(ParsedResponse parsedResponse) {
+        MineStoreExecuteIntentEvent intent = new MineStoreExecuteIntentEvent(parsedResponse.commandType(), parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId());
+        intent.call();
+        return !intent.isCancelled();
+    }
 
-
-    private void handleOfflineCommand(ParsedResponse parsedResponse) {
+    private boolean handleOfflineCommand(ParsedResponse parsedResponse) {
         String command = parsedResponse.command();
         String username = parsedResponse.username();
         int requestId = parsedResponse.commandId();
@@ -183,6 +197,7 @@ public class CommandStorage {
         MineStoreExecuteEvent event = new MineStoreExecuteEvent(username, command, requestId);
         event.call();
         Registries.COMMAND_EXECUTER.get().execute(event);
+        return true;
     }
 
     public void init() {

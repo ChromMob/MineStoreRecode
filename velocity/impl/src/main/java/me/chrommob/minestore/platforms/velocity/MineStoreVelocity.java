@@ -44,7 +44,7 @@ public class MineStoreVelocity implements MineStorePlugin {
         Registries.SCHEDULER.set(new VelocityScheduler(this));
         Registries.USER_GETTER.set(new VelocityUserGetter(server));
 
-        final Function<CommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null, commandSource);
+        final Function<CommandSource, AbstractUser> cToA = commandSource -> Registries.USER_GETTER.get().get(commandSource instanceof Player ? ((Player) commandSource).getUniqueId() : null);
         final Function<AbstractUser, CommandSource> aToC = abstractUser -> (CommandSource) abstractUser.platformObject();
         final SenderMapper<CommandSource, AbstractUser> senderMapper = new SenderMapper<CommandSource, AbstractUser>() {
             @Override

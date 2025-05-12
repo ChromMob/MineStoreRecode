@@ -52,9 +52,9 @@ public class PaymentHandler {
             return;
         }
         if (responseData.status.equals("success")) {
-            Registries.USER_GETTER.get().get(username).sendMessage(Component.text("You have successfully bought the item for " + responseData.data.price + "!").color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+            Registries.USER_GETTER.get().get(username).commonUser().sendMessage(Component.text("You have successfully bought the item for " + responseData.data.price + "!").color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
         } else {
-            Registries.USER_GETTER.get().get(username).sendMessage(Component.text("Failed to buy the item! You do not have enough money!").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
+            Registries.USER_GETTER.get().get(username).commonUser().sendMessage(Component.text("Failed to buy the item! You do not have enough money!").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
         }
     }
 }

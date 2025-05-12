@@ -38,8 +38,8 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
         ServerLifecycleEvents.SERVER_STARTED.register(this::onEnable);
         ServerLifecycleEvents.SERVER_STOPPED.register(this::onDisable);
 
-        final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> new AbstractUser(commandSource.isExecutedByPlayer() ? commandSource.getPlayer().getUuid() : null, commandSource);
-        final Function<AbstractUser, ServerCommandSource> aToC = abstractUser -> abstractUser.user() instanceof CommonConsoleUser ? server.getCommandSource() : server.getPlayerManager().getPlayer(abstractUser.user().getUUID()).getCommandSource();
+        final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> Registries.USER_GETTER.get().get(commandSource.getEntity().getUuid());
+        final Function<AbstractUser, ServerCommandSource> aToC = abstractUser -> abstractUser.commonUser() instanceof CommonConsoleUser ? server.getCommandSource() : server.getPlayerManager().getPlayer(abstractUser.commonUser().getUUID()).getCommandSource();
         final SenderMapper<ServerCommandSource, AbstractUser> senderMapper = new SenderMapper<ServerCommandSource, AbstractUser>() {
             @Override
             public AbstractUser map(ServerCommandSource base) {

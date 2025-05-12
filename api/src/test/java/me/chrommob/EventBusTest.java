@@ -1,5 +1,6 @@
 package me.chrommob;
 
+import me.chrommob.minestore.api.event.MineStoreEvent;
 import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.*;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
@@ -54,18 +55,18 @@ public class EventBusTest {
             Assert.assertEquals("test", event.username());
             Assert.assertEquals("test", event.command());
             Assert.assertEquals(0, event.id());
-            Assert.assertEquals(MineStorePurchaseEvent.COMMAND_TYPE.ONLINE, event.commandType());
-            event.setCommandType(MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
+            Assert.assertEquals(MineStoreEvent.COMMAND_TYPE.ONLINE, event.commandType());
+            event.setCommandType(MineStoreEvent.COMMAND_TYPE.OFFLINE);
             event.setCommand("test 2");
             purchase = true;
         });
-        MineStorePurchaseEvent event = new MineStorePurchaseEvent("test", "test", 0, MineStorePurchaseEvent.COMMAND_TYPE.ONLINE);
+        MineStorePurchaseEvent event = new MineStorePurchaseEvent("test", "test", 0, MineStoreEvent.COMMAND_TYPE.ONLINE);
         event.call();
         if (!event.doNotExecute()) {
             Assert.fail("Event should be cancelled");
         }
         Assert.assertEquals("test 2", event.command());
-        Assert.assertEquals(MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE, event.commandType());
+        Assert.assertEquals(MineStoreEvent.COMMAND_TYPE.OFFLINE, event.commandType());
         Assert.assertTrue(purchase);
     }
 

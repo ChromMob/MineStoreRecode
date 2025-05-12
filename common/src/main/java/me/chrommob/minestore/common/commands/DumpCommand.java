@@ -18,7 +18,7 @@ public class DumpCommand {
     @Permission("minestore.dump")
     @Command("minestore|ms dump")
     public void onDumpCommand(AbstractUser abstractUser) {
-        CommonUser user = abstractUser.user();
+        CommonUser user = abstractUser.commonUser();
         user.sendMessage(Component.text("Dumping MineStore data...").color(NamedTextColor.GREEN));
         new Thread(() -> {
             String link = plugin.dumper().dump(true, plugin);

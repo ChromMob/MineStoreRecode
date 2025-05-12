@@ -1,7 +1,10 @@
 package me.chrommob.minestore.platforms.bungee.user;
 
+import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.api.interfaces.user.UserGetter;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.HashSet;
@@ -15,19 +18,26 @@ public class BungeeUserGetter implements UserGetter {
     }
 
     @Override
-    public CommonUser get(UUID uuid) {
-        return new BungeeUser(mineStoreBungee.getProxy().getPlayer(uuid));
+    public AbstractUser get(UUID uuid) {
+        ProxiedPlayer player = mineStoreBungee.getProxy().getPlayer(uuid);
+        return get(player);
     }
 
     @Override
-    public CommonUser get(String username) {
-        return new BungeeUser(mineStoreBungee.getProxy().getPlayer(username));
+    public AbstractUser get(String username) {
+        ProxiedPlayer player = mineStoreBungee.getProxy().getPlayer(username);
+        return get(player);
+    }
+
+    private AbstractUser get(ProxiedPlayer player) {
+        CommonUser user = player == null ? new CommonConsoleUser() : new BungeeUser(player);
+        return new AbstractUser(user, player == null ? mineStoreBungee.getProxy().getConsole() : player);
     }
 
     @Override
-    public Set<CommonUser> getAllPlayers() {
-        Set<CommonUser> users = new HashSet<>();
-        for (UUID uuid : mineStoreBungee.getProxy().getPlayers().stream().map(net.md_5.bungee.api.connection.ProxiedPlayer::getUniqueId).toArray(UUID[]::new)) {
+    public Set<AbstractUser> getAllPlayers() {
+        Set<AbstractUser> users = new HashSet<>();
+        for (UUID uuid : mineStoreBungee.getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId).toArray(UUID[]::new)) {
             users.add(get(uuid));
         }
         return users;

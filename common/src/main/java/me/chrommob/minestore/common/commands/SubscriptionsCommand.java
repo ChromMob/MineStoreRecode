@@ -18,7 +18,7 @@ public class SubscriptionsCommand {
     @Permission("minestore.subscriptions")
     @Command("minestore|ms subscriptions")
     public void onSubscription(AbstractUser user) {
-        CommonUser commonUser = user.user();
+        CommonUser commonUser = user.commonUser();
         if (commonUser instanceof CommonConsoleUser) {
             commonUser.sendMessage("[MineStore] You can't use this command from console!");
             return;

@@ -16,7 +16,7 @@ public class BuyCommand {
     @Permission("minestore.buy")
     @Command("buy")
     public void onBuy(AbstractUser user) {
-        CommonUser commonUser = user.user();
+        CommonUser commonUser = user.commonUser();
         if (commonUser instanceof CommonConsoleUser) {
             commonUser.sendMessage("[MineStore] You can't use this command from console!");
             return;

@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import io.leangen.geantyref.TypeToken;
+import me.chrommob.minestore.api.event.MineStoreEvent;
 import me.chrommob.minestore.api.event.types.MineStorePurchaseEvent;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
@@ -68,12 +69,9 @@ public class WebListener {
                     if (parsedResponse.type() != ParsedResponse.TYPE.COMMAND) {
                         continue;
                     }
-                    MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStorePurchaseEvent.COMMAND_TYPE.ONLINE : MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
+                    MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStoreEvent.COMMAND_TYPE.ONLINE : MineStoreEvent.COMMAND_TYPE.OFFLINE);
                     event.call();
-                    if (event.doNotExecute()) {
-                        continue;
-                    }
-                    ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStorePurchaseEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
+                    ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStoreEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
                     commands.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
                     plugin.debug(this.getClass(), "Got command: " + "\"" + parsedResponse.command() + "\""
                             + " with id: " + parsedResponse.commandId() + " for player: "

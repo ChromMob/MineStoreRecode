@@ -9,6 +9,6 @@ public class VersionCommand {
     @Permission("minestore.version")
     @Command("minestore|ms version")
     public void onVersion(AbstractUser abstractUser) {
-        abstractUser.user().sendMessage("MineStore version: " + MineStoreCommon.version().toString());
+        abstractUser.commonUser().sendMessage("MineStore version: " + MineStoreCommon.version().toString());
     }
 }

@@ -101,7 +101,7 @@ public class ChargeBalanceCommand {
         responseData.data.price = Double.parseDouble(amount);
         responseData.data.payment_internal_id = paymentInternalId;
         responseData.data.signature = signature;
-        CommonUser user = Registries.USER_GETTER.get().get(username);
+        CommonUser user = Registries.USER_GETTER.get().get(username).commonUser();
 
         boolean hasEnoughMoney = user.takeMoney(Double.parseDouble(amount));
         if (!hasEnoughMoney) {

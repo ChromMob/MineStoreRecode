@@ -49,7 +49,7 @@ public class DatabaseManager {
     private final Map<String, PlayerData> playerData = new ConcurrentHashMap<>();
 
     public void onPlayerJoin(String name) {
-        playerData.put(name, new PlayerData(Registries.USER_GETTER.get().get(name)));
+        playerData.put(name, new PlayerData(Registries.USER_GETTER.get().get(name).commonUser()));
         plugin.debug(this.getClass(), "Added " + name + " to playerData");
     }
 

@@ -4,9 +4,9 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface UserGetter {
-    CommonUser get(UUID uuid);
+    AbstractUser get(UUID uuid);
 
-    CommonUser get(String username);
+    AbstractUser get(String username);
 
-    Set<CommonUser> getAllPlayers();
+    Set<AbstractUser> getAllPlayers();
 }

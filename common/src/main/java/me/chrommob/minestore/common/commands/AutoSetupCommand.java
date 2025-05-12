@@ -18,7 +18,7 @@ public class AutoSetupCommand {
     @Permission("minestore.autosetup")
     @Command("minestore|ms autosetup <storeUrl> <apiKey> <secretKey>")
     public void onAutoSetup(AbstractUser abstractUser, @Argument("storeUrl") @Quoted String storeUrl, @Argument("apiKey") String apiKey, @Argument("secretKey") String secretKey) {
-        CommonUser user = abstractUser.user();
+        CommonUser user = abstractUser.commonUser();
         user.sendMessage("Auto setup started!");
         user.sendMessage("Store URL: " + storeUrl);
         if (!storeUrl.endsWith("/")) {

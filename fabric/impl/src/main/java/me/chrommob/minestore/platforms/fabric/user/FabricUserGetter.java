@@ -1,5 +1,7 @@
 package me.chrommob.minestore.platforms.fabric.user;
 
+import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.api.interfaces.user.UserGetter;
 import net.minecraft.server.MinecraftServer;
@@ -20,20 +22,27 @@ public class FabricUserGetter implements UserGetter {
     }
 
     @Override
-    public CommonUser get(UUID uuid) {
-        return new UserFabric(this.pManager.getPlayer(uuid));
+    public AbstractUser get(UUID uuid) {
+        ServerPlayerEntity player = this.pManager.getPlayer(uuid);
+        return get(player);
     }
 
     @Override
-    public CommonUser get(String username) {
-        return new UserFabric(this.pManager.getPlayer(username));
+    public AbstractUser get(String username) {
+        ServerPlayerEntity player = this.pManager.getPlayer(username);
+        return get(player);
+    }
+
+    private AbstractUser get(ServerPlayerEntity player) {
+        CommonUser user = player == null ? new CommonConsoleUser() : new UserFabric(player);
+        return new AbstractUser(user, player == null ? server.getCommandSource() : player);
     }
 
     @Override
-    public Set<CommonUser> getAllPlayers() {
-        Set<CommonUser> users = new HashSet<>();
+    public Set<AbstractUser> getAllPlayers() {
+        Set<AbstractUser> users = new HashSet<>();
         for (ServerPlayerEntity player : this.pManager.getPlayerList()) {
-            users.add(new UserFabric(player));
+            users.add(get(player));
         }
         return users;
     }

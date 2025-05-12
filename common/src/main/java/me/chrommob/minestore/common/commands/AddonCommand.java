@@ -17,7 +17,7 @@ public class AddonCommand {
     @Command("minestore|ms addons")
     @Permission("minestore.addons")
     public void onAddons(AbstractUser abstractUser) {
-        CommonUser user = abstractUser.user();
+        CommonUser user = abstractUser.commonUser();
         for (MineStoreAddon addon : plugin.getAddons()) {
             user.sendMessage(addon.getName());
             MineStoreEventBus.getRegisteredEvents(addon).forEach(event -> user.sendMessage(" - " + event));

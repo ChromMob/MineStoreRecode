@@ -1,7 +1,9 @@
 package me.chrommob.minestore.platforms.velocity.user;
 
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.api.interfaces.user.UserGetter;
 
@@ -17,22 +19,25 @@ public class VelocityUserGetter implements UserGetter {
     }
 
     @Override
-    public CommonUser get(UUID uuid) {
-        if (server.getPlayer(uuid).isPresent()) {
-            return new VelocityUser(uuid, server);
-        } else {
-            return new CommonConsoleUser();
-        }
+    public AbstractUser get(UUID uuid) {
+        Player player = server.getPlayer(uuid).orElse(null);
+        return get(player);
     }
 
     @Override
-    public CommonUser get(String username) {
-        return new VelocityUser(username, server);
+    public AbstractUser get(String username) {
+        Player player = server.getPlayer(username).orElse(null);
+        return get(player);
+    }
+
+    private AbstractUser get(Player player) {
+        CommonUser user = player == null ? new CommonConsoleUser() : new VelocityUser(player);
+        return new AbstractUser(user, player == null ? server.getConsoleCommandSource() : player);
     }
 
     @Override
-    public Set<CommonUser> getAllPlayers() {
-        Set<CommonUser> users = new HashSet<>();
+    public Set<AbstractUser> getAllPlayers() {
+        Set<AbstractUser> users = new HashSet<>();
         for (UUID uuid : server.getAllPlayers().stream().map(com.velocitypowered.api.proxy.Player::getUniqueId).toArray(UUID[]::new)) {
             users.add(get(uuid));
         }

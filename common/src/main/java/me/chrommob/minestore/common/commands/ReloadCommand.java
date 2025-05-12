@@ -17,7 +17,7 @@ public class ReloadCommand {
     @Permission("minestore.reload")
     @Command("minestore|ms reload")
     public void onReload(AbstractUser abstractUser) {
-        CommonUser user = abstractUser.user();
+        CommonUser user = abstractUser.commonUser();
         plugin.reload();
         //Send pretty message to user using Component
         user.sendMessage(Component.text("Reloaded MineStore!").color(NamedTextColor.GREEN));

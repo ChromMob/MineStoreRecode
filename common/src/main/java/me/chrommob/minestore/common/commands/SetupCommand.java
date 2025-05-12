@@ -30,7 +30,7 @@ public class SetupCommand {
     @Permission("minestore.setup")
     @Command("minestore|ms setup [configKey] [value]")
     public void onSetupCommand(AbstractUser user, @Argument(value = "configKey", suggestions = "configKeys") String key, @Argument("value") String value) {
-        CommonUser commonUser = user.user();
+        CommonUser commonUser = user.commonUser();
         if (keys == null) {
              getAllNames();
         }

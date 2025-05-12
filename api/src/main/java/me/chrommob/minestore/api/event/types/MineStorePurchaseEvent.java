@@ -3,12 +3,6 @@ package me.chrommob.minestore.api.event.types;
 import me.chrommob.minestore.api.event.MineStoreEvent;
 
 public class MineStorePurchaseEvent extends MineStoreEvent {
-    private boolean doNotExecute = false;
-
-    public enum COMMAND_TYPE {
-        ONLINE,
-        OFFLINE
-    }
 
     private final String username;
     private String command;
@@ -43,13 +37,5 @@ public class MineStorePurchaseEvent extends MineStoreEvent {
 
     public COMMAND_TYPE commandType() {
         return commandType;
-    }
-
-    public void setDoNotExecute(boolean doNotExecute) {
-        this.doNotExecute = doNotExecute;
-    }
-
-    public boolean doNotExecute() {
-        return doNotExecute;
     }
 }

@@ -55,15 +55,15 @@ public final class MineStoreBukkit implements MineStorePlugin {
         Registries.PLATFORM_VERSION.set(Bukkit.getVersion());
         Registries.LOGGER.set(new BukkitLogger(plugin));
         Registries.SCHEDULER.set(new BukkitScheduler(plugin));
-        Registries.USER_GETTER.set(new BukkitUserGetter(plugin, common));
+        Registries.USER_GETTER.set(new BukkitUserGetter(plugin));
         Registries.COMMAND_EXECUTER.set(new CommandExecuterBukkit(plugin, common));
         Registries.CONFIG_FILE.set(plugin.getDataFolder().toPath().resolve("config.yml").toFile());
         Registries.PLAYER_JOIN_LISTENER.set(new BukkitPlayerEvent(plugin, common));
         new BukkitInventoryEvent(plugin, common);
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
-                ? new AbstractUser((String) null, commandSender)
-                : new AbstractUser(((HumanEntity) commandSender).getUniqueId(), commandSender);
+                ? Registries.USER_GETTER.get().get("")
+                : Registries.USER_GETTER.get().get(((HumanEntity) commandSender).getUniqueId());
         final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.platformObject();
 
         final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {

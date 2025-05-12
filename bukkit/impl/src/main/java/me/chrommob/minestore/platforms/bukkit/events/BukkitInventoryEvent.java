@@ -14,10 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BukkitInventoryEvent implements Listener {
@@ -87,6 +84,6 @@ public class BukkitInventoryEvent implements Listener {
             }
         }
         CommonItem item = new CommonItem(name, event.getCurrentItem().getType().toString(), lore);
-        plugin.guiData().getGuiInfo().handleInventoryClick(Registries.USER_GETTER.get().get(event.getWhoClicked().getUniqueId()), item);
+        plugin.guiData().getGuiInfo().handleInventoryClick(Registries.USER_GETTER.get().get(event.getWhoClicked().getUniqueId()).commonUser(), item);
     }
 }

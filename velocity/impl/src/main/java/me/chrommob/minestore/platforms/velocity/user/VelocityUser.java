@@ -12,12 +12,8 @@ import java.util.UUID;
 public class VelocityUser extends CommonUser {
     private final Player player;
 
-    public VelocityUser(UUID uuid, ProxyServer server) {
-        player = server.getPlayer(uuid).get();
-    }
-
-    public VelocityUser(String username, ProxyServer server) {
-        player = server.getPlayer(username).get();
+    public VelocityUser(Player player) {
+        this.player = player;
     }
 
     @Override

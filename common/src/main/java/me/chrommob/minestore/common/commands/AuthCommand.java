@@ -17,7 +17,7 @@ public class AuthCommand {
     @Permission("minestore.auth")
     @Command("minestore|ms auth")
     public void onAuth(AbstractUser abstractUser) {
-        CommonUser user = abstractUser.user();
+        CommonUser user = abstractUser.commonUser();
         if (user instanceof CommonConsoleUser) {
             user.sendMessage("[MineStore] You can't use this command from console!");
             return;

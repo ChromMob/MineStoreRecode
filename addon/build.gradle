@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     project(":MineStore-API")
-    //compileOnly "com.github.ChromMob:MineStoreRecode:master-SNAPSHOT"
+    compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
 }
 
 configurations.configureEach {
