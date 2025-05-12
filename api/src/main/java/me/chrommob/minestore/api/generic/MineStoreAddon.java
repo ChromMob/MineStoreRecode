@@ -7,12 +7,14 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class MineStoreAddon {
+
     private ConfigWrapper configWrapper;
 
     public void setConfigWrapper(ConfigWrapper configWrapper) {
         this.configWrapper = configWrapper;
     }
 
+    abstract public void onEnable();
     abstract public String getName();
 
     public List<ConfigKey> getConfigKeys() {
@@ -20,6 +22,9 @@ public abstract class MineStoreAddon {
     }
 
     public ConfigKey getConfigKey(String key) {
+        if (configWrapper == null) {
+            return null;
+        }
         return configWrapper.getKey(key);
     }
 }

@@ -1,12 +1,12 @@
 package me.chrommob.minestore;
 
-import me.chrommob.config.ConfigKey;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.MineStoreExecuteIntentEvent;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigKey;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,7 +18,8 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class ConditionalExecuteAddon extends MineStoreAddon {
-    public ConditionalExecuteAddon() {
+    @Override
+    public void onEnable() {
         MineStoreEventBus.registerListener(this, MineStoreExecuteIntentEvent.class, event -> {
             if (!event.command().startsWith("give") && !event.command().startsWith("/give")) {
                 return;

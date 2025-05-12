@@ -2,8 +2,15 @@ dependencies {
     implementation "net.kyori:adventure-text-serializer-plain:4.18.0"
     implementation "net.kyori:adventure-text-serializer-legacy:4.18.0"
     compileOnly("org.incendo:cloud-paper:2.0.0-SNAPSHOT")
-    compileOnly("com.github.ChromMob:ConfigManager:master-SNAPSHOT")
+    implementation("com.github.ChromMob:ConfigManager:master-SNAPSHOT")
     implementation 'com.google.code.gson:gson:2.8.9'
+}
+
+shadowJar {
+    relocate "me.chrommob.config", "me.chrommob.minestore.libs.me.chrommob.config.ConfigManager"
+    minimize {
+        exclude(dependency('com.github.ChromMob:ConfigManager:.*'))
+    }
 }
 
 def templateSource = file('src/main/templates')

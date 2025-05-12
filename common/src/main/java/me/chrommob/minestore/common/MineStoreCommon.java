@@ -1,7 +1,5 @@
 package me.chrommob.minestore.common;
 
-import me.chrommob.config.ConfigManager;
-import me.chrommob.config.ConfigWrapper;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
@@ -29,6 +27,8 @@ import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import me.chrommob.minestore.common.verification.VerificationManager;
 import me.chrommob.minestore.common.verification.VerificationResult;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigManager;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigWrapper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -217,17 +217,18 @@ public class MineStoreCommon {
                     continue;
                 }
                 addonClasses.add(mainClass);
+                File loadedAddonFolder = new File(addonFolder, name);
+                loadedAddonFolder.mkdirs();
+                ConfigManager configManager = new ConfigManager(loadedAddonFolder);
+                configManager.reloadConfig("config");
                 try {
                     MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
+                    ConfigWrapper configWrapper = new ConfigWrapper("config", addon.getConfigKeys());
+                    configManager.addConfig(configWrapper);
+                    addon.setConfigWrapper(configWrapper);
                     addons.add(addon);
-
-                    File loadedAddonFolder = new File(addonFolder, addon.getName());
-                    loadedAddonFolder.mkdirs();
-                    ConfigManager configManager = new ConfigManager(loadedAddonFolder);
-                    configManager.addConfig(new ConfigWrapper("config", addon.getConfigKeys()));
-                    configManager.reloadConfig("config");
-                    addon.setConfigWrapper(configManager.getConfigWrapper("config"));
                     addonConfigs.put((MineStoreAddon) cls.getConstructor().newInstance(), configManager);
+                    addon.onEnable();
                     log("Loaded addon " + addon.getName() + " from " + file.getName());
                 } catch (Exception e) {
                     e.printStackTrace();

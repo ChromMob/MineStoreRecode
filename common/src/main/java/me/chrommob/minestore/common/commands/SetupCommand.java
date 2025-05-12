@@ -1,10 +1,10 @@
 package me.chrommob.minestore.common.commands;
 
-import me.chrommob.config.ConfigKey;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.PluginConfig;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;

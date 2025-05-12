@@ -1,10 +1,10 @@
 package me.chrommob.minestore.common.config;
 
-import me.chrommob.config.ConfigKey;
-import me.chrommob.config.ConfigManager;
-import me.chrommob.config.ConfigWrapper;
 import me.chrommob.minestore.common.config.lang.cs_CZ;
 import me.chrommob.minestore.common.config.lang.en_US;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigKey;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigManager;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigWrapper;
 
 import java.io.File;
 import java.util.*;

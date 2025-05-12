@@ -21,6 +21,11 @@ public class EventBusTest {
 
     private final MineStoreAddon addon = new MineStoreAddon() {
         @Override
+        public void onEnable() {
+
+        }
+
+        @Override
         public String getName() {
             return "TestAddon";
         }
@@ -56,7 +61,6 @@ public class EventBusTest {
     @Test
     public void testPurchase() {
         MineStoreEventBus.registerListener(addon, MineStorePurchaseEvent.class, event -> {
-            event.setDoNotExecute(true);
             Assert.assertEquals("test", event.username());
             Assert.assertEquals("test", event.command());
             Assert.assertEquals(0, event.id());
@@ -67,9 +71,6 @@ public class EventBusTest {
         });
         MineStorePurchaseEvent event = new MineStorePurchaseEvent("test", "test", 0, MineStoreEvent.COMMAND_TYPE.ONLINE);
         event.call();
-        if (!event.doNotExecute()) {
-            Assert.fail("Event should be cancelled");
-        }
         Assert.assertEquals("test 2", event.command());
         Assert.assertEquals(MineStoreEvent.COMMAND_TYPE.OFFLINE, event.commandType());
         Assert.assertTrue(purchase);

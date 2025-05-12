@@ -199,6 +199,9 @@ public class CommandStorage {
                     remove(parsedResponse.username(), parsedResponse.command());
                 }
             }
+        }).exceptionally(e -> {
+            e.printStackTrace();
+            return null;
         });
     }
 
