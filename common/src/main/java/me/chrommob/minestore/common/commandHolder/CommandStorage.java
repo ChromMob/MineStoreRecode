@@ -200,7 +200,7 @@ public class CommandStorage {
                 }
             }
         }).exceptionally(e -> {
-            e.printStackTrace();
+            plugin.debug(this.getClass(), e);
             return null;
         });
     }
