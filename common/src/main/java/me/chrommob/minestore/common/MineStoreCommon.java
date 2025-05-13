@@ -204,7 +204,6 @@ public class MineStoreCommon {
                     continue;
                 }
                 ClassLoader dependencyClassLoader = getClass().getClassLoader();
-                log("Loading addon " + name + " from " + file.getName() + "...");
                 URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
                 Class<?> cls = urlClassLoader.loadClass(mainClass);
@@ -213,9 +212,9 @@ public class MineStoreCommon {
                     continue;
                 }
                 if (addonClasses.contains(mainClass)) {
-                    log("Addon " + file.getName() + " is already loaded!");
                     continue;
                 }
+                log("Loading addon " + name + " from " + file.getName() + "...");
                 addonClasses.add(mainClass);
                 File loadedAddonFolder = new File(addonFolder, name);
                 loadedAddonFolder.mkdirs();
