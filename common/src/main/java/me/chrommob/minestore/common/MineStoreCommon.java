@@ -227,7 +227,7 @@ public class MineStoreCommon {
                     configManager.addConfig(configWrapper);
                     addon.setConfigWrapper(configWrapper);
                     addons.add(addon);
-                    addonConfigs.put((MineStoreAddon) cls.getConstructor().newInstance(), configManager);
+                    addonConfigs.put(addon, configManager);
                     addon.onEnable();
                     log("Loaded addon " + addon.getName() + " from " + file.getName());
                 } catch (Exception e) {
