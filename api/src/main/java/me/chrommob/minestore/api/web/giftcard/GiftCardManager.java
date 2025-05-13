@@ -44,16 +44,6 @@ public class GiftCardManager extends FeatureManager {
         return new GiftCardManager.CreateGiftCardResponse(true, null);
     }
 
-    public ValidateGiftCardResponse validateGiftCard(String coupon) {
-        WebApiRequest<ValidateGiftCardResponse> request = new WebApiRequest<>("validateGiftCard", WebApiRequest.Type.GET, new ParamBuilder()
-                .append("code", coupon), ValidateGiftCardResponse.class);
-        Result<ValidateGiftCardResponse, Exception> result = request(request);
-        if (result.value() != null) {
-            return result.value();
-        }
-        return new ValidateGiftCardResponse(null, 0, result.error().getMessage());
-    }
-
     public static class CreateGiftCardResponse {
         private final boolean success;
         private final String message;
