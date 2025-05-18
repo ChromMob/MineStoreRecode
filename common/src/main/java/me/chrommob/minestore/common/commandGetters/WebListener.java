@@ -44,12 +44,14 @@ public class WebListener {
                         Thread.sleep(9500);
                         wasEmpty = false;
                     } catch (InterruptedException e) {
+                        plugin.debug(this.getClass(), "Interrupted while waiting for data");
+                        plugin.debug(this.getClass(), e);
                         break;
                     }
                     continue;
                 }
                 handleExecuted();
-                plugin.debug(this.getClass(), "[WebListener] Running...");
+                plugin.debug(this.getClass(), "Running...");
                 List<ParsedResponse> parsedResponses = fetchData();
                 if (wasEmpty || parsedResponses.isEmpty()) {
                     plugin.debug(this.getClass(), wasEmpty ? "Issue while parsing json" : "Parsed responses is empty");
@@ -59,6 +61,8 @@ public class WebListener {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
+                        plugin.debug(this.getClass(), "Interrupted while waiting for next loop after empty");
+                        plugin.debug(this.getClass(), e);
                         break;
                     }
                     continue;
@@ -110,6 +114,7 @@ public class WebListener {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
+                    plugin.debug(this.getClass(), "Interrupted while waiting for next loop after posting");
                     plugin.debug(this.getClass(), e);
                     break;
                 }
