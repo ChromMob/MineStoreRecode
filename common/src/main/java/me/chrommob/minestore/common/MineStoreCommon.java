@@ -352,6 +352,13 @@ public class MineStoreCommon {
             return;
         }
         version = MineStoreVersion.getMineStoreVersion(pluginConfig.getKey("store-url").getAsString());
+        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
+            if (databaseManager == null) {
+                databaseManager = new DatabaseManager(this);
+            } else {
+                databaseManager.stop();
+            }
+        }
         verificationManager = null;
         VerificationResult verificationResult = verify();
         Component message = null;
@@ -368,14 +375,8 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         statsSender.start();
-        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
-            if (databaseManager == null) {
-                databaseManager = new DatabaseManager(this);
-                databaseManager.start();
-            } else {
-                databaseManager.stop();
-                databaseManager.start();
-            }
+        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean() && databaseManager != null) {
+            databaseManager.start();
         }
     }
 
