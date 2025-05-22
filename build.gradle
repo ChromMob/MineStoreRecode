@@ -179,14 +179,6 @@ publishing {
 
 tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.jar
 
-shadowJar {
-    relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
-    relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
-    relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
-    exclude "META-INF/*.SF"
-}
-
-
 tasks.register("copyJar", Copy) {
     dependsOn(":bukkit:bukkit-impl:shadowJar")
     dependsOn(":bungee:bungee-impl:shadowJar")

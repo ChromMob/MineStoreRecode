@@ -18,3 +18,8 @@ dependencies {
     compileOnly("org.incendo:cloud-core:2.0.0-SNAPSHOT")
 }
 
+shadowJar {
+    relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
+    relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
+
+}
