@@ -32,8 +32,17 @@ public class CommandStorage {
         plugin.newCommandDumper().update(newCommands);
     }
 
-    private void add(String username, String command) {
+    private void addCommand(String username, String command, int requestId) {
         plugin.debug(this.getClass(), "Adding " + command + " to " + username + " in command storage");
+        username = username.toLowerCase();
+        if (MineStoreCommon.version().requires("3.0.0")) {
+            addNewCommand(username, command, requestId);
+        } else {
+            add(username, command);
+        }
+    }
+
+    private void add(String username, String command) {
         if (commands.containsKey(username)) {
             commands.get(username).add(command);
         } else {
@@ -43,7 +52,6 @@ public class CommandStorage {
     }
 
     private void addNewCommand(String username, String command, int requestId) {
-        plugin.debug(this.getClass(), "Adding " + command + " to " + username + " in new command storage");
         if (newCommands.containsKey(username)) {
             newCommands.get(username).add(new StoredCommand(command, requestId));
         } else {
@@ -114,11 +122,7 @@ public class CommandStorage {
                 online.add(parsedResponse);
                 continue;
             }
-            if (MineStoreCommon.version().requires(3, 0, 0)) {
-                addNewCommand(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId());
-            } else {
-                add(parsedResponse.username(), parsedResponse.command());
-            }
+            addCommand(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId());
         }
         executeWithOnlineCheck(online, true);
     }
@@ -173,11 +177,7 @@ public class CommandStorage {
                     if (!newCommands) {
                         continue;
                     }
-                    if (MineStoreCommon.version().requires(3, 0, 0)) {
-                        addNewCommand(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId());
-                    } else {
-                        add(parsedResponse.username(), parsedResponse.command());
-                    }
+                    addCommand(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId());
                     continue;
                 }
                 execute(parsedResponse);

@@ -358,6 +358,11 @@ public class MineStoreCommon {
             } else {
                 databaseManager.stop();
             }
+        } else {
+            if (databaseManager != null) {
+                databaseManager.stop();
+            }
+            databaseManager = null;
         }
         verificationManager = null;
         VerificationResult verificationResult = verify();
