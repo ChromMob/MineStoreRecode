@@ -80,11 +80,14 @@ public class StatSender {
                 StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE, MineStoreCommon.version() == MineStoreVersion.dummy() ? "Pre 3.0.0" : MineStoreCommon.version().toString());
                 statJson.setPlayerCount(playerCount);
                 int storePlayerCount = getPlayerCount(common.pluginConfig().getKey("store-url").getAsString());
-                WebStoreJson webStoreJson = new WebStoreJson(STORE_UUID, storePlayerCount);
-                String json = gson.toJson(statJson);
+                String json;
+                if (storePlayerCount != -1) {
+                    WebStoreJson webStoreJson = new WebStoreJson(STORE_UUID, storePlayerCount);
+                    json = gson.toJson(webStoreJson);
+                    sendStoreData(json);
+                }
+                json = gson.toJson(statJson);
                 sendData(json);
-                json = gson.toJson(webStoreJson);
-                sendStoreData(json);
                 try {
                     Thread.sleep(1000 * 60);
                 } catch (InterruptedException e) {
@@ -188,7 +191,7 @@ public class StatSender {
             int port = jsonObject.getAsJsonObject("server").get("port").getAsInt();
             return getPlayerCount(ip, port);
         } catch (Exception e) {
-            return 0;
+            return -1;
         } finally {
             if (connection != null) {
                 connection.disconnect();
