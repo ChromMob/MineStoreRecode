@@ -7,7 +7,6 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
 
 import java.time.Duration;
@@ -76,8 +75,8 @@ public class VerificationManager {
         if (verificationResult.isValid()) {
             return;
         }
-        AbstractUser abstractUser = new AbstractUser(username, null);
-        CommonUser user = abstractUser.user();
+        AbstractUser abstractUser = Registries.USER_GETTER.get().get(username);
+        CommonUser user = abstractUser.commonUser();
         if (!user.hasPermission("minestore.admin")) {
             return;
         }

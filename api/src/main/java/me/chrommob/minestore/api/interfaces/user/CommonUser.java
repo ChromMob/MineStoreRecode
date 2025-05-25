@@ -2,7 +2,6 @@ package me.chrommob.minestore.api.interfaces.user;
 
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 

@@ -19,6 +19,11 @@ allprojects {
     repositories {
         mavenCentral()
         maven {
+            name = "sonatype-oss-snapshots1"
+            url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            mavenContent { snapshotsOnly() }
+        }
+        maven {
             name = 'paper-repo'
             url = 'https://repo.papermc.io/repository/maven-public/'
         }
@@ -29,10 +34,6 @@ allprojects {
         maven {
             name = "sponge-repo"
             url = "https://repo.spongepowered.org/repository/maven-public/"
-        }
-        maven {
-            name = "jitpack"
-            url = "https://jitpack.io/"
         }
         maven {
             name = 'placeholderapi-repo'
@@ -50,11 +51,6 @@ allprojects {
             }
         }
         maven {
-            name = "sonatype-oss-snapshots1"
-            url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            mavenContent { snapshotsOnly() }
-        }
-        maven {
             name = "jitpack"
             url = "https://jitpack.io"
         }
@@ -63,7 +59,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.3.8'
+    version = '3.4.0'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -99,12 +95,13 @@ subprojects {
     }
 
     dependencies {
-        implementation 'com.google.code.gson:gson:2.8.9'
+        compileOnly 'com.google.code.gson:gson:2.8.9'
     }
 
     if (project.name != "common" && project.name != "MineStore-API") {
         dependencies {
-            implementation project(path: ':common', configuration: 'shadow')
+            compileOnly project(path: ':common', configuration: 'shadow')
+            compileOnly project(path: ':MineStore-API', configuration: 'shadow')
         }
     }
 
@@ -120,6 +117,10 @@ subprojects {
             expand props
         }
 
+        filesMatching('bungee.yml') {
+            expand props
+        }
+
         filesMatching("fabric.mod.json") {
             expand props
         }
@@ -128,15 +129,20 @@ subprojects {
 
 
 
-def fabricProject = project(":MineStore-Fabric")
-def velocityProject = project(":MineStore-Velocity")
+def fabricProject = project(":fabric:fabric-plugin")
 def finalJar = tasks.register('finalJar', Jar) {
+    dependsOn processResources
     group = 'build'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from zipTree(shadowJar.archiveFile)
     archiveClassifier = "final"
     archiveFileName = "${project.name}-${project.version}.jar"
     destinationDirectory = file("${projectDir}/build/libs/")
+}
+
+finalJar.configure {
+    dependsOn fabricProject.tasks.remapJar
+    dependsOn project(":fabric:fabric-impl").tasks.named("remapJar")
 }
 
 fabricProject.afterEvaluate {
@@ -147,14 +153,17 @@ fabricProject.afterEvaluate {
     }
 }
 
-
-velocityProject.afterEvaluate {
+project(":fabric:fabric-impl").afterEvaluate {
     finalJar.configure {
-        from zipTree(velocityProject.tasks.named("shadowJar", AbstractArchiveTask).flatMap {
-            it.archiveFile
-        })
+        copy {
+            from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
+                rename { "MineStore-Fabric.jarjar" }
+            }
+            into("src/main/resources/jars")
+        }
     }
 }
+
 
 def addonApiProject = project(":MineStore-API")
 publishing {
@@ -167,28 +176,47 @@ publishing {
         mavenLocal()
     }
 }
+
 tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.jar
 
+tasks.register("copyJar", Copy) {
+    dependsOn(":bukkit:bukkit-impl:shadowJar")
+    dependsOn(":bungee:bungee-impl:shadowJar")
+    dependsOn(":velocity:velocity-impl:shadowJar")
+    dependsOn(":common:shadowJar")
 
-
-shadowJar {
-    relocate "org.incendo", "me.chrommob.minestore.libs.org.incendo"
-    relocate "com.google.gson", "me.chrommob.minestore.libs.com.google.gson"
-    relocate 'com.zaxxer', 'me.chrommob.minestore.libs.com.zaxxer'
-    relocate "com.mysql", "me.chrommob.minestore.libs.com.mysql"
-    relocate "org.mariadb", "me.chrommob.minestore.libs.org.mariadb"
-    relocate "org.yaml", "me.chrommob.minestore.libs.org.yaml"
-    relocate ("net.kyori", "me.chrommob.minestore.libs.net.kyori") {
-        exclude "net.kyori.adventure.platform.fabric.**"
+    doFirst {
+        delete("src/main/resources/jars/**.jar")
     }
-    relocate "me.chrommob.config", "me.chrommob.minestore.libs.me.chrommob.config"
-    exclude "META-INF/*.SF"
+    from(project(":bukkit:bukkit-impl").tasks.named("shadowJar")) {
+        rename { "MineStore-Bukkit.jarjar" }
+    }
+
+    from(project(":bungee:bungee-impl").tasks.named("shadowJar")) {
+        rename { "MineStore-Bungee.jarjar" }
+    }
+
+    from(project(":velocity:velocity-impl").tasks.named("shadowJar")) {
+        rename { "MineStore-Velocity.jarjar" }
+    }
+
+    from(project(":common").tasks.named("shadowJar")) {
+        rename { "MineStore-Common.jarjar" }
+    }
+
+    into("src/main/resources/jars")
+}
+
+tasks.processResources {
+    dependsOn(copyJar)
 }
 
 
 dependencies {
-    implementation project(path: ':common', configuration: 'shadow')
-    implementation project(path: ':MineStore-Bukkit', configuration: 'shadow')
-    implementation project(path: ':MineStore-Bungee', configuration: 'shadow')
+    implementation project(path: ':MineStore-API', configuration: 'shadow')
+    implementation project(path: ':bungee:bungee-plugin', configuration: 'shadow')
+    implementation project(path: ':bukkit:bukkit-plugin', configuration: 'shadow')
+    implementation project(path: ':velocity:velocity-plugin', configuration: 'shadow')
+   // implementation project(path: ':MineStore-Fabric', configuration: 'shadow')
 //    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }

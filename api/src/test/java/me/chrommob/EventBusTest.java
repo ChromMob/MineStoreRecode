@@ -1,11 +1,15 @@
 package me.chrommob;
 
-import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
-import me.chrommob.minestore.api.generic.MineStoreAddon;
+import me.chrommob.minestore.api.event.MineStoreEvent;
 import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.*;
+import me.chrommob.minestore.api.generic.MineStoreAddon;
+import me.chrommob.minestore.api.web.WebApiAccessor;
+import me.chrommob.minestore.api.web.giftcard.GiftCardManager;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.time.LocalDateTime;
 
 public class EventBusTest {
     private boolean disabled = false;
@@ -17,8 +21,13 @@ public class EventBusTest {
 
     private final MineStoreAddon addon = new MineStoreAddon() {
         @Override
+        public void onEnable() {
+
+        }
+
+        @Override
         public String getName() {
-            return "test";
+            return "TestAddon";
         }
     };
 
@@ -52,22 +61,18 @@ public class EventBusTest {
     @Test
     public void testPurchase() {
         MineStoreEventBus.registerListener(addon, MineStorePurchaseEvent.class, event -> {
-            event.setDoNotExecute(true);
             Assert.assertEquals("test", event.username());
             Assert.assertEquals("test", event.command());
             Assert.assertEquals(0, event.id());
-            Assert.assertEquals(MineStorePurchaseEvent.COMMAND_TYPE.ONLINE, event.commandType());
-            event.setCommandType(MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
+            Assert.assertEquals(MineStoreEvent.COMMAND_TYPE.ONLINE, event.commandType());
+            event.setCommandType(MineStoreEvent.COMMAND_TYPE.OFFLINE);
             event.setCommand("test 2");
             purchase = true;
         });
-        MineStorePurchaseEvent event = new MineStorePurchaseEvent("test", "test", 0, MineStorePurchaseEvent.COMMAND_TYPE.ONLINE);
+        MineStorePurchaseEvent event = new MineStorePurchaseEvent("test", "test", 0, MineStoreEvent.COMMAND_TYPE.ONLINE);
         event.call();
-        if (!event.doNotExecute()) {
-            Assert.fail("Event should be cancelled");
-        }
         Assert.assertEquals("test 2", event.command());
-        Assert.assertEquals(MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE, event.commandType());
+        Assert.assertEquals(MineStoreEvent.COMMAND_TYPE.OFFLINE, event.commandType());
         Assert.assertTrue(purchase);
     }
 
@@ -88,5 +93,12 @@ public class EventBusTest {
         });
         new CustomEventExample("test").call();
         Assert.assertTrue(customEvent);
+    }
+
+    @Test
+    public void testAPI() {
+        GiftCardManager.CreateGiftCardResponse response = WebApiAccessor.giftCardManager().createGiftCard("test", "test", 100, LocalDateTime.now().plusDays(1), "");
+        System.out.println(response.isSuccess());
+        System.out.println(response.message());
     }
 }

@@ -4,14 +4,11 @@ import com.google.gson.Gson;
 import me.chrommob.minestore.common.MineStoreCommon;
 
 import javax.net.ssl.HttpsURLConnection;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class Dumper {
     private final Gson gson = new Gson();

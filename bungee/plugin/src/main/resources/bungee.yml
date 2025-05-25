@@ -1,0 +1,4 @@
+name: MineStore
+main: me.chrommob.minestore.platforms.bungee.MineStoreBungeePlugin
+version: '${version}'
+author: ChromMob

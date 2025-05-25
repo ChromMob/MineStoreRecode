@@ -4,9 +4,12 @@ buildscript {
     }
 }
 
+
 plugins {
     id 'java'
 }
+
+version "1.0.0"
 
 repositories {
     maven {
@@ -16,8 +19,8 @@ repositories {
 }
 
 dependencies {
-    project(":MineStore-API")
-    //compileOnly "com.github.ChromMob:MineStoreRecode:master-SNAPSHOT"
+    project(path: ':MineStore-API')
+    compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
 }
 
 configurations.configureEach {

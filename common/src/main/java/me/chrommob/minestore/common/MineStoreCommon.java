@@ -1,33 +1,34 @@
 package me.chrommob.minestore.common;
 
-import me.chrommob.config.ConfigManager;
 import me.chrommob.minestore.api.Registries;
-import me.chrommob.minestore.api.generic.AuthData;
-import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
 import me.chrommob.minestore.api.event.types.MineStoreReloadEvent;
+import me.chrommob.minestore.api.generic.AuthData;
+import me.chrommob.minestore.api.generic.MineStoreAddon;
+import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.api.ApiHandler;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
-import me.chrommob.minestore.common.command.*;
 import me.chrommob.minestore.common.commandGetters.WebListener;
-import me.chrommob.minestore.common.commandHolder.CommandDumper;
+import me.chrommob.minestore.common.commandHolder.storage.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
-import me.chrommob.minestore.common.commandHolder.NewCommandDumper;
-import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.common.commandHolder.storage.NewCommandDumper;
+import me.chrommob.minestore.common.commands.*;
 import me.chrommob.minestore.common.config.PluginConfig;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.payment.PaymentHandler;
-import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
-import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
+import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import me.chrommob.minestore.common.verification.VerificationManager;
 import me.chrommob.minestore.common.verification.VerificationResult;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigManager;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigWrapper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -45,7 +46,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -168,10 +168,11 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         webListener.start();
-        new MineStoreEnableEvent().call();
         new ApiHandler(new AuthData(pluginConfig.getKey("store-url").getAsString(), pluginConfig.getKey("api").getKey("key").getAsString()));
+        new MineStoreEnableEvent().call();
     }
 
+    private Map<MineStoreAddon, ConfigManager> addonConfigs = new HashMap<>();
     private void registerAddons() {
         File addonFolder = new File(Registries.CONFIG_FILE.get().getParentFile(), "addons");
         if (!addonFolder.exists()) {
@@ -203,7 +204,6 @@ public class MineStoreCommon {
                     continue;
                 }
                 ClassLoader dependencyClassLoader = getClass().getClassLoader();
-                log("Loading addon " + name + " from " + file.getName() + "...");
                 URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
                 Class<?> cls = urlClassLoader.loadClass(mainClass);
@@ -212,13 +212,22 @@ public class MineStoreCommon {
                     continue;
                 }
                 if (addonClasses.contains(mainClass)) {
-                    log("Addon " + file.getName() + " is already loaded!");
                     continue;
                 }
+                log("Loading addon " + name + " from " + file.getName() + "...");
                 addonClasses.add(mainClass);
+                File loadedAddonFolder = new File(addonFolder, name);
+                loadedAddonFolder.mkdirs();
+                ConfigManager configManager = new ConfigManager(loadedAddonFolder);
+                configManager.reloadConfig("config");
                 try {
                     MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
+                    ConfigWrapper configWrapper = new ConfigWrapper("config", addon.getConfigKeys());
+                    configManager.addConfig(configWrapper);
+                    addon.setConfigWrapper(configWrapper);
                     addons.add(addon);
+                    addonConfigs.put(addon, configManager);
+                    addon.onEnable();
                     log("Loaded addon " + addon.getName() + " from " + file.getName());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -229,8 +238,8 @@ public class MineStoreCommon {
         }
     }
 
-    public String getAddons() {
-        return addons.stream().map(MineStoreAddon::getName).collect(Collectors.joining(", "));
+    public List<MineStoreAddon> getAddons() {
+        return new ArrayList<>(addons);
     }
 
     public void notError() {
@@ -332,6 +341,9 @@ public class MineStoreCommon {
     }
 
     public void reload() {
+        for (MineStoreAddon addon : addons) {
+            addonConfigs.get(addon).reloadConfig("config");
+        }
         new MineStoreReloadEvent().call();
         log("Reloading...");
         pluginConfig.reload();
@@ -340,6 +352,18 @@ public class MineStoreCommon {
             return;
         }
         version = MineStoreVersion.getMineStoreVersion(pluginConfig.getKey("store-url").getAsString());
+        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
+            if (databaseManager == null) {
+                databaseManager = new DatabaseManager(this);
+            } else {
+                databaseManager.stop();
+            }
+        } else {
+            if (databaseManager != null) {
+                databaseManager.stop();
+            }
+            databaseManager = null;
+        }
         verificationManager = null;
         VerificationResult verificationResult = verify();
         Component message = null;
@@ -356,14 +380,8 @@ public class MineStoreCommon {
         guiData.start();
         placeHolderData.start();
         statsSender.start();
-        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
-            if (databaseManager == null) {
-                databaseManager = new DatabaseManager(this);
-                databaseManager.start();
-            } else {
-                databaseManager.stop();
-                databaseManager.start();
-            }
+        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean() && databaseManager != null) {
+            databaseManager.start();
         }
     }
 
@@ -432,7 +450,7 @@ public class MineStoreCommon {
     }
 
     public void log(String message) {
-        writeDebugLog(message);
+        writeDebugLog(message + "\n");
         Registries.LOGGER.get().log(message);
     }
 
@@ -478,7 +496,7 @@ public class MineStoreCommon {
         }
     }
 
-    public void debug(Class<?> c,Exception e) {
+    public void debug(Class<?> c,Throwable e) {
         if (e.getMessage() != null) {
             debug(c, e.getMessage());
         }

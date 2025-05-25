@@ -1,8 +1,8 @@
 package me.chrommob.minestore.common.authHolder;
 
-import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.common.MineStoreCommon;
 
 public class AuthUser {
     private final MineStoreCommon plugin;

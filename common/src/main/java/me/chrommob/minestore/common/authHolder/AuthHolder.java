@@ -1,9 +1,10 @@
 package me.chrommob.minestore.common.authHolder;
 
-import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.common.MineStoreCommon;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.OutputStream;
@@ -107,13 +108,13 @@ public final class AuthHolder {
     If the user is already in the authUsers map, the time is updated else the user is added to the map.
      */
     public void listener(ParsedResponse parsedResponse) {
-        AbstractUser abstractUser = new AbstractUser(parsedResponse.username(), null);
-        if (!abstractUser.user().isOnline() || abstractUser.user() instanceof CommonConsoleUser) {
+        AbstractUser abstractUser = Registries.USER_GETTER.get().get(parsedResponse.username());
+        if (!abstractUser.commonUser().isOnline() || abstractUser.commonUser() instanceof CommonConsoleUser) {
             return;
         }
         AuthUser authUser = authUsers.getOrDefault(parsedResponse.username(), null);
         if (authUser == null) {
-            authUsers.put(parsedResponse.username().toLowerCase(), new AuthUser(plugin, abstractUser.user(), parsedResponse, System.currentTimeMillis()));
+            authUsers.put(parsedResponse.username().toLowerCase(), new AuthUser(plugin, abstractUser.commonUser(), parsedResponse, System.currentTimeMillis()));
         } else {
             authUser.setTime(System.currentTimeMillis());
         }

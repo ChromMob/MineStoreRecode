@@ -1,8 +1,6 @@
 package me.chrommob.minestore.api.event;
 
 import me.chrommob.minestore.api.generic.MineStoreAddon;
-import me.chrommob.minestore.api.WebApiAccessor;
-import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
 
 import java.util.HashSet;
 import java.util.List;

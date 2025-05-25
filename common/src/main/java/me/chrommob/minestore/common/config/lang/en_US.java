@@ -1,7 +1,7 @@
 package me.chrommob.minestore.common.config.lang;
 
-import me.chrommob.config.ConfigKey;
-import me.chrommob.config.ConfigWrapper;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigKey;
+import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigWrapper;
 
 import java.util.ArrayList;
 import java.util.List;

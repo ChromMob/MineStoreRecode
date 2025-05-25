@@ -1,12 +1,16 @@
 package me.chrommob.minestore.common.commandGetters;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import io.leangen.geantyref.TypeToken;
+import me.chrommob.minestore.api.event.MineStoreEvent;
 import me.chrommob.minestore.api.event.types.MineStorePurchaseEvent;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
-import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
@@ -40,12 +44,14 @@ public class WebListener {
                         Thread.sleep(9500);
                         wasEmpty = false;
                     } catch (InterruptedException e) {
+                        plugin.debug(this.getClass(), "Interrupted while waiting for data");
+                        plugin.debug(this.getClass(), e);
                         break;
                     }
                     continue;
                 }
                 handleExecuted();
-                plugin.debug(this.getClass(), "[WebListener] Running...");
+                plugin.debug(this.getClass(), "Running...");
                 List<ParsedResponse> parsedResponses = fetchData();
                 if (wasEmpty || parsedResponses.isEmpty()) {
                     plugin.debug(this.getClass(), wasEmpty ? "Issue while parsing json" : "Parsed responses is empty");
@@ -55,6 +61,8 @@ public class WebListener {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
+                        plugin.debug(this.getClass(), "Interrupted while waiting for next loop after empty");
+                        plugin.debug(this.getClass(), e);
                         break;
                     }
                     continue;
@@ -65,12 +73,9 @@ public class WebListener {
                     if (parsedResponse.type() != ParsedResponse.TYPE.COMMAND) {
                         continue;
                     }
-                    MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStorePurchaseEvent.COMMAND_TYPE.ONLINE : MineStorePurchaseEvent.COMMAND_TYPE.OFFLINE);
+                    MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStoreEvent.COMMAND_TYPE.ONLINE : MineStoreEvent.COMMAND_TYPE.OFFLINE);
                     event.call();
-                    if (event.doNotExecute()) {
-                        continue;
-                    }
-                    ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStorePurchaseEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
+                    ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStoreEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
                     commands.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
                     plugin.debug(this.getClass(), "Got command: " + "\"" + parsedResponse.command() + "\""
                             + " with id: " + parsedResponse.commandId() + " for player: "
@@ -109,6 +114,8 @@ public class WebListener {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
+                    plugin.debug(this.getClass(), "Interrupted while waiting for next loop after posting");
+                    plugin.debug(this.getClass(), e);
                     break;
                 }
             }
@@ -456,6 +463,9 @@ public class WebListener {
                 plugin.debug(this.getClass(), e);
                 return CheckResponse.empty();
             }
+        }).exceptionally(e -> {
+            plugin.debug(getClass(), e);
+            return CheckResponse.empty();
         });
     }
 

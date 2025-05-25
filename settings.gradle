@@ -11,29 +11,44 @@ pluginManagement {
         }
         mavenCentral()
     }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "me.chrommob.skidfuscatorgradle") {
-                useModule("com.github.ChromMob.SkidFuscatorGradle:SkidFuscatorGradle:master-SNAPSHOT")
-            }
-        }
-    }
 }
 
 rootProject.name = 'MineStore'
 
 include "common"
-include "bukkit"
-include "velocity"
-include "bungee"
-//include "sponge"
-include "fabric"
+include "bukkit:impl", "bukkit:plugin"
+include "velocity:impl", "velocity:plugin"
+include "bungee:impl", "bungee:plugin"
+include "fabric:impl", "fabric:plugin"
 include "api"
 include "addon"
 
-project(":bukkit").name = "MineStore-Bukkit"
-project(":velocity").name = "MineStore-Velocity"
-project(":bungee").name = "MineStore-Bungee"
+project(":bukkit:plugin").projectDir = file("bukkit/plugin")
+project(":bukkit:plugin").name = "bukkit-plugin"
+
+project(":bukkit:impl").projectDir = file("bukkit/impl")
+project(":bukkit:impl").name = "bukkit-impl"
+
+project(":bungee:plugin").projectDir = file("bungee/plugin")
+project(":bungee:plugin").name = "bungee-plugin"
+
+project(":bungee:impl").projectDir = file("bungee/impl")
+project(":bungee:impl").name = "bungee-impl"
+
+project(":velocity:plugin").projectDir = file("velocity/plugin")
+project(":velocity:plugin").name = "velocity-plugin"
+
+project(":velocity:impl").projectDir = file("velocity/impl")
+project(":velocity:impl").name = "velocity-impl"
+
+project(":fabric:plugin").projectDir = file("fabric/plugin")
+project(":fabric:plugin").name = "fabric-plugin"
+
+project(":fabric:impl").projectDir = file("fabric/impl")
+project(":fabric:impl").name = "fabric-impl"
+
+project(":addon").name = "ConditionalExecuteAddon"
+
 //project(":sponge").name = "MineStore-Sponge"
-project(":fabric").name = "MineStore-Fabric"
+//project(":fabric").name = "MineStore-Fabric"
 project(':api').name = 'MineStore-API'

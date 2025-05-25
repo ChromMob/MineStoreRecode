@@ -1,13 +1,9 @@
 package me.chrommob.minestore.common.dumper;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.stats.BuildConstats;
 import me.chrommob.minestore.common.MineStoreCommon;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 @SuppressWarnings("FieldCanBeLocal unused")
@@ -21,7 +17,7 @@ public class DumpData {
 
     public DumpData(String log, MineStoreCommon plugin) {
         this.config = plugin.pluginConfig().getConfig();
-        this.version = plugin.jarFile().getAbsolutePath();
+        this.version = BuildConstats.VERSION;
         this.platform = Registries.PLATFORM.get();
         this.plaformName = Registries.PLATFORM_NAME.get();
         this.platformVersion = Registries.PLATFORM_VERSION.get();

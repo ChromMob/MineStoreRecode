@@ -1,7 +1,5 @@
 package me.chrommob.minestore.common.placeholder.json;
 
-import com.google.gson.annotations.SerializedName;
-
 @SuppressWarnings("unused")
 public class DonationGoal {
     private final double donationGoalAmount;

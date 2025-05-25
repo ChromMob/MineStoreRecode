@@ -15,11 +15,23 @@ public class StoredCommand {
         return new ParsedResponse(ParsedResponse.TYPE.COMMAND, ParsedResponse.COMMAND_TYPE.ONLINE, command, username, requestId);
     }
 
+    public static StoredCommand fromParsedResponse(ParsedResponse parsedResponse) {
+        return new StoredCommand(parsedResponse.command(), parsedResponse.commandId());
+    }
+
     public String command() {
         return command;
     }
 
     public int requestId() {
         return requestId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StoredCommand that = (StoredCommand) o;
+        return requestId == that.requestId && command.equals(that.command);
     }
 }
