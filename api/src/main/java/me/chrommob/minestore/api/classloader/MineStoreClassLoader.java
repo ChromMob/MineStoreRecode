@@ -89,6 +89,7 @@ public class MineStoreClassLoader extends URLClassLoader {
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-services", "2.0.0"));
         dependencies.add(new MineStorePluginDependency("org.mariadb.jdbc", "mariadb-java-client", "3.5.3"));
         dependencies.add(new MineStorePluginDependency("com.mysql", "mysql-connector-j", "9.3.0"));
+        dependencies.add(new MineStorePluginDependency("io.leangen.geantyref", "geantyref", "2.0.1"));
 
         repositories.add(RepositoryRegistry.MAVEN.getRepository());
         repositories.add(RepositoryRegistry.MAVEN1.getRepository());
