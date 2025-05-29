@@ -20,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -229,7 +231,7 @@ public class PlaceHolderData {
         PlaceHolderManager.getInstance().registerPlaceHolder("top_donator_price_(\\d+)", (name, param) -> {
             param = param.replaceFirst("top_donator_price_", "");
             int arg = Integer.parseInt(param);
-            return String.valueOf(getTopDonator(arg - 1).getPrice());
+            return toFixed(getTopDonator(arg - 1).getPrice(), 2);
         });
         //Regex that matches last_donator_username_1, last_donator_username_2, etc.
         PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_username_(\\d+)", (name, param) -> {
@@ -241,7 +243,7 @@ public class PlaceHolderData {
         PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_price_(\\d+)", (name, param) -> {
             param = param.replaceFirst("last_donator_price_", "");
             int arg = Integer.parseInt(param);
-            return String.valueOf(getLastDonator(arg - 1).getPrice());
+            return toFixed(getLastDonator(arg - 1).getPrice(), 2);
         });
         //Regex that matches last_donator_package_1, last_donator_package_2, etc.
         PlaceHolderManager.getInstance().registerPlaceHolder("last_donator_package_(\\d+)", (name, param) -> {
@@ -249,9 +251,9 @@ public class PlaceHolderData {
             int arg = Integer.parseInt(param);
             return getLastDonator(arg - 1).getPackageName();
         });
-        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_current", (name, param) -> String.valueOf(donationGoal.getDonationGoalCurrentAmount()));
-        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_target", (name, param) -> String.valueOf(donationGoal.getDonationGoalAmount()));
-        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_percentage", (name, param) -> String.valueOf(donationGoal.getDonationGoalPercentage()));
+        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_current", (name, param) -> toFixed(donationGoal.getDonationGoalCurrentAmount(), 2));
+        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_target", (name, param) -> toFixed(donationGoal.getDonationGoalAmount(), 2));
+        PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_percentage", (name, param) -> toFixed(donationGoal.getDonationGoalPercentage(), 2));
         PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_bar_(\\d+)", (name, param) -> {
             param = param.replaceFirst("donation_goal_bar_", "");
             int amount = Integer.parseInt(param);
@@ -287,8 +289,17 @@ public class PlaceHolderData {
             if (profile == null) {
                 return "";
             }
-            return String.valueOf(profile.moneySpent());
+            return toFixed(profile.moneySpent(), 2);
         });
+    }
+
+    String toFixed(double value, int precision) {
+        if (precision < 0) {
+            precision = 0;
+        }
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(precision, RoundingMode.HALF_UP);
+        return bd.toPlainString();
     }
 
     public VerificationResult load() {
