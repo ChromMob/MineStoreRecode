@@ -65,7 +65,6 @@ public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapp
         Set<MineStorePluginRepository> repositories = new HashSet<>();
         repositories.add(RepositoryRegistry.MAVEN.getRepository());
         repositories.add(RepositoryRegistry.SONATYPE.getRepository());
-        dependencies.add(new MineStorePluginDependency("io.leangen.geantyref", "geantyref", "1.3.15"));
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-bungee", "2.0.0-beta.10"));
 
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bungeecord", "4.3.4"));
