@@ -6,19 +6,17 @@ import me.chrommob.minestore.api.classloader.repository.MineStorePluginRepositor
 import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 public class MineStoreClassLoader extends URLClassLoader {
     private final File folder;
+    private final RelocationHandler relocationHandler;
     private final Set<MineStoreDependencies> dependencies = new HashSet<>();
-    private final List<MineStorePluginDependency> loadedDependencies = new ArrayList<>();
+    private final Set<MineStoreDependencies> loadedDependencies = new HashSet<>();
     static {
         ClassLoader.registerAsParallelCapable();
     }
@@ -26,11 +24,14 @@ public class MineStoreClassLoader extends URLClassLoader {
     public MineStoreClassLoader(ClassLoader parent, File folder) {
         super(new URL[0], parent);
         this.folder = folder;
+        loadRelocateDependencies();
+        relocationHandler = new RelocationHandler(this);
         dependencies.add(getGlobalDependencies());
     }
 
     public void addJarToClassLoader(URL url) {
         super.addURL(url);
+        System.out.println("Added " + url);
     }
 
     private boolean checkConflict() {
@@ -52,32 +53,42 @@ public class MineStoreClassLoader extends URLClassLoader {
         this.dependencies.add(dependencies);
     }
 
+    private final Set<File> used = new HashSet<>();
     public void loadDependencies() {
         if (checkConflict()) {
             throw new IllegalStateException("Conflicting dependencies found!");
         }
 
         for (MineStoreDependencies depend : dependencies) {
-            loadedDependencies.addAll(depend.getDependencies());
-        }
-
-        Set<File> used = new HashSet<>();
-        for (MineStoreDependencies depend : dependencies) {
-            for (URI dependencyJar : depend.getDependencyJars(folder, used)) {
+            if (loadedDependencies.contains(depend)) {
+                continue;
+            }
+            for (URI dependencyJar : depend.getDependencyJars(folder, used, relocationHandler)) {
                 try {
                     addJarToClassLoader(dependencyJar.toURL());
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
             }
+            loadedDependencies.add(depend);
         }
-
         for (File file : Objects.requireNonNull(folder.listFiles())) {
             if (used.contains(file)) {
                 continue;
             }
             file.delete();
         }
+    }
+
+    private void loadRelocateDependencies() {
+        Set<MineStorePluginDependency> dependencies = new HashSet<>();
+        Set<MineStorePluginRepository> repositories = new HashSet<>();
+        repositories.add(RepositoryRegistry.MAVEN.getRepository());
+        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm", "9.1"));
+        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm-commons", "9.1"));
+        dependencies.add(new MineStorePluginDependency("me.lucko", "jar-relocator", "1.7"));
+        this.dependencies.add(new MineStoreDependencies(repositories, dependencies));
+        loadDependencies();
     }
 
     private MineStoreDependencies getGlobalDependencies() {
@@ -97,17 +108,16 @@ public class MineStoreClassLoader extends URLClassLoader {
         return new MineStoreDependencies(repositories, dependencies);
     }
 
-    public void loadCommonJar() {
-        File file = new File(folder, "MineStore-Common.jar");
-        try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Common.jarjar")) {
-            Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            addJarToClassLoader(file.toURI().toURL());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+    public void addCommonJar() {
+        addCommonJar(new HashMap<>());
+    }
+
+    public void addCommonJar(Map<String, String> relocations) {
+        Set<MineStorePluginDependency> dependencies = new HashSet<>();
+        Set<MineStorePluginRepository> repositories = new HashSet<>();
+
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Common", "", relocations));
+        repositories.add(RepositoryRegistry.MAVEN.getRepository());
+        add(new MineStoreDependencies(repositories, dependencies));
     }
 }

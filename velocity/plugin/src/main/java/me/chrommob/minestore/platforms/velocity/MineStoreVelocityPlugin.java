@@ -49,7 +49,7 @@ public class MineStoreVelocityPlugin implements MineStoreBootstrapper {
 
             classLoader.add(getDependencies());
             classLoader.loadDependencies();
-            classLoader.loadCommonJar();
+            classLoader.addCommonJar();
 
             File file = new File(dataPath.resolve("dependencies").toFile(), "MineStore-Velocity.jar");
             try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Velocity.jarjar")) {

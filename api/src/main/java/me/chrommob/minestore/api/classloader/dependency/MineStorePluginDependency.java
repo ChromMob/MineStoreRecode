@@ -7,17 +7,25 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class MineStorePluginDependency {
     private final String group;
     private final String name;
     private final String version;
+    private final Map<String, String> relocations;
 
     public MineStorePluginDependency(String group, String name, String version) {
+        this(group, name, version, new HashMap<>());
+    }
+
+    public MineStorePluginDependency(String group, String name, String version, Map<String, String> relocations) {
         this.group = group;
         this.name = name;
         this.version = version;
+        this.relocations = relocations;
     }
 
     public static MineStorePluginDependency fromGradle(String gradle) {
@@ -158,5 +166,17 @@ public class MineStorePluginDependency {
             return false;
         }
         return md52.get().equals(getMd5(file));
+    }
+
+    public void addRelocation(String from, String to) {
+        relocations.put(from, to);
+    }
+
+    public Map<String, String> getRelocations() {
+        return relocations;
+    }
+
+    public boolean hasRelocations() {
+        return !relocations.isEmpty();
     }
 }

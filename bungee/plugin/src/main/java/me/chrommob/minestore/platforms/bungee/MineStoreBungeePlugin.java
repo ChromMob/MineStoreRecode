@@ -27,8 +27,8 @@ public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapp
             classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile());
 
             classLoader.add(getDependencies());
+            classLoader.addCommonJar();
             classLoader.loadDependencies();
-            classLoader.loadCommonJar();
 
             File file = new File(getDataFolder().toPath().resolve("dependencies").toFile(), "MineStore-Bungee.jar");
             try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Bungee.jarjar")) {

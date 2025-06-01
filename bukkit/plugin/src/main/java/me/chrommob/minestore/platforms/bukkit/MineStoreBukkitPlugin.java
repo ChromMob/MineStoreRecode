@@ -9,13 +9,8 @@ import me.chrommob.minestore.api.classloader.repository.MineStorePluginRepositor
 import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootstrapper {
     private static final String MAIN_CLASS = "me.chrommob.minestore.platforms.bukkit.MineStoreBukkit";
@@ -28,14 +23,11 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
             classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile());
 
             classLoader.add(getDependencies());
+            Map<String, String> relocations = new HashMap<>();
+            relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
+            classLoader.addCommonJar(relocations);
             classLoader.loadDependencies();
-            classLoader.loadCommonJar();
 
-            File file = new File(getDataFolder().toPath().resolve("dependencies").toFile(), "MineStore-Bukkit.jar");
-            try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Bukkit.jarjar")) {
-                Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
-            classLoader.addJarToClassLoader(file.toURI().toURL());
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(JavaPlugin.class).newInstance(this);
             plugin.onEnable();
@@ -62,13 +54,16 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
 
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bukkit", "4.3.4"));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4"));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4"));
-        //net.kyori:adventure-text-serializer-gson-legacy-impl:4.13.1
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson-legacy-impl", "4.13.1"));
-        //pkg:maven/net.kyori/adventure-nbt@4.13.1
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-nbt", "4.13.1"));
+        Map<String, String> relocations = new HashMap<>();
+        relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
+
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bukkit", "4.3.4", relocations));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4", relocations));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4", relocations));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson-legacy-impl", "4.13.1", relocations));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-nbt", "4.13.1", relocations));
+
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit", "", relocations));
 
         MineStorePluginDependency cloudPaper = MineStorePluginDependency.fromGradle("org.incendo:cloud-paper:2.0.0-beta.10");
         MineStorePluginDependency cloudBukkit = MineStorePluginDependency.fromGradle("org.incendo:cloud-bukkit:2.0.0-beta.10");

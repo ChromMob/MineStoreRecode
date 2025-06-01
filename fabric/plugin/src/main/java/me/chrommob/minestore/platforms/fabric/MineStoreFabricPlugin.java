@@ -64,7 +64,7 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
             classLoader = new MineStoreClassLoader(getClass().getClassLoader(), FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("dependencies").toFile());
             classLoader.add(getDependencies());
             classLoader.loadDependencies();
-            classLoader.loadCommonJar();
+            classLoader.addCommonJar();
 
             File file = new File(FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("dependencies").toFile(), "MineStore-Fabric.jar");
             try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Fabric.jarjar")) {
