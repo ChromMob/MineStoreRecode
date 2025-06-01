@@ -1,13 +1,13 @@
 package me.chrommob.minestore.platforms.fabric;
 
 import me.chrommob.minestore.api.Registries;
-import me.chrommob.minestore.api.classloader.MineStoreBootstrapper;
-import me.chrommob.minestore.api.classloader.MineStoreClassLoader;
-import me.chrommob.minestore.api.classloader.MineStorePlugin;
-import me.chrommob.minestore.api.classloader.dependency.MineStoreDependencies;
-import me.chrommob.minestore.api.classloader.dependency.MineStorePluginDependency;
-import me.chrommob.minestore.api.classloader.repository.MineStorePluginRepository;
-import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
+import me.chrommob.minestore.classloader.MineStoreBootstrapper;
+import me.chrommob.minestore.classloader.MineStoreClassLoader;
+import me.chrommob.minestore.classloader.MineStorePlugin;
+import me.chrommob.minestore.classloader.dependency.MineStoreDependencies;
+import me.chrommob.minestore.classloader.dependency.MineStorePluginDependency;
+import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
+import me.chrommob.minestore.classloader.repository.RepositoryRegistry;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import net.fabricmc.api.ModInitializer;

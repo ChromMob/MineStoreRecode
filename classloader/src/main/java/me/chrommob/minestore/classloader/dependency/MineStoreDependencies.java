@@ -1,12 +1,14 @@
-package me.chrommob.minestore.api.classloader.dependency;
+package me.chrommob.minestore.classloader.dependency;
 
-import me.chrommob.minestore.api.classloader.RelocationHandler;
-import me.chrommob.minestore.api.classloader.repository.MineStorePluginRepository;
+import me.chrommob.minestore.classloader.MineStoreBootstrapper;
+import me.chrommob.minestore.classloader.RelocationHandler;
+import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -83,9 +85,11 @@ public class MineStoreDependencies {
                             used.add(file);
                             found = true;
                         }
+                    } else {
+                        found = true;
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    e.printStackTrace(System.err);
                 }
                 if (found) {
                     continue;

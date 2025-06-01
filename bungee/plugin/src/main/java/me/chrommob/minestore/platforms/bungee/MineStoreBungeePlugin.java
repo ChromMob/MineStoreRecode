@@ -1,40 +1,35 @@
 package me.chrommob.minestore.platforms.bungee;
 
-import me.chrommob.minestore.api.classloader.MineStoreBootstrapper;
-import me.chrommob.minestore.api.classloader.MineStoreClassLoader;
-import me.chrommob.minestore.api.classloader.MineStorePlugin;
-import me.chrommob.minestore.api.classloader.dependency.MineStoreDependencies;
-import me.chrommob.minestore.api.classloader.dependency.MineStorePluginDependency;
-import me.chrommob.minestore.api.classloader.repository.MineStorePluginRepository;
-import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
+import me.chrommob.minestore.classloader.MineStoreBootstrapper;
+import me.chrommob.minestore.classloader.MineStoreClassLoader;
+import me.chrommob.minestore.classloader.MineStorePlugin;
+import me.chrommob.minestore.classloader.dependency.MineStoreDependencies;
+import me.chrommob.minestore.classloader.dependency.MineStorePluginDependency;
+import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
+import me.chrommob.minestore.classloader.repository.RepositoryRegistry;
 import net.md_5.bungee.api.plugin.Plugin;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapper {
     private static final String MAIN_CLASS = "me.chrommob.minestore.platforms.bungee.MineStoreBungee";
     private MineStorePlugin plugin;
     private MineStoreClassLoader classLoader;
+
     @Override
     public void onEnable() {
         try {
-            classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile());
+            Map<String, String> relocations = new HashMap<>();
+            relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
+            classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile(), relocations);
 
             classLoader.add(getDependencies());
-            classLoader.addCommonJar();
+            classLoader.addCommonJar(relocations);
             classLoader.loadDependencies();
-
-            File file = new File(getDataFolder().toPath().resolve("dependencies").toFile(), "MineStore-Bungee.jar");
-            try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Bungee.jarjar")) {
-                Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
-            classLoader.addJarToClassLoader(file.toURI().toURL());
 
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(Plugin.class).newInstance(this);
@@ -63,13 +58,18 @@ public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapp
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
         Set<MineStorePluginRepository> repositories = new HashSet<>();
+
+        Map<String, String> relocations = new HashMap<>();
+        relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
+
         repositories.add(RepositoryRegistry.MAVEN.getRepository());
         repositories.add(RepositoryRegistry.SONATYPE.getRepository());
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Bungee", "", relocations));
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-bungee", "2.0.0-beta.10"));
 
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bungeecord", "4.3.4"));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4"));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4"));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bungeecord", "4.3.4", relocations));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4", relocations));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4", relocations));
         return new MineStoreDependencies(repositories, dependencies);
     }
 }

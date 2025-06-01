@@ -1,7 +1,7 @@
 package me.chrommob.minestore.platforms.fabric;
 
 import me.chrommob.minestore.api.Registries;
-import me.chrommob.minestore.api.classloader.MineStorePlugin;
+import me.chrommob.minestore.classloader.MineStorePlugin;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.platforms.fabric.events.FabricPlayerEvent;
 import me.chrommob.minestore.platforms.fabric.logger.FabricLogger;

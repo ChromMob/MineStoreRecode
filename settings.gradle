@@ -22,6 +22,7 @@ include "bungee:impl", "bungee:plugin"
 include "fabric:impl", "fabric:plugin"
 include "api"
 include "addon"
+include "classloader"
 
 project(":bukkit:plugin").projectDir = file("bukkit/plugin")
 project(":bukkit:plugin").name = "bukkit-plugin"
@@ -52,3 +53,4 @@ project(":addon").name = "ConditionalExecuteAddon"
 //project(":sponge").name = "MineStore-Sponge"
 //project(":fabric").name = "MineStore-Fabric"
 project(':api').name = 'MineStore-API'
+project(':classloader').name = 'MineStore-ClassLoader'

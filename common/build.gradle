@@ -6,6 +6,7 @@ dependencies {
     implementation "net.kyori:adventure-text-minimessage:4.18.0"
 
     implementation(project(path: ':MineStore-API', configuration: 'shadow'))
+    compileOnly(project(path: ':MineStore-ClassLoader', configuration: 'shadow'))
 
     implementation "com.google.guava:guava:33.4.7-jre"
     implementation 'com.zaxxer:HikariCP:4.0.3'

@@ -59,7 +59,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.4.2'
+    version = '3.4.3'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -98,9 +98,10 @@ subprojects {
         compileOnly 'com.google.code.gson:gson:2.8.9'
     }
 
-    if (project.name != "common" && project.name != "MineStore-API") {
+    if (project.name != "common" && project.name != "MineStore-API" && project.name != "MineStore-ClassLoader") {
         dependencies {
             compileOnly project(path: ':common', configuration: 'shadow')
+            compileOnly project(path: ':MineStore-ClassLoader', configuration: 'shadow')
             compileOnly project(path: ':MineStore-API', configuration: 'shadow')
         }
     }
@@ -213,7 +214,7 @@ tasks.processResources {
 
 
 dependencies {
-    implementation project(path: ':MineStore-API', configuration: 'shadow')
+    implementation project(path: ':MineStore-ClassLoader', configuration: 'shadow')
     implementation project(path: ':bungee:bungee-plugin', configuration: 'shadow')
     implementation project(path: ':bukkit:bukkit-plugin', configuration: 'shadow')
     implementation project(path: ':velocity:velocity-plugin', configuration: 'shadow')

@@ -9,6 +9,7 @@ import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.classloader.MineStoreClassLoader;
 import me.chrommob.minestore.common.api.ApiHandler;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.commandGetters.WebListener;
@@ -172,7 +173,7 @@ public class MineStoreCommon {
         new MineStoreEnableEvent().call();
     }
 
-    private Map<MineStoreAddon, ConfigManager> addonConfigs = new HashMap<>();
+    private final Map<MineStoreAddon, ConfigManager> addonConfigs = new HashMap<>();
     private void registerAddons() {
         File addonFolder = new File(Registries.CONFIG_FILE.get().getParentFile(), "addons");
         if (!addonFolder.exists()) {
@@ -204,6 +205,12 @@ public class MineStoreCommon {
                     continue;
                 }
                 ClassLoader dependencyClassLoader = getClass().getClassLoader();
+                if (dependencyClassLoader instanceof MineStoreClassLoader) {
+                    MineStoreClassLoader mineStoreClassLoader = (MineStoreClassLoader) dependencyClassLoader;
+                    if (mineStoreClassLoader.relocateAddon()) {
+                        file = mineStoreClassLoader.remapAddon(file);
+                    }
+                }
                 URL[] urls = { new URL("jar:file:" + file.getPath() + "!/") };
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls, dependencyClassLoader);
                 Class<?> cls = urlClassLoader.loadClass(mainClass);

@@ -1,4 +1,6 @@
-package me.chrommob.minestore.api.classloader;
+package me.chrommob.minestore.classloader;
+
+import me.chrommob.minestore.classloader.MineStoreClassLoader;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -27,7 +29,6 @@ public class RelocationHandler {
 
     public boolean relocate(File file, File relocated, Map<String, String> relocations) {
         try {
-            System.out.println("Relocating " + file.getName() + " to " + relocated.getName());
             Object relocator = this.jarRelocatorConstructor.newInstance(file, relocated, relocations);
             this.jarRelocatorRunMethod.invoke(relocator);
         } catch (Exception e) {

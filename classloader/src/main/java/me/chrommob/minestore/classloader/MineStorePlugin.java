@@ -1,4 +1,4 @@
-package me.chrommob.minestore.api.classloader;
+package me.chrommob.minestore.classloader;
 
 public interface MineStorePlugin {
     void onEnable();

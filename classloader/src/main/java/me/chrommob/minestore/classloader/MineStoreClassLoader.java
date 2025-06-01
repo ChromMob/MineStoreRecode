@@ -1,9 +1,9 @@
-package me.chrommob.minestore.api.classloader;
+package me.chrommob.minestore.classloader;
 
-import me.chrommob.minestore.api.classloader.dependency.MineStoreDependencies;
-import me.chrommob.minestore.api.classloader.dependency.MineStorePluginDependency;
-import me.chrommob.minestore.api.classloader.repository.MineStorePluginRepository;
-import me.chrommob.minestore.api.classloader.repository.RepositoryRegistry;
+import me.chrommob.minestore.classloader.dependency.MineStoreDependencies;
+import me.chrommob.minestore.classloader.dependency.MineStorePluginDependency;
+import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
+import me.chrommob.minestore.classloader.repository.RepositoryRegistry;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -17,21 +17,26 @@ public class MineStoreClassLoader extends URLClassLoader {
     private final RelocationHandler relocationHandler;
     private final Set<MineStoreDependencies> dependencies = new HashSet<>();
     private final Set<MineStoreDependencies> loadedDependencies = new HashSet<>();
+    private final Map<String, String> addonRelocations;
     static {
         ClassLoader.registerAsParallelCapable();
     }
 
-    public MineStoreClassLoader(ClassLoader parent, File folder) {
+    public MineStoreClassLoader(ClassLoader parent, File folder, Map<String, String> addonRelocations) {
         super(new URL[0], parent);
         this.folder = folder;
+        this.addonRelocations = addonRelocations;
         loadRelocateDependencies();
         relocationHandler = new RelocationHandler(this);
         dependencies.add(getGlobalDependencies());
     }
 
+    public MineStoreClassLoader(ClassLoader parent, File folder) {
+        this(parent, folder, new HashMap<>());
+    }
+
     public void addJarToClassLoader(URL url) {
         super.addURL(url);
-        System.out.println("Added " + url);
     }
 
     private boolean checkConflict() {
@@ -119,5 +124,15 @@ public class MineStoreClassLoader extends URLClassLoader {
         dependencies.add(new MineStorePluginDependency("", "MineStore-Common", "", relocations));
         repositories.add(RepositoryRegistry.MAVEN.getRepository());
         add(new MineStoreDependencies(repositories, dependencies));
+    }
+
+    public boolean relocateAddon() {
+        return addonRelocations.isEmpty();
+    }
+
+    public File remapAddon(File file) {
+        File relocated = new File(folder, file.getName().replace(".jar", "-relocated.jar"));
+        relocationHandler.relocate(file, relocated, addonRelocations);
+        return relocated;
     }
 }

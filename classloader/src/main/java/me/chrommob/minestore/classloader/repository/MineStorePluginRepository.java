@@ -1,4 +1,4 @@
-package me.chrommob.minestore.api.classloader.repository;
+package me.chrommob.minestore.classloader.repository;
 
 public class MineStorePluginRepository {
     private final String name;

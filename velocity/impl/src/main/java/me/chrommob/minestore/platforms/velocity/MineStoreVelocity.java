@@ -4,7 +4,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.chrommob.minestore.api.Registries;
-import me.chrommob.minestore.api.classloader.MineStorePlugin;
+import me.chrommob.minestore.classloader.MineStorePlugin;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;

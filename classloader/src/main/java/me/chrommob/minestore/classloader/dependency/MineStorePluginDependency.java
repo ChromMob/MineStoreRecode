@@ -1,6 +1,6 @@
-package me.chrommob.minestore.api.classloader.dependency;
+package me.chrommob.minestore.classloader.dependency;
 
-import me.chrommob.minestore.api.classloader.repository.MineStorePluginRepository;
+import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
