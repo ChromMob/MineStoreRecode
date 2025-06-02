@@ -30,6 +30,7 @@ public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapp
             classLoader.add(getDependencies());
             classLoader.addCommonJar(relocations);
             classLoader.loadDependencies();
+            classLoader.removeUnusedDependencies();
 
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(Plugin.class).newInstance(this);

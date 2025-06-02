@@ -77,10 +77,14 @@ public class MineStoreClassLoader extends URLClassLoader {
             }
             loadedDependencies.add(depend);
         }
+    }
+
+    public void removeUnusedDependencies() {
         for (File file : Objects.requireNonNull(folder.listFiles())) {
             if (used.contains(file)) {
                 continue;
             }
+            System.out.println("Removing unused dependency: " + file.getName());
             file.delete();
         }
     }

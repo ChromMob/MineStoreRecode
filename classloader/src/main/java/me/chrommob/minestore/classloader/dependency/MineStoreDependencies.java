@@ -34,42 +34,53 @@ public class MineStoreDependencies {
         for (MineStorePluginDependency dependency : dependencies) {
             File file = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? ".jar" : "-" + dependency.getVersion() + ".jar"));
             boolean found = false;
-            for (MineStorePluginRepository repository : repositories) {
-                if (file.exists()) {
+            if (file.exists()) {
+                for (MineStorePluginRepository repository : repositories) {
                     if (dependency.verify(file, repository)) {
                         found = true;
                         used.add(file);
                         File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
-                        if (dependency.hasRelocations() && !relocated.exists()) {
-                            boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
-                            if (res) {
-                                file = relocated;
+                        if (dependency.hasRelocations()) {
+                            if (!relocated.exists()) {
+                                boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
+                                if (res) {
+                                    file = relocated;
+                                }
+                                used.add(file);
+                            } else {
+                                used.add(relocated);
                             }
-                            used.add(file);
                         }
                         break;
                     }
                 }
-                Optional<byte[]> optional = dependency.download(repository);
-                if (optional.isPresent()) {
-                    try {
-                        file.createNewFile();
-                        FileOutputStream fileOutputStream = new FileOutputStream(file);
-                        fileOutputStream.write(optional.get());
-                        fileOutputStream.close();
-                        found = true;
-                        used.add(file);
-                        File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
-                        if (dependency.hasRelocations() && !relocated.exists()) {
-                            boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
-                            if (res) {
-                                file = relocated;
-                            }
+            }
+            if (!found) {
+                for (MineStorePluginRepository repository : repositories) {
+                    Optional<byte[]> optional = dependency.download(repository);
+                    if (optional.isPresent()) {
+                        try {
+                            file.createNewFile();
+                            FileOutputStream fileOutputStream = new FileOutputStream(file);
+                            fileOutputStream.write(optional.get());
+                            fileOutputStream.close();
+                            found = true;
                             used.add(file);
+                            File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
+                            if (dependency.hasRelocations()) {
+                                if (relocated.exists()) {
+                                    relocated.delete();
+                                }
+                                boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
+                                if (res) {
+                                    file = relocated;
+                                    used.add(file);
+                                }
+                            }
+                            break;
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        break;
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             }

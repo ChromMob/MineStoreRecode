@@ -51,7 +51,7 @@ public class MineStoreVelocityPlugin implements MineStoreBootstrapper {
             classLoader.add(getDependencies());
             classLoader.addCommonJar();
             classLoader.loadDependencies();
-
+            classLoader.removeUnusedDependencies();
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(Object.class, ProxyServer.class, Logger.class, Path.class).newInstance(this, server, logger, dataPath);
             plugin.onEnable();

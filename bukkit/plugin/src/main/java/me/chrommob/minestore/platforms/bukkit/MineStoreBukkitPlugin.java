@@ -27,7 +27,7 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
             classLoader.add(getDependencies());
             classLoader.addCommonJar(relocations);
             classLoader.loadDependencies();
-
+            classLoader.removeUnusedDependencies();
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(JavaPlugin.class).newInstance(this);
             plugin.onEnable();
