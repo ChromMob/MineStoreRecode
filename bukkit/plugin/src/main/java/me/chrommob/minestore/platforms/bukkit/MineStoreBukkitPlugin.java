@@ -62,6 +62,7 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4", relocations));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson-legacy-impl", "4.13.1", relocations));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-nbt", "4.13.1", relocations));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson", "4.13.1", relocations));
 
         dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit", "", relocations));
 
