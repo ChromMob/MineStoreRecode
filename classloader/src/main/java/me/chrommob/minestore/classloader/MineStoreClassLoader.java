@@ -89,6 +89,34 @@ public class MineStoreClassLoader extends URLClassLoader {
         }
     }
 
+    @Override
+    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        // Delegate core Java classes to parent
+        if (name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("sun.")) {
+            return super.loadClass(name, resolve);
+        }
+
+        // First, check if already loaded
+        Class<?> c = findLoadedClass(name);
+
+        // Try to load it from this classloader (child)
+        if (c == null) {
+            try {
+                c = findClass(name); // from the URLs in this classloader
+            } catch (ClassNotFoundException e) {
+                // Not found here, delegate to parent
+                c = super.loadClass(name, resolve);
+            }
+        }
+
+        if (resolve) {
+            resolveClass(c);
+        }
+
+        return c;
+    }
+
+
     private void loadRelocateDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
         Set<MineStorePluginRepository> repositories = new HashSet<>();
