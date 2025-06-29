@@ -63,14 +63,9 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
         try {
             classLoader = new MineStoreClassLoader(getClass().getClassLoader(), FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("dependencies").toFile());
             classLoader.add(getDependencies());
-            classLoader.loadDependencies();
             classLoader.addCommonJar();
-
-            File file = new File(FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("dependencies").toFile(), "MineStore-Fabric.jar");
-            try (InputStream in = getClass().getResourceAsStream("/jars/MineStore-Fabric.jarjar")) {
-                Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
-            classLoader.addJarToClassLoader(file.toURI().toURL());
+            classLoader.loadDependencies();
+            classLoader.removeUnusedDependencies();
 
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
             plugin = mainClass.getDeclaredConstructor(MinecraftServer.class).newInstance(server);
@@ -88,8 +83,7 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
         Set<MineStorePluginRepository> repositories = new HashSet<>();
-        repositories.add(RepositoryRegistry.MAVEN.getRepository());
-        repositories.add(RepositoryRegistry.SONATYPE.getRepository());
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Fabric", ""));
         return new MineStoreDependencies(repositories, dependencies);
     }
 }
