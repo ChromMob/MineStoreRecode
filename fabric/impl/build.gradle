@@ -34,6 +34,6 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation("org.incendo:cloud-fabric:2.0.0-SNAPSHOT")
+	modImplementation("org.incendo:cloud-fabric:2.0.0-beta.9")
 	modImplementation("net.kyori:adventure-platform-fabric:5.14.1")
 }

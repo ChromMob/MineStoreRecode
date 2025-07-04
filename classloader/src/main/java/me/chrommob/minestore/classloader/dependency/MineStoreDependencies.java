@@ -85,15 +85,26 @@ public class MineStoreDependencies {
                 }
             }
             if (!found) {
-                try (InputStream in = getClass().getResourceAsStream("/jars/" + dependency.getName() + ".jarjar")) {
-                    Files.copy(Objects.requireNonNull(in), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                try {
+                    boolean same = dependency.verify("/jars/" + dependency.getName() + ".jarjar", file);
+                    if (!same) {
+                        System.out.println("Copying " + dependency.getName() + ".jarjar to " + file.getAbsolutePath());
+                        Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("/jars/" + dependency.getName() + ".jarjar")), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } else {
+                        System.out.println("Using " + dependency.getName() + ".jarjar from jars folder");
+                    }
                     used.add(file);
                     if (dependency.hasRelocations()) {
                         File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
-                        boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
-                        if (res) {
-                            file = relocated;
-                            used.add(file);
+                        if (!same) {
+                            boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
+                            if (res) {
+                                file = relocated;
+                                used.add(file);
+                                found = true;
+                            }
+                        } else {
+                            used.add(relocated);
                             found = true;
                         }
                     } else {

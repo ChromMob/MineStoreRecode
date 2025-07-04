@@ -104,52 +104,62 @@ public class MineStorePluginDependency {
         }
     }
 
-    public String getSha(File file) {
+    public String getSha(InputStream file) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            try (FileInputStream fis = new FileInputStream(file)) {
+            try (InputStream fis = file) {
                 byte[] byteArray = new byte[1024];
                 int bytesCount;
-
                 while ((bytesCount = fis.read(byteArray)) != -1) {
                     digest.update(byteArray, 0, bytesCount);
                 }
             }
-
             byte[] bytes = digest.digest();
             StringBuilder sb = new StringBuilder();
-
             for (byte b : bytes) {
                 sb.append(String.format("%02x", b));
             }
-
             return sb.toString();
         } catch (Exception e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+
+    public String getSha(File file) {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            return getSha(fis);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+
+    public String getMd5(InputStream file) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] byteArray = new byte[1024];
+            int bytesCount;
+            while ((bytesCount = file.read(byteArray)) != -1) {
+                digest.update(byteArray, 0, bytesCount);
+            }
+            byte[] bytes = digest.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
             return null;
         }
     }
 
     public String getMd5(File file) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            try (FileInputStream fis = new FileInputStream(file)) {
-                byte[] byteArray = new byte[1024];
-                int bytesCount;
-
-                while ((bytesCount = fis.read(byteArray)) != -1) {
-                    digest.update(byteArray, 0, bytesCount);
-                }
-            }
-
-            byte[] bytes = digest.digest();
-            StringBuilder sb = new StringBuilder();
-
-            for (byte b : bytes) {
-                sb.append(String.format("%02x", b));
-            }
-
-            return sb.toString();
+        try (FileInputStream fis = new FileInputStream(file)) {
+            return getMd5(fis);
         } catch (Exception e) {
+            e.printStackTrace(System.err);
             return null;
         }
     }
@@ -166,6 +176,23 @@ public class MineStorePluginDependency {
             return false;
         }
         return md52.get().equals(getMd5(file));
+    }
+
+    public boolean verify(String newFile, File oldFile) {
+        if (!oldFile.exists()) {
+            return false;
+        }
+        String sha = getSha(getClass().getResourceAsStream(newFile));
+        String md5 = getMd5(getClass().getResourceAsStream(newFile));
+        if (sha == null || md5 == null) {
+            return false;
+        }
+        String oldSha = getSha(oldFile);
+        if (!sha.equals(oldSha)) {
+            return false;
+        }
+        String oldMd5 = getMd5(oldFile);
+        return md5.equals(oldMd5);
     }
 
     public void addRelocation(String from, String to) {

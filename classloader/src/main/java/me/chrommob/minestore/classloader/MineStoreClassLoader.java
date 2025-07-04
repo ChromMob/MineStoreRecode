@@ -11,6 +11,8 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MineStoreClassLoader extends URLClassLoader {
     private final File folder;
@@ -40,19 +42,18 @@ public class MineStoreClassLoader extends URLClassLoader {
     }
 
     private boolean checkConflict() {
-        for (MineStoreDependencies depend : dependencies) {
-            for (MineStoreDependencies depend2 : dependencies) {
-                for (MineStorePluginDependency dependency : depend.getDependencies()) {
-                    for (MineStorePluginDependency dependency2 : depend2.getDependencies()) {
-                        if (dependency.conflictsWith(dependency2)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        List<MineStorePluginDependency> allDependencies = dependencies.parallelStream()
+                .flatMap(depend -> depend.getDependencies().stream())
+                .collect(Collectors.toList());
+
+        return IntStream.range(0, allDependencies.size())
+                .parallel()
+                .anyMatch(i ->
+                        IntStream.range(i + 1, allDependencies.size())
+                                .anyMatch(j -> allDependencies.get(i).conflictsWith(allDependencies.get(j)))
+                );
     }
+
 
     public void add(MineStoreDependencies dependencies) {
         this.dependencies.add(dependencies);
@@ -93,6 +94,11 @@ public class MineStoreClassLoader extends URLClassLoader {
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         // Delegate core Java classes to parent
         if (name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("sun.")) {
+            return super.loadClass(name, resolve);
+        }
+
+        // If interop also load from parent
+        if (name.startsWith("org.incendo.cloud.") || name.startsWith("io.leangen.geantyref.") || name.startsWith("net.kyori.")) {
             return super.loadClass(name, resolve);
         }
 

@@ -34,8 +34,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
-import org.incendo.cloud.setting.ManagerSetting;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedWriter;
@@ -86,15 +86,14 @@ public class MineStoreCommon {
                 debugLogFile.createNewFile();
                 debugLogWriter = new BufferedWriter(new FileWriter(debugLogFile));
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace(System.err);
             }
             configManager = new ConfigManager(configFile.getParentFile());
             pluginConfig = new PluginConfig(configManager, configFile);
             configManager.addConfig(pluginConfig);
         });
         Registries.COMMAND_MANAGER.listen(commandManager -> {
-            commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
-            annotationParser = new AnnotationParser(
+            annotationParser = new AnnotationParser<>(
                     /* Manager */ Registries.COMMAND_MANAGER.get(),
                     /* Command sender type */ AbstractUser.class);
         });
@@ -267,18 +266,7 @@ public class MineStoreCommon {
         }
         int percent = (int) (verificationManager.getErrorRate() * 100);
         log("[VerificationManager] Error rate reached: " + percent +  ", restarting... in " + (int) (verificationManager.getErrorRate() * 100) + "s");
-        if (statsSender != null)
-            statsSender.stop();
-        if (guiData != null)
-            guiData.stop();
-        if (placeHolderData != null)
-            placeHolderData.stop();
-        if (authHolder != null)
-            authHolder.stop();
-        if (databaseManager != null)
-            databaseManager.stop();
-        if (webListener != null)
-            webListener.stop();
+        stopFeatures();
         new Thread(() -> {
             try {
                 Thread.sleep((long) (verificationManager.getErrorRate() * 1000 * 100));
@@ -289,9 +277,7 @@ public class MineStoreCommon {
         }).start();
     }
 
-    public void stop() {
-        new MineStoreDisableEvent().call();
-        log("Shutting down...");
+    private void stopFeatures() {
         if (statsSender != null)
             statsSender.stop();
         if (guiData != null)
@@ -306,7 +292,13 @@ public class MineStoreCommon {
             webListener.stop();
     }
 
-    private void registerEssentialCommands() {
+    public void stop() {
+        new MineStoreDisableEvent().call();
+        log("Shutting down...");
+        stopFeatures();
+    }
+
+    public void registerEssentialCommands() {
         if (Registries.COMMAND_MANAGER.get() == null) {
             return;
         }
