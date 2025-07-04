@@ -34,7 +34,7 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
             classLoader.removeUnusedDependencies();
 
             Class<? extends MineStorePlugin> mainClass = (Class<? extends MineStorePlugin>) classLoader.loadClass(MAIN_CLASS);
-            plugin = mainClass.getDeclaredConstructor().newInstance();
+            plugin = mainClass.getConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }

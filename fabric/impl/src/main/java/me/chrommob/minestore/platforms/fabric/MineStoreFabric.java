@@ -33,7 +33,6 @@ public class MineStoreFabric implements MineStorePlugin {
 	private MinecraftServer server;
 
 	public void setServer(MinecraftServer server) {
-		instance = this;
 		this.server = server;
 		adventure = FabricServerAudiences.of(server);
 
@@ -45,6 +44,7 @@ public class MineStoreFabric implements MineStorePlugin {
 	private static final UUID NIL_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
 	public MineStoreFabric() {
+		instance = this;
 		final Function<ServerCommandSource, AbstractUser> cToA = commandSource -> Registries.USER_GETTER.get().get(commandSource.getEntity() == null ? NIL_UUID : commandSource.getEntity().getUuid());
 		final Function<AbstractUser, ServerCommandSource> aToC = abstractUser -> abstractUser.commonUser() instanceof CommonConsoleUser ? server.getCommandSource() : server.getPlayerManager().getPlayer(abstractUser.commonUser().getUUID()).getCommandSource();
 		final SenderMapper<ServerCommandSource, AbstractUser> senderMapper = new SenderMapper<ServerCommandSource, AbstractUser>() {

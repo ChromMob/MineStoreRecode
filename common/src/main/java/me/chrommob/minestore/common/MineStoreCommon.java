@@ -93,7 +93,7 @@ public class MineStoreCommon {
             configManager.addConfig(pluginConfig);
         });
         Registries.COMMAND_MANAGER.listen(commandManager -> {
-            annotationParser = new AnnotationParser<>(
+            annotationParser = new AnnotationParser(
                     /* Manager */ Registries.COMMAND_MANAGER.get(),
                     /* Command sender type */ AbstractUser.class);
         });
