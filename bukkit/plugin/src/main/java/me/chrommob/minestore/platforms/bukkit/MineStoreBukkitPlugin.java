@@ -21,7 +21,11 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
     public void onEnable() {
         try {
             Map<String, String> relocations = new HashMap<>();
-            relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
+            try {
+                Class.forName("net.kyori.adventure.Adventure");
+            } catch (ClassNotFoundException e) {
+                relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
+            }
             classLoader = new MineStoreClassLoader(this.getClass().getClassLoader(), getDataFolder().toPath().resolve("dependencies").toFile(), relocations);
 
             classLoader.add(getDependencies());
@@ -55,7 +59,13 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
 
         Map<String, String> relocations = new HashMap<>();
-        relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
+        try {
+            Class.forName("net.kyori.adventure.Adventure");
+            dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit-Kyori-Native", "", relocations));
+        } catch (ClassNotFoundException e) {
+            relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
+            dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit-Kyori-Compat", "", relocations));
+        }
 
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bukkit", "4.3.4", relocations));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4", relocations));

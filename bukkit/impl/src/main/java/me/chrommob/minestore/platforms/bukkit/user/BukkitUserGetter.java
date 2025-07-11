@@ -8,11 +8,28 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 public class BukkitUserGetter implements UserGetter {
+    private final static MethodHandle mh;
+    static {
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        MethodType constructorType = MethodType.methodType(void.class, Player.class);
+        Class<?> MyClass;
+        MethodHandle constructorHandle = null;
+        try {
+            MyClass = Class.forName("me.chrommob.minestore.platforms.bukkit.user.UserBukkit");
+            constructorHandle = lookup.findConstructor(MyClass, constructorType);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+        mh = constructorHandle;
+    }
     private final JavaPlugin mineStoreBukkit;
 
     public BukkitUserGetter(JavaPlugin mineStoreBukkit) {
@@ -32,8 +49,13 @@ public class BukkitUserGetter implements UserGetter {
     }
 
     private AbstractUser get(Player player) {
-        CommonUser user = player == null ? new CommonConsoleUser() : new UserBukkit(player);
-        return new AbstractUser(user, player == null ? mineStoreBukkit.getServer().getConsoleSender() : player);
+        try {
+            CommonUser user = player == null ? new CommonConsoleUser() : (CommonUser) mh.invoke(player);
+            return new AbstractUser(user, player == null ? mineStoreBukkit.getServer().getConsoleSender() : player);
+        } catch (Throwable e) {
+            e.printStackTrace(System.err);
+            return new AbstractUser(new CommonConsoleUser(), player == null ? mineStoreBukkit.getServer().getConsoleSender() : player);
+        }
     }
 
     @Override

@@ -182,6 +182,8 @@ tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.task
 
 tasks.register("copyJar", Copy) {
     dependsOn(":bukkit:bukkit-impl:shadowJar")
+    dependsOn(":bukkit:impl:kyori:compat:shadowJar")
+    dependsOn(":bukkit:impl:kyori:native:shadowJar")
     dependsOn(":bungee:bungee-impl:shadowJar")
     dependsOn(":velocity:velocity-impl:shadowJar")
     dependsOn(":common:shadowJar")
@@ -191,6 +193,14 @@ tasks.register("copyJar", Copy) {
     }
     from(project(":bukkit:bukkit-impl").tasks.named("shadowJar")) {
         rename { "MineStore-Bukkit.jarjar" }
+    }
+
+    from(project(":bukkit:impl:kyori:compat").tasks.named("shadowJar")) {
+        rename { "MineStore-Bukkit-Kyori-Compat.jarjar" }
+    }
+
+    from(project(":bukkit:impl:kyori:native").tasks.named("shadowJar")) {
+        rename { "MineStore-Bukkit-Kyori-Native.jarjar" }
     }
 
     from(project(":bungee:bungee-impl").tasks.named("shadowJar")) {

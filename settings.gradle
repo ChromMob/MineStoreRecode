@@ -16,6 +16,7 @@ pluginManagement {
 rootProject.name = 'MineStore'
 
 include "common"
+include "bukkit:impl:kyori:compat", "bukkit:impl:kyori:native"
 include "bukkit:impl", "bukkit:plugin"
 include "velocity:impl", "velocity:plugin"
 include "bungee:impl", "bungee:plugin"
@@ -23,6 +24,10 @@ include "fabric:impl", "fabric:plugin"
 include "api"
 include "addon"
 include "classloader"
+
+project(":bukkit:impl:kyori:compat").projectDir = file("bukkit/impl/kyori/compat")
+
+project(":bukkit:impl:kyori:native").projectDir = file("bukkit/impl/kyori/native")
 
 project(":bukkit:plugin").projectDir = file("bukkit/plugin")
 project(":bukkit:plugin").name = "bukkit-plugin"

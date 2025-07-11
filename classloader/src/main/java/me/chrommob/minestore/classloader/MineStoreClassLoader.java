@@ -90,6 +90,13 @@ public class MineStoreClassLoader extends URLClassLoader {
         }
     }
 
+    private final static String[] IGNORED_PACKAGES = new String[]{
+            "org.incendo.cloud.",
+            "io.leangen.geantyref.",
+            "net.kyori.",
+            "org.slf4j."
+            };
+
     @Override
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         // Delegate core Java classes to parent
@@ -98,8 +105,10 @@ public class MineStoreClassLoader extends URLClassLoader {
         }
 
         // If interop also load from parent
-        if (name.startsWith("org.incendo.cloud.") || name.startsWith("io.leangen.geantyref.") || name.startsWith("net.kyori.")) {
-            return super.loadClass(name, resolve);
+        for (String ignoredPackage : IGNORED_PACKAGES) {
+            if (name.startsWith(ignoredPackage)) {
+                return super.loadClass(name, resolve);
+            }
         }
 
         // First, check if already loaded
