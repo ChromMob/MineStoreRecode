@@ -7,6 +7,7 @@ import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.stats.BuildConstats;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -63,40 +64,23 @@ public class StatSender {
         }
     }
 
-    public void stop() {
-        if (thread != null) {
-            thread.interrupt();
-        }
-    }
-
-
-    public void start() {
-        if (thread != null) {
-            thread.interrupt();
-        }
-        thread = new Thread(() -> {
-            while (true) {
-                int playerCount = Registries.USER_GETTER.get().getAllPlayers().size();
-                StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE, MineStoreCommon.version() == MineStoreVersion.dummy() ? "Pre 3.0.0" : MineStoreCommon.version().toString());
-                statJson.setPlayerCount(playerCount);
-                int storePlayerCount = getPlayerCount(common.pluginConfig().getKey("store-url").getAsString());
-                String json;
-                if (storePlayerCount != -1) {
-                    WebStoreJson webStoreJson = new WebStoreJson(STORE_UUID, storePlayerCount);
-                    json = gson.toJson(webStoreJson);
-                    sendStoreData(json);
-                }
-                json = gson.toJson(statJson);
-                sendData(json);
-                try {
-                    Thread.sleep(1000 * 60);
-                } catch (InterruptedException e) {
-                    return;
-                }
+    public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("statSender", new Runnable() {
+        @Override
+        public void run() {
+            int playerCount = Registries.USER_GETTER.get().getAllPlayers().size();
+            StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE, MineStoreCommon.version() == MineStoreVersion.dummy() ? "Pre 3.0.0" : MineStoreCommon.version().toString());
+            statJson.setPlayerCount(playerCount);
+            int storePlayerCount = getPlayerCount(common.pluginConfig().getKey("store-url").getAsString());
+            String json;
+            if (storePlayerCount != -1) {
+                WebStoreJson webStoreJson = new WebStoreJson(STORE_UUID, storePlayerCount);
+                json = gson.toJson(webStoreJson);
+                sendStoreData(json);
             }
-        });
-        thread.start();
-    }
+            json = gson.toJson(statJson);
+            sendData(json);
+        }
+    }, 1000 * 60);
 
     private void sendData(String json) {
         common.debug(this.getClass(), "Sending stat json: " + json);

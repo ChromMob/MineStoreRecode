@@ -9,6 +9,7 @@ import me.chrommob.minestore.api.web.WebApiAccessor;
 import me.chrommob.minestore.api.web.profile.ProfileManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.placeholder.json.*;
+import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -427,35 +428,20 @@ public class PlaceHolderData {
         return VerificationResult.valid();
     }
 
-    public void start() {
-        if (thread != null && thread.isAlive()) {
-            thread.interrupt();
-        }
-        thread = new Thread(runnable);
-        thread.start();
-    }
-
-    private final Runnable runnable = () -> {
-        while (true) {
+    public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("placeholderData", new Runnable() {
+        @Override
+        public void run() {
             if (!load().isValid()) {
                 plugin.debug(this.getClass(), "Failed to load placeholder data!");
                 plugin.handleError();
             } else {
                 plugin.notError();
             }
-            try {
-                Thread.sleep(1000 * 60);
-            } catch (InterruptedException e) {
-                break;
-            }
         }
-    };
+    }, 1000 * 60);
 
     public void stop() {
         lastDonatorsDeque.clear();
         topDonatorsMap.clear();
-        if (thread != null && thread.isAlive()) {
-            thread.interrupt();
-        }
     }
 }

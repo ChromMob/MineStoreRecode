@@ -14,6 +14,7 @@ import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
+import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -22,6 +23,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class WebListener {
     private final MineStoreVersion arraySupportedSince = new MineStoreVersion(3, 2, 5);
@@ -33,94 +35,66 @@ public class WebListener {
     private URL deliveredUrl;
     private URL checkUrl;
     private URL paymentUrl;
-    private Thread thread = null;
     private final Set<String> toPostExecuted = new HashSet<>();
-    public Runnable runnable = new Runnable() {
+    public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("weblistener", new Consumer<MineStoreScheduledTask>() {
         @Override
-        public void run() {
-            while (true) {
-                if (wasEmpty) {
-                    try {
-                        Thread.sleep(9500);
-                        wasEmpty = false;
-                    } catch (InterruptedException e) {
-                        plugin.debug(this.getClass(), "Interrupted while waiting for data");
-                        plugin.debug(this.getClass(), e);
-                        break;
-                    }
+        public void accept(MineStoreScheduledTask task) {
+            handleExecuted();
+            plugin.debug(this.getClass(), "Running...");
+            List<ParsedResponse> parsedResponses = fetchData();
+            if (wasEmpty || parsedResponses.isEmpty()) {
+                plugin.debug(this.getClass(), wasEmpty ? "Issue while parsing json" : "Parsed responses is empty");
+                wasEmpty = false;
+                task.delay(9500);
+                return;
+            }
+            Set<Integer> toPostDelivered = new HashSet<>();
+            List<ParsedResponse> commands = new ArrayList<>();
+            for (ParsedResponse parsedResponse : parsedResponses) {
+                if (parsedResponse.type() != ParsedResponse.TYPE.COMMAND) {
                     continue;
                 }
-                handleExecuted();
-                plugin.debug(this.getClass(), "Running...");
-                List<ParsedResponse> parsedResponses = fetchData();
-                if (wasEmpty || parsedResponses.isEmpty()) {
-                    plugin.debug(this.getClass(), wasEmpty ? "Issue while parsing json" : "Parsed responses is empty");
-                    wasEmpty = true;
+                MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStoreEvent.COMMAND_TYPE.ONLINE : MineStoreEvent.COMMAND_TYPE.OFFLINE);
+                event.call();
+                ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStoreEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
+                commands.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
+                plugin.debug(this.getClass(), "Got command: " + "\"" + parsedResponse.command() + "\""
+                        + " with id: " + parsedResponse.commandId() + " for player: "
+                        + parsedResponse.username() + " requires online: "
+                        + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
+                        ? "true"
+                        : "false"));
+            }
+            plugin.commandStorage().listener(commands);
+            for (ParsedResponse parsedResponse : parsedResponses) {
+                toPostDelivered.add(parsedResponse.commandId());
+                if (parsedResponse.type() == ParsedResponse.TYPE.AUTH) {
+                    plugin.debug(this.getClass(), "Got auth for player: " + parsedResponse.username() + " with id: "
+                            + parsedResponse.authId());
+                    plugin.authHolder().listener(parsedResponse);
                 }
-                if (wasEmpty) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        plugin.debug(this.getClass(), "Interrupted while waiting for next loop after empty");
-                        plugin.debug(this.getClass(), e);
-                        break;
+                if (MineStoreCommon.version().requires("3.0.0")) {
+                    if (!MineStoreCommon.version().requires(arraySupportedSince)) {
+                        postDelivered(String.valueOf(parsedResponse.commandId()));
                     }
-                    continue;
-                }
-                Set<Integer> toPostDelivered = new HashSet<>();
-                List<ParsedResponse> commands = new ArrayList<>();
-                for (ParsedResponse parsedResponse : parsedResponses) {
-                    if (parsedResponse.type() != ParsedResponse.TYPE.COMMAND) {
-                        continue;
-                    }
-                    MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStoreEvent.COMMAND_TYPE.ONLINE : MineStoreEvent.COMMAND_TYPE.OFFLINE);
-                    event.call();
-                    ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStoreEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
-                    commands.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
-                    plugin.debug(this.getClass(), "Got command: " + "\"" + parsedResponse.command() + "\""
-                            + " with id: " + parsedResponse.commandId() + " for player: "
-                            + parsedResponse.username() + " requires online: "
-                            + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
-                            ? "true"
-                            : "false"));
-                }
-                plugin.commandStorage().listener(commands);
-                for (ParsedResponse parsedResponse : parsedResponses) {
-                    toPostDelivered.add(parsedResponse.commandId());
-                    if (parsedResponse.type() == ParsedResponse.TYPE.AUTH) {
-                        plugin.debug(this.getClass(), "Got auth for player: " + parsedResponse.username() + " with id: "
-                                + parsedResponse.authId());
-                        plugin.authHolder().listener(parsedResponse);
-                    }
-                    if (MineStoreCommon.version().requires("3.0.0")) {
-                        if (!MineStoreCommon.version().requires(arraySupportedSince)) {
-                            postDelivered(String.valueOf(parsedResponse.commandId()));
-                        }
-                        if (parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.OFFLINE) {
-                            postExecuted(String.valueOf(parsedResponse.commandId()));
-                        }
-                    } else {
+                    if (parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.OFFLINE) {
                         postExecuted(String.valueOf(parsedResponse.commandId()));
                     }
-                }
-                if (MineStoreCommon.version().requires(arraySupportedSince)) {
-                    int[] toPostDeliveredArray = new int[toPostDelivered.size()];
-                    int i = 0;
-                    for (Integer id : toPostDelivered) {
-                        toPostDeliveredArray[i++] = id;
-                    }
-                    postDelivered(toPostDeliveredArray);
-                }
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    plugin.debug(this.getClass(), "Interrupted while waiting for next loop after posting");
-                    plugin.debug(this.getClass(), e);
-                    break;
+                } else {
+                    postExecuted(String.valueOf(parsedResponse.commandId()));
                 }
             }
+            if (MineStoreCommon.version().requires(arraySupportedSince)) {
+                int[] toPostDeliveredArray = new int[toPostDelivered.size()];
+                int i = 0;
+                for (Integer id : toPostDelivered) {
+                    toPostDeliveredArray[i++] = id;
+                }
+                postDelivered(toPostDeliveredArray);
+            }
+            task.delay(500);
         }
-    };
+    });
 
     private List<ParsedResponse> fetchData() {
         List<ParsedResponse> parsedResponses = new ArrayList<>();
@@ -260,20 +234,6 @@ public class WebListener {
             return new VerificationResult(false, Collections.singletonList("STORE URL has to start with https://"), VerificationResult.TYPE.STORE_URL);
         }
         return VerificationResult.valid();
-    }
-
-    public void start() {
-        if (thread != null) {
-            thread.interrupt();
-        }
-        thread = new Thread(runnable);
-        thread.start();
-    }
-
-    public void stop() {
-        if (thread != null) {
-            thread.interrupt();
-        }
     }
 
     private void postDelivered(String id) {

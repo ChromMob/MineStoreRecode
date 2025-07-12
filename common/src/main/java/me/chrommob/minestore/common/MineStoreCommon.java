@@ -24,6 +24,8 @@ import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.payment.PaymentHandler;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
+import me.chrommob.minestore.common.scheduler.MineStoreScheduler;
+import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import me.chrommob.minestore.common.verification.VerificationManager;
@@ -34,8 +36,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
+import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedWriter;
@@ -46,7 +48,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -66,6 +70,7 @@ public class MineStoreCommon {
     private BufferedWriter debugLogWriter;
     private File debugLogFile;
     private final PaymentHandler paymentHandler = new PaymentHandler(this);
+    private final MineStoreScheduler scheduler = new MineStoreScheduler();
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
     private VerificationManager verificationManager;
@@ -155,7 +160,7 @@ public class MineStoreCommon {
                 }
             }
             if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
-                databaseManager.start();
+                scheduler.addTask(databaseManager.updaterTask);
             }
         }
         if (Registries.COMMAND_MANAGER.get() != null && Registries.COMMAND_MANAGER.get().isCommandRegistrationAllowed()) {
@@ -164,10 +169,11 @@ public class MineStoreCommon {
             log("Command registration is not allowed at this point. Please restart the server.");
         }
         initialized = true;
-        statsSender.start();
-        guiData.start();
-        placeHolderData.start();
-        webListener.start();
+        scheduler.addTask(statsSender.mineStoreScheduledTask);
+        scheduler.addTask(guiData.mineStoreScheduledTask);
+        scheduler.addTask(placeHolderData.mineStoreScheduledTask);
+        scheduler.addTask(webListener.mineStoreScheduledTask);
+        scheduler.addTask(authHolder.removeAndPost);
         new ApiHandler(new AuthData(pluginConfig.getKey("store-url").getAsString(), pluginConfig.getKey("api").getKey("key").getAsString()));
         new MineStoreEnableEvent().call();
     }
@@ -255,6 +261,7 @@ public class MineStoreCommon {
         verificationManager.safeIncrementSuccess();
     }
 
+    long retryCount = 0;
     public void handleError() {
         if (verificationManager == null) {
             return;
@@ -265,37 +272,58 @@ public class MineStoreCommon {
             return;
         }
         int percent = (int) (verificationManager.getErrorRate() * 100);
-        log("[VerificationManager] Error rate reached: " + percent +  ", restarting... in " + (int) (verificationManager.getErrorRate() * 100) + "s");
+        log("[VerificationManager] Error rate reached: " + percent +  "%, restarting... in 16 seconds...");
         stopFeatures();
-        new Thread(() -> {
-            try {
-                Thread.sleep((long) (verificationManager.getErrorRate() * 1000 * 100));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        MineStoreScheduledTask retryTask = getRetryTask();
+        scheduler.addTask(retryTask);
+    }
+
+    private @NotNull MineStoreScheduledTask getRetryTask() {
+        MineStoreScheduledTask retryTask = new MineStoreScheduledTask("retry", (task) -> {
+            VerificationResult verificationResult = verify();
+            if (!verificationResult.isValid()) {
+                retryCount++;
+            } else {
+                retryCount = 0;
+                reload();
+                scheduler.removeTask(task);
+                return;
             }
-            reload();
-        }).start();
+            if (retryCount > 5) {
+                log("[VerificationManager] Too many failed attempts, stopping...");
+                scheduler.removeTask(task);
+                return;
+            }
+            long delay = (long) ((Math.pow(2, 4 + retryCount)) * 1000);
+            task.delay(delay);
+            log("[VerificationManager] Retrying in " + delay / 1000 + " seconds...");
+        });
+        retryTask.delay(16_000);
+        return retryTask;
     }
 
     private void stopFeatures() {
         if (statsSender != null)
-            statsSender.stop();
+            scheduler.removeTask(statsSender.mineStoreScheduledTask);
         if (guiData != null)
-            guiData.stop();
-        if (placeHolderData != null)
+            scheduler.removeTask(guiData.mineStoreScheduledTask);
+        if (placeHolderData != null) {
+            scheduler.removeTask(placeHolderData.mineStoreScheduledTask);
             placeHolderData.stop();
+        }
         if (authHolder != null)
-            authHolder.stop();
+            scheduler.removeTask(authHolder.removeAndPost);
         if (databaseManager != null)
-            databaseManager.stop();
+            scheduler.removeTask(databaseManager.updaterTask);
         if (webListener != null)
-            webListener.stop();
+            scheduler.removeTask(webListener.mineStoreScheduledTask);
     }
 
     public void stop() {
         new MineStoreDisableEvent().call();
         log("Shutting down...");
         stopFeatures();
+        scheduler.stop();
     }
 
     public void registerEssentialCommands() {
@@ -348,6 +376,7 @@ public class MineStoreCommon {
         pluginConfig.reload();
         if (!initialized) {
             init(true);
+            log("Reloaded MineStore!");
             return;
         }
         version = MineStoreVersion.getMineStoreVersion(pluginConfig.getKey("store-url").getAsString());
@@ -355,14 +384,15 @@ public class MineStoreCommon {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
             } else {
-                databaseManager.stop();
+                scheduler.removeTask(databaseManager.updaterTask);
             }
         } else {
             if (databaseManager != null) {
-                databaseManager.stop();
+                scheduler.removeTask(databaseManager.updaterTask);
             }
             databaseManager = null;
         }
+        stopFeatures();
         verificationManager = null;
         VerificationResult verificationResult = verify();
         Component message = null;
@@ -373,15 +403,18 @@ public class MineStoreCommon {
         }
         verificationManager = new VerificationManager(this, verificationResult, message);
         if (!verificationManager.isValid()) {
+            log("Could not reload MineStore!");
             return;
         }
-        webListener.start();
-        guiData.start();
-        placeHolderData.start();
-        statsSender.start();
+        scheduler.addTask(webListener.mineStoreScheduledTask);
+        scheduler.addTask(guiData.mineStoreScheduledTask);
+        scheduler.addTask(placeHolderData.mineStoreScheduledTask);
+        scheduler.addTask(statsSender.mineStoreScheduledTask);
+        scheduler.addTask(authHolder.removeAndPost);
         if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean() && databaseManager != null) {
-            databaseManager.start();
+            scheduler.addTask(databaseManager.updaterTask);
         }
+        log("Reloaded MineStore!");
     }
 
     private VerificationResult verify() {
@@ -487,8 +520,9 @@ public class MineStoreCommon {
     }
 
     private void writeDebugLog(String message) {
+        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         try {
-            debugLogWriter.write(message);
+            debugLogWriter.write(time + ": " + message);
             debugLogWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();

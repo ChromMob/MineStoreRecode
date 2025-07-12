@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.commands;
 
+import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
@@ -20,6 +21,9 @@ public class ReloadCommand {
         CommonUser user = abstractUser.commonUser();
         plugin.reload();
         //Send pretty message to user using Component
+        if (user instanceof CommonConsoleUser) {
+            return;
+        }
         user.sendMessage(Component.text("Reloaded MineStore!").color(NamedTextColor.GREEN));
     }
 }

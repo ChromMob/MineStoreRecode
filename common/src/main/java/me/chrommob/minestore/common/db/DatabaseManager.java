@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
 import java.sql.Connection;
@@ -117,34 +118,7 @@ public class DatabaseManager {
         }
     }
 
-    public void start() {
-        new Thread(this::createTable).start();
-        if (thread != null) {
-            thread.interrupt();
-        }
-        thread = new Thread(updater);
-        thread.start();
-    }
-
-    public void stop() {
-        if (thread != null) {
-            thread.interrupt();
-        }
-        if (hikari != null) {
-            hikari.close();
-        }
-    }
-
-    private final Runnable updater = () -> {
-        while (true) {
-            update();
-            try {
-                Thread.sleep(1000 * 10);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-    };
+    public final MineStoreScheduledTask updaterTask = new MineStoreScheduledTask("updatePlayerData", this::update, 1000 * 10);
 
     private void update() {
         Set<PlayerData> changed = ConcurrentHashMap.newKeySet();

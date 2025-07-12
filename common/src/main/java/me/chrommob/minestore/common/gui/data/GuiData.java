@@ -8,6 +8,7 @@ import me.chrommob.minestore.common.gui.GuiOpenener;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
+import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -117,35 +118,17 @@ public class GuiData {
         return VerificationResult.valid();
     }
 
-    public void start() {
-        if (thread != null && thread.isAlive()) {
-            thread.interrupt();
-        }
-        thread = new Thread(runnable);
-        thread.start();
-    }
-
-    public void stop() {
-        if (thread != null && thread.isAlive()) {
-            thread.interrupt();
-        }
-    }
-
-    private final Runnable runnable = () -> {
-        while (true) {
+    public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("guiData", new Runnable() {
+        @Override
+        public void run() {
             if (!load().isValid()) {
                 plugin.debug(this.getClass(), "[GuiData] Error loading data!");
                 plugin.handleError();
             } else {
                 plugin.notError();
             }
-            try {
-                Thread.sleep(1000 * 60 * 5);
-            } catch (InterruptedException e) {
-                break;
-            }
         }
-    };
+    }, 1000 * 60 * 5);
 
     public ParsedGui getParsedGui() {
         return parsedGui;

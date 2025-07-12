@@ -5,6 +5,7 @@ import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.OutputStream;
@@ -18,13 +19,10 @@ public final class AuthHolder {
     private final Map<String, AuthUser> authUsers = new ConcurrentHashMap<>();
     private final Map<String, ParsedResponse> toPost = new ConcurrentHashMap<>();
     private final String url;
-    private Thread thread = null;
-    
+
     public AuthHolder(MineStoreCommon plugin) {
         this.plugin = plugin;
         authTimeout = plugin.pluginConfig().getKey("auth").getKey("timeout").getAsInt() * 1000;
-        thread = new Thread(removeAndPost);
-        thread.start();
         String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
@@ -32,42 +30,32 @@ public final class AuthHolder {
         url = storeUrl + "/api/game_auth/confirm/";
     }
     
-    private Runnable removeAndPost = () -> {
-        while (true) {
-            if (authUsers.isEmpty() && toPost.isEmpty()) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    break;
-                }
-                continue;
-            }
-
-            toPost.forEach((s, parsedResponse) -> {
-                postAuthCompleted(parsedResponse);
-                toPost.remove(s);
-            });
-
-            authUsers.forEach((s, authUser) -> {
-            /*
-            Remove the user from the authUsers map if the user is offline or the authTimeout has been reached.
-            This is to prevent memory leaks.
-             */
-                if (isExpired(authUser) || !authUser.user().isOnline()) {
-                    plugin.debug(this.getClass(), "Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
-                    if (authUser.user().isOnline()) {
-                        authUser.user().sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("timeout-message").getAsString()));
-                    }
-                    authUsers.remove(s);
-                }
-            });
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                break;
-            }
+    public final MineStoreScheduledTask removeAndPost = new MineStoreScheduledTask("removeAndPost", task -> {
+        if (authUsers.isEmpty() && toPost.isEmpty()) {
+            task.delay(1000);
+            return;
         }
-    };
+
+        toPost.forEach((s, parsedResponse) -> {
+            postAuthCompleted(parsedResponse);
+            toPost.remove(s);
+        });
+
+        authUsers.forEach((s, authUser) -> {
+        /*
+        Remove the user from the authUsers map if the user is offline or the authTimeout has been reached.
+        This is to prevent memory leaks.
+         */
+            if (isExpired(authUser) || !authUser.user().isOnline()) {
+                plugin.debug(this.getClass(), "Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
+                if (authUser.user().isOnline()) {
+                    authUser.user().sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("timeout-message").getAsString()));
+                }
+                authUsers.remove(s);
+            }
+        });
+        task.delay(1000);
+    });
 
     private void postAuthCompleted(ParsedResponse parsedResponse) {
         plugin.debug(this.getClass(), "Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
@@ -117,12 +105,6 @@ public final class AuthHolder {
             authUsers.put(parsedResponse.username().toLowerCase(), new AuthUser(plugin, abstractUser.commonUser(), parsedResponse, System.currentTimeMillis()));
         } else {
             authUser.setTime(System.currentTimeMillis());
-        }
-    }
-
-    public void stop() {
-        if (thread != null) {
-            thread.interrupt();
         }
     }
 }

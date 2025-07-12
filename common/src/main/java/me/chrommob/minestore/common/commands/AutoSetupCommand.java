@@ -1,8 +1,11 @@
 package me.chrommob.minestore.common.commands;
 
+import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.incendo.cloud.annotation.specifier.Quoted;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
@@ -31,5 +34,9 @@ public class AutoSetupCommand {
         plugin.pluginConfig().getKey("weblistener").getKey("secret-enabled").setValue(true);
         plugin.pluginConfig().saveConfig();
         plugin.reload();
+        if (user instanceof CommonConsoleUser) {
+            return;
+        }
+        user.sendMessage(Component.text("Auto setup finished!").color(NamedTextColor.GREEN));
     }
 }
