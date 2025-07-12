@@ -94,7 +94,8 @@ public class MineStoreClassLoader extends URLClassLoader {
             "org.incendo.cloud.",
             "io.leangen.geantyref.",
             "net.kyori.",
-            "org.slf4j."
+            "org.slf4j.",
+            "com.google.gson."
             };
 
     @Override
