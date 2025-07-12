@@ -174,6 +174,7 @@ public class MineStoreCommon {
         scheduler.addTask(placeHolderData.mineStoreScheduledTask);
         scheduler.addTask(webListener.mineStoreScheduledTask);
         scheduler.addTask(authHolder.removeAndPost);
+        retryCount = 0;
         new ApiHandler(new AuthData(pluginConfig.getKey("store-url").getAsString(), pluginConfig.getKey("api").getKey("key").getAsString()));
         new MineStoreEnableEvent().call();
     }
@@ -415,6 +416,7 @@ public class MineStoreCommon {
             scheduler.addTask(databaseManager.updaterTask);
         }
         log("Reloaded MineStore!");
+        retryCount = 0;
     }
 
     private VerificationResult verify() {
