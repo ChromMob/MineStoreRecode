@@ -1,6 +1,7 @@
 package me.chrommob.minestore.common.scheduler;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class MineStoreScheduledTask {
@@ -16,13 +17,27 @@ public class MineStoreScheduledTask {
 
     public MineStoreScheduledTask(String name, Runnable runnable, long delay) {
         this.runnable = (task) -> {
-            runnable.run();
-            task.delay(delay);
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                task.delay(delay);
+            }
         };
         this.name = name + "-" + UUID.randomUUID();
     }
 
-    public void delay(long delay) {
-        this.nextExecuteAt = System.currentTimeMillis() + delay;
+
+    public void delay(long delayMillis) {
+        this.nextExecuteAt = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(delayMillis);
+    }
+
+    public boolean shouldRun() {
+        return System.nanoTime() >= nextExecuteAt && lastExecuteAt != nextExecuteAt;
+    }
+
+    public void markExecuted() {
+        this.lastExecuteAt = this.nextExecuteAt;
     }
 }

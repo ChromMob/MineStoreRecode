@@ -32,10 +32,9 @@ public class MineStoreScheduler {
         executor.scheduleAtFixedRate(() -> {
             Set<MineStoreScheduledTask> tasks = new HashSet<>(this.tasks);
             for (MineStoreScheduledTask task : tasks) {
-                long diff = System.currentTimeMillis() - task.nextExecuteAt;
-                if (diff >= 0 && task.lastExecuteAt != task.nextExecuteAt) {
+                if (task.shouldRun()) {
                     toExecute.add(task);
-                    task.lastExecuteAt = task.nextExecuteAt;
+                    task.markExecuted();
                 }
             }
         }, DELAY, DELAY, TimeUnit.MILLISECONDS);

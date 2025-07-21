@@ -15,6 +15,7 @@ import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.common.scheduler.SafeScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -36,65 +37,7 @@ public class WebListener {
     private URL checkUrl;
     private URL paymentUrl;
     private final Set<String> toPostExecuted = new HashSet<>();
-    public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("weblistener", new Consumer<MineStoreScheduledTask>() {
-        @Override
-        public void accept(MineStoreScheduledTask task) {
-            handleExecuted();
-            plugin.debug(this.getClass(), "Running...");
-            List<ParsedResponse> parsedResponses = fetchData();
-            if (wasEmpty || parsedResponses.isEmpty()) {
-                plugin.debug(this.getClass(), wasEmpty ? "Issue while parsing json" : "Parsed responses is empty");
-                wasEmpty = false;
-                task.delay(9500);
-                return;
-            }
-            Set<Integer> toPostDelivered = new HashSet<>();
-            List<ParsedResponse> commands = new ArrayList<>();
-            for (ParsedResponse parsedResponse : parsedResponses) {
-                if (parsedResponse.type() != ParsedResponse.TYPE.COMMAND) {
-                    continue;
-                }
-                MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStoreEvent.COMMAND_TYPE.ONLINE : MineStoreEvent.COMMAND_TYPE.OFFLINE);
-                event.call();
-                ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStoreEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
-                commands.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
-                plugin.debug(this.getClass(), "Got command: " + "\"" + parsedResponse.command() + "\""
-                        + " with id: " + parsedResponse.commandId() + " for player: "
-                        + parsedResponse.username() + " requires online: "
-                        + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
-                        ? "true"
-                        : "false"));
-            }
-            plugin.commandStorage().listener(commands);
-            for (ParsedResponse parsedResponse : parsedResponses) {
-                toPostDelivered.add(parsedResponse.commandId());
-                if (parsedResponse.type() == ParsedResponse.TYPE.AUTH) {
-                    plugin.debug(this.getClass(), "Got auth for player: " + parsedResponse.username() + " with id: "
-                            + parsedResponse.authId());
-                    plugin.authHolder().listener(parsedResponse);
-                }
-                if (MineStoreCommon.version().requires("3.0.0")) {
-                    if (!MineStoreCommon.version().requires(arraySupportedSince)) {
-                        postDelivered(String.valueOf(parsedResponse.commandId()));
-                    }
-                    if (parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.OFFLINE) {
-                        postExecuted(String.valueOf(parsedResponse.commandId()));
-                    }
-                } else {
-                    postExecuted(String.valueOf(parsedResponse.commandId()));
-                }
-            }
-            if (MineStoreCommon.version().requires(arraySupportedSince)) {
-                int[] toPostDeliveredArray = new int[toPostDelivered.size()];
-                int i = 0;
-                for (Integer id : toPostDelivered) {
-                    toPostDeliveredArray[i++] = id;
-                }
-                postDelivered(toPostDeliveredArray);
-            }
-            task.delay(500);
-        }
-    });
+    public final MineStoreScheduledTask mineStoreScheduledTask;
 
     private List<ParsedResponse> fetchData() {
         List<ParsedResponse> parsedResponses = new ArrayList<>();
@@ -154,6 +97,61 @@ public class WebListener {
 
     public WebListener(MineStoreCommon plugin) {
         this.plugin = plugin;
+        mineStoreScheduledTask = SafeScheduledTask.wrap(this.getClass(), "weblistener", plugin, () -> {
+            handleExecuted();
+            plugin.debug(this.getClass(), "Running...");
+            List<ParsedResponse> parsedResponses = fetchData();
+            if (wasEmpty || parsedResponses.isEmpty()) {
+                plugin.debug(this.getClass(), wasEmpty ? "Issue while parsing json" : "Parsed responses is empty");
+                wasEmpty = false;
+                return 9500;
+            }
+            Set<Integer> toPostDelivered = new HashSet<>();
+            List<ParsedResponse> commands = new ArrayList<>();
+            for (ParsedResponse parsedResponse : parsedResponses) {
+                if (parsedResponse.type() != ParsedResponse.TYPE.COMMAND) {
+                    continue;
+                }
+                MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStoreEvent.COMMAND_TYPE.ONLINE : MineStoreEvent.COMMAND_TYPE.OFFLINE);
+                event.call();
+                ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStoreEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
+                commands.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
+                plugin.debug(this.getClass(), "Got command: " + "\"" + parsedResponse.command() + "\""
+                        + " with id: " + parsedResponse.commandId() + " for player: "
+                        + parsedResponse.username() + " requires online: "
+                        + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
+                        ? "true"
+                        : "false"));
+            }
+            plugin.commandStorage().listener(commands);
+            for (ParsedResponse parsedResponse : parsedResponses) {
+                toPostDelivered.add(parsedResponse.commandId());
+                if (parsedResponse.type() == ParsedResponse.TYPE.AUTH) {
+                    plugin.debug(this.getClass(), "Got auth for player: " + parsedResponse.username() + " with id: "
+                            + parsedResponse.authId());
+                    plugin.authHolder().listener(parsedResponse);
+                }
+                if (MineStoreCommon.version().requires("3.0.0")) {
+                    if (!MineStoreCommon.version().requires(arraySupportedSince)) {
+                        postDelivered(String.valueOf(parsedResponse.commandId()));
+                    }
+                    if (parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.OFFLINE) {
+                        postExecuted(String.valueOf(parsedResponse.commandId()));
+                    }
+                } else {
+                    postExecuted(String.valueOf(parsedResponse.commandId()));
+                }
+            }
+            if (MineStoreCommon.version().requires(arraySupportedSince)) {
+                int[] toPostDeliveredArray = new int[toPostDelivered.size()];
+                int i = 0;
+                for (Integer id : toPostDelivered) {
+                    toPostDeliveredArray[i++] = id;
+                }
+                postDelivered(toPostDeliveredArray);
+            }
+            return 500;
+        });
     }
 
     public VerificationResult load() {
