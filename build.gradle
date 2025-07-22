@@ -178,6 +178,14 @@ publishing {
     }
 }
 
+tasks.register("clearResources") {
+    doLast {
+        delete fileTree(dir: "src/main/resources", include: "**/*jarjar")
+    }
+}
+
+tasks.clean.dependsOn(clearResources)
+
 tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.jar
 
 tasks.register("copyJar", Copy) {
