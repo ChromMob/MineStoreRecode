@@ -60,7 +60,7 @@ public class MineStorePluginDependency {
     }
 
     public Optional<byte[]> download(MineStorePluginRepository repository) {
-        String path = repository.getUrl() + "/" + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar";
+        String path = repository.getUrl() + File.separator + group.replace('.', '/') + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar";
         try {
             URL url = new URL(path);
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -165,8 +165,8 @@ public class MineStorePluginDependency {
     }
 
     public boolean verify(File file, MineStorePluginRepository repository) {
-        String sha = repository.getUrl() + "/" + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar.sha1";
-        String md5 = repository.getUrl() + "/" + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar.md5";
+        String sha = repository.getUrl() + File.separator + group.replace('.', '/') + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar.sha1";
+        String md5 = repository.getUrl() + File.separator + group.replace('.', '/') + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar.md5";
         Optional<String> sha1 = getFromURL(sha);
         Optional<String> md52 = getFromURL(md5);
         if (!sha1.isPresent() || !md52.isPresent()) {

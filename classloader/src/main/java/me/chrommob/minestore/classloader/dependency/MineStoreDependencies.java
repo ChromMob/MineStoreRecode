@@ -86,10 +86,10 @@ public class MineStoreDependencies {
             }
             if (!found) {
                 try {
-                    boolean same = dependency.verify("/jars/" + dependency.getName() + ".jarjar", file);
+                    boolean same = dependency.verify(File.separator + "jars" + File.separator + dependency.getName() + ".jarjar", file);
                     if (!same) {
                         System.out.println("Copying " + dependency.getName() + ".jarjar to " + file.getAbsolutePath());
-                        Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("/jars/" + dependency.getName() + ".jarjar")), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(File.separator + "jars" + File.separator + dependency.getName() + ".jarjar")), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     } else {
                         System.out.println("Using " + dependency.getName() + ".jarjar from jars folder");
                     }
