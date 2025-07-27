@@ -130,7 +130,6 @@ subprojects {
 
 
 
-def fabricProject = project(":fabric:fabric-plugin")
 def finalJar = tasks.register('finalJar', Jar) {
     dependsOn processResources
     group = 'build'
@@ -141,11 +140,7 @@ def finalJar = tasks.register('finalJar', Jar) {
     destinationDirectory = file("${projectDir}/build/libs/")
 }
 
-finalJar.configure {
-    dependsOn fabricProject.tasks.remapJar
-    dependsOn project(":fabric:fabric-impl").tasks.named("remapJar")
-}
-
+def fabricProject = project(":fabric:fabric-plugin")
 fabricProject.afterEvaluate {
     finalJar.configure {
         from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
@@ -153,18 +148,6 @@ fabricProject.afterEvaluate {
         })
     }
 }
-
-project(":fabric:fabric-impl").afterEvaluate {
-    finalJar.configure {
-        copy {
-            from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
-                rename { "MineStore-Fabric.jarjar" }
-            }
-            into("src/main/resources/jars")
-        }
-    }
-}
-
 
 def addonApiProject = project(":MineStore-API")
 publishing {
@@ -194,6 +177,8 @@ tasks.register("copyJar", Copy) {
     dependsOn(":bukkit:impl:kyori:native:shadowJar")
     dependsOn(":bungee:bungee-impl:shadowJar")
     dependsOn(":velocity:velocity-impl:shadowJar")
+    project(":fabric:fabric-impl").getAllTasks(true)
+    dependsOn(":fabric:fabric-impl:remapJar")
     dependsOn(":common:shadowJar")
 
     doFirst {
@@ -219,7 +204,7 @@ tasks.register("copyJar", Copy) {
         rename { "MineStore-Velocity.jarjar" }
     }
 
-    from(project(":fabric:fabric-impl").tasks.named("shadowJar")) {
+    from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
         rename { "MineStore-Fabric.jarjar" }
     }
 
@@ -231,15 +216,14 @@ tasks.register("copyJar", Copy) {
 }
 
 tasks.processResources {
-    dependsOn(copyJar)
+    dependsOn(copyJar);
 }
-
 
 dependencies {
     implementation project(path: ':MineStore-ClassLoader', configuration: 'shadow')
     implementation project(path: ':bungee:bungee-plugin', configuration: 'shadow')
     implementation project(path: ':bukkit:bukkit-plugin', configuration: 'shadow')
     implementation project(path: ':velocity:velocity-plugin', configuration: 'shadow')
-    implementation project(path: ':fabric:fabric-plugin', configuration: 'shadow')
+    //implementation project(path: ':fabric:fabric-plugin', configuration: 'shadow')
 //    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }
