@@ -75,12 +75,9 @@ public class MineStoreVelocityPlugin implements MineStoreBootstrapper {
     @Override
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        Set<MineStorePluginRepository> repositories = new HashSet<>();
-        repositories.add(RepositoryRegistry.SONATYPE.getRepository());
-        repositories.add(RepositoryRegistry.MAVEN.getRepository());
-        dependencies.add(new MineStorePluginDependency("", "MineStore-Velocity", ""));
-        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-velocity", "2.0.0-beta.10"));
-        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-brigadier", "2.0.0-beta.10"));
-        return new MineStoreDependencies(repositories, dependencies);
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Velocity", "", null));
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-velocity", "2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-brigadier", "2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository()));
+        return new MineStoreDependencies(dependencies);
     }
 }

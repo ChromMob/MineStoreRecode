@@ -61,31 +61,28 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
         Map<String, String> relocations = new HashMap<>();
         try {
             Class.forName("net.kyori.adventure.Adventure");
-            dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit-Kyori-Native", "", relocations));
+            dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit-Kyori-Native", "", relocations, null));
         } catch (ClassNotFoundException e) {
             relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
-            dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit-Kyori-Compat", "", relocations));
+            dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit-Kyori-Compat", "", relocations, null));
         }
 
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bukkit", "4.3.4", relocations));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4", relocations));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4", relocations));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson-legacy-impl", "4.13.1", relocations));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-nbt", "4.13.1", relocations));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson", "4.13.1", relocations));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bukkit", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson-legacy-impl", "4.13.1", relocations, RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-nbt", "4.13.1", relocations, RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-serializer-gson", "4.13.1", relocations, RepositoryRegistry.MAVEN.getRepository()));
 
-        dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit", "", relocations));
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit", "", relocations, null));
 
-        MineStorePluginDependency cloudPaper = MineStorePluginDependency.fromGradle("org.incendo:cloud-paper:2.0.0-beta.10");
-        MineStorePluginDependency cloudBukkit = MineStorePluginDependency.fromGradle("org.incendo:cloud-bukkit:2.0.0-beta.10");
-        MineStorePluginDependency cloudBrigadier = MineStorePluginDependency.fromGradle("org.incendo:cloud-brigadier:2.0.0-beta.10");
+        MineStorePluginDependency cloudPaper = MineStorePluginDependency.fromGradle("org.incendo:cloud-paper:2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository());
+        MineStorePluginDependency cloudBukkit = MineStorePluginDependency.fromGradle("org.incendo:cloud-bukkit:2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository());
+        MineStorePluginDependency cloudBrigadier = MineStorePluginDependency.fromGradle("org.incendo:cloud-brigadier:2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository());
 
         dependencies.add(cloudPaper);
         dependencies.add(cloudBukkit);
         dependencies.add(cloudBrigadier);
-        Set<MineStorePluginRepository> repositories = new HashSet<>();
-        repositories.add(RepositoryRegistry.SONATYPE.getRepository());
-        repositories.add(RepositoryRegistry.MAVEN.getRepository());
-        return new MineStoreDependencies(repositories, dependencies);
+        return new MineStoreDependencies(dependencies);
     }
 }

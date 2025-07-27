@@ -92,6 +92,7 @@ public class MineStoreFabric implements MineStorePlugin {
 
 	@Override
 	public void onDisable() {
+		common.stop();
 		Registries.LOGGER.get().log("MineStore has been disabled!");
 		adventure = null;
 	}

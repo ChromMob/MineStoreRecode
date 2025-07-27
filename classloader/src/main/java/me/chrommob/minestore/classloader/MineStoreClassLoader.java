@@ -135,30 +135,24 @@ public class MineStoreClassLoader extends URLClassLoader {
 
     private void loadRelocateDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        Set<MineStorePluginRepository> repositories = new HashSet<>();
-        repositories.add(RepositoryRegistry.MAVEN.getRepository());
-        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm", "9.1"));
-        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm-commons", "9.1"));
-        dependencies.add(new MineStorePluginDependency("me.lucko", "jar-relocator", "1.7"));
-        this.dependencies.add(new MineStoreDependencies(repositories, dependencies));
+        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm", "9.1", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm-commons", "9.1", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("me.lucko", "jar-relocator", "1.7", RepositoryRegistry.MAVEN.getRepository()));
+        this.dependencies.add(new MineStoreDependencies(dependencies));
         loadDependencies();
     }
 
     private MineStoreDependencies getGlobalDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        Set<MineStorePluginRepository> repositories = new HashSet<>();
 
-        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-core", "2.0.0"));
-        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-annotations", "2.0.0"));
-        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-services", "2.0.0"));
-        dependencies.add(new MineStorePluginDependency("org.mariadb.jdbc", "mariadb-java-client", "3.5.3"));
-        dependencies.add(new MineStorePluginDependency("com.mysql", "mysql-connector-j", "9.3.0"));
-        dependencies.add(new MineStorePluginDependency("io.leangen.geantyref", "geantyref", "2.0.1"));
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-core", "2.0.0", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-annotations", "2.0.0", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-services", "2.0.0", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("org.mariadb.jdbc", "mariadb-java-client", "3.5.3", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("com.mysql", "mysql-connector-j", "9.3.0", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("io.leangen.geantyref", "geantyref", "2.0.1", RepositoryRegistry.MAVEN.getRepository()));
 
-        repositories.add(RepositoryRegistry.MAVEN.getRepository());
-        repositories.add(RepositoryRegistry.MAVEN1.getRepository());
-        repositories.add(RepositoryRegistry.SONATYPE.getRepository());
-        return new MineStoreDependencies(repositories, dependencies);
+        return new MineStoreDependencies(dependencies);
     }
 
     public void addCommonJar() {
@@ -167,11 +161,8 @@ public class MineStoreClassLoader extends URLClassLoader {
 
     public void addCommonJar(Map<String, String> relocations) {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        Set<MineStorePluginRepository> repositories = new HashSet<>();
-
-        dependencies.add(new MineStorePluginDependency("", "MineStore-Common", "", relocations));
-        repositories.add(RepositoryRegistry.MAVEN.getRepository());
-        add(new MineStoreDependencies(repositories, dependencies));
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Common", "", relocations, null));
+        add(new MineStoreDependencies(dependencies));
     }
 
     public boolean relocateAddon() {

@@ -36,9 +36,8 @@ public class Dumper {
                 return connection.getResponseMessage() + " (" + connection.getResponseCode() + ")";
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     public String dump(boolean includeLog, MineStoreCommon plugin) {

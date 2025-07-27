@@ -16,19 +16,21 @@ public class MineStorePluginDependency {
     private final String name;
     private final String version;
     private final Map<String, String> relocations;
+    private final MineStorePluginRepository repository;
 
-    public MineStorePluginDependency(String group, String name, String version) {
-        this(group, name, version, new HashMap<>());
+    public MineStorePluginDependency(String group, String name, String version, MineStorePluginRepository repository) {
+        this(group, name, version, new HashMap<>(), repository);
     }
 
-    public MineStorePluginDependency(String group, String name, String version, Map<String, String> relocations) {
+    public MineStorePluginDependency(String group, String name, String version, Map<String, String> relocations, MineStorePluginRepository repository) {
         this.group = group;
         this.name = name;
         this.version = version;
         this.relocations = relocations;
+        this.repository = repository;
     }
 
-    public static MineStorePluginDependency fromGradle(String gradle) {
+    public static MineStorePluginDependency fromGradle(String gradle, MineStorePluginRepository repository) {
         int start = gradle.indexOf('"');
         if (start == -1) {
             start = gradle.indexOf('\'');
@@ -44,7 +46,7 @@ public class MineStorePluginDependency {
             dependency = gradle;
         }
         String[] split = dependency.split(":");
-        return new MineStorePluginDependency(split[0], split[1], split[2]);
+        return new MineStorePluginDependency(split[0], split[1], split[2], repository);
     }
 
     public String getName() {
@@ -165,8 +167,8 @@ public class MineStorePluginDependency {
     }
 
     public boolean verify(File file, MineStorePluginRepository repository) {
-        String sha = repository.getUrl() + File.separator + group.replace('.', '/') + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar.sha1";
-        String md5 = repository.getUrl() + File.separator + group.replace('.', '/') + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar.md5";
+        String sha = repository.getUrl() + File.separator + group.replace('.', File.separatorChar) + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar.sha1";
+        String md5 = repository.getUrl() + File.separator + group.replace('.', File.separatorChar) + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar.md5";
         Optional<String> sha1 = getFromURL(sha);
         Optional<String> md52 = getFromURL(md5);
         if (!sha1.isPresent() || !md52.isPresent()) {
@@ -205,5 +207,9 @@ public class MineStorePluginDependency {
 
     public boolean hasRelocations() {
         return !relocations.isEmpty();
+    }
+
+    public MineStorePluginRepository getRepository() {
+        return repository;
     }
 }

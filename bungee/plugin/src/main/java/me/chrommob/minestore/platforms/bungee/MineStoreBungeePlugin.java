@@ -58,19 +58,16 @@ public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapp
     @Override
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        Set<MineStorePluginRepository> repositories = new HashSet<>();
 
         Map<String, String> relocations = new HashMap<>();
         relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
 
-        repositories.add(RepositoryRegistry.MAVEN.getRepository());
-        repositories.add(RepositoryRegistry.SONATYPE.getRepository());
-        dependencies.add(new MineStorePluginDependency("", "MineStore-Bungee", "", relocations));
-        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-bungee", "2.0.0-beta.10"));
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Bungee", "", relocations, null));
+        dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-bungee", "2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository()));
 
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bungeecord", "4.3.4", relocations));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4", relocations));
-        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4", relocations));
-        return new MineStoreDependencies(repositories, dependencies);
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bungeecord", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
+        return new MineStoreDependencies(dependencies);
     }
 }

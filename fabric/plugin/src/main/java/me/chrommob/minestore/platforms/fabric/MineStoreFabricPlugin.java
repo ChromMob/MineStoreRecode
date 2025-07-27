@@ -56,8 +56,7 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
     @Override
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        Set<MineStorePluginRepository> repositories = new HashSet<>();
-        dependencies.add(new MineStorePluginDependency("", "MineStore-Fabric", ""));
-        return new MineStoreDependencies(repositories, dependencies);
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Fabric", "", null));
+        return new MineStoreDependencies(dependencies);
     }
 }

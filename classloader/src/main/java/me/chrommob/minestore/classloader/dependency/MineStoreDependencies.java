@@ -4,6 +4,7 @@ import me.chrommob.minestore.classloader.MineStoreBootstrapper;
 import me.chrommob.minestore.classloader.RelocationHandler;
 import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -14,82 +15,76 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 public class MineStoreDependencies {
-    private final Set<MineStorePluginRepository> repositories;
     private final Set<MineStorePluginDependency> dependencies;
 
-    public MineStoreDependencies(Set<MineStorePluginRepository> repositories, Set<MineStorePluginDependency> dependencies) {
-        this.repositories = repositories;
+    public MineStoreDependencies(Set<MineStorePluginDependency> dependencies) {
         this.dependencies = dependencies;
-    }
-
-    public Set<MineStorePluginRepository> getRepositories() {
-        return repositories;
     }
 
     public Set<MineStorePluginDependency> getDependencies() {
         return dependencies;
     }
 
-    public boolean downloadToFolder(File folder, Set<File> used, RelocationHandler relocationHandler) {
+    public boolean downloadToFolder(File folder, Set<File> used, RelocationHandler relocationHandler, boolean offlineMode) {
         for (MineStorePluginDependency dependency : dependencies) {
             File file = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? ".jar" : "-" + dependency.getVersion() + ".jar"));
+            if (file.exists() && dependency.getRepository() != null) {
+                if (offlineMode || dependency.verify(file, dependency.getRepository())) {
+                    used.add(file);
+                    File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
+                    if (dependency.hasRelocations()) {
+                        if (!relocated.exists()) {
+                            boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
+                            if (res) {
+                                file = relocated;
+                            }
+                            used.add(file);
+                        } else {
+                            used.add(relocated);
+                        }
+                    }
+                    continue;
+                }
+            }
             boolean found = false;
-            if (file.exists()) {
-                for (MineStorePluginRepository repository : repositories) {
-                    if (dependency.verify(file, repository)) {
+            if (!offlineMode && dependency.getRepository() != null) {
+                Optional<byte[]> optional = dependency.download(dependency.getRepository());
+                if (optional.isPresent()) {
+                    try {
+                        file.createNewFile();
+                        FileOutputStream fileOutputStream = new FileOutputStream(file);
+                        fileOutputStream.write(optional.get());
+                        fileOutputStream.close();
                         found = true;
                         used.add(file);
                         File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
                         if (dependency.hasRelocations()) {
-                            if (!relocated.exists()) {
-                                boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
-                                if (res) {
-                                    file = relocated;
-                                }
+                            if (relocated.exists()) {
+                                relocated.delete();
+                            }
+                            boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
+                            if (res) {
+                                file = relocated;
                                 used.add(file);
-                            } else {
-                                used.add(relocated);
                             }
                         }
-                        break;
+                        continue;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
-            if (!found) {
-                for (MineStorePluginRepository repository : repositories) {
-                    Optional<byte[]> optional = dependency.download(repository);
-                    if (optional.isPresent()) {
-                        try {
-                            file.createNewFile();
-                            FileOutputStream fileOutputStream = new FileOutputStream(file);
-                            fileOutputStream.write(optional.get());
-                            fileOutputStream.close();
-                            found = true;
-                            used.add(file);
-                            File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
-                            if (dependency.hasRelocations()) {
-                                if (relocated.exists()) {
-                                    relocated.delete();
-                                }
-                                boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
-                                if (res) {
-                                    file = relocated;
-                                    used.add(file);
-                                }
-                            }
-                            break;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-            if (!found) {
+            if (dependency.getRepository() == null) {
                 try {
                     boolean same = dependency.verify(File.separator + "jars" + File.separator + dependency.getName() + ".jarjar", file);
                     if (!same) {
                         System.out.println("Copying " + dependency.getName() + ".jarjar to " + file.getAbsolutePath());
-                        Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(File.separator + "jars" + File.separator + dependency.getName() + ".jarjar")), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        InputStream in = getClass().getResourceAsStream(File.separator + "jars" + File.separator + dependency.getName() + ".jarjar");
+                        if (in == null) {
+                            System.out.println("Could not find " + dependency.getName() + ".jarjar in jars folder");
+                            return false;
+                        }
+                        Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     } else {
                         System.out.println("Using " + dependency.getName() + ".jarjar from jars folder");
                     }
@@ -129,7 +124,9 @@ public class MineStoreDependencies {
         if (!folder.exists()) {
             folder.mkdirs();
         }
-        boolean download = downloadToFolder(folder, used, relocationHandler);
+        boolean offlineMode = !hasInternet();
+        System.out.println("Downloading dependencies...");
+        boolean download = downloadToFolder(folder, used, relocationHandler, offlineMode);
         if (!download) {
             System.out.println("Could not download dependencies!");
             return Collections.emptyList();
@@ -143,5 +140,16 @@ public class MineStoreDependencies {
             uris.add(file.toURI());
         }
         return Collections.unmodifiableList(uris);
+    }
+
+    private final URI GOOGLE = URI.create("http://google.com");
+
+    public boolean hasInternet() {
+        try {
+            GOOGLE.toURL().openConnection();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
