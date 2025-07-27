@@ -219,6 +219,10 @@ tasks.register("copyJar", Copy) {
         rename { "MineStore-Velocity.jarjar" }
     }
 
+    from(project(":fabric:fabric-impl").tasks.named("shadowJar")) {
+        rename { "MineStore-Fabric.jarjar" }
+    }
+
     from(project(":common").tasks.named("shadowJar")) {
         rename { "MineStore-Common.jarjar" }
     }
@@ -236,6 +240,6 @@ dependencies {
     implementation project(path: ':bungee:bungee-plugin', configuration: 'shadow')
     implementation project(path: ':bukkit:bukkit-plugin', configuration: 'shadow')
     implementation project(path: ':velocity:velocity-plugin', configuration: 'shadow')
-   // implementation project(path: ':MineStore-Fabric', configuration: 'shadow')
+    implementation project(path: ':fabric:fabric-plugin', configuration: 'shadow')
 //    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }
