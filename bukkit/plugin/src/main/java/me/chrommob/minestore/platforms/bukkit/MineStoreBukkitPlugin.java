@@ -22,7 +22,7 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
         try {
             Map<String, String> relocations = new HashMap<>();
             try {
-                Class.forName("net.kyori.adventure.Adventure");
+                Class.forName("net.kyori.adventure.text.minimessage.MiniMessage");
             } catch (ClassNotFoundException e) {
                 relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");
             }
@@ -60,7 +60,7 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
 
         Map<String, String> relocations = new HashMap<>();
         try {
-            Class.forName("net.kyori.adventure.Adventure");
+            Class.forName("net.kyori.adventure.text.minimessage.MiniMessage");
             dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit-Kyori-Native", "", relocations, null));
         } catch (ClassNotFoundException e) {
             relocations.put("net.kyori", "me.chrommob.minestore.libs.net.kyori");

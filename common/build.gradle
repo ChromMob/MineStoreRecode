@@ -3,7 +3,7 @@ dependencies {
     //compileOnly "net.kyori:adventure-api:4.12.0"
     compileOnly "net.kyori:adventure-text-serializer-plain:4.18.0"
     compileOnly "net.kyori:adventure-text-serializer-legacy:4.18.0"
-    implementation "net.kyori:adventure-text-minimessage:4.18.0"
+    compileOnly "net.kyori:adventure-text-minimessage:4.18.0"
 
     implementation(project(path: ':MineStore-API', configuration: 'shadow'))
     compileOnly(project(path: ':MineStore-ClassLoader', configuration: 'shadow'))
