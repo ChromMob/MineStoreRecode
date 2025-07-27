@@ -62,7 +62,7 @@ public class MineStorePluginDependency {
     }
 
     public Optional<byte[]> download(MineStorePluginRepository repository) {
-        String path = repository.getUrl() + File.separator + group.replace('.', '/') + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar";
+        String path = repository.getUrl() + "/" + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar";
         try {
             URL url = new URL(path);
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -78,7 +78,7 @@ public class MineStorePluginDependency {
                 }
                 byte[] byteStreams = out.toByteArray();
                 if (byteStreams.length == 0) {
-                    System.out.println("Could not download " + path);
+                    System.out.println("Could not download " + path + " because server returned empty");
                     return Optional.empty();
                 }
                 return Optional.of(byteStreams);
@@ -167,8 +167,8 @@ public class MineStorePluginDependency {
     }
 
     public boolean verify(File file, MineStorePluginRepository repository) {
-        String sha = repository.getUrl() + File.separator + group.replace('.', File.separatorChar) + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar.sha1";
-        String md5 = repository.getUrl() + File.separator + group.replace('.', File.separatorChar) + File.separator + name + File.separator + version + File.separator + name + "-" + version + ".jar.md5";
+        String sha = repository.getUrl() + File.separator + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar.sha1";
+        String md5 = repository.getUrl() + File.separator + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar.md5";
         Optional<String> sha1 = getFromURL(sha);
         Optional<String> md52 = getFromURL(md5);
         if (!sha1.isPresent() || !md52.isPresent()) {

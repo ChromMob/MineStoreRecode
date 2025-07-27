@@ -46,8 +46,7 @@ public class MineStoreDependencies {
                     continue;
                 }
             }
-            boolean found = false;
-            if (!offlineMode && dependency.getRepository() != null) {
+            else if (!offlineMode && dependency.getRepository() != null) {
                 Optional<byte[]> optional = dependency.download(dependency.getRepository());
                 if (optional.isPresent()) {
                     try {
@@ -55,7 +54,6 @@ public class MineStoreDependencies {
                         FileOutputStream fileOutputStream = new FileOutputStream(file);
                         fileOutputStream.write(optional.get());
                         fileOutputStream.close();
-                        found = true;
                         used.add(file);
                         File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
                         if (dependency.hasRelocations()) {
@@ -72,6 +70,9 @@ public class MineStoreDependencies {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                } else {
+                    System.out.println("Could not download " + dependency.getName() + " with version " + dependency.getVersion() + " from " + dependency.getRepository().getUrl());
+                    return false;
                 }
             }
             if (dependency.getRepository() == null) {
@@ -79,7 +80,7 @@ public class MineStoreDependencies {
                     boolean same = dependency.verify(File.separator + "jars" + File.separator + dependency.getName() + ".jarjar", file);
                     if (!same) {
                         System.out.println("Copying " + dependency.getName() + ".jarjar to " + file.getAbsolutePath());
-                        InputStream in = getClass().getResourceAsStream(File.separator + "jars" + File.separator + dependency.getName() + ".jarjar");
+                        InputStream in = getClass().getResourceAsStream("/jars/" + dependency.getName() + ".jarjar");
                         if (in == null) {
                             System.out.println("Could not find " + dependency.getName() + ".jarjar in jars folder");
                             return false;
@@ -96,26 +97,21 @@ public class MineStoreDependencies {
                             if (res) {
                                 file = relocated;
                                 used.add(file);
-                                found = true;
+                                continue;
                             }
                         } else {
                             used.add(relocated);
-                            found = true;
+                            continue;
                         }
                     } else {
-                        found = true;
+                        continue;
                     }
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
                 }
-                if (found) {
-                    continue;
-                }
             }
-            if (!found) {
-                System.out.println("Could not find dependency " + dependency.getName() + " with version " + dependency.getVersion());
-                return false;
-            }
+            System.out.println("Could not find dependency " + dependency.getName() + " with version " + dependency.getVersion());
+            return false;
         }
         return true;
     }
