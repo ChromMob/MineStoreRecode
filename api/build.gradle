@@ -9,6 +9,7 @@ dependencies {
 shadowJar {
     relocate "me.chrommob.config", "me.chrommob.minestore.libs.me.chrommob.config.ConfigManager"
     minimize {
+        exclude(dependency('net.kyori:.*:.*'))
         exclude(dependency('com.github.ChromMob:ConfigManager:.*'))
     }
 }

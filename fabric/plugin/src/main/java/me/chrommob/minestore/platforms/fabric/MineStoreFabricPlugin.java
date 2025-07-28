@@ -6,6 +6,7 @@ import me.chrommob.minestore.classloader.MineStorePlugin;
 import me.chrommob.minestore.classloader.dependency.MineStoreDependencies;
 import me.chrommob.minestore.classloader.dependency.MineStorePluginDependency;
 import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
+import me.chrommob.minestore.classloader.repository.RepositoryRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -57,6 +58,7 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
         dependencies.add(new MineStorePluginDependency("", "MineStore-Fabric", "", null));
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-minimessage", "4.18.0", null, RepositoryRegistry.MAVEN.getRepository()));
         return new MineStoreDependencies(dependencies);
     }
 }

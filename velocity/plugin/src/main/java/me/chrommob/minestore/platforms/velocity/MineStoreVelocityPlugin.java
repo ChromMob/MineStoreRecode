@@ -75,6 +75,11 @@ public class MineStoreVelocityPlugin implements MineStoreBootstrapper {
     @Override
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
+        try {
+            Class.forName("net.kyori.adventure.text.minimessage.MiniMessage");
+        } catch (ClassNotFoundException e) {
+            dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-minimessage", "4.18.0", null, RepositoryRegistry.MAVEN.getRepository()));
+        }
         dependencies.add(new MineStorePluginDependency("", "MineStore-Velocity", "", null));
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-velocity", "2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository()));
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-brigadier", "2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository()));

@@ -64,7 +64,7 @@ public class MineStoreBungeePlugin extends Plugin implements MineStoreBootstrapp
 
         dependencies.add(new MineStorePluginDependency("", "MineStore-Bungee", "", relocations, null));
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-bungee", "2.0.0-beta.10", RepositoryRegistry.MAVEN.getRepository()));
-
+        dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-minimessage", "4.18.0", relocations, RepositoryRegistry.MAVEN.getRepository()));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-bungeecord", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-api", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-platform-facet", "4.3.4", relocations, RepositoryRegistry.MAVEN.getRepository()));
