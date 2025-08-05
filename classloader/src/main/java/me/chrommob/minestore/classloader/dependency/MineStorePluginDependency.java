@@ -26,7 +26,7 @@ public class MineStorePluginDependency {
         this.group = group;
         this.name = name;
         this.version = version;
-        this.relocations = relocations;
+        this.relocations = relocations == null ? new HashMap<>() : relocations;
         this.repository = repository;
     }
 

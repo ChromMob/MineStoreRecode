@@ -46,7 +46,7 @@ public class MineStoreDependencies {
                     continue;
                 }
             }
-            else if (!offlineMode && dependency.getRepository() != null) {
+            if (!offlineMode && dependency.getRepository() != null) {
                 Optional<byte[]> optional = dependency.download(dependency.getRepository());
                 if (optional.isPresent()) {
                     try {
