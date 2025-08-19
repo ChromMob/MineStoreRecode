@@ -52,6 +52,13 @@ public class PluginConfig extends ConfigWrapper {
         weblistenerKeys.add(new ConfigKey("secret-key", "extraSecretKey", Collections.singletonList("The secret key that is used to authenticate the getting of commands.")));
         keys.add(new ConfigKey("weblistener", weblistenerKeys));
 
+        List<ConfigKey> payNowKeys = new ArrayList<>();
+        List<String> onJoinComment = new ArrayList<>();
+        onJoinComment.add("By providing PayNow with IP data, you enable enhanced fraud detection and improve your chances of winning chargeback disputes.");
+        onJoinComment.add("If this feature is disabled, you may experience more chargeback losses, and PayNow may revoke your chargeback protection.");
+        payNowKeys.add(new ConfigKey("share-ip-onjoin", true, onJoinComment));
+        keys.add(new ConfigKey("paynow", payNowKeys, Collections.singletonList("You should only care about these if you are using PayNow.gg as a payment method.")));
+
         List<ConfigKey> authKeys = new ArrayList<>();
         List<String> authTimeoutComment = new ArrayList<>();
         authTimeoutComment.add("Set the timeout in seconds that the player has to authenticate their Minecraft account with MineStore website.");
