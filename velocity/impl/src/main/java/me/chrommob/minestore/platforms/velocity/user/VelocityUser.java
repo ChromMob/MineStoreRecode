@@ -7,6 +7,7 @@ import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 public class VelocityUser extends CommonUser {
@@ -49,6 +50,11 @@ public class VelocityUser extends CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
+    }
+
+    @Override
+    public InetSocketAddress getAddress() {
+        return player.getRemoteAddress();
     }
 
     @Override

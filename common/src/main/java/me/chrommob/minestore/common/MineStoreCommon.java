@@ -22,6 +22,7 @@ import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.payment.PaymentHandler;
+import me.chrommob.minestore.common.paynow.PayNowManager;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduler;
@@ -50,7 +51,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -60,6 +60,7 @@ public class MineStoreCommon {
     private DatabaseManager databaseManager;
     private MiniMessage miniMessage;
     private WebListener webListener;
+    private PayNowManager payNowManager;
     private CommandStorage commandStorage;
     private CommandDumper commandDumper;
     private NewCommandDumper newCommandDumper;
@@ -77,6 +78,7 @@ public class MineStoreCommon {
 
     private final MineStoreVersion subscriptionCommandSince = new MineStoreVersion(3, 0, 8);
     private final MineStoreVersion chargeBalanceSince = new MineStoreVersion(3, 2, 5);
+    private final MineStoreVersion payNowSince = new MineStoreVersion(3, 6, 0);
 
     public MineStoreCommon() {
         Registries.CONFIG_FILE.listen(configFile -> {
@@ -120,6 +122,7 @@ public class MineStoreCommon {
         authHolder = new AuthHolder(this);
         commandStorage.init();
         webListener = new WebListener(this);
+        payNowManager = new PayNowManager(this);
         guiData = new GuiData(this);
         version = MineStoreVersion.getMineStoreVersion(pluginConfig.getKey("store-url").getAsString());
         placeHolderData = new PlaceHolderData(this);
@@ -174,6 +177,12 @@ public class MineStoreCommon {
         scheduler.addTask(placeHolderData.mineStoreScheduledTask);
         scheduler.addTask(webListener.mineStoreScheduledTask);
         scheduler.addTask(authHolder.removeAndPost);
+
+        if (payNowManager != null && payNowManager.isEnabled()) {
+            scheduler.run(payNowManager.initTask);
+            scheduler.addTask(payNowManager.mineStoreScheduledTask);
+        }
+
         retryCount = 0;
         new ApiHandler(new AuthData(pluginConfig.getKey("store-url").getAsString(), pluginConfig.getKey("api").getKey("key").getAsString()));
         new MineStoreEnableEvent().call();
@@ -318,6 +327,9 @@ public class MineStoreCommon {
             scheduler.removeTask(databaseManager.updaterTask);
         if (webListener != null)
             scheduler.removeTask(webListener.mineStoreScheduledTask);
+        if (payNowManager != null) {
+            scheduler.removeTask(payNowManager.mineStoreScheduledTask);
+        }
     }
 
     public void stop() {
@@ -413,6 +425,12 @@ public class MineStoreCommon {
         scheduler.addTask(placeHolderData.mineStoreScheduledTask);
         scheduler.addTask(statsSender.mineStoreScheduledTask);
         scheduler.addTask(authHolder.removeAndPost);
+
+        scheduler.run(payNowManager.initTask);
+        if (payNowManager.isEnabled()) {
+            scheduler.addTask(payNowManager.mineStoreScheduledTask);
+        }
+
         if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean() && databaseManager != null) {
             scheduler.addTask(databaseManager.updaterTask);
         }
@@ -453,6 +471,12 @@ public class MineStoreCommon {
         VerificationResult webListenerVerification = webListener.load();
         if (!webListenerVerification.isValid()) {
             return webListenerVerification;
+        }
+        if (version.requires(payNowSince)) {
+            VerificationResult payNowVerification = payNowManager.load();
+            if (!payNowVerification.isValid()) {
+                return payNowVerification;
+            }
         }
         if (Registries.SCHEDULER.get() == null) {
             log("Scheduler is not registered.");
@@ -554,6 +578,9 @@ public class MineStoreCommon {
         commandStorage.onPlayerJoin(name);
         if (databaseManager != null) {
             databaseManager.onPlayerJoin(name);
+        }
+        if (payNowManager != null && payNowManager.isEnabled() && pluginConfig.getKey("paynow").getKey("share-ip-onjoin").getAsBoolean()) {
+            payNowManager.onJoin(Registries.USER_GETTER.get().get(name));
         }
     }
 

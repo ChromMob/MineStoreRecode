@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 public class UserFabric extends CommonUser {
@@ -48,6 +49,11 @@ public class UserFabric extends CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUuid();
+    }
+
+    @Override
+    public InetSocketAddress getAddress() {
+        return new InetSocketAddress(player.getIp(), 25565);
     }
 
     @Override

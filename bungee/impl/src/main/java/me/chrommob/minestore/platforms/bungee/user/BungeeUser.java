@@ -8,6 +8,7 @@ import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 public class BungeeUser extends CommonUser {
@@ -50,6 +51,11 @@ public class BungeeUser extends CommonUser {
     @Override
     public UUID getUUID() {
         return player.getUniqueId();
+    }
+
+    @Override
+    public InetSocketAddress getAddress() {
+        return player.getAddress();
     }
 
     @Override

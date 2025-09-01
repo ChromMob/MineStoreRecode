@@ -27,6 +27,7 @@ import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
 import java.util.function.Function;
 
 public final class MineStoreBukkit implements MineStorePlugin {
@@ -62,6 +63,10 @@ public final class MineStoreBukkit implements MineStorePlugin {
         Registries.COMMAND_EXECUTER.set(new CommandExecuterBukkit(plugin, common));
         Registries.CONFIG_FILE.set(plugin.getDataFolder().toPath().resolve("config.yml").toFile());
         Registries.PLAYER_JOIN_LISTENER.set(new BukkitPlayerEvent(plugin, common));
+
+        Registries.HOSTNAME.set(plugin.getServer().getMotd() == null ? "" : plugin.getServer().getMotd());
+        Registries.IP.set(new InetSocketAddress(plugin.getServer().getIp(), plugin.getServer().getPort()));
+
         new BukkitInventoryEvent(plugin, common);
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
