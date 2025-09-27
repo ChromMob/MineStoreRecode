@@ -63,7 +63,6 @@ public class GuiData {
             String line;
 
             if (urlConnection.getResponseCode() != 200) {
-                messages.add("The request was denied by the server with code: " + urlConnection.getResponseCode() + "!");
                 switch (urlConnection.getResponseCode()) {
                     case 403:
                         messages.add("Probably Cloudflare protection.");
@@ -75,6 +74,7 @@ public class GuiData {
                         messages.add("The server returned an error with code: " + urlConnection.getResponseCode() + "!");
                         break;
                 }
+                messages.add("Error: " + urlConnection.getResponseMessage());
                 return new VerificationResult(false, messages, VerificationResult.TYPE.WEBSTORE);
             }
 

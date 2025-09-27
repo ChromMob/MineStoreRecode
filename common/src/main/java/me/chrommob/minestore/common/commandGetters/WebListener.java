@@ -43,6 +43,10 @@ public class WebListener {
         List<ParsedResponse> parsedResponses = new ArrayList<>();
         try {
             HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
+            urlConnection.setUseCaches(false);
+            urlConnection.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
+            urlConnection.setRequestProperty("Pragma", "no-cache");
+            urlConnection.setRequestProperty("Expires", "0");
             InputStream in = urlConnection.getInputStream();
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
             StringBuilder responseString = new StringBuilder();
