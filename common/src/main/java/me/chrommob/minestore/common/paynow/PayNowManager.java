@@ -166,7 +166,7 @@ public class PayNowManager {
     }
 
     public boolean isEnabled() {
-        return tokenReadResponse.success && tokenReadResponse.token != null;
+        return tokenReadResponse != null && tokenReadResponse.success && tokenReadResponse.token != null;
     }
 
     public void onJoin(AbstractUser user) {
