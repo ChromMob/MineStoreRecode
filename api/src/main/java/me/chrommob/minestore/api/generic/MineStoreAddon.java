@@ -17,11 +17,11 @@ public abstract class MineStoreAddon {
     abstract public void onEnable();
     abstract public String getName();
 
-    public List<ConfigKey> getConfigKeys() {
+    public List<ConfigKey<?>> getConfigKeys() {
         return Collections.emptyList();
     }
 
-    public ConfigKey getConfigKey(String key) {
+    public ConfigKey<?> getConfigKey(String key) {
         if (configWrapper == null) {
             return null;
         }

@@ -38,16 +38,17 @@ public class SetupCommand {
             sendConfigKeys(commonUser);
             return;
         }
-        ConfigKey config = keys.get(key);
+        ConfigKey<?> config = keys.get(key);
         if (config == null) {
             commonUser.sendMessage(Component.text("Config key " + key + " does not exist").color(NamedTextColor.RED));
             return;
         }
         if (value == null) {
-            commonUser.sendMessage(Component.text("The value of " + key + " is " + config.getAsString()).color(NamedTextColor.GREEN));
+            commonUser.sendMessage(Component.text("The value of " + key + " is " + config.getValueAsString()).color(NamedTextColor.GREEN));
             return;
         }
-        config.setValue(value);
+        //TODO
+        //config.setValue(value);
         plugin.pluginConfig().saveConfig();
         plugin.reload();
         commonUser.sendMessage(Component.text("Value of " + key + " has been set to " + value).color(NamedTextColor.GREEN));
@@ -56,7 +57,7 @@ public class SetupCommand {
     private void sendConfigKeys(CommonUser commonUser) {
         commonUser.sendMessage(Component.text("Config keys:").color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
         for (String key : plugin.pluginConfig().getConfig().keySet()) {
-            ConfigKey config = plugin.pluginConfig().getKey(key);
+            ConfigKey<?> config = plugin.pluginConfig().getKey(key);
             if (config == null) {
                 System.out.println("Config key " + key + " does not exist");
                 continue;
@@ -65,7 +66,7 @@ public class SetupCommand {
         }
     }
 
-    private void sendConfigKey(CommonUser commonUser, ConfigKey config, int depth) {
+    private void sendConfigKey(CommonUser commonUser, ConfigKey<?> config, int depth) {
         Component out = Component.empty();
         for (int i = 0; i < depth; i++) {
             out = out.append(Component.text("  "));
@@ -73,7 +74,7 @@ public class SetupCommand {
         out = out.append(Component.text(config.get()).color(NamedTextColor.GREEN));
         if (config.getChildren().isEmpty()) {
             out = out.append(Component.text(" = ").color(NamedTextColor.YELLOW));
-            out = out.append(Component.text(config.getAsString()).color(NamedTextColor.GREEN));
+            out = out.append(Component.text(config.getValueAsString()).color(NamedTextColor.GREEN));
             commonUser.sendMessage(out);
             return;
         }
@@ -88,24 +89,24 @@ public class SetupCommand {
         return new HashSet<>(getAllNames());
     }
 
-    private Map<String, ConfigKey> keys;
+    private Map<String, ConfigKey<?>> keys;
     private Set<String> getAllNames() {
         if (keys != null) return keys.keySet();
         keys =  new LinkedHashMap<>();
-        for (ConfigKey key : PluginConfig.getKeys()) {
-            ConfigKey real = plugin.pluginConfig().getKey(key.get());
+        for (ConfigKey<?> key : PluginConfig.getKeys()) {
+            ConfigKey<?> real = plugin.pluginConfig().getKey(key.get());
             keys.putAll(getNames(new StringBuilder(), real));
         }
         return keys.keySet();
     }
 
-    private Map<String, ConfigKey> getNames(StringBuilder stringBuilder, ConfigKey key) {
-        Map<String, ConfigKey> names = new LinkedHashMap<>();
+    private Map<String, ConfigKey<?>> getNames(StringBuilder stringBuilder, ConfigKey<?> key) {
+        Map<String, ConfigKey<?>> names = new LinkedHashMap<>();
         if (key.getChildren().isEmpty()) {
             names.put(stringBuilder.toString() + key.get().toUpperCase(), key);
         } else {
             stringBuilder.append(key.get().toUpperCase()).append(".");
-            for (ConfigKey child : key.getChildren().values()) {
+            for (ConfigKey<?> child : key.getChildren().values()) {
                 names.putAll(getNames(stringBuilder, child));
             }
         }

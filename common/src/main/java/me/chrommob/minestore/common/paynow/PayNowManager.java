@@ -6,6 +6,7 @@ import io.leangen.geantyref.TypeToken;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.paynow.json.*;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
@@ -28,6 +29,7 @@ public class PayNowManager {
     private MineStoreCommon mineStoreCommon;
     private final static Gson gson = new Gson();
     private TokenReadResponse tokenReadResponse;
+    private static final URI API_LINK_URL = URI.create("https://api.paynow.gg/v1/delivery/gameserver/link");
     private static final URI API_QUEUE_URL = URI.create("https://api.paynow.gg/v1/delivery/command-queue/");
     private static final URI API_EVENT_URL = URI.create("https://api.paynow.gg/v1/delivery/events/");
 
@@ -35,6 +37,32 @@ public class PayNowManager {
 
     public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("paynow", () -> {
         if (!isEnabled()) return;
+
+
+        List<PayNowEvent> localEvents = new ArrayList<>(events);
+        events.removeAll(localEvents);
+        try {
+            HttpsURLConnection connection = (HttpsURLConnection) API_EVENT_URL.toURL().openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Authorization", "Gameserver " + tokenReadResponse.token);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.connect();
+            OutputStream os = connection.getOutputStream();
+            String data = gson.toJson(localEvents.toArray(new PayNowEvent[0]));
+            mineStoreCommon.debug(this.getClass(), "Sending events to paynow:");
+            mineStoreCommon.debug(this.getClass(), data);
+            os.write(data.getBytes());
+            os.flush();
+            os.close();
+            connection.getInputStream();
+            connection.disconnect();
+        } catch (IOException e) {
+            mineStoreCommon.debug(this.getClass(), e);
+        }
+
         try {
             List<String> names = new ArrayList<>();
             List<UUID> uuids = new ArrayList<>();
@@ -44,6 +72,8 @@ public class PayNowManager {
             });
             PlayerList playerList = new PlayerList(names, uuids);
             String json = gson.toJson(playerList);
+            mineStoreCommon.debug(this.getClass(), "Sending server data to paynow: " + json);
+
             HttpsURLConnection connection = (HttpsURLConnection) API_QUEUE_URL.toURL().openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
@@ -57,15 +87,10 @@ public class PayNowManager {
                 return;
             }
             String response = new BufferedReader(new InputStreamReader(connection.getInputStream())).lines().collect(Collectors.joining("\n"));
-            JsonObject responseJson = gson.fromJson(response, JsonObject.class);
-            if (!responseJson.has("gameserver")) {
-                mineStoreCommon.log("PayNow API did not return a GameServer object, this may be a transient issue, please try again or contact support.");
-                return;
-            }
-
+            mineStoreCommon.debug(this.getClass(), "Received paynow commands (ignoring and confirming): " + response);
             TypeToken<List<QueuedCommand>> queuedCommandType = new TypeToken<List<QueuedCommand>>() {
             };
-            List<QueuedCommand> queuedCommands = gson.fromJson(responseJson.get("queued_commands").getAsString(), queuedCommandType.getType());
+            List<QueuedCommand> queuedCommands = gson.fromJson(response, queuedCommandType.getType());
             if (queuedCommands == null || queuedCommands.isEmpty()) {
                 return;
             }
@@ -88,32 +113,11 @@ public class PayNowManager {
                 os.close();
                 delete.getInputStream();
                 delete.disconnect();
+                mineStoreCommon.debug(this.getClass(), "Deleted commands");
             } catch (IOException e) {
                 mineStoreCommon.debug(this.getClass(), e);
             }
         } catch (Exception e) {
-            mineStoreCommon.debug(this.getClass(), e);
-        }
-
-
-        List<PayNowEvent> localEvents = new ArrayList<>(events);
-        events.removeAll(localEvents);
-        try {
-            HttpsURLConnection connection = (HttpsURLConnection) API_EVENT_URL.toURL().openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Authorization", "Gameserver " + tokenReadResponse.token);
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.connect();
-            OutputStream os = connection.getOutputStream();
-            os.write(gson.toJson(localEvents.toArray(new PayNowEvent[0])).getBytes());
-            os.flush();
-            os.close();
-            connection.getInputStream();
-            connection.disconnect();
-        } catch (IOException e) {
             mineStoreCommon.debug(this.getClass(), e);
         }
     }, 1000 * 60);
@@ -122,14 +126,16 @@ public class PayNowManager {
         if (!isEnabled()) return;
         LinkRequest linkRequest = new LinkRequest(Registries.IP.get().getAddress().getHostAddress() + ":" + Registries.IP.get().getPort(), Registries.HOSTNAME.get(), Registries.PLATFORM_NAME.get(), Registries.PLATFORM_VERSION.get());
         try {
-            URI linkUri = new URI("https://api.paynow.gg/v1/delivery/gameserver/link");
-            HttpsURLConnection connection = (HttpsURLConnection) linkUri.toURL().openConnection();
+            HttpsURLConnection connection = (HttpsURLConnection) API_LINK_URL.toURL().openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Authorization", "Gameserver " + tokenReadResponse.token);
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoInput(true);
             connection.setDoOutput(true);
-            connection.getOutputStream().write(gson.toJson(linkRequest).getBytes());
+            mineStoreCommon.debug(this.getClass(), "Sending link request to paynow:");
+            String linkRequestString = gson.toJson(linkRequest);
+            mineStoreCommon.debug(this.getClass(), linkRequestString);
+            connection.getOutputStream().write(linkRequestString.getBytes(StandardCharsets.UTF_8));
             int responseCode = connection.getResponseCode();
             if (responseCode < 200 || responseCode >= 300) {
                 return;
@@ -159,6 +165,7 @@ public class PayNowManager {
 
     public VerificationResult load() {
         tokenReadResponse = readToken();
+        mineStoreCommon.debug(this.getClass(), "Token read response: " + gson.toJson(tokenReadResponse));
         if (tokenReadResponse.success) {
             return VerificationResult.valid();
         }
@@ -177,25 +184,16 @@ public class PayNowManager {
         events.add(event);
     }
 
-    private static String decryptToken(String base64Payload, String apiKey) throws Exception {
-        byte[] payloadBytes = Base64.getDecoder().decode(base64Payload);
-        byte[] iv = new byte[16];
-        System.arraycopy(payloadBytes, 0, iv, 0, 16);
-
-        byte[] encryptedToken = new byte[payloadBytes.length - 16];
-        System.arraycopy(payloadBytes, 16, encryptedToken, 0, encryptedToken.length);
-
-        byte[] keyBytes = apiKey.getBytes(StandardCharsets.UTF_8);
-        if (keyBytes.length != 32) {
-            throw new IllegalArgumentException("Key must be exactly 32 bytes long for AES-256.");
-        }
-
+    public static String decryptToken(String base64Payload, String apiKey) throws Exception {
+        byte[] outerBytes = Base64.getDecoder().decode(base64Payload);
+        byte[] iv = Arrays.copyOfRange(outerBytes, 0, 16);
+        byte[] innerBase64 = Arrays.copyOfRange(outerBytes, 16, outerBytes.length);
+        byte[] encryptedToken = Base64.getDecoder().decode(innerBase64);
+        byte[] keyBytes = Arrays.copyOf(apiKey.getBytes(StandardCharsets.UTF_8), 32);
         SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
-
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivSpec);
-
         byte[] decryptedBytes = cipher.doFinal(encryptedToken);
         return new String(decryptedBytes, StandardCharsets.UTF_8);
     }
@@ -213,9 +211,9 @@ public class PayNowManager {
     }
 
     public TokenReadResponse readToken() {
-        String storeUrl = mineStoreCommon.pluginConfig().getKey("store-url").getAsString();
-        String apiKey = mineStoreCommon.pluginConfig().getKey("api").getKey("key").getAsString();
-        String secretKey = mineStoreCommon.pluginConfig().getKey("weblistener").getKey("secret-key").getAsString();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
+        String apiKey = ConfigKeys.API_KEYS.KEY.getValue();
+        String secretKey = ConfigKeys.WEBLISTENER_KEYS.KEY.getValue();
         TokenReadResponse response = new TokenReadResponse();
         try {
             if (storeUrl.endsWith("/")) {

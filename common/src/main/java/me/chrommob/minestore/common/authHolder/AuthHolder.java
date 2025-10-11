@@ -5,6 +5,7 @@ import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -22,8 +23,8 @@ public final class AuthHolder {
 
     public AuthHolder(MineStoreCommon plugin) {
         this.plugin = plugin;
-        authTimeout = plugin.pluginConfig().getKey("auth").getKey("timeout").getAsInt() * 1000;
-        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+        authTimeout = ConfigKeys.AUTH_KEYS.TIMEOUT.getValue();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
@@ -49,7 +50,7 @@ public final class AuthHolder {
             if (isExpired(authUser) || !authUser.user().isOnline()) {
                 plugin.debug(this.getClass(), "Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
                 if (authUser.user().isOnline()) {
-                    authUser.user().sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("timeout-message").getAsString()));
+                    authUser.user().sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("timeout-message").getValueAsString()));
                 }
                 authUsers.remove(s);
             }

@@ -17,6 +17,7 @@ import me.chrommob.minestore.common.commandHolder.storage.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
 import me.chrommob.minestore.common.commandHolder.storage.NewCommandDumper;
 import me.chrommob.minestore.common.commands.*;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.config.PluginConfig;
 import me.chrommob.minestore.common.db.DatabaseManager;
 import me.chrommob.minestore.common.dumper.Dumper;
@@ -124,24 +125,24 @@ public class MineStoreCommon {
         webListener = new WebListener(this);
         payNowManager = new PayNowManager(this);
         guiData = new GuiData(this);
-        version = MineStoreVersion.getMineStoreVersion(pluginConfig.getKey("store-url").getAsString());
+        version = MineStoreVersion.getMineStoreVersion(ConfigKeys.STORE_URL.getValue());
         placeHolderData = new PlaceHolderData(this);
         SubscriptionUtil.init(this);
-        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
+        if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
             }
         }
         if (!reload)
             registerEssentialCommands();
-        String storeUrl = pluginConfig.getKey("store-url").getAsString();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (!storeUrl.startsWith("https://")) {
             if (storeUrl.contains("://")) {
                 String[] prefix = storeUrl.split("://");
                 storeUrl = "https://" + prefix[1];
             } else
                 storeUrl = "https://" + storeUrl;
-            pluginConfig.getKey("store-url").setValue(storeUrl);
+            ConfigKeys.STORE_URL.setValue(storeUrl);
             pluginConfig.saveConfig();
         }
         VerificationResult lastVerificationResult = verify();
@@ -162,7 +163,7 @@ public class MineStoreCommon {
                     log("Failed to register PlaceHolderAPI expansion!");
                 }
             }
-            if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
+            if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
                 scheduler.addTask(databaseManager.updaterTask);
             }
         }
@@ -184,7 +185,7 @@ public class MineStoreCommon {
         }
 
         retryCount = 0;
-        new ApiHandler(new AuthData(pluginConfig.getKey("store-url").getAsString(), pluginConfig.getKey("api").getKey("key").getAsString()));
+        new ApiHandler(new AuthData(ConfigKeys.STORE_URL.getValue(), ConfigKeys.API_KEYS.KEY.getValue()));
         new MineStoreEnableEvent().call();
     }
 
@@ -366,10 +367,10 @@ public class MineStoreCommon {
         // });
         annotationParser.parse(new AuthCommand(this));
         annotationParser.parse(new VersionCommand());
-        if (pluginConfig.getKey("store-command").getKey("enabled").getAsBoolean()) {
+        if (ConfigKeys.STORE_COMMAND_KEYS.ENABLED.getValue()) {
             annotationParser.parse(new StoreCommand(this));
         }
-        if (pluginConfig.getKey("buy-gui").getKey("enabled").getAsBoolean()) {
+        if (ConfigKeys.BUY_GUI_KEYS.ENABLED.getValue()) {
             annotationParser.parse(new BuyCommand(this));
         }
         if (version.requires(subscriptionCommandSince)) {
@@ -392,8 +393,8 @@ public class MineStoreCommon {
             log("Reloaded MineStore!");
             return;
         }
-        version = MineStoreVersion.getMineStoreVersion(pluginConfig.getKey("store-url").getAsString());
-        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
+        version = MineStoreVersion.getMineStoreVersion(ConfigKeys.STORE_URL.getValue());
+        if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
             } else {
@@ -431,7 +432,7 @@ public class MineStoreCommon {
             scheduler.addTask(payNowManager.mineStoreScheduledTask);
         }
 
-        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean() && databaseManager != null) {
+        if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue() && databaseManager != null) {
             scheduler.addTask(databaseManager.updaterTask);
         }
         log("Reloaded MineStore!");
@@ -482,7 +483,7 @@ public class MineStoreCommon {
             log("Scheduler is not registered.");
             return new VerificationResult(false, Collections.singletonList("Scheduler is not registered."), VerificationResult.TYPE.SUPPORT);
         }
-        if (pluginConfig.getKey("mysql").getKey("enabled").getAsBoolean()) {
+        if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
             if (databaseManager == null) {
                 return new VerificationResult(false, Collections.singletonList("DatabaseManager is not registered."), VerificationResult.TYPE.SUPPORT);
             }
@@ -534,12 +535,13 @@ public class MineStoreCommon {
             debugLog.append(c.getName()).append("\n");
             debugLog.append("================================================================================").append("\n");
             previousClass = c;
+
         }
         String[] lines = message.split(", ");
         for (String line : lines) {
             debugLog.append(line).append("\n");
         }
-        if (pluginConfig.getKey("debug").getAsBoolean()) {
+        if (ConfigKeys.DEBUG.getValue()) {
             log(debugLog.toString());
             return;
         }
@@ -579,7 +581,7 @@ public class MineStoreCommon {
         if (databaseManager != null) {
             databaseManager.onPlayerJoin(name);
         }
-        if (payNowManager != null && payNowManager.isEnabled() && pluginConfig.getKey("paynow").getKey("share-ip-onjoin").getAsBoolean()) {
+        if (payNowManager != null && payNowManager.isEnabled() && ConfigKeys.PAYNOW_KEYS.SHARE_IP_ON_JOIN.getValue()) {
             payNowManager.onJoin(Registries.USER_GETTER.get().get(name));
         }
     }

@@ -24,10 +24,10 @@ public class AuthCommand {
         }
         AuthUser authUser = plugin.authHolder().getAuthUser(user.getName().toLowerCase());
         if (authUser == null) {
-            user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("failure-message").getAsString()));
+            user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("failure-message").getValueAsString()));
             return;
         }
         authUser.confirmAuth();
-        user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("success-message").getAsString()));
+        user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("success-message").getValueAsString()));
     }
 }

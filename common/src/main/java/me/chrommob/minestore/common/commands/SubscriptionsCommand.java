@@ -28,13 +28,13 @@ public class SubscriptionsCommand {
             commonUser.sendMessage("[MineStore] The plugin is not successfully connected to the store! Contact the server owner!");
             return;
         }
-        commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("title").getAsString()));
-        commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("status").getAsString().replaceAll("%message%", returnSubscriptionObject.message())));
+        commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("title").getValueAsString()));
+        commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("status").getValueAsString().replaceAll("%message%", returnSubscriptionObject.message())));
         if (!returnSubscriptionObject.isSuccess()) {
             return;
         }
         for (String url : returnSubscriptionObject.urls()) {
-            commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("url").getAsString().replaceAll("%url%", url)));
+            commonUser.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("subscription").getKey("url").getValueAsString().replaceAll("%url%", url)));
         }
     }
 }

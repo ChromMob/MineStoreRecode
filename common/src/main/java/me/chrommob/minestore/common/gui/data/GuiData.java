@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.GuiOpenener;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
@@ -36,13 +37,13 @@ public class GuiData {
     public VerificationResult load() {
         List<String> messages = new ArrayList<>();
         String finalUrl;
-        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         finalUrl = storeUrl + "/api/"
-                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
-                        ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/gui/packages_new"
+                + (ConfigKeys.API_KEYS.ENABLED.getValue()
+                        ? ConfigKeys.API_KEYS.KEY.getValue() + "/gui/packages_new"
                         : "gui/packages_new");
         URL packageURL;
         try {

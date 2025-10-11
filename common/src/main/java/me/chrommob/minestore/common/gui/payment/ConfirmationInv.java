@@ -20,7 +20,7 @@ public class ConfirmationInv {
 
     public ConfirmationInv(ParsedPackage parsedPackage, MineStoreCommon plugin) {
         this.parsedPackage = parsedPackage;
-        background = new CommonItem(Component.text(" "), plugin.pluginConfig().getKey("buy-gui").getKey("back").getKey("item").getAsString(), Collections.emptyList(), true);
+        background = new CommonItem(Component.text(" "), plugin.pluginConfig().getKey("buy-gui").getKey("back").getKey("item").getValueAsString(), Collections.emptyList(), true);
     }
 
     public CommonInventory getInventory() {

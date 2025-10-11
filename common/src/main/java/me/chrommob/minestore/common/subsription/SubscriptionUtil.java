@@ -2,6 +2,7 @@ package me.chrommob.minestore.common.subsription;
 
 import com.google.gson.Gson;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.subsription.json.ReturnSubscriptionObject;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -42,13 +43,13 @@ public class SubscriptionUtil {
     }
 
     public static void init(MineStoreCommon plugin) {
-        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         String url = storeUrl + "/api/"
-                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
-                ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/in-game/manageSubscriptions/"
+                + (ConfigKeys.API_KEYS.ENABLED.getValue()
+                ? ConfigKeys.API_KEYS.KEY.getValue() + "/in-game/manageSubscriptions/"
                 : "/in-game/manageSubscriptions/");
         try {
             SubscriptionUtil.url = new URL(url);

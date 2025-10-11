@@ -62,7 +62,7 @@ public class ParsedSubCategory {
             return item;
         }
         MiniMessage miniMessage = plugin.miniMessage();
-        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("subcategory").getKey("name").getAsString();
+        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("subcategory").getKey("name").getValueAsString();
         configName = configName.replace("%subcategory%", this.name);
         Component name = miniMessage.deserialize(configName);
         return new CommonItem(name, material, new ArrayList<>());
@@ -76,7 +76,7 @@ public class ParsedSubCategory {
         for (ParsedPackage pack : this.packages) {
             items.add(pack.getItem());
         }
-        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("title").getAsString().replace("%subcategory%", name)), 54, items);
+        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("title").getValueAsString().replace("%subcategory%", name)), 54, items);
         plugin.guiData().getGuiInfo().formatInventory(inventory, false);
         return inventory;
     }

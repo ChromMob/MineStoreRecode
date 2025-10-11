@@ -8,6 +8,7 @@ import me.chrommob.minestore.api.generic.ParamBuilder;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
@@ -28,13 +29,13 @@ public class ChargeBalanceCommand {
     public ChargeBalanceCommand(MineStoreCommon plugin) {
         this.plugin = plugin;
 
-        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         storeUrl = storeUrl + "/api/payments/handle/";
-        if (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()) {
-            storeUrl += plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/virtualcurrency";
+        if (ConfigKeys.API_KEYS.ENABLED.getValue()) {
+            storeUrl += ConfigKeys.API_KEYS.KEY.getValue() + "/virtualcurrency";
         } else {
             storeUrl += "virtualcurrency";
         }
@@ -50,7 +51,7 @@ public class ChargeBalanceCommand {
     @Permission("minestore.admin.chargeBalance")
     @Command("minestore|ms chargeBalance <username> <amount> <payment_internal_id> <signature>")
     public void onCharge(AbstractUser user, @Argument("username") String username, @Argument("amount") String amount, @Argument("payment_internal_id") String paymentInternalId, @Argument("signature") String signature) {
-        String secretKey = plugin.pluginConfig().getKey("api").getKey("key").getAsString();
+        String secretKey = ConfigKeys.API_KEYS.KEY.getValue();
         String generatedSignature = getSignature(amount, paymentInternalId, username, secretKey);
         boolean verifySignature = generatedSignature.equals(signature);
         if (!verifySignature) {
