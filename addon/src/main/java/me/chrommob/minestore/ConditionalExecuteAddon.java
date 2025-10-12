@@ -3,11 +3,17 @@ package me.chrommob.minestore;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.MineStoreExecuteIntentEvent;
+import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigKey;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,11 +21,26 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class ConditionalExecuteAddon extends MineStoreAddon {
+    private static final Function<Component, String> serialize = c -> MiniMessage.miniMessage().serialize(c);
+    private static final Function<String, Component> deserialize = s -> MiniMessage.miniMessage().deserialize(s);
+
+
+    private static final ConfigKey<Component> MESSAGE;
+    private static final ConfigKey<Component> INIT_MESSAGE;
+    static {
+        MESSAGE = new ConfigKey<>("message", Component.text("You do not have enough free slots to receive the item!").color(NamedTextColor.RED), serialize, deserialize);
+        INIT_MESSAGE = new ConfigKey<>("init_message", Component.text("ConditionalExecuteAddon").decorate(TextDecoration.BOLD).color(NamedTextColor.RED).append(Component.text(" has been enabled!")), serialize, deserialize);
+    }
+
     @Override
     public void onEnable() {
+        MineStoreEventBus.registerListener(this, MineStoreLoadEvent.class, mineStoreLoadEvent -> {
+            Registries.LOGGER.get().log(PlainTextComponentSerializer.plainText().serialize(INIT_MESSAGE.getValue()));
+        });
         MineStoreEventBus.registerListener(this, MineStoreExecuteIntentEvent.class, event -> {
             if (!event.command().startsWith("give") && !event.command().startsWith("/give")) {
                 return;
@@ -45,7 +66,7 @@ public class ConditionalExecuteAddon extends MineStoreAddon {
             if (freeSlots > 0) {
                 return;
             }
-            user.commonUser().sendMessage(MiniMessage.miniMessage().deserialize(getConfigKey("message").getAsString()));
+            user.commonUser().sendMessage(MESSAGE.getValue());
             event.setCancelled(true);
         });
     }
@@ -56,9 +77,10 @@ public class ConditionalExecuteAddon extends MineStoreAddon {
     }
 
     @Override
-    public List<ConfigKey> getConfigKeys() {
-        List<ConfigKey> keys = new ArrayList<>();
-        keys.add(new ConfigKey("message", "<red>You do not have enough free slots to receive the item!"));
+    public List<ConfigKey<?>> getConfigKeys() {
+        List<ConfigKey<?>> keys = new ArrayList<>();
+        keys.add(MESSAGE);
+        keys.add(INIT_MESSAGE);
         return keys;
     }
 }

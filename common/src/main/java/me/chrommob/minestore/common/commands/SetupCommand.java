@@ -47,8 +47,7 @@ public class SetupCommand {
             commonUser.sendMessage(Component.text("The value of " + key + " is " + config.getValueAsString()).color(NamedTextColor.GREEN));
             return;
         }
-        //TODO
-        //config.setValue(value);
+        config.loadValue(value);
         plugin.pluginConfig().saveConfig();
         plugin.reload();
         commonUser.sendMessage(Component.text("Value of " + key + " has been set to " + value).color(NamedTextColor.GREEN));
@@ -71,7 +70,7 @@ public class SetupCommand {
         for (int i = 0; i < depth; i++) {
             out = out.append(Component.text("  "));
         }
-        out = out.append(Component.text(config.get()).color(NamedTextColor.GREEN));
+        out = out.append(Component.text(config.getKey()).color(NamedTextColor.GREEN));
         if (config.getChildren().isEmpty()) {
             out = out.append(Component.text(" = ").color(NamedTextColor.YELLOW));
             out = out.append(Component.text(config.getValueAsString()).color(NamedTextColor.GREEN));
@@ -94,7 +93,7 @@ public class SetupCommand {
         if (keys != null) return keys.keySet();
         keys =  new LinkedHashMap<>();
         for (ConfigKey<?> key : PluginConfig.getKeys()) {
-            ConfigKey<?> real = plugin.pluginConfig().getKey(key.get());
+            ConfigKey<?> real = plugin.pluginConfig().getKey(key.getKey());
             keys.putAll(getNames(new StringBuilder(), real));
         }
         return keys.keySet();
@@ -103,9 +102,9 @@ public class SetupCommand {
     private Map<String, ConfigKey<?>> getNames(StringBuilder stringBuilder, ConfigKey<?> key) {
         Map<String, ConfigKey<?>> names = new LinkedHashMap<>();
         if (key.getChildren().isEmpty()) {
-            names.put(stringBuilder.toString() + key.get().toUpperCase(), key);
+            names.put(stringBuilder.toString() + key.getKey().toUpperCase(), key);
         } else {
-            stringBuilder.append(key.get().toUpperCase()).append(".");
+            stringBuilder.append(key.getKey().toUpperCase()).append(".");
             for (ConfigKey<?> child : key.getChildren().values()) {
                 names.putAll(getNames(stringBuilder, child));
             }
