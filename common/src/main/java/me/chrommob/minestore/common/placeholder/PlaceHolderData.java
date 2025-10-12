@@ -8,6 +8,7 @@ import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
 import me.chrommob.minestore.api.web.WebApiAccessor;
 import me.chrommob.minestore.api.web.profile.ProfileManager;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.placeholder.json.*;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
@@ -71,13 +72,13 @@ public class PlaceHolderData {
             }
             fetchingLast.put(page, System.currentTimeMillis());
             String finalLastDonatorsUrl;
-            String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+            String storeUrl = ConfigKeys.STORE_URL.getValue();
             if (storeUrl.endsWith("/")) {
                 storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
             }
             finalLastDonatorsUrl = storeUrl + "/api/"
-                    + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
-                    ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/getTotalPayments/"
+                    + (ConfigKeys.API_KEYS.ENABLED.getValue()
+                    ? ConfigKeys.API_KEYS.KEY.getValue() + "/getTotalPayments/"
                     : "getTotalPayments/");
             finalLastDonatorsUrl = finalLastDonatorsUrl + "?page=" + page;
             plugin.debug(this.getClass(), "Fetching last donors page " + page);
@@ -128,13 +129,13 @@ public class PlaceHolderData {
             fetchingTop.put(page, System.currentTimeMillis());
             indexesFetchedLately.put(System.currentTimeMillis(), page);
             String finalTopDonatorsUrl;
-            String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+            String storeUrl = ConfigKeys.STORE_URL.getValue();
             if (storeUrl.endsWith("/")) {
                 storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
             }
             finalTopDonatorsUrl = storeUrl + "/api/"
-                    + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
-                    ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/top_donators/"
+                    + (ConfigKeys.API_KEYS.ENABLED.getValue()
+                    ? ConfigKeys.API_KEYS.KEY.getValue() + "/top_donators/"
                     : "top_donators/");
             finalTopDonatorsUrl = finalTopDonatorsUrl + "?page=" + page;
             plugin.debug(this.getClass(), "Fetching top donors page " + page);
@@ -308,21 +309,21 @@ public class PlaceHolderData {
         String finalDonationGoalUrl;
         String finalLastDonatorsUrl;
         String finalTopDonatorsUrl;
-        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         finalDonationGoalUrl = storeUrl + "/api/"
-                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
-                        ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/donation_goal"
+                + (ConfigKeys.API_KEYS.ENABLED.getValue()
+                        ? ConfigKeys.API_KEYS.KEY.getValue() + "/donation_goal"
                         : "donation_goal");
         finalLastDonatorsUrl = storeUrl + "/api/"
-                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
-                        ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/getTotalPayments"
+                + (ConfigKeys.API_KEYS.ENABLED.getValue()
+                        ? ConfigKeys.API_KEYS.KEY.getValue() + "/getTotalPayments"
                         : "getTotalPayments");
         finalTopDonatorsUrl = storeUrl + "/api/"
-                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
-                        ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/top_donators"
+                + (ConfigKeys.API_KEYS.ENABLED.getValue()
+                        ? ConfigKeys.API_KEYS.KEY.getValue() + "/top_donators"
                         : "top_donators");
         try {
             URI donationGoalUrl = new URI(finalDonationGoalUrl);

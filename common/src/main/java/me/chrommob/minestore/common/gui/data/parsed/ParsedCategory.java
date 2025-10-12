@@ -33,7 +33,7 @@ public class ParsedCategory {
         this.name = category.getName();
         this.url = category.getUrl();
         this.material = category.getGui_item_id();
-        this.displayName = plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getAsString().replace("%category%", this.name));
+        this.displayName = plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getValueAsString().replace("%category%", this.name));
         if (category.getSubcategories() != null && !category.getSubcategories().isEmpty()) {
             for (SubCategory subCategory : category.getSubcategories()) {
                 this.subcategories.add(new ParsedSubCategory(subCategory, category.getPackages(), this, plugin));
@@ -62,7 +62,7 @@ public class ParsedCategory {
         this.name = category.getName();
         this.url = category.getUrl();
         this.material = category.getGui_item_id();
-        this.displayName = plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getAsString().replace("%category%", this.name));
+        this.displayName = plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getValueAsString().replace("%category%", this.name));
         if (category.getSubcategories() != null && !category.getSubcategories().isEmpty()) {
             for (NewCategory subCategory : category.getSubcategories()) {
                 this.newCategories.add(new ParsedCategory(this, subCategory, plugin));
@@ -113,7 +113,7 @@ public class ParsedCategory {
             return this.item;
         }
         MiniMessage miniMessage = plugin.miniMessage();
-        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getAsString();
+        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getValueAsString();
         configName = configName.replace("%category%", this.name);
         Component name = miniMessage.deserialize(configName);
         return new CommonItem(name, material, new ArrayList<>());

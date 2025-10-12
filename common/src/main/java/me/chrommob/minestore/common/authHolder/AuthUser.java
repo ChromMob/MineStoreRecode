@@ -15,7 +15,7 @@ public class AuthUser {
         this.user = user;
         this.parsedResponse = parsedResponse;
         this.time = time;
-        user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("initial-message").getAsString()));
+        user.sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("initial-message").getValueAsString()));
     }
 
     public long time() {

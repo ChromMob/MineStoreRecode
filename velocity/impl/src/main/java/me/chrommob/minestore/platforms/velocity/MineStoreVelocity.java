@@ -18,6 +18,7 @@ import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.velocity.VelocityCommandManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -44,6 +45,11 @@ public class MineStoreVelocity implements MineStorePlugin {
         Registries.LOGGER.set(new VelocityLogger(logger));
         Registries.SCHEDULER.set(new VelocityScheduler(this));
         Registries.USER_GETTER.set(new VelocityUserGetter(server));
+
+        InetSocketAddress ip = this.server.getBoundAddress();
+        String motd = this.server.getConfiguration().getMotd().toString();
+        Registries.IP.set(ip);
+        Registries.HOSTNAME.set(motd);
 
         final Function<CommandSource, AbstractUser> cToA = commandSource -> commandSource instanceof Player
                 ? Registries.USER_GETTER.get().get(((Player) commandSource).getUniqueId())

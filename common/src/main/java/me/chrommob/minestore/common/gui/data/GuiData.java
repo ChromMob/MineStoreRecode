@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.GuiOpenener;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
@@ -36,13 +37,13 @@ public class GuiData {
     public VerificationResult load() {
         List<String> messages = new ArrayList<>();
         String finalUrl;
-        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
         finalUrl = storeUrl + "/api/"
-                + (plugin.pluginConfig().getKey("api").getKey("key-enabled").getAsBoolean()
-                        ? plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/gui/packages_new"
+                + (ConfigKeys.API_KEYS.ENABLED.getValue()
+                        ? ConfigKeys.API_KEYS.KEY.getValue() + "/gui/packages_new"
                         : "gui/packages_new");
         URL packageURL;
         try {
@@ -63,7 +64,6 @@ public class GuiData {
             String line;
 
             if (urlConnection.getResponseCode() != 200) {
-                messages.add("The request was denied by the server with code: " + urlConnection.getResponseCode() + "!");
                 switch (urlConnection.getResponseCode()) {
                     case 403:
                         messages.add("Probably Cloudflare protection.");
@@ -75,6 +75,7 @@ public class GuiData {
                         messages.add("The server returned an error with code: " + urlConnection.getResponseCode() + "!");
                         break;
                 }
+                messages.add("Error: " + urlConnection.getResponseMessage());
                 return new VerificationResult(false, messages, VerificationResult.TYPE.WEBSTORE);
             }
 

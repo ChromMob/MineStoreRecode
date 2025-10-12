@@ -49,7 +49,7 @@ public class ParsedGui {
         for (ParsedCategory category : this.categories) {
             items.add(category.getItem());
         }
-        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("title").getAsString()), 54, items);
+        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("title").getValueAsString()), 54, items);
         plugin.guiData().getGuiInfo().formatInventory(inventory, true);
         return inventory;
     }

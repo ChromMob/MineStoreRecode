@@ -4,6 +4,7 @@ import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.incendo.cloud.annotation.specifier.Quoted;
@@ -27,11 +28,11 @@ public class AutoSetupCommand {
         if (!storeUrl.endsWith("/")) {
             storeUrl += "/";
         }
-        plugin.pluginConfig().getKey("store-url").setValue(storeUrl);
-        plugin.pluginConfig().getKey("api").getKey("key").setValue(apiKey);
-        plugin.pluginConfig().getKey("api").getKey("key-enabled").setValue(true);
-        plugin.pluginConfig().getKey("weblistener").getKey("secret-key").setValue(secretKey);
-        plugin.pluginConfig().getKey("weblistener").getKey("secret-enabled").setValue(true);
+        ConfigKeys.STORE_URL.setValue(storeUrl);
+        ConfigKeys.API_KEYS.KEY.setValue(apiKey);
+        ConfigKeys.API_KEYS.ENABLED.setValue(true);
+        ConfigKeys.WEBLISTENER_KEYS.ENABLED.setValue(true);
+        ConfigKeys.WEBLISTENER_KEYS.KEY.setValue(secretKey);
         plugin.pluginConfig().saveConfig();
         plugin.reload();
         if (user instanceof CommonConsoleUser) {

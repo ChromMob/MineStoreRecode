@@ -7,6 +7,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 public class CommonConsoleUser extends CommonUser {
@@ -43,6 +46,11 @@ public class CommonConsoleUser extends CommonUser {
     @Override
     public UUID getUUID() {
         return UUID.randomUUID();
+    }
+
+    @Override
+    public InetSocketAddress getAddress() {
+        return Registries.IP.get();
     }
 
     @Override

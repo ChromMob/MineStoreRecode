@@ -18,6 +18,10 @@ public class MineStoreScheduler {
         start();
     }
 
+    public void run(MineStoreScheduledTask task) {
+        toExecute.add(task);
+    }
+
     public void addTask(MineStoreScheduledTask task) {
         tasks.add(task);
         task.lastExecuteAt = 0;

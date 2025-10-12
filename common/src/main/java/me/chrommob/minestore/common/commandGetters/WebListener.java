@@ -13,6 +13,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.scheduler.SafeScheduledTask;
@@ -43,6 +44,10 @@ public class WebListener {
         List<ParsedResponse> parsedResponses = new ArrayList<>();
         try {
             HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
+            urlConnection.setUseCaches(false);
+            urlConnection.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
+            urlConnection.setRequestProperty("Pragma", "no-cache");
+            urlConnection.setRequestProperty("Expires", "0");
             InputStream in = urlConnection.getInputStream();
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
             StringBuilder responseString = new StringBuilder();
@@ -160,18 +165,18 @@ public class WebListener {
         String finalDeliveredUrl;
         String finalCheckUrl;
         String finalPaymentUrl;
-        String storeUrl = plugin.pluginConfig().getKey("store-url").getAsString();
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
         }
-        if (plugin.pluginConfig().getKey("weblistener").getKey("secret-enabled").getAsBoolean()) {
-            finalQueueUrl = storeUrl + "/api/servers/" + plugin.pluginConfig().getKey("weblistener").getKey("secret-key").getAsString() + "/commands/queue";
-            finalExecutedUrl = storeUrl + "/api/servers/" + plugin.pluginConfig().getKey("weblistener").getKey("secret-key").getAsString()
+        if (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue()) {
+            finalQueueUrl = storeUrl + "/api/servers/" + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/commands/queue";
+            finalExecutedUrl = storeUrl + "/api/servers/" + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue()
                     + "/commands/executed/";
-            finalDeliveredUrl = storeUrl + "/api/servers/" + plugin.pluginConfig().getKey("weblistener").getKey("secret-key").getAsString()
+            finalDeliveredUrl = storeUrl + "/api/servers/" + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue()
                     + "/commands/delivered/";
-            finalCheckUrl = storeUrl + "/api/servers/" + plugin.pluginConfig().getKey("weblistener").getKey("secret-key").getAsString() + "/commands/validated/";
-            finalPaymentUrl = storeUrl + "/api/rest/v2/" + plugin.pluginConfig().getKey("api").getKey("key").getAsString() + "/payment/create";
+            finalCheckUrl = storeUrl + "/api/servers/" + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/commands/validated/";
+            finalPaymentUrl = storeUrl + "/api/rest/v2/" + ConfigKeys.API_KEYS.KEY.getValue() + "/payment/create";
         } else {
             finalQueueUrl = storeUrl + "/api/servers/commands/queue";
             finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
@@ -216,7 +221,7 @@ public class WebListener {
                     plugin.debug(this.getClass(), e);
                     List<String> messages = new ArrayList<>();
                     messages.add(e.getMessage());
-                    messages.add("SECRET KEY: " + plugin.pluginConfig().getKey("weblistener").getKey("secret-key").getAsString());
+                    messages.add("SECRET KEY: " + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue());
                     return new VerificationResult(false, messages, VerificationResult.TYPE.SECRET_KEY);
                 }
             }
@@ -224,7 +229,7 @@ public class WebListener {
             plugin.debug(this.getClass(), e);
             List<String> messages = new ArrayList<>();
             messages.add(e.getMessage());
-            messages.add("SECRET KEY: " + plugin.pluginConfig().getKey("weblistener").getKey("secret-key").getAsString());
+            messages.add("SECRET KEY: " + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue());
             return new VerificationResult(false, messages, VerificationResult.TYPE.SECRET_KEY);
         } catch (ClassCastException e) {
             plugin.log("STORE URL has to start with https://");

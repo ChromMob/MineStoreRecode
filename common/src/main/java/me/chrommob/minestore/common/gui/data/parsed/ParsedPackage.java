@@ -50,21 +50,21 @@ public class ParsedPackage {
         List<Component> lore = new ArrayList<>();
         if (this.item_lore != null && !this.item_lore.isEmpty()) {
             String item_lore = this.item_lore;
-            String configLore = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("description").getAsString();
+            String configLore = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("description").getValueAsString();
             configLore = configLore.replace("%description%", item_lore);
             lore.add(miniMessage.deserialize(configLore));
         }
         String configPrice;
         if (this.virtual_currency) {
-            configPrice = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("price").getKey("virtual").getAsString();
+            configPrice = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("price").getKey("virtual").getValueAsString();
         } else {
-            configPrice = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("price").getKey("normal").getAsString();
+            configPrice = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("price").getKey("normal").getValueAsString();
         }
         double price = (this.price - (this.price * (this.discount / 100)));
         price = Math.round(price * 100.0) / 100.0;
         configPrice = configPrice.replace("%price%", String.valueOf(price));
         lore.add(miniMessage.deserialize(configPrice));
-        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("name").getAsString();
+        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("name").getValueAsString();
         configName = configName.replace("%package%", this.name);
         Component name = miniMessage.deserialize(configName);
         return new CommonItem(name, material, lore, featured == 1, sorting);

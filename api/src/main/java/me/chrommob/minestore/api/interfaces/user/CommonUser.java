@@ -5,6 +5,8 @@ import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 public abstract class CommonUser {
@@ -20,6 +22,8 @@ public abstract class CommonUser {
     public abstract boolean isOnline();
 
     public abstract UUID getUUID();
+
+    public abstract InetSocketAddress getAddress();
 
     public abstract void openInventory(CommonInventory inventory);
     public abstract void closeInventory();

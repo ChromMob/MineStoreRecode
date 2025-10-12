@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
@@ -60,11 +61,11 @@ public class DatabaseManager {
     }
 
     public VerificationResult load() {
-        host = plugin.pluginConfig().getKey("mysql").getKey("ip").getAsString();
-        port = plugin.pluginConfig().getKey("mysql").getKey("port").getAsInt();
-        database = plugin.pluginConfig().getKey("mysql").getKey("database").getAsString();
-        username = plugin.pluginConfig().getKey("mysql").getKey("username").getAsString();
-        password = plugin.pluginConfig().getKey("mysql").getKey("password").getAsString();
+        host = ConfigKeys.MYSQL_KEYS.IP.getValue();
+        port = ConfigKeys.MYSQL_KEYS.PORT.getValue();
+        database = ConfigKeys.MYSQL_KEYS.DATABASE.getValue();
+        username = ConfigKeys.MYSQL_KEYS.USERNAME.getValue();
+        password = ConfigKeys.MYSQL_KEYS.PASSWORD.getValue();
         if (tryType(DatabaseType.MARIADB) || tryType(DatabaseType.MYSQL)) {
             HikariConfig config = new HikariConfig();
             config.setDriverClassName(driverClass);

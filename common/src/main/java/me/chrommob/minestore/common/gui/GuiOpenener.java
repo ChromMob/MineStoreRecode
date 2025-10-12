@@ -5,6 +5,7 @@ import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.data.GuiData;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
@@ -23,7 +24,7 @@ public class GuiOpenener {
     private final GuiData guiData;
     public GuiOpenener(GuiData guiData) {
         this.guiData = guiData;
-        backItem = new CommonItem(guiData.getPlugin().miniMessage().deserialize(guiData.getPlugin().pluginConfig().getLang().getKey("buy-gui").getKey("back").getKey("name").getAsString()), guiData.getPlugin().pluginConfig().getKey("buy-gui").getKey("back").getKey("item").getAsString(), Collections.singletonList(guiData.getPlugin().miniMessage().deserialize(guiData.getPlugin().pluginConfig().getLang().getKey("buy-gui").getKey("back").getKey("description").getAsString())));
+        backItem = new CommonItem(guiData.getPlugin().miniMessage().deserialize(guiData.getPlugin().pluginConfig().getLang().getKey("buy-gui").getKey("back").getKey("name").getValueAsString()), guiData.getPlugin().pluginConfig().getKey("buy-gui").getKey("back").getKey("item").getValueAsString(), Collections.singletonList(guiData.getPlugin().miniMessage().deserialize(guiData.getPlugin().pluginConfig().getLang().getKey("buy-gui").getKey("back").getKey("description").getValueAsString())));
     }
 
     public enum MENU_TYPE {
@@ -107,8 +108,8 @@ public class GuiOpenener {
                     openMenu(user);
                     return;
                 }
-                String config = guiData.getPlugin().pluginConfig().getLang().getKey("buy-gui").getKey("message").getAsString();
-                String storeUrl = guiData.getPlugin().pluginConfig().getKey("store-url").getAsString();
+                String config = guiData.getPlugin().pluginConfig().getLang().getKey("buy-gui").getKey("message").getValueAsString();
+                String storeUrl = ConfigKeys.STORE_URL.getValue();
                 if (storeUrl.endsWith("/")) {
                     storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
                 }
@@ -181,7 +182,7 @@ public class GuiOpenener {
             items.sort(Comparator.comparing(CommonItem::isFeatured).reversed());
         }
         List<CommonItem> finalItems = new ArrayList<>();
-        addBackground(finalItems, guiData.getPlugin().pluginConfig().getKey("buy-gui").getKey("background").getKey("enabled").getAsBoolean());
+        addBackground(finalItems, ConfigKeys.BUY_GUI_KEYS.BACK_KEYS.ENABLED.getValue());
         int index = 0;
         for (int i = 10; i < 17; i++) {
             if (index >= items.size()) {
@@ -223,7 +224,7 @@ public class GuiOpenener {
         inventory.setItems(finalItems);
     }
     private void addBackground(List<CommonItem> finalItems, boolean enabled) {
-        CommonItem glassPane = new CommonItem(Component.text(" "), guiData.getPlugin().pluginConfig().getKey("buy-gui").getKey("background").getKey("item").getAsString(), Collections.emptyList(), true);
+        CommonItem glassPane = new CommonItem(Component.text(" "), ConfigKeys.BUY_GUI_KEYS.BACK_KEYS.ITEM.getValue(), Collections.emptyList(), true);
         CommonItem air = new CommonItem(Component.text(" "), "AIR", Collections.emptyList(), true);
         for (int i = 0; i < 54; i++) {
             if (enabled) {

@@ -21,6 +21,7 @@ import org.incendo.cloud.fabric.FabricServerCommandManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -63,6 +64,9 @@ public class MineStoreFabric implements MineStorePlugin {
 				ExecutionCoordinator.asyncCoordinator(),
 				senderMapper
 		));
+
+		Registries.IP.set(new InetSocketAddress(server.getServerIp(), server.getServerPort()));
+		Registries.HOSTNAME.set(server.getServerMotd());
 
 		common = new MineStoreCommon();
 		common.registerEssentialCommands();

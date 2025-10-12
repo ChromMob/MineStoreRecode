@@ -7,7 +7,7 @@ buildscript {
 
 plugins {
     id 'java'
-    id 'io.github.goooler.shadow' version '8.1.7'
+    id("com.gradleup.shadow") version "9.2.2"
     id "maven-publish"
 }
 
@@ -59,7 +59,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.5.7'
+    version = '3.5.8'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -91,7 +91,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     if (project.name != "MineStore-Fabric") {
-        apply plugin: 'io.github.goooler.shadow'
+        apply plugin: 'com.gradleup.shadow'
     }
 
     dependencies {
@@ -140,14 +140,14 @@ def finalJar = tasks.register('finalJar', Jar) {
     destinationDirectory = file("${projectDir}/build/libs/")
 }
 
-def fabricProject = project(":fabric:fabric-plugin")
+/*def fabricProject = project(":fabric:fabric-plugin")
 fabricProject.afterEvaluate {
     finalJar.configure {
         from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
             it.archiveFile
         })
     }
-}
+}*/
 
 def addonApiProject = project(":MineStore-API")
 publishing {
@@ -177,8 +177,8 @@ tasks.register("copyJar", Copy) {
     dependsOn(":bukkit:impl:kyori:native:shadowJar")
     dependsOn(":bungee:bungee-impl:shadowJar")
     dependsOn(":velocity:velocity-impl:shadowJar")
-    project(":fabric:fabric-impl").getAllTasks(true)
-    dependsOn(":fabric:fabric-impl:remapJar")
+    //project(":fabric:fabric-impl").getAllTasks(true)
+    //dependsOn(":fabric:fabric-impl:remapJar")
     dependsOn(":common:shadowJar")
 
     doFirst {
@@ -200,13 +200,13 @@ tasks.register("copyJar", Copy) {
         rename { "MineStore-Bungee.jarjar" }
     }
 
-    from(project(":velocity:velocity-impl").tasks.named("shadowJar")) {
+/*    from(project(":velocity:velocity-impl").tasks.named("shadowJar")) {
         rename { "MineStore-Velocity.jarjar" }
     }
 
     from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
         rename { "MineStore-Fabric.jarjar" }
-    }
+    }*/
 
     from(project(":common").tasks.named("shadowJar")) {
         rename { "MineStore-Common.jarjar" }

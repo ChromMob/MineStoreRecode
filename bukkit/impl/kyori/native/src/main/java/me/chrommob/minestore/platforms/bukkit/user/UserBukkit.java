@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -95,6 +96,11 @@ public class UserBukkit extends CommonUser {
             return null;
         }
         return player.getUniqueId();
+    }
+
+    @Override
+    public InetSocketAddress getAddress() {
+        return player.getAddress();
     }
 
     @Override

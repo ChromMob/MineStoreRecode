@@ -12,6 +12,7 @@ import me.chrommob.minestore.platforms.bungee.user.BungeeUserGetter;
 import me.chrommob.minestore.platforms.bungee.webCommand.CommandExecuterBungee;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -20,6 +21,7 @@ import org.incendo.cloud.bungee.BungeeCommandManager;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.util.function.Function;
 
 @SuppressWarnings("unused")
@@ -47,6 +49,18 @@ public class MineStoreBungee implements MineStorePlugin {
         Registries.COMMAND_EXECUTER.set(new CommandExecuterBungee(plugin));
         Registries.CONFIG_FILE.set(new File(plugin.getDataFolder(), "config.yml"));
         Registries.PLAYER_JOIN_LISTENER.set(new PlayerEventListenerBungee(plugin, common));
+
+        InetSocketAddress ip = new InetSocketAddress(0);
+        String motd = "";
+        try {
+            ListenerInfo listenerInfo = plugin.getProxy().getConfig().getListeners().iterator().next();
+            ip = listenerInfo.getHost();
+            motd = listenerInfo.getMotd();
+        } catch (Exception ignored) {
+        }
+
+        Registries.IP.set(ip);
+        Registries.HOSTNAME.set(motd);
 
         final Function<CommandSender, AbstractUser> cToA = commandSender -> commandSender instanceof ProxiedPlayer
                 ? Registries.USER_GETTER.get().get(((ProxiedPlayer) commandSender).getUniqueId())

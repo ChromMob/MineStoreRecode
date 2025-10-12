@@ -135,8 +135,8 @@ public class MineStoreClassLoader extends URLClassLoader {
 
     private void loadRelocateDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm", "9.1", RepositoryRegistry.MAVEN.getRepository()));
-        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm-commons", "9.1", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm", "9.2", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm-commons", "9.2", RepositoryRegistry.MAVEN.getRepository()));
         dependencies.add(new MineStorePluginDependency("me.lucko", "jar-relocator", "1.7", RepositoryRegistry.MAVEN.getRepository()));
         this.dependencies.add(new MineStoreDependencies(dependencies));
         loadDependencies();
