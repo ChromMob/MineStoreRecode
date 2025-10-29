@@ -1,14 +1,14 @@
 package me.chrommob.minestore.common.commands;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.annotations.SerializedName;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.ParamBuilder;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
+import me.chrommob.minestore.libs.com.google.gson.JsonSyntaxException;
+import me.chrommob.minestore.libs.com.google.gson.annotations.SerializedName;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;

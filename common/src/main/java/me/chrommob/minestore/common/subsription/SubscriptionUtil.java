@@ -1,6 +1,6 @@
 package me.chrommob.minestore.common.subsription;
 
-import com.google.gson.Gson;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.subsription.json.ReturnSubscriptionObject;

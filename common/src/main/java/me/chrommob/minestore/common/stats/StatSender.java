@@ -1,14 +1,14 @@
 package me.chrommob.minestore.common.stats;
 
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.stats.BuildConstats;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
+import me.chrommob.minestore.libs.com.google.gson.JsonObject;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;

@@ -1,6 +1,6 @@
 package me.chrommob.minestore.common.paynow.json;
 
-import com.google.gson.annotations.SerializedName;
+import me.chrommob.minestore.libs.com.google.gson.annotations.SerializedName;
 
 import java.util.UUID;
 

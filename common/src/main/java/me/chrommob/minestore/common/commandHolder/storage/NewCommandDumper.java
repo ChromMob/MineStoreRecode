@@ -1,10 +1,10 @@
 package me.chrommob.minestore.common.commandHolder.storage;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandHolder.type.StoredCommand;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileReader;

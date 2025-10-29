@@ -1,7 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit;
 
 import me.chrommob.minestore.api.Registries;
-import me.chrommob.minestore.api.interfaces.user.UserGetter;
 import me.chrommob.minestore.classloader.MineStorePlugin;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
@@ -26,7 +25,6 @@ import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.function.Function;
 

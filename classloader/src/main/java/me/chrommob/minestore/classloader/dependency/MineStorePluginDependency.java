@@ -12,21 +12,37 @@ import java.util.Map;
 import java.util.Optional;
 
 public class MineStorePluginDependency {
+    private static final Map<String, String> defaultRelocations = new HashMap<>();
+    static {
+        defaultRelocations.put("com.mysql", "me.chrommob.libs.mysql");
+        defaultRelocations.put("io.leangen.geantyref", "me.chrommob.geantyref");
+    }
     private final String group;
     private final String name;
     private final String version;
     private final Map<String, String> relocations;
     private final MineStorePluginRepository repository;
 
+    public MineStorePluginDependency(String group, String name, String version, MineStorePluginRepository repository, boolean skipDefault) {
+        this(group, name, version, new HashMap<>(), repository, skipDefault);
+    }
+
     public MineStorePluginDependency(String group, String name, String version, MineStorePluginRepository repository) {
         this(group, name, version, new HashMap<>(), repository);
     }
 
     public MineStorePluginDependency(String group, String name, String version, Map<String, String> relocations, MineStorePluginRepository repository) {
+        this(group, name, version, relocations, repository, false);
+    }
+
+    public MineStorePluginDependency(String group, String name, String version, Map<String, String> relocations, MineStorePluginRepository repository, boolean skipDefault) {
         this.group = group;
         this.name = name;
         this.version = version;
         this.relocations = relocations == null ? new HashMap<>() : relocations;
+        if (!skipDefault) {
+            this.relocations.putAll(defaultRelocations);
+        }
         this.repository = repository;
     }
 

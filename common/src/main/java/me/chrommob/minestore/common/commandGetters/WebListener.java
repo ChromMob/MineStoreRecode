@@ -1,10 +1,5 @@
 package me.chrommob.minestore.common.commandGetters;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import io.leangen.geantyref.TypeToken;
 import me.chrommob.minestore.api.event.MineStoreEvent;
 import me.chrommob.minestore.api.event.types.MineStorePurchaseEvent;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
@@ -18,6 +13,11 @@ import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.scheduler.SafeScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
+import me.chrommob.minestore.libs.com.google.gson.JsonArray;
+import me.chrommob.minestore.libs.com.google.gson.JsonObject;
+import me.chrommob.minestore.libs.com.google.gson.JsonSyntaxException;
+import me.chrommob.minestore.libs.com.google.gson.reflect.TypeToken;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;

@@ -92,10 +92,8 @@ public class MineStoreClassLoader extends URLClassLoader {
 
     private final static String[] IGNORED_PACKAGES = new String[]{
             "org.incendo.cloud.",
-            "io.leangen.geantyref.",
             "net.kyori.",
             "org.slf4j.",
-            "com.google.gson."
             };
 
     @Override
@@ -105,7 +103,6 @@ public class MineStoreClassLoader extends URLClassLoader {
             return super.loadClass(name, resolve);
         }
 
-        // If interop also load from parent
         for (String ignoredPackage : IGNORED_PACKAGES) {
             if (name.startsWith(ignoredPackage)) {
                 return super.loadClass(name, resolve);
@@ -115,13 +112,12 @@ public class MineStoreClassLoader extends URLClassLoader {
         // First, check if already loaded
         Class<?> c = findLoadedClass(name);
 
-        // Try to load it from this classloader (child)
+        // Try to load it from parent first
         if (c == null) {
             try {
-                c = findClass(name); // from the URLs in this classloader
-            } catch (ClassNotFoundException e) {
-                // Not found here, delegate to parent
                 c = super.loadClass(name, resolve);
+            } catch (ClassNotFoundException e) {
+                c = findClass(name); // from the URLs in this classloader
             }
         }
 
@@ -135,9 +131,9 @@ public class MineStoreClassLoader extends URLClassLoader {
 
     private void loadRelocateDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm", "9.2", RepositoryRegistry.MAVEN.getRepository()));
-        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm-commons", "9.2", RepositoryRegistry.MAVEN.getRepository()));
-        dependencies.add(new MineStorePluginDependency("me.lucko", "jar-relocator", "1.7", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm", "9.2", RepositoryRegistry.MAVEN.getRepository(), true));
+        dependencies.add(new MineStorePluginDependency("org.ow2.asm", "asm-commons", "9.2", RepositoryRegistry.MAVEN.getRepository(), true));
+        dependencies.add(new MineStorePluginDependency("me.lucko", "jar-relocator", "1.7", RepositoryRegistry.MAVEN.getRepository(), true));
         this.dependencies.add(new MineStoreDependencies(dependencies));
         loadDependencies();
     }
@@ -150,7 +146,7 @@ public class MineStoreClassLoader extends URLClassLoader {
         dependencies.add(new MineStorePluginDependency("org.incendo", "cloud-services", "2.0.0", RepositoryRegistry.MAVEN.getRepository()));
         dependencies.add(new MineStorePluginDependency("org.mariadb.jdbc", "mariadb-java-client", "3.5.3", RepositoryRegistry.MAVEN.getRepository()));
         dependencies.add(new MineStorePluginDependency("com.mysql", "mysql-connector-j", "9.3.0", RepositoryRegistry.MAVEN.getRepository()));
-        dependencies.add(new MineStorePluginDependency("io.leangen.geantyref", "geantyref", "2.0.1", RepositoryRegistry.MAVEN.getRepository()));
+        dependencies.add(new MineStorePluginDependency("io.leangen.geantyref", "geantyref", "1.3.15", RepositoryRegistry.MAVEN.getRepository()));
 
         return new MineStoreDependencies(dependencies);
     }

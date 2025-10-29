@@ -1,7 +1,7 @@
 package me.chrommob.minestore.common.dumper;
 
-import com.google.gson.Gson;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;

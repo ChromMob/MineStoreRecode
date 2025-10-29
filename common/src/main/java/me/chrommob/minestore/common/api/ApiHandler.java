@@ -1,11 +1,10 @@
 package me.chrommob.minestore.common.api;
 
-import com.google.gson.Gson;
-import io.leangen.geantyref.TypeToken;
 import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.web.Result;
 import me.chrommob.minestore.api.web.WebApiAccessor;
 import me.chrommob.minestore.api.web.WebApiRequest;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;

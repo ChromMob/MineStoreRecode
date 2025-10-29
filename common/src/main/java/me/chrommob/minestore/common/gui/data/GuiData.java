@@ -1,8 +1,6 @@
 package me.chrommob.minestore.common.gui.data;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.GuiOpenener;
@@ -11,6 +9,8 @@ import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
+import me.chrommob.minestore.libs.com.google.gson.JsonSyntaxException;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;

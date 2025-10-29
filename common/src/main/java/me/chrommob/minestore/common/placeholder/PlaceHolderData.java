@@ -1,8 +1,6 @@
 package me.chrommob.minestore.common.placeholder;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
 import me.chrommob.minestore.api.web.WebApiAccessor;
@@ -12,6 +10,8 @@ import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.placeholder.json.*;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
+import me.chrommob.minestore.libs.com.google.gson.Gson;
+import me.chrommob.minestore.libs.com.google.gson.JsonSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

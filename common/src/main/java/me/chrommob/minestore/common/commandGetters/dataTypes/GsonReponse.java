@@ -1,7 +1,7 @@
 package me.chrommob.minestore.common.commandGetters.dataTypes;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import me.chrommob.minestore.libs.com.google.gson.annotations.Expose;
+import me.chrommob.minestore.libs.com.google.gson.annotations.SerializedName;
 
 public class GsonReponse {
     @SerializedName("type")

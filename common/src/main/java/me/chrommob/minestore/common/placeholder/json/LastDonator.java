@@ -1,6 +1,6 @@
 package me.chrommob.minestore.common.placeholder.json;
 
-import com.google.gson.annotations.SerializedName;
+import me.chrommob.minestore.libs.com.google.gson.annotations.SerializedName;
 
 @SuppressWarnings("unused")
 public class LastDonator {
