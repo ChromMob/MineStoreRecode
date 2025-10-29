@@ -59,7 +59,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.6.0'
+    version = '3.6.1'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -92,10 +92,6 @@ subprojects {
     apply plugin: 'java'
     if (project.name != "MineStore-Fabric") {
         apply plugin: 'com.gradleup.shadow'
-    }
-
-    dependencies {
-        compileOnly 'com.google.code.gson:gson:2.8.9'
     }
 
     if (project.name != "common" && project.name != "MineStore-API" && project.name != "MineStore-ClassLoader") {
@@ -172,6 +168,7 @@ tasks.clean.dependsOn(clearResources)
 tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.jar
 
 tasks.register("copyJar", Copy) {
+    dependsOn(":common:shadowJar")
     dependsOn(":bukkit:bukkit-impl:shadowJar")
     dependsOn(":bukkit:impl:kyori:compat:shadowJar")
     dependsOn(":bukkit:impl:kyori:native:shadowJar")
@@ -179,7 +176,6 @@ tasks.register("copyJar", Copy) {
     dependsOn(":velocity:velocity-impl:shadowJar")
     //project(":fabric:fabric-impl").getAllTasks(true)
     //dependsOn(":fabric:fabric-impl:remapJar")
-    dependsOn(":common:shadowJar")
 
     doFirst {
         delete("src/main/resources/jars/**.jar")

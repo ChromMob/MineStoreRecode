@@ -7,7 +7,7 @@ dependencies {
     implementation "net.kyori:adventure-text-serializer-legacy:4.18.0"
     compileOnly("org.incendo:cloud-paper:2.0.0-SNAPSHOT")
     implementation("com.github.ChromMob:ConfigManager:7113b63a27")
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation("com.google.code.gson:gson:2.13.2")
 }
 
 shadowJar {
@@ -15,6 +15,7 @@ shadowJar {
     minimize {
         exclude(dependency('net.kyori:.*:.*'))
         exclude(dependency('com.github.ChromMob:ConfigManager:.*'))
+        exclude(dependency('com.google.code.gson:gson:.*'))
     }
 }
 
