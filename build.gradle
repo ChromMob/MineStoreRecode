@@ -59,7 +59,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.6.1'
+    version = '3.6.2'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -196,11 +196,11 @@ tasks.register("copyJar", Copy) {
         rename { "MineStore-Bungee.jarjar" }
     }
 
-/*    from(project(":velocity:velocity-impl").tasks.named("shadowJar")) {
+    from(project(":velocity:velocity-impl").tasks.named("shadowJar")) {
         rename { "MineStore-Velocity.jarjar" }
     }
 
-    from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
+/*    from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
         rename { "MineStore-Fabric.jarjar" }
     }*/
 
