@@ -1,7 +1,7 @@
 package me.chrommob.minestore.classloader.repository;
 
 public enum RepositoryRegistry {
-    MAVEN("maven", "https://repo.maven.apache.org/maven2/"),
+    MAVEN("maven", "https://maven-central-eu.storage-download.googleapis.com/maven2/"),
     MAVEN1("maven1", "https://repo1.maven.org/maven2/"),
     JITPACK("jitpack", "https://jitpack.io/"),
     SONATYPE("sonatype", "https://s01.oss.sonatype.org/content/repositories/releases/");
