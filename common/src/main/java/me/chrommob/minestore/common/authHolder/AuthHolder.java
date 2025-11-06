@@ -11,6 +11,8 @@ import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,7 +25,7 @@ public final class AuthHolder {
 
     public AuthHolder(MineStoreCommon plugin) {
         this.plugin = plugin;
-        authTimeout = ConfigKeys.AUTH_KEYS.TIMEOUT.getValue();
+        authTimeout = ConfigKeys.AUTH_KEYS.TIMEOUT.getValue() * 1000;
         String storeUrl = ConfigKeys.STORE_URL.getValue();
         if (storeUrl.endsWith("/")) {
             storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
@@ -42,19 +44,21 @@ public final class AuthHolder {
             toPost.remove(s);
         });
 
-        authUsers.forEach((s, authUser) -> {
-        /*
-        Remove the user from the authUsers map if the user is offline or the authTimeout has been reached.
-        This is to prevent memory leaks.
-         */
+        List<String> toRemove = new ArrayList<>();
+        for (Map.Entry<String, AuthUser> entry : authUsers.entrySet()) {
+            String name = entry.getKey();
+            AuthUser authUser = entry.getValue();
             if (isExpired(authUser) || !authUser.user().isOnline()) {
                 plugin.debug(this.getClass(), "Removing " + authUser.user().getName() + " from authUsers map because the authTimeout has been reached (" + this.isExpired(authUser) + ") or the user is offline (" + !authUser.user().isOnline() + ")");
                 if (authUser.user().isOnline()) {
                     authUser.user().sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("timeout-message").getValueAsString()));
                 }
-                authUsers.remove(s);
+                toRemove.add(name);
             }
-        });
+        };
+        for (String s : toRemove) {
+            authUsers.remove(s);
+        }
         task.delay(1000);
     });
 
