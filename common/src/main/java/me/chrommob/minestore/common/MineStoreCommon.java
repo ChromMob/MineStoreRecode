@@ -171,6 +171,12 @@ public class MineStoreCommon {
             registerCommands();
         } else {
             log("Command registration is not allowed at this point. Please restart the server.");
+            for (AbstractUser user : Registries.USER_GETTER.get().getAllPlayers()) {
+                if (!user.commonUser().hasPermission("minestore.admin")) {
+                    return;
+                }
+                user.commonUser().sendMessage("[MineStore] Command registration is not allowed at this point. Please restart the server.");
+            }
         }
         initialized = true;
         scheduler.addTask(statsSender.mineStoreScheduledTask);
