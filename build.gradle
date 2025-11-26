@@ -89,7 +89,8 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'java'
+    if (project.name != "MineStore-API") apply plugin: 'java'
+    else apply plugin: 'java-library'
     if (project.name != "MineStore-Fabric") {
         apply plugin: 'com.gradleup.shadow'
     }

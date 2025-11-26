@@ -19,11 +19,8 @@ repositories {
 }
 
 dependencies {
-    project(path: ':MineStore-API')
+    compileOnly 'com.github.ChromMob:MineStoreRecode:master-SNAPSHOT'
     compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
-    compileOnly("org.incendo:cloud-annotations:2.0.0-SNAPSHOT")
-    compileOnly("org.incendo:cloud-core:2.0.0-SNAPSHOT")
-    compileOnly 'net.kyori:adventure-text-minimessage:4.18.0'
 }
 
 configurations.configureEach {
