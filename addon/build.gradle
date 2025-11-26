@@ -27,8 +27,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'me.chrommob:MineStore:3.6.6'
     compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
+    compileOnly 'com.github.ChromMob:MineStoreRecode:master-SNAPSHOT'
 }
 
 configurations.configureEach {
