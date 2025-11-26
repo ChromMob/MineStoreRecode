@@ -11,6 +11,12 @@ plugins {
     id "maven-publish"
 }
 
+project(":MineStore-ExampleAddon") {
+    tasks.matching {true}.configureEach {
+        enabled = false;
+    }
+}
+
 java {
 	disableAutoTargetJvm()
 }
