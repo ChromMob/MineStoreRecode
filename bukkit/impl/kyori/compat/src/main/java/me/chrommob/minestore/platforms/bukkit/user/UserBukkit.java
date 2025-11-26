@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.user;
 
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
@@ -13,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -82,7 +84,7 @@ public class UserBukkit extends CommonUser {
     }
 
     private Enchantment getDurabilityEnchantment() {
-        Enchantment enchantment = null;
+        Enchantment enchantment;
         if (Enchantment.getByName("DURABILITY") != null) {
             enchantment = Enchantment.getByName("DURABILITY");
         } else {
@@ -135,6 +137,7 @@ public class UserBukkit extends CommonUser {
             }
             ItemStack bukkitItem = new ItemStack(material, item.getAmount());
             ItemMeta meta = bukkitItem.getItemMeta();
+            if (meta == null) continue;
             LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
             List<String> lore = new ArrayList<>();
             for (Component line : item.getLore()) {

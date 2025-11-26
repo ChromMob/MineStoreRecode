@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.gui;
 
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
@@ -182,7 +183,7 @@ public class GuiOpenener {
             items.sort(Comparator.comparing(CommonItem::isFeatured).reversed());
         }
         List<CommonItem> finalItems = new ArrayList<>();
-        addBackground(finalItems, ConfigKeys.BUY_GUI_KEYS.BACK_KEYS.ENABLED.getValue());
+        addBackground(finalItems, ConfigKeys.BUY_GUI_KEYS.CATEGORY_KEYS.ENABLED.getValue());
         int index = 0;
         for (int i = 10; i < 17; i++) {
             if (index >= items.size()) {
@@ -224,7 +225,7 @@ public class GuiOpenener {
         inventory.setItems(finalItems);
     }
     private void addBackground(List<CommonItem> finalItems, boolean enabled) {
-        CommonItem glassPane = new CommonItem(Component.text(" "), ConfigKeys.BUY_GUI_KEYS.BACK_KEYS.ITEM.getValue(), Collections.emptyList(), true);
+        CommonItem glassPane = new CommonItem(Component.text(" "), ConfigKeys.BUY_GUI_KEYS.CATEGORY_KEYS.ITEM.getValue(), Collections.emptyList(), true);
         CommonItem air = new CommonItem(Component.text(" "), "AIR", Collections.emptyList(), true);
         for (int i = 0; i < 54; i++) {
             if (enabled) {

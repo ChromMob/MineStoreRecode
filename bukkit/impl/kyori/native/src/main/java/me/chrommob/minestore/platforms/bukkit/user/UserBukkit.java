@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit.user;
 
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
@@ -134,6 +135,7 @@ public class UserBukkit extends CommonUser {
             }
             ItemStack bukkitItem = new ItemStack(material, item.getAmount());
             ItemMeta meta = bukkitItem.getItemMeta();
+            if (meta == null) continue;
             LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
             List<String> lore = new ArrayList<>();
             for (Component line : item.getLore()) {
