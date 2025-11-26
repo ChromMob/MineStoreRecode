@@ -10,6 +10,7 @@ import me.chrommob.minestore.platforms.bukkit.db.VaultEconomyProvider;
 import me.chrommob.minestore.platforms.bukkit.db.VaultPlayerInfoProvider;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitInventoryEvent;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitPlayerEvent;
+import me.chrommob.minestore.platforms.bukkit.logger.BukkitLogger;
 import me.chrommob.minestore.platforms.bukkit.placeholder.BukkitPlaceHolderProvider;
 import me.chrommob.minestore.platforms.bukkit.scheduler.BukkitScheduler;
 import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
@@ -56,6 +57,7 @@ public final class MineStoreBukkit implements MineStorePlugin {
         Registries.PLATFORM.set("bukkit");
         Registries.PLATFORM_NAME.set(Bukkit.getName());
         Registries.PLATFORM_VERSION.set(Bukkit.getVersion());
+        Registries.LOGGER.set(new BukkitLogger(plugin));
         Registries.SCHEDULER.set(new BukkitScheduler(plugin));
         Registries.USER_GETTER.set(new BukkitUserGetter(plugin));
         Registries.COMMAND_EXECUTER.set(new CommandExecuterBukkit(plugin, common));

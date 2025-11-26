@@ -72,7 +72,6 @@ public class ConditionalExecuteAddon extends MineStoreAddon {
         });
     }
 
-    @Override
     public String getName() {
         return "ConditionalExecuteAddon";
     }

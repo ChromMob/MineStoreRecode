@@ -1,3 +1,7 @@
+plugins {
+    id 'java-library'
+}
+
 repositories {
     mavenLocal()
 }
@@ -5,7 +9,9 @@ repositories {
 dependencies {
     implementation "net.kyori:adventure-text-serializer-plain:4.18.0"
     implementation "net.kyori:adventure-text-serializer-legacy:4.18.0"
-    compileOnly("org.incendo:cloud-paper:2.0.0-SNAPSHOT")
+    api("org.incendo:cloud-annotations:2.0.0-SNAPSHOT")
+    api ("org.incendo:cloud-core:2.0.0-SNAPSHOT")
+    api("net.kyori:adventure-text-minimessage:4.18.0")
     implementation("com.github.ChromMob:ConfigManager:master-SNAPSHOT")
     implementation("com.google.code.gson:gson:2.13.2")
 }
