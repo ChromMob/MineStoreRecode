@@ -16,6 +16,10 @@ dependencies {
     implementation("com.google.code.gson:gson:2.13.2")
 }
 
+tasks.jar {
+    enabled = false
+}
+
 shadowJar {
     archiveClassifier = ""
     relocate "me.chrommob.config", "me.chrommob.minestore.libs.me.chrommob.config.ConfigManager"

@@ -158,6 +158,7 @@ publishing {
     publications {
         create("api", MavenPublication) {
             from addonApiProject.components.java
+            artifact (addonApiProject.shadowJar)
         }
     }
     repositories {
