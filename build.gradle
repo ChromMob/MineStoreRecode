@@ -153,9 +153,10 @@ fabricProject.afterEvaluate {
 }*/
 
 def addonApiProject = project(":MineStore-API")
+
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        create("api", MavenPublication) {
             from addonApiProject.components.java
         }
     }
@@ -172,7 +173,7 @@ tasks.register("clearResources") {
 
 tasks.clean.dependsOn(clearResources)
 
-tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.jar
+//tasks.generateMetadataFileForMavenJavaPublication.dependsOn addonApiProject.tasks.shadow
 
 tasks.register("copyJar", Copy) {
     dependsOn(":common:shadowJar")

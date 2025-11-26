@@ -12,14 +12,22 @@ plugins {
 version "1.0.0"
 
 repositories {
+    mavenCentral()
+    mavenLocal()
+    // Needed for MineStore API
     maven {
         name = "jitpack"
         url = "https://jitpack.io/"
     }
+    // Needed for SpigotMC (not required for most addons)
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
+    }
 }
 
 dependencies {
-    compileOnly 'com.github.ChromMob:MineStoreRecode:master-SNAPSHOT'
+    compileOnly 'me.chrommob:MineStore:3.6.6'
     compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
 }
 
