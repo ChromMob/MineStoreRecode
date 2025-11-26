@@ -80,6 +80,14 @@ public class MineStoreCommon {
     private final MineStoreVersion subscriptionCommandSince = new MineStoreVersion(3, 0, 8);
     private final MineStoreVersion chargeBalanceSince = new MineStoreVersion(3, 2, 5);
     private final MineStoreVersion payNowSince = new MineStoreVersion(3, 6, 0);
+    private final MineStoreAddon internalAddon = new MineStoreAddon() {
+        @Override
+        public void onEnable() {}
+        @Override
+        public String getName() {
+            return "InternalAddon";
+        }
+    };
 
     public MineStoreCommon() {
         Registries.CONFIG_FILE.listen(configFile -> {
@@ -254,6 +262,7 @@ public class MineStoreCommon {
                     ConfigWrapper configWrapper = new ConfigWrapper("config", addon.getConfigKeys());
                     configManager.addConfig(configWrapper);
                     addon.setConfigWrapper(configWrapper);
+                    annotationParser.parse(addon.getCommands());
                     addons.add(addon);
                     addonConfigs.put(addon, configManager);
                     addon.onEnable();
@@ -576,31 +585,6 @@ public class MineStoreCommon {
         }
     }
 
-    public void onPlayerJoin(String name) {
-        if (verificationManager != null) {
-            verificationManager.onJoin(name);
-        }
-        if (!initialized) {
-            return;
-        }
-        commandStorage.onPlayerJoin(name);
-        if (databaseManager != null) {
-            databaseManager.onPlayerJoin(name);
-        }
-        if (payNowManager != null && payNowManager.isEnabled() && ConfigKeys.PAYNOW_KEYS.SHARE_IP_ON_JOIN.getValue()) {
-            payNowManager.onJoin(Registries.USER_GETTER.get().get(name));
-        }
-    }
-
-    public void onPlayerQuit(String name) {
-        if (!initialized) {
-            return;
-        }
-        if (databaseManager != null) {
-            databaseManager.onPlayerQuit(name);
-        }
-    }
-
     public CommandStorage commandStorage() {
         return commandStorage;
     }
@@ -692,5 +676,9 @@ public class MineStoreCommon {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public MineStoreAddon getInternalAddon() {
+        return internalAddon;
     }
 }

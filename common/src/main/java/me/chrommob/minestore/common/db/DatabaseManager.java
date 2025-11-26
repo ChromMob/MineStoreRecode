@@ -3,6 +3,9 @@ package me.chrommob.minestore.common.db;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.event.MineStoreEventBus;
+import me.chrommob.minestore.api.event.types.MineStorePlayerJoinEvent;
+import me.chrommob.minestore.api.event.types.MineStorePlayerQuitEvent;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
@@ -46,16 +49,18 @@ public class DatabaseManager {
 
     public DatabaseManager(MineStoreCommon plugin) {
         this.plugin = plugin;
+        MineStoreEventBus.registerListener(plugin.getInternalAddon(), MineStorePlayerJoinEvent.class, event -> onPlayerJoin(event.getUsername()));
+        MineStoreEventBus.registerListener(plugin.getInternalAddon(), MineStorePlayerQuitEvent.class, event -> onPlayerQuit(event.getUsername()));
     }
 
     private final Map<String, PlayerData> playerData = new ConcurrentHashMap<>();
 
-    public void onPlayerJoin(String name) {
+    private void onPlayerJoin(String name) {
         playerData.put(name, new PlayerData(Registries.USER_GETTER.get().get(name).commonUser()));
         plugin.debug(this.getClass(), "Added " + name + " to playerData");
     }
 
-    public void onPlayerQuit(String name) {
+    private void onPlayerQuit(String name) {
         playerData.remove(name);
         plugin.debug(this.getClass(), "Removed " + name + " from playerData");
     }

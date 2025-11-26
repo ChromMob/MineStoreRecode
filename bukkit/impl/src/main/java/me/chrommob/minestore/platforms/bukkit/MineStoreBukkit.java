@@ -1,5 +1,6 @@
 package me.chrommob.minestore.platforms.bukkit;
 
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.classloader.MineStorePlugin;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
@@ -9,7 +10,6 @@ import me.chrommob.minestore.platforms.bukkit.db.VaultEconomyProvider;
 import me.chrommob.minestore.platforms.bukkit.db.VaultPlayerInfoProvider;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitInventoryEvent;
 import me.chrommob.minestore.platforms.bukkit.events.BukkitPlayerEvent;
-import me.chrommob.minestore.platforms.bukkit.logger.BukkitLogger;
 import me.chrommob.minestore.platforms.bukkit.placeholder.BukkitPlaceHolderProvider;
 import me.chrommob.minestore.platforms.bukkit.scheduler.BukkitScheduler;
 import me.chrommob.minestore.platforms.bukkit.user.BukkitUserGetter;
@@ -24,6 +24,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
+import org.incendo.cloud.paper.PaperCommandManager;
 
 import java.net.InetSocketAddress;
 import java.util.function.Function;
@@ -55,38 +56,65 @@ public final class MineStoreBukkit implements MineStorePlugin {
         Registries.PLATFORM.set("bukkit");
         Registries.PLATFORM_NAME.set(Bukkit.getName());
         Registries.PLATFORM_VERSION.set(Bukkit.getVersion());
-        Registries.LOGGER.set(new BukkitLogger(plugin));
         Registries.SCHEDULER.set(new BukkitScheduler(plugin));
         Registries.USER_GETTER.set(new BukkitUserGetter(plugin));
         Registries.COMMAND_EXECUTER.set(new CommandExecuterBukkit(plugin, common));
         Registries.CONFIG_FILE.set(plugin.getDataFolder().toPath().resolve("config.yml").toFile());
-        Registries.PLAYER_JOIN_LISTENER.set(new BukkitPlayerEvent(plugin, common));
+        Registries.PLAYER_JOIN_LISTENER.set(new BukkitPlayerEvent(plugin));
 
         Registries.HOSTNAME.set(plugin.getServer().getMotd() == null ? "" : plugin.getServer().getMotd());
         Registries.IP.set(new InetSocketAddress(plugin.getServer().getIp(), plugin.getServer().getPort()));
 
         new BukkitInventoryEvent(plugin, common);
 
-        final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
-                ? new AbstractUser(new CommonConsoleUser(), commandSender)
-                : Registries.USER_GETTER.get().get(((HumanEntity) commandSender).getUniqueId());
-        final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.platformObject();
+        boolean legacy = false;
+        try {
+            Class.forName("io.papermc.paper.command.brigadier.CommandSourceStack");
+        } catch (ClassNotFoundException e) {
+            legacy = true;
+        }
+        common.log("Using " + (legacy ? "legacy" : "modern") + " command manager.");
+        if (legacy) {
+            final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
+                    ? new AbstractUser(new CommonConsoleUser(), commandSender)
+                    : Registries.USER_GETTER.get().get(((HumanEntity) commandSender).getUniqueId());
+            final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.platformObject();
 
-        final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
-            @Override
-            public @NonNull AbstractUser map(@NonNull CommandSender base) {
-                return cToA.apply(base);
-            }
+            final SenderMapper<CommandSender, AbstractUser> senderMapper = new SenderMapper<CommandSender, AbstractUser>() {
+                @Override
+                public @NonNull AbstractUser map(@NonNull CommandSender base) {
+                    return cToA.apply(base);
+                }
 
-            @Override
-            public @NonNull CommandSender reverse(@NonNull AbstractUser mapped) {
-                return aToC.apply(mapped);
-            }
-        };
-        Registries.COMMAND_MANAGER.set(new LegacyPaperCommandManager<>(
-                /* Owning plugin */ plugin,
-                /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
-                /* Command Sender -> C */ senderMapper));
+                @Override
+                public @NonNull CommandSender reverse(@NonNull AbstractUser mapped) {
+                    return aToC.apply(mapped);
+                }
+            };
+            Registries.COMMAND_MANAGER.set(new LegacyPaperCommandManager<>(
+                    /* Owning plugin */ plugin,
+                    /* Coordinator function */ ExecutionCoordinator.asyncCoordinator(),
+                    /* Command Sender -> C */ senderMapper));
+        } else {
+            final Function<CommandSourceStack, AbstractUser> cToA = commandSender -> !(commandSender.getSender() instanceof HumanEntity)
+                    ? new AbstractUser(new CommonConsoleUser(), commandSender)
+                    : new AbstractUser(Registries.USER_GETTER.get().get(((HumanEntity) commandSender.getSender()).getUniqueId()).commonUser(), commandSender);
+            final Function<AbstractUser, CommandSourceStack> aToC = abstractUser -> (CommandSourceStack) abstractUser.platformObject();
+            final SenderMapper<CommandSourceStack, AbstractUser> senderMapper = new SenderMapper<CommandSourceStack, AbstractUser>() {
+                @Override
+                public @NonNull AbstractUser map(@NonNull CommandSourceStack base) {
+                    return cToA.apply(base);
+                }
+
+                @Override
+                public @NonNull CommandSourceStack reverse(@NonNull AbstractUser mapped) {
+                    return aToC.apply(mapped);
+                }
+            };
+            Registries.COMMAND_MANAGER.set(PaperCommandManager.builder(senderMapper)
+                    .executionCoordinator(ExecutionCoordinator.asyncCoordinator())
+                    .buildOnEnable(plugin));
+        }
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(plugin, common);
             if (vaultPlayerInfoProvider.isInstalled()) {

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class MineStorePluginDependency {
-    private static final Map<String, String> defaultRelocations = new HashMap<>();
+    public static final Map<String, String> defaultRelocations = new HashMap<>();
     static {
         defaultRelocations.put("com.mysql", "me.chrommob.libs.mysql");
         defaultRelocations.put("io.leangen.geantyref", "me.chrommob.libs.geantyref");

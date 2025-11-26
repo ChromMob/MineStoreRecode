@@ -14,7 +14,6 @@ import me.chrommob.minestore.api.interfaces.user.UserGetter;
 import org.incendo.cloud.CommandManager;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 public class Registries {

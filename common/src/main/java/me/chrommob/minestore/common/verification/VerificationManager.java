@@ -1,6 +1,8 @@
 package me.chrommob.minestore.common.verification;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.event.MineStoreEventBus;
+import me.chrommob.minestore.api.event.types.MineStorePlayerJoinEvent;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
@@ -26,6 +28,7 @@ public class VerificationManager {
         this.verificationResult = verificationResult;
         this.log = log;
         log();
+        MineStoreEventBus.registerListener(plugin.getInternalAddon(), MineStorePlayerJoinEvent.class, event -> onJoin(event.getUsername()));
     }
 
     public void safeIncrementError() {
@@ -71,7 +74,7 @@ public class VerificationManager {
         }
     }
 
-    public void onJoin(String username) {
+    private void onJoin(String username) {
         if (verificationResult.isValid()) {
             return;
         }

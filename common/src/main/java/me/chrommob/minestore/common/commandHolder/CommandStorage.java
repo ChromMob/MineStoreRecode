@@ -1,8 +1,10 @@
 package me.chrommob.minestore.common.commandHolder;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.MineStoreExecuteEvent;
 import me.chrommob.minestore.api.event.types.MineStoreExecuteIntentEvent;
+import me.chrommob.minestore.api.event.types.MineStorePlayerJoinEvent;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
@@ -11,12 +13,12 @@ import me.chrommob.minestore.common.config.ConfigKeys;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class CommandStorage {
     private final MineStoreCommon plugin;
     public CommandStorage(MineStoreCommon plugin) {
         this.plugin = plugin;
+        MineStoreEventBus.registerListener(plugin.getInternalAddon(), MineStorePlayerJoinEvent.class, event -> onPlayerJoin(event.getUsername()));
     }
     private Map<String, List<String>> commands;
     private Map<String, List<StoredCommand>> newCommands;
@@ -61,7 +63,7 @@ public class CommandStorage {
         plugin.newCommandDumper().update(newCommands);
     }
 
-    public void onPlayerJoin(String username) {
+    private void onPlayerJoin(String username) {
         username = username.toLowerCase();
         List<ParsedResponse> parsedResponses;
         if (MineStoreCommon.version().requires("3.0.0")) {

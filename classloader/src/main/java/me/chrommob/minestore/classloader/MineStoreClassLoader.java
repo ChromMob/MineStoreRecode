@@ -28,6 +28,7 @@ public class MineStoreClassLoader extends URLClassLoader {
         super(new URL[0], parent);
         this.folder = folder;
         this.addonRelocations = addonRelocations;
+        this.addonRelocations.putAll(MineStorePluginDependency.defaultRelocations);
         loadRelocateDependencies();
         relocationHandler = new RelocationHandler(this);
         dependencies.add(getGlobalDependencies());
@@ -162,7 +163,7 @@ public class MineStoreClassLoader extends URLClassLoader {
     }
 
     public boolean relocateAddon() {
-        return addonRelocations.isEmpty();
+        return !addonRelocations.isEmpty();
     }
 
     public File remapAddon(File file) {

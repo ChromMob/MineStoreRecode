@@ -4,6 +4,8 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
+import me.chrommob.minestore.api.event.types.MineStorePlayerJoinEvent;
+import me.chrommob.minestore.api.event.types.MineStorePlayerQuitEvent;
 import me.chrommob.minestore.api.interfaces.event.PlayerEventListener;
 import me.chrommob.minestore.common.MineStoreCommon;
 
@@ -16,11 +18,11 @@ public class VelocityPlayerEvent implements PlayerEventListener {
 
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
-        pl.onPlayerJoin(event.getPlayer().getUsername());
+        new MineStorePlayerJoinEvent(event.getPlayer().getUsername()).call();
     }
 
     @Subscribe
     public void onPlayerQuit(DisconnectEvent event) {
-        pl.onPlayerQuit(event.getPlayer().getUsername());
+        new MineStorePlayerQuitEvent(event.getPlayer().getUsername()).call();
     }
 }

@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.leangen.geantyref.TypeToken;
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.event.MineStoreEventBus;
+import me.chrommob.minestore.api.event.types.MineStorePlayerJoinEvent;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
@@ -161,6 +163,7 @@ public class PayNowManager {
 
     public PayNowManager(MineStoreCommon mineStoreCommon) {
         this.mineStoreCommon = mineStoreCommon;
+        MineStoreEventBus.registerListener(mineStoreCommon.getInternalAddon(), MineStorePlayerJoinEvent.class, event -> onJoin(Registries.USER_GETTER.get().get(event.getUsername())));
     }
 
     public VerificationResult load() {

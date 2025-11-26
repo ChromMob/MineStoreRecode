@@ -21,10 +21,7 @@ public abstract class MineStoreAddon {
         return Collections.emptyList();
     }
 
-    public ConfigKey<?> getConfigKey(String key) {
-        if (configWrapper == null) {
-            return null;
-        }
-        return configWrapper.getKey(key);
+    public List<Object> getCommands() {
+        return Collections.emptyList();
     }
 }

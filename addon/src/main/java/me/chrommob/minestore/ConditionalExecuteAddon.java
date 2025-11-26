@@ -7,7 +7,6 @@ import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
-import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -17,6 +16,8 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,10 +78,24 @@ public class ConditionalExecuteAddon extends MineStoreAddon {
     }
 
     @Override
+    public List<Object> getCommands() {
+        List<Object> list = new ArrayList<>();
+        list.add(new Test());
+        return list;
+    }
+
+    @Override
     public List<ConfigKey<?>> getConfigKeys() {
         List<ConfigKey<?>> keys = new ArrayList<>();
         keys.add(MESSAGE);
         keys.add(INIT_MESSAGE);
         return keys;
+    }
+
+    private static class Test {
+        @Command("test <value>")
+        public void test(AbstractUser abstractUser, @Argument("value") boolean value) {
+            abstractUser.commonUser().sendMessage("GG " + value);
+        }
     }
 }

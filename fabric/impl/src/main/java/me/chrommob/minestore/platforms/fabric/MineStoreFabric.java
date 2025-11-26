@@ -14,7 +14,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
-import org.apache.logging.log4j.simple.SimpleLogger;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.fabric.FabricServerCommandManager;
@@ -89,7 +88,7 @@ public class MineStoreFabric implements MineStorePlugin {
 		Registries.LOGGER.set(new FabricLogger(LOGGER));
 		Registries.SCHEDULER.set(new FabricScheduler());
 		Registries.CONFIG_FILE.set(FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("config.yml").toFile());
-		Registries.PLAYER_JOIN_LISTENER.set(new FabricPlayerEvent(common));
+		Registries.PLAYER_JOIN_LISTENER.set(new FabricPlayerEvent());
 		common.init(true);
 		Registries.LOGGER.get().log("MineStore has been enabled!");
 	}

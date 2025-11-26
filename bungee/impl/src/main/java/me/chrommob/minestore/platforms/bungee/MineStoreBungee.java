@@ -48,7 +48,7 @@ public class MineStoreBungee implements MineStorePlugin {
         Registries.USER_GETTER.set(new BungeeUserGetter(plugin));
         Registries.COMMAND_EXECUTER.set(new CommandExecuterBungee(plugin));
         Registries.CONFIG_FILE.set(new File(plugin.getDataFolder(), "config.yml"));
-        Registries.PLAYER_JOIN_LISTENER.set(new PlayerEventListenerBungee(plugin, common));
+        Registries.PLAYER_JOIN_LISTENER.set(new PlayerEventListenerBungee(plugin));
 
         InetSocketAddress ip = new InetSocketAddress(0);
         String motd = "";
