@@ -259,7 +259,7 @@ public class MineStoreCommon {
                     MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
                     ConfigWrapper configWrapper = new ConfigWrapper("config", addon.getConfigKeys());
                     configManager.addConfig(configWrapper);
-                    addon.setConfigWrapper(configWrapper);
+                    addon.setDirectory(loadedAddonFolder);
                     annotationParser.parse(addon.getCommands());
                     addons.add(addon);
                     addonConfigs.put(addon, configManager);

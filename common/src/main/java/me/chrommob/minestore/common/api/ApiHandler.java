@@ -21,7 +21,12 @@ public class ApiHandler {
     }
 
     private <V> Result<V, Exception> request(WebApiRequest<V> request) {
-        URL url = authData.createUrl(request.getPath(), request.getParams());
+        URL url;
+        if (request.requiresApiKey()) {
+            url = authData.createUrl(request.getPath(), request.getParams());
+        } else {
+            url = authData.createNonKeyUrl(request.getPath(), request.getParams());
+        }
         try {
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
             urlConnection.setRequestMethod(request.getType().name().toUpperCase());

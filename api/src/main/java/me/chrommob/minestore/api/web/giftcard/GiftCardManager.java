@@ -26,13 +26,13 @@ public class GiftCardManager extends FeatureManager {
      *                     This is nullable.
      * @return The response of the gift card creation request.
      */
-    public CreateGiftCardResponse createGiftCard(String name, String description, int amount, LocalDateTime expiry, @Nullable String tiedUsername) {
+    public CreateGiftCardResponse createGiftCard(String name, String description, double amount, LocalDateTime expiry, @Nullable String tiedUsername) {
         WebApiRequest<JsonObject> request = new WebApiRequest<>("createGiftCard", WebApiRequest.Type.POST, new ParamBuilder()
                 .append("code", name)
                 .append("balance", String.valueOf(amount))
                 .appendDate("expire", expiry)
                 .append("note", description)
-                .append("username", tiedUsername), JsonObject.class);
+                .append("username", tiedUsername), JsonObject.class, true);
         Result<JsonObject, Exception> result = request(request);
         if (result.value() == null) {
             return new GiftCardManager.CreateGiftCardResponse(false, result.error().getMessage());
@@ -69,87 +69,57 @@ public class GiftCardManager extends FeatureManager {
         }
     }
 
-    public static class CreateGiftCardRequest {
-        private final String name;
-        private final String description;
-        private final int amount;
-        private final int expiryYear;
-        private final int expiryMonth;
-        private final int expiryDay;
-        private final int expiryHour;
-        private final int expiryMinute;
-        private final int expirySecond;
-
-        public CreateGiftCardRequest(String name, String description, int amount, int expiryYear, int expiryMonth, int expiryDay, int expiryHour, int expiryMinute, int expirySecond) {
-            this.name = name;
-            this.description = description;
-            this.amount = amount;
-            this.expiryYear = expiryYear;
-            this.expiryMonth = expiryMonth;
-            this.expiryDay = expiryDay;
-            this.expiryHour = expiryHour;
-            this.expiryMinute = expiryMinute;
-            this.expirySecond = expirySecond;
+    public ValidateGiftCardResponse validateGiftCard(String code) {
+        WebApiRequest<JsonObject> request = new WebApiRequest<>("cart/getGift", WebApiRequest.Type.POST, new ParamBuilder()
+                .append("gift", code), JsonObject.class, false);
+        Result<JsonObject, Exception> result = request(request);
+        if (result.value() == null) {
+            return new ValidateGiftCardResponse(result.error().getMessage());
         }
-
-        public String name() {
-            return name;
+        boolean success = result.value().get("status").getAsBoolean();
+        if (!success) {
+            return new ValidateGiftCardResponse(result.error().getMessage());
         }
-
-        public String description() {
-            return description;
-        }
-
-        public int amount() {
-            return amount;
-        }
-
-        public int expiryYear() {
-            return expiryYear;
-        }
-
-        public int expiryMonth() {
-            return expiryMonth;
-        }
-
-        public int expiryDay() {
-            return expiryDay;
-        }
-
-        public int expiryHour() {
-            return expiryHour;
-        }
-
-        public int expiryMinute() {
-            return expiryMinute;
-        }
-
-        public int expirySecond() {
-            return expirySecond;
-        }
+        return new ValidateGiftCardResponse(result.value().get("start_balance").getAsDouble(), result.value().get("end_balance").getAsDouble(), result.value().get("currency").getAsString());
     }
 
+
     public static class ValidateGiftCardResponse {
-        private String name;
-        private int amount;
-        private String error;
+        private final boolean success;
+        private String message;
+        public ValidateGiftCardResponse(String message) {
+            this.success = false;
+            this.message = message;
+        }
+        private double startBalance;
+        private double currentBalance;
+        private String currency;
 
-        public ValidateGiftCardResponse(String name, int amount, String error) {
-            this.name = name;
-            this.amount = amount;
-            this.error = error;
+        public ValidateGiftCardResponse(double startBalance, double currentBalance, String currency) {
+            this.success = false;
+            this.startBalance = startBalance;
+            this.currentBalance = currentBalance;
+            this.currency = currency;
         }
 
-        public  String getName() {
-            return name;
+        public boolean isSuccess() {
+            return success;
         }
 
-        public int getAmount() {
-            return amount;
+        public String getMessage() {
+            return message;
         }
 
-        public String getError() {
-            return error;
+        public double getStartBalance() {
+            return startBalance;
+        }
+
+        public double getCurrentBalance() {
+            return currentBalance;
+        }
+
+        public String getCurrency() {
+            return currency;
         }
     }
 }

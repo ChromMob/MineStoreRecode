@@ -3,15 +3,15 @@ package me.chrommob.minestore.api.generic;
 import me.chrommob.config.ConfigKey;
 import me.chrommob.config.ConfigWrapper;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
 public abstract class MineStoreAddon {
+    private File directory;
 
-    private ConfigWrapper configWrapper;
-
-    public void setConfigWrapper(ConfigWrapper configWrapper) {
-        this.configWrapper = configWrapper;
+    public void  setDirectory(File directory) {
+        this.directory = directory;
     }
 
     abstract public void onEnable();
@@ -23,5 +23,9 @@ public abstract class MineStoreAddon {
 
     public List<Object> getCommands() {
         return Collections.emptyList();
+    }
+
+    public File getDataFolder() {
+        return directory;
     }
 }

@@ -17,7 +17,7 @@ public class PaymentManager extends FeatureManager {
         ParamBuilder paramBuilder = new ParamBuilder();
         paramBuilder.append("execute_commands", String.valueOf(executeCommands));
         paramBuilder.append("note", note);
-        Result<Void, Exception> result = request(new WebApiRequest<>("payment/markAsPaid/" + paymentId, WebApiRequest.Type.POST, paramBuilder, Void.class));
+        Result<Void, Exception> result = request(new WebApiRequest<>("payment/markAsPaid/" + paymentId, WebApiRequest.Type.POST, paramBuilder, Void.class, true));
         return result.error() == null;
     }
 }

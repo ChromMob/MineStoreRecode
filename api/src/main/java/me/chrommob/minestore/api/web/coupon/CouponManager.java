@@ -51,7 +51,7 @@ public class CouponManager extends FeatureManager {
                 .append("note", note)
                 .appendDate("start_at", startAt)
                 .appendDate("expire_at", expireAt)
-                .append("username", username), CreateCouponResponse.class);
+                .append("username", username), CreateCouponResponse.class, true);
         Result<CreateCouponResponse, Exception> result = request(request);
         if (result.value() == null) {
             return new CreateCouponResponse(result.error().getMessage());

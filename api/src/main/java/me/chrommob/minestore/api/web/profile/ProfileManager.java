@@ -38,7 +38,7 @@ public class ProfileManager extends FeatureManager {
         }
         fetching.add(username);
         CompletableFuture.runAsync(() -> {
-            Result<Profile, Exception> result = request(new WebApiRequest<>("profile/" + username, WebApiRequest.Type.GET, Profile.class));
+            Result<Profile, Exception> result = request(new WebApiRequest<>("profile/" + username, WebApiRequest.Type.GET, Profile.class, true));
             if (result.value() == null) {
                 return;
             }

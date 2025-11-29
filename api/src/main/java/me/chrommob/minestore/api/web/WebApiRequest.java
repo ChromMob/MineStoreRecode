@@ -7,20 +7,23 @@ public class WebApiRequest <T> {
         GET,
         POST
     }
+    
+    private final boolean requiresApiKey;
     private final Type type;
     private final String path;
     private final ParamBuilder paramBuilder;
     private final Class<T> clazz;
 
-    public WebApiRequest(String path, Type type, Class<T> clazz) {
-        this(path, type, null, clazz);
+    public WebApiRequest(String path, Type type, Class<T> clazz, boolean requiresApiKey) {
+        this(path, type, null, clazz, requiresApiKey);
     }
 
-    public WebApiRequest(String path, Type type, ParamBuilder paramBuilder, Class<T> clazz) {
+    public WebApiRequest(String path, Type type, ParamBuilder paramBuilder, Class<T> clazz, boolean requiresApiKey) {
         this.type = type;
         this.path = path;
         this.paramBuilder = paramBuilder;
         this.clazz = clazz;
+        this.requiresApiKey = requiresApiKey;
     }
 
     public Type getType() {
@@ -40,5 +43,9 @@ public class WebApiRequest <T> {
 
     public Class<T> getClazz() {
         return clazz;
+    }
+
+    public boolean requiresApiKey() {
+        return requiresApiKey;
     }
 }
