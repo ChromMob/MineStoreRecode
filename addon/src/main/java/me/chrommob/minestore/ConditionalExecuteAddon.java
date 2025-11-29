@@ -98,9 +98,7 @@ public class ConditionalExecuteAddon extends MineStoreAddon {
             abstractUser.commonUser().sendMessage("Hello now!");
             if (value) {
                 Registries.MINESTORE_SCHEDULER.get().runDelayed(
-                        new MineStoreScheduledTask("later", () -> {
-                            abstractUser.commonUser().sendMessage("Hello in 5 seconds!");
-                        }, 1000 * 5)
+                        new MineStoreScheduledTask("later", () -> abstractUser.commonUser().sendMessage("Hello in 5 seconds!"), 1000 * 5)
                 );
             }
         }
