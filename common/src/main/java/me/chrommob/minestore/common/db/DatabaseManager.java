@@ -8,7 +8,7 @@ import me.chrommob.minestore.api.event.types.MineStorePlayerJoinEvent;
 import me.chrommob.minestore.api.event.types.MineStorePlayerQuitEvent;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
-import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
 import java.sql.Connection;

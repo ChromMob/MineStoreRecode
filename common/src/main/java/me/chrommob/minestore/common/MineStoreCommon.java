@@ -26,8 +26,7 @@ import me.chrommob.minestore.common.gui.payment.PaymentHandler;
 import me.chrommob.minestore.common.paynow.PayNowManager;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
-import me.chrommob.minestore.common.scheduler.MineStoreScheduler;
-import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.stats.StatSender;
 import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import me.chrommob.minestore.common.verification.VerificationManager;
@@ -72,7 +71,6 @@ public class MineStoreCommon {
     private BufferedWriter debugLogWriter;
     private File debugLogFile;
     private final PaymentHandler paymentHandler = new PaymentHandler(this);
-    private final MineStoreScheduler scheduler = new MineStoreScheduler();
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
     private VerificationManager verificationManager;
@@ -172,7 +170,7 @@ public class MineStoreCommon {
                 }
             }
             if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
-                scheduler.addTask(databaseManager.updaterTask);
+                Registries.MINESTORE_SCHEDULER.get().addTask(databaseManager.updaterTask);
             }
         }
         if (Registries.COMMAND_MANAGER.get() != null && Registries.COMMAND_MANAGER.get().isCommandRegistrationAllowed()) {
@@ -187,15 +185,15 @@ public class MineStoreCommon {
             }
         }
         initialized = true;
-        scheduler.addTask(statsSender.mineStoreScheduledTask);
-        scheduler.addTask(guiData.mineStoreScheduledTask);
-        scheduler.addTask(placeHolderData.mineStoreScheduledTask);
-        scheduler.addTask(webListener.mineStoreScheduledTask);
-        scheduler.addTask(authHolder.removeAndPost);
+        Registries.MINESTORE_SCHEDULER.get().addTask(statsSender.mineStoreScheduledTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(guiData.mineStoreScheduledTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(placeHolderData.mineStoreScheduledTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(webListener.mineStoreScheduledTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(authHolder.removeAndPost);
 
         if (payNowManager != null && payNowManager.isEnabled()) {
-            scheduler.run(payNowManager.initTask);
-            scheduler.addTask(payNowManager.mineStoreScheduledTask);
+            Registries.MINESTORE_SCHEDULER.get().runDelayed(payNowManager.initTask);
+            Registries.MINESTORE_SCHEDULER.get().addTask(payNowManager.mineStoreScheduledTask);
         }
 
         retryCount = 0;
@@ -301,7 +299,7 @@ public class MineStoreCommon {
         log("[VerificationManager] Error rate reached: " + percent +  "%, restarting... in 16 seconds...");
         stopFeatures();
         MineStoreScheduledTask retryTask = getRetryTask();
-        scheduler.addTask(retryTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(retryTask);
     }
 
     private @NotNull MineStoreScheduledTask getRetryTask() {
@@ -312,12 +310,12 @@ public class MineStoreCommon {
             } else {
                 retryCount = 0;
                 reload();
-                scheduler.removeTask(task);
+                Registries.MINESTORE_SCHEDULER.get().removeTask(task);
                 return;
             }
             if (retryCount > 5) {
                 log("[VerificationManager] Too many failed attempts, stopping...");
-                scheduler.removeTask(task);
+                Registries.MINESTORE_SCHEDULER.get().removeTask(task);
                 return;
             }
             long delay = (long) ((Math.pow(2, 4 + retryCount)) * 1000);
@@ -330,21 +328,21 @@ public class MineStoreCommon {
 
     private void stopFeatures() {
         if (statsSender != null)
-            scheduler.removeTask(statsSender.mineStoreScheduledTask);
+            Registries.MINESTORE_SCHEDULER.get().removeTask(statsSender.mineStoreScheduledTask);
         if (guiData != null)
-            scheduler.removeTask(guiData.mineStoreScheduledTask);
+            Registries.MINESTORE_SCHEDULER.get().removeTask(guiData.mineStoreScheduledTask);
         if (placeHolderData != null) {
-            scheduler.removeTask(placeHolderData.mineStoreScheduledTask);
+            Registries.MINESTORE_SCHEDULER.get().removeTask(placeHolderData.mineStoreScheduledTask);
             placeHolderData.stop();
         }
         if (authHolder != null)
-            scheduler.removeTask(authHolder.removeAndPost);
+            Registries.MINESTORE_SCHEDULER.get().removeTask(authHolder.removeAndPost);
         if (databaseManager != null)
-            scheduler.removeTask(databaseManager.updaterTask);
+            Registries.MINESTORE_SCHEDULER.get().removeTask(databaseManager.updaterTask);
         if (webListener != null)
-            scheduler.removeTask(webListener.mineStoreScheduledTask);
+            Registries.MINESTORE_SCHEDULER.get().removeTask(webListener.mineStoreScheduledTask);
         if (payNowManager != null) {
-            scheduler.removeTask(payNowManager.mineStoreScheduledTask);
+            Registries.MINESTORE_SCHEDULER.get().removeTask(payNowManager.mineStoreScheduledTask);
         }
     }
 
@@ -352,7 +350,7 @@ public class MineStoreCommon {
         new MineStoreDisableEvent().call();
         log("Shutting down...");
         stopFeatures();
-        scheduler.stop();
+        Registries.MINESTORE_SCHEDULER.get().stop();
     }
 
     public void registerEssentialCommands() {
@@ -413,11 +411,11 @@ public class MineStoreCommon {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
             } else {
-                scheduler.removeTask(databaseManager.updaterTask);
+                Registries.MINESTORE_SCHEDULER.get().removeTask(databaseManager.updaterTask);
             }
         } else {
             if (databaseManager != null) {
-                scheduler.removeTask(databaseManager.updaterTask);
+                Registries.MINESTORE_SCHEDULER.get().removeTask(databaseManager.updaterTask);
             }
             databaseManager = null;
         }
@@ -436,19 +434,19 @@ public class MineStoreCommon {
             log("Could not reload MineStore!");
             return;
         }
-        scheduler.addTask(webListener.mineStoreScheduledTask);
-        scheduler.addTask(guiData.mineStoreScheduledTask);
-        scheduler.addTask(placeHolderData.mineStoreScheduledTask);
-        scheduler.addTask(statsSender.mineStoreScheduledTask);
-        scheduler.addTask(authHolder.removeAndPost);
+        Registries.MINESTORE_SCHEDULER.get().addTask(webListener.mineStoreScheduledTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(guiData.mineStoreScheduledTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(placeHolderData.mineStoreScheduledTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(statsSender.mineStoreScheduledTask);
+        Registries.MINESTORE_SCHEDULER.get().addTask(authHolder.removeAndPost);
 
-        scheduler.run(payNowManager.initTask);
+        Registries.MINESTORE_SCHEDULER.get().runDelayed(payNowManager.initTask);
         if (payNowManager.isEnabled()) {
-            scheduler.addTask(payNowManager.mineStoreScheduledTask);
+            Registries.MINESTORE_SCHEDULER.get().addTask(payNowManager.mineStoreScheduledTask);
         }
 
         if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue() && databaseManager != null) {
-            scheduler.addTask(databaseManager.updaterTask);
+            Registries.MINESTORE_SCHEDULER.get().addTask(databaseManager.updaterTask);
         }
         log("Reloaded MineStore!");
         retryCount = 0;

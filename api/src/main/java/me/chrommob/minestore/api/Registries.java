@@ -11,6 +11,7 @@ import me.chrommob.minestore.api.interfaces.playerInfo.DefaultPlayerInfoProvider
 import me.chrommob.minestore.api.interfaces.playerInfo.PlayerInfoProvider;
 import me.chrommob.minestore.api.interfaces.scheduler.CommonScheduler;
 import me.chrommob.minestore.api.interfaces.user.UserGetter;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduler;
 import org.incendo.cloud.CommandManager;
 
 import java.io.File;
@@ -25,6 +26,7 @@ public class Registries {
     public static final Registry<String> HOSTNAME = new Registry<>("default");
 
     public static final Registry<LoggerCommon> LOGGER = new Registry<>();
+    public static final Registry<MineStoreScheduler> MINESTORE_SCHEDULER = new Registry<>(new MineStoreScheduler());
     public static final Registry<CommonScheduler> SCHEDULER = new Registry<>();
     public static final Registry<UserGetter> USER_GETTER = new Registry<>();
     public static final Registry<CommandExecuterCommon> COMMAND_EXECUTER = new Registry<>();

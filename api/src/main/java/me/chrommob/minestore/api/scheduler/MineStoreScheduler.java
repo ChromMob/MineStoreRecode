@@ -1,4 +1,4 @@
-package me.chrommob.minestore.common.scheduler;
+package me.chrommob.minestore.api.scheduler;
 
 import java.util.HashSet;
 import java.util.Queue;
@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MineStoreScheduler {
     private static final int DELAY = 100;
+    private final Set<MineStoreScheduledTask> delayed = new HashSet<>();
     private final Set<MineStoreScheduledTask> tasks = new HashSet<>();
     private final Queue<MineStoreScheduledTask> toExecute = new ConcurrentLinkedQueue<>();
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
@@ -18,8 +19,8 @@ public class MineStoreScheduler {
         start();
     }
 
-    public void run(MineStoreScheduledTask task) {
-        toExecute.add(task);
+    public void runDelayed(MineStoreScheduledTask task) {
+        delayed.add(task);
     }
 
     public void addTask(MineStoreScheduledTask task) {
@@ -39,6 +40,13 @@ public class MineStoreScheduler {
                 if (task.shouldRun()) {
                     toExecute.add(task);
                     task.markExecuted();
+                }
+            }
+            Set<MineStoreScheduledTask> delayed = new HashSet<>(this.delayed);
+            for (MineStoreScheduledTask task : delayed) {
+                if (task.shouldRun()) {
+                    toExecute.add(task);
+                    this.delayed.remove(task);
                 }
             }
         }, DELAY, DELAY, TimeUnit.MILLISECONDS);

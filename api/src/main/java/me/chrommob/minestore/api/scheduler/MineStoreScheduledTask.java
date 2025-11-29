@@ -1,4 +1,4 @@
-package me.chrommob.minestore.common.scheduler;
+package me.chrommob.minestore.api.scheduler;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +26,7 @@ public class MineStoreScheduledTask {
             }
         };
         this.name = name + "-" + UUID.randomUUID();
+        delay(delay);
     }
 
 

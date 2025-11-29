@@ -10,7 +10,7 @@ import me.chrommob.minestore.api.web.profile.ProfileManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.placeholder.json.*;
-import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

@@ -10,7 +10,7 @@ import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.paynow.json.*;
-import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
 import javax.crypto.Cipher;
@@ -158,7 +158,7 @@ public class PayNowManager {
         } catch (Exception e) {
             mineStoreCommon.debug(this.getClass(), e);
         }
-    }, 1000 * 60 * 5);
+    }, 0);
 
 
     public PayNowManager(MineStoreCommon mineStoreCommon) {

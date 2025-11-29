@@ -15,8 +15,8 @@ import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
-import me.chrommob.minestore.common.scheduler.MineStoreScheduledTask;
-import me.chrommob.minestore.common.scheduler.SafeScheduledTask;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.scheduler.SafeScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -25,7 +25,6 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public class WebListener {
     private final MineStoreVersion arraySupportedSince = new MineStoreVersion(3, 2, 5);
@@ -102,7 +101,7 @@ public class WebListener {
 
     public WebListener(MineStoreCommon plugin) {
         this.plugin = plugin;
-        mineStoreScheduledTask = SafeScheduledTask.wrap(this.getClass(), "weblistener", plugin, () -> {
+        mineStoreScheduledTask = SafeScheduledTask.wrap("weblistener", () -> {
             handleExecuted();
             plugin.debug(this.getClass(), "Running...");
             List<ParsedResponse> parsedResponses = fetchData();
