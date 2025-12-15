@@ -1,5 +1,7 @@
 package me.chrommob.minestore.api.generic;
 
+import me.chrommob.minestore.api.Registries;
+
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -88,8 +90,6 @@ public class MineStoreVersion {
         storeUrl = storeUrl + "/api/getVersion";
         try {
             HttpsURLConnection urlConnection = (HttpsURLConnection) new URL(storeUrl).openConnection();
-            urlConnection.setConnectTimeout(1000);
-            urlConnection.setReadTimeout(1000);
             InputStream in = urlConnection.getInputStream();
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
             String line;
@@ -102,7 +102,9 @@ public class MineStoreVersion {
                 }
                 return new MineStoreVersion(line);
             }
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            Registries.LOGGER.get().log("Failed to get MineStore version!");
+            Registries.LOGGER.get().log(e.getMessage());
         }
         return MineStoreVersion.dummy();
     }

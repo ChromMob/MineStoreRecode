@@ -1,2 +1,2 @@
-main-class: me.chrommob.minestore.AddonTest
-name: MineStoreTestAddon
+main-class: me.chrommob.minestore.ConditionalExecuteAddon
+name: ConditionalExecuteAddon

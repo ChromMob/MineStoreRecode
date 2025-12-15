@@ -49,7 +49,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -92,8 +95,18 @@ public class MineStoreCommon {
             if (!configFile.getParentFile().exists()) {
                 new File(configFile.getParentFile(), "lang").mkdirs();
             }
-            debugLogFile = new File(configFile.getParentFile(), "debug.log");
+            File logFolder = new File(configFile.getParentFile(), "logs");
+            if (!logFolder.exists()) {
+                logFolder.mkdirs();
+            }
+            debugLogFile = new File(logFolder, "debug.log");
             if (debugLogFile.exists()) {
+                File store = getDebugBackupFile(debugLogFile);
+                store.mkdirs();
+                try {
+                    Files.copy(debugLogFile.toPath(), store.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException ignored) {
+                }
                 debugLogFile.delete();
             }
             try {
@@ -111,6 +124,15 @@ public class MineStoreCommon {
                     /* Manager */ Registries.COMMAND_MANAGER.get(),
                     /* Command sender type */ AbstractUser.class);
         });
+    }
+
+    private File getDebugBackupFile(File debugLogFile) {
+        String formattedTime = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        File file =  new File(debugLogFile.getParentFile(), "debug" + formattedTime + ".log");
+        for (int i = 0; file.exists(); i++) {
+            file = new File(file.getParentFile(), "debug" + formattedTime + "-" + i + ".log");
+        }
+        return file;
     }
 
     private final Set<MineStoreAddon> addons = new HashSet<>();
@@ -362,6 +384,7 @@ public class MineStoreCommon {
         annotationParser.parse(new DumpCommand(this));
         annotationParser.parse(new SetupCommand(this));
         annotationParser.parse(new AddonCommand(this));
+        annotationParser.parse(new VersionCommand());
     }
 
     private AnnotationParser<?> annotationParser;
@@ -379,7 +402,6 @@ public class MineStoreCommon {
         // return keys;
         // });
         annotationParser.parse(new AuthCommand(this));
-        annotationParser.parse(new VersionCommand());
         if (ConfigKeys.STORE_COMMAND_KEYS.ENABLED.getValue()) {
             annotationParser.parse(new StoreCommand(this));
         }
@@ -401,12 +423,12 @@ public class MineStoreCommon {
         new MineStoreReloadEvent().call();
         log("Reloading...");
         pluginConfig.reload();
+        version = MineStoreVersion.getMineStoreVersion(ConfigKeys.STORE_URL.getValue());
         if (!initialized) {
             init(true);
             log("Reloaded MineStore!");
             return;
         }
-        version = MineStoreVersion.getMineStoreVersion(ConfigKeys.STORE_URL.getValue());
         if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);

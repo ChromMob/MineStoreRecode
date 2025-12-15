@@ -46,8 +46,6 @@ public class PlaceHolderData {
     private final URI[] apiUrls = new URI[3];
 
     private final Gson gson = new Gson();
-    private Thread thread = null;
-    
     public PlaceHolderData(MineStoreCommon plugin) {
         this.plugin = plugin;
         registerNativePlaceholders();
@@ -177,7 +175,6 @@ public class PlaceHolderData {
             in = new GZIPInputStream(in);
         }
 
-
         BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
 
         StringBuilder response = new StringBuilder();
@@ -304,6 +301,101 @@ public class PlaceHolderData {
         return bd.toPlainString();
     }
 
+    private void handleUrl(URI apiUrl) throws IOException {
+        plugin.debug(this.getClass(), "Loading placeholder data from " + apiUrl);
+        URL url = apiUrl.toURL();
+        HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+        try {
+            StringBuilder response = getResponse(urlConnection);
+            plugin.debug(this.getClass(), "Received: " + response);
+            if (apiUrl.equals(apiUrls[0])) {
+                handleDonationGoal(response);
+            } else if (apiUrl.equals(apiUrls[1])) {
+                handleLastDonators(response);
+            } else if (apiUrl.equals(apiUrls[2])) {
+                handleTopDonators(response);
+            }
+        } catch (IOException e) {
+            plugin.debug(this.getClass(), urlConnection.getResponseCode() + " " + urlConnection.getResponseMessage());
+            throw e;
+        }
+    }
+
+    private void handleDonationGoal(StringBuilder response) {
+        try {
+            if (!MineStoreCommon.version().requires("3.0.0")) {
+                DonationGoalJsonOld donationGoalJsonOld = gson.fromJson(response.toString(), DonationGoalJsonOld.class);
+                donationGoal = donationGoalJsonOld.getDonationGoal();
+            } else {
+                Type listType = new TypeToken<List<DonationGoalJson>>() {
+                }.getType();
+                List<DonationGoalJson> donationGoals = gson.fromJson(response.toString(), listType);
+                if (!donationGoals.isEmpty()) {
+                    donationGoal = donationGoals.get(0).getDonationGoal();
+                } else {
+                    donationGoal = new DonationGoal(0, 0);
+                }
+            }
+        } catch (JsonSyntaxException e) {
+            plugin.debug(this.getClass(), e);
+            donationGoal = new DonationGoal(0, 0);
+        }
+    }
+
+    private void handleLastDonators(StringBuilder response) {
+        try {
+            if (MineStoreCommon.version().requires(pagesSupportedSince)) {
+                Type jsonType = new TypeToken<PaginatedJson<LastDonator>>(){}.getType();
+                lastDonatorJson = gson.fromJson(response.toString(), jsonType);
+                List<LastDonator> newLastDonators = new ArrayList<>();
+                LastDonator fromQueue = lastDonatorsDeque.getFirst();
+                for (LastDonator lastDonator : lastDonatorJson.getList()) {
+                    int comparisonResult = fromQueue == null ? 1 : fromQueue.compareTo(lastDonator);
+                    if (comparisonResult == -1) {
+                        continue;
+                    }
+                    if (comparisonResult == 0 && fromQueue.getUserName().equals(lastDonator.getUserName()) && fromQueue.getPackageName().equals(lastDonator.getPackageName())) {
+                        continue;
+                    }
+                    newLastDonators.add(lastDonator);
+                }
+                if (!newLastDonators.isEmpty()) {
+                    for (int i = newLastDonators.size() - 1; i >= 0; i--) {
+                        lastDonatorsDeque.pushFirst(newLastDonators.get(i));
+                    }
+                    refetchAllTopDonators();
+                }
+            } else {
+                Type listType = new TypeToken<List<LastDonator>>() {
+                }.getType();
+                lastDonators = gson.fromJson(response.toString(), listType);
+            }
+        } catch (JsonSyntaxException e) {
+            plugin.debug(this.getClass(), e);
+        }
+    }
+
+    private void handleTopDonators(StringBuilder response) {
+        if (MineStoreCommon.version().requires(pagesSupportedSince)) {
+            Type jsonType = new TypeToken<PaginatedJson<TopDonator>>(){}.getType();
+            topDonatorJson = gson.fromJson(response.toString(), jsonType);
+            int index = 0;
+            for (TopDonator topDonator : topDonatorJson.getList()) {
+                topDonatorsMap.put(index++, topDonator);
+            }
+            indexesFetchedLately.put(System.currentTimeMillis(), 1);
+        } else {
+            Type listType = new TypeToken<List<TopDonator>>() {
+            }.getType();
+            try {
+                topDonators = gson.fromJson(response.toString(), listType);
+            } catch (JsonSyntaxException e) {
+                plugin.debug(this.getClass(), e);
+                topDonators = new ArrayList<>();
+            }
+        }
+    }
+
     public VerificationResult load() {
         List<String> errors = new ArrayList<>();
         String finalDonationGoalUrl;
@@ -341,81 +433,7 @@ public class PlaceHolderData {
             plugin.debug(this.getClass(), "Loading placeholder data...");
             for (URI apiUrl : apiUrls) {
                 plugin.debug(this.getClass(), "Loading placeholder data from " + apiUrl);
-                URL url = apiUrl.toURL();
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                StringBuilder response = getResponse(urlConnection);
-
-                plugin.debug(this.getClass(), "Received: " + response);
-                if (apiUrl.equals(apiUrls[0])) {
-                    try {
-                        if (!MineStoreCommon.version().requires("3.0.0")) {
-                            DonationGoalJsonOld donationGoalJsonOld = gson.fromJson(response.toString(), DonationGoalJsonOld.class);
-                            donationGoal = donationGoalJsonOld.getDonationGoal();
-                        } else {
-                            Type listType = new TypeToken<List<DonationGoalJson>>() {
-                            }.getType();
-                            List<DonationGoalJson> donationGoals = gson.fromJson(response.toString(), listType);
-                            if (!donationGoals.isEmpty()) {
-                                donationGoal = donationGoals.get(0).getDonationGoal();
-                            } else {
-                                donationGoal = new DonationGoal(0, 0);
-                            }
-                        }
-                    } catch (JsonSyntaxException e) {
-                        plugin.debug(this.getClass(), e);
-                        donationGoal = new DonationGoal(0, 0);
-                    }
-                } else if (apiUrl.equals(apiUrls[1])) {
-                    try {
-                        if (MineStoreCommon.version().requires(pagesSupportedSince)) {
-                            Type jsonType = new TypeToken<PaginatedJson<LastDonator>>(){}.getType();
-                            lastDonatorJson = gson.fromJson(response.toString(), jsonType);
-                            List<LastDonator> newLastDonators = new ArrayList<>();
-                            LastDonator fromQueue = lastDonatorsDeque.getFirst();
-                            for (LastDonator lastDonator : lastDonatorJson.getList()) {
-                                int comparisonResult = fromQueue == null ? 1 : fromQueue.compareTo(lastDonator);
-                                if (comparisonResult == -1) {
-                                    continue;
-                                }
-                                if (comparisonResult == 0 && fromQueue.getUserName().equals(lastDonator.getUserName()) && fromQueue.getPackageName().equals(lastDonator.getPackageName())) {
-                                    continue;
-                                }
-                                newLastDonators.add(lastDonator);
-                            }
-                            if (!newLastDonators.isEmpty()) {
-                                for (int i = newLastDonators.size() - 1; i >= 0; i--) {
-                                    lastDonatorsDeque.pushFirst(newLastDonators.get(i));
-                                }
-                                refetchAllTopDonators();
-                            }
-                        } else {
-                            Type listType = new TypeToken<List<LastDonator>>() {
-                            }.getType();
-                            lastDonators = gson.fromJson(response.toString(), listType);
-                        }
-                    } catch (JsonSyntaxException e) {
-                        plugin.debug(this.getClass(), e);
-                    }
-                } else if (apiUrl.equals(apiUrls[2])) {
-                    if (MineStoreCommon.version().requires(pagesSupportedSince)) {
-                        Type jsonType = new TypeToken<PaginatedJson<TopDonator>>(){}.getType();
-                        topDonatorJson = gson.fromJson(response.toString(), jsonType);
-                        int index = 0;
-                        for (TopDonator topDonator : topDonatorJson.getList()) {
-                            topDonatorsMap.put(index++, topDonator);
-                        }
-                        indexesFetchedLately.put(System.currentTimeMillis(), 1);
-                    } else {
-                        Type listType = new TypeToken<List<TopDonator>>() {
-                        }.getType();
-                        try {
-                            topDonators = gson.fromJson(response.toString(), listType);
-                        } catch (JsonSyntaxException e) {
-                            plugin.debug(this.getClass(), e);
-                            topDonators = new ArrayList<>();
-                        }
-                    }
-                }
+                handleUrl(apiUrl);
             }
         } catch (IOException e) {
             plugin.debug(this.getClass(), e);
@@ -429,17 +447,24 @@ public class PlaceHolderData {
         return VerificationResult.valid();
     }
 
+    int urlIndex = 0;
     public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("placeholderData", new Runnable() {
         @Override
         public void run() {
-            if (!load().isValid()) {
-                plugin.debug(this.getClass(), "Failed to load placeholder data!");
-                plugin.handleError();
-            } else {
+            URI apiUrl = apiUrls[urlIndex];
+            try {
+                handleUrl(apiUrl);
                 plugin.notError();
+            } catch (Exception e) {
+                plugin.debug(this.getClass(), e);
+                urlIndex++;
+                if (urlIndex >= apiUrls.length) {
+                    urlIndex = 0;
+                }
+                plugin.handleError();
             }
         }
-    }, 1000 * 60);
+    }, 1000 * 20);
 
     public void stop() {
         lastDonatorsDeque.clear();
