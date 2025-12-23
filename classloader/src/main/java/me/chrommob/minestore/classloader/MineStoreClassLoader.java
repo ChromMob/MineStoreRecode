@@ -19,16 +19,23 @@ public class MineStoreClassLoader extends URLClassLoader {
     private final RelocationHandler relocationHandler;
     private final Set<MineStoreDependencies> dependencies = new HashSet<>();
     private final Set<MineStoreDependencies> loadedDependencies = new HashSet<>();
-    private final Map<String, String> addonRelocations;
     static {
         ClassLoader.registerAsParallelCapable();
+    }
+
+    public static final Map<String, String> defaultRelocations = new HashMap<>();
+    static {
+        defaultRelocations.put("com.mysql", "me.chrommob.libs.mysql");
+        defaultRelocations.put("io.leangen.geantyref", "me.chrommob.libs.geantyref");
+        defaultRelocations.put("org.incendo.cloud", "me.chrommob.libs.incendo");
+        defaultRelocations.put("com.google.gson", "me.chrommob.libs.gson");
     }
 
     public MineStoreClassLoader(ClassLoader parent, File folder, Map<String, String> addonRelocations) {
         super(new URL[0], parent);
         this.folder = folder;
-        this.addonRelocations = addonRelocations;
-        this.addonRelocations.putAll(MineStorePluginDependency.defaultRelocations);
+        defaultRelocations.putAll(addonRelocations);
+        removeNegatingRelocations(defaultRelocations);
         loadRelocateDependencies();
         relocationHandler = new RelocationHandler(this);
         dependencies.add(getGlobalDependencies());
@@ -40,6 +47,24 @@ public class MineStoreClassLoader extends URLClassLoader {
 
     public void addJarToClassLoader(URL url) {
         super.addURL(url);
+    }
+
+    public static void removeNegatingRelocations(Map<String, String> modifiedRelocations) {
+        Set<String> keysToRemove = new HashSet<>();
+        for (Map.Entry<String, String> entry : modifiedRelocations.entrySet()) {
+            for (Map.Entry<String, String> secondEntry : modifiedRelocations.entrySet()) {
+                if (entry.equals(secondEntry)) {
+                    continue;
+                }
+                if (entry.getKey().equals(secondEntry.getValue()) && entry.getValue().equals(secondEntry.getKey())) {
+                    keysToRemove.add(entry.getKey());
+                }
+            }
+        }
+        if (keysToRemove.isEmpty()) {
+            return;
+        }
+        keysToRemove.forEach(modifiedRelocations::remove);
     }
 
     private boolean checkConflict() {
@@ -91,23 +116,12 @@ public class MineStoreClassLoader extends URLClassLoader {
         }
     }
 
-    private final static String[] IGNORED_PACKAGES = new String[]{
-            "org.incendo.cloud.",
-            "net.kyori.",
-            "org.slf4j.",
-            };
 
     @Override
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         // Delegate core Java classes to parent
         if (name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("sun.")) {
             return super.loadClass(name, resolve);
-        }
-
-        for (String ignoredPackage : IGNORED_PACKAGES) {
-            if (name.startsWith(ignoredPackage)) {
-                return super.loadClass(name, resolve);
-            }
         }
 
         // First, check if already loaded
@@ -163,12 +177,12 @@ public class MineStoreClassLoader extends URLClassLoader {
     }
 
     public boolean relocateAddon() {
-        return !addonRelocations.isEmpty();
+        return !defaultRelocations.isEmpty();
     }
 
     public File remapAddon(File file) {
         File relocated = new File(folder, file.getName().replace(".jar", "-relocated.jar"));
-        relocationHandler.relocate(file, relocated, addonRelocations);
+        relocationHandler.relocate(file, relocated, defaultRelocations);
         return relocated;
     }
 }

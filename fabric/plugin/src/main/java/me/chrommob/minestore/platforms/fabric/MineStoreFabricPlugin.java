@@ -14,7 +14,9 @@ import net.minecraft.server.MinecraftServer;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitializer {
@@ -28,7 +30,10 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
         ServerLifecycleEvents.SERVER_STOPPED.register(this::onDisable);
         try {
             File config = FabricLoader.getInstance().getConfigDir().resolve("MineStore").resolve("dependencies").toFile();
-            classLoader = new MineStoreClassLoader(getClass().getClassLoader(), config);
+            Map<String, String> relocations = new HashMap<>();
+            relocations.put("me.chrommob.libs.incendo", "org.incendo.cloud");
+            relocations.put("me.chrommob.libs.geantyref", "io.leangen.geantyref");
+            classLoader = new MineStoreClassLoader(getClass().getClassLoader(), config, relocations);
             classLoader.add(getDependencies());
             classLoader.addCommonJar();
             classLoader.loadDependencies();
@@ -57,7 +62,8 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
     @Override
     public MineStoreDependencies getDependencies() {
         Set<MineStorePluginDependency> dependencies = new HashSet<>();
-        dependencies.add(new MineStorePluginDependency("", "MineStore-Fabric", "", null));
+        Map<String, String> relocations = new HashMap<>();
+        dependencies.add(new MineStorePluginDependency("", "MineStore-Fabric", "", relocations, null));
         dependencies.add(new MineStorePluginDependency("net.kyori", "adventure-text-minimessage", "4.18.0", null, RepositoryRegistry.MAVEN.getRepository()));
         return new MineStoreDependencies(dependencies);
     }

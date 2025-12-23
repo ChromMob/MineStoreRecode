@@ -13,7 +13,6 @@ public class FabricLogger implements LoggerCommon {
 
     @Override
     public void log(String message) {
-        System.out.println(message);
         this.logger.info(message);
     }
 

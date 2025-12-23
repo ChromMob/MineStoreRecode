@@ -1,5 +1,6 @@
 package me.chrommob.minestore.classloader.dependency;
 
+import me.chrommob.minestore.classloader.MineStoreClassLoader;
 import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -12,13 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class MineStorePluginDependency {
-    public static final Map<String, String> defaultRelocations = new HashMap<>();
-    static {
-        defaultRelocations.put("com.mysql", "me.chrommob.libs.mysql");
-        defaultRelocations.put("io.leangen.geantyref", "me.chrommob.libs.geantyref");
-        defaultRelocations.put("org.incendo.cloud", "me.chrommob.libs.incendo");
-        defaultRelocations.put("com.google.gson", "me.chrommob.libs.gson");
-    }
     private final String group;
     private final String name;
     private final String version;
@@ -41,9 +35,10 @@ public class MineStorePluginDependency {
         this.group = group;
         this.name = name;
         this.version = version;
-        this.relocations = relocations == null ? new HashMap<>() : relocations;
+        this.relocations = relocations == null ? new HashMap<>() : new HashMap<>(relocations);
         if (!skipDefault) {
-            this.relocations.putAll(defaultRelocations);
+            this.relocations.putAll(MineStoreClassLoader.defaultRelocations);
+            MineStoreClassLoader.removeNegatingRelocations(this.relocations);
         }
         this.repository = repository;
     }

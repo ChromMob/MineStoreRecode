@@ -65,7 +65,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.6.9'
+    version = '3.7.0'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -143,14 +143,14 @@ def finalJar = tasks.register('finalJar', Jar) {
     destinationDirectory = file("${projectDir}/build/libs/")
 }
 
-/*def fabricProject = project(":fabric:fabric-plugin")
+def fabricProject = project(":fabric:fabric-plugin")
 fabricProject.afterEvaluate {
     finalJar.configure {
         from zipTree(fabricProject.tasks.named("remapJar", AbstractArchiveTask).flatMap {
             it.archiveFile
         })
     }
-}*/
+}
 
 def addonApiProject = project(":MineStore-API")
 
@@ -186,8 +186,8 @@ tasks.register("copyJar", Copy) {
     dependsOn(":bukkit:impl:kyori:native:shadowJar")
     dependsOn(":bungee:bungee-impl:shadowJar")
     dependsOn(":velocity:velocity-impl:shadowJar")
-    //project(":fabric:fabric-impl").getAllTasks(true)
-    //dependsOn(":fabric:fabric-impl:remapJar")
+    project(":fabric:fabric-impl").getAllTasks(true)
+    dependsOn(":fabric:fabric-impl:remapJar")
 
     doFirst {
         delete("src/main/resources/jars/**.jar")
@@ -212,9 +212,9 @@ tasks.register("copyJar", Copy) {
         rename { "MineStore-Velocity.jarjar" }
     }
 
-/*    from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
+    from(project(":fabric:fabric-impl").tasks.named("remapJar")) {
         rename { "MineStore-Fabric.jarjar" }
-    }*/
+    }
 
     from(project(":common").tasks.named("shadowJar")) {
         rename { "MineStore-Common.jarjar" }

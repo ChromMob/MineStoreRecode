@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.11.+'
+	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -34,6 +34,6 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation include("org.incendo:cloud-fabric:2.0.0-SNAPSHOT")
+	modImplementation include("org.incendo:cloud-fabric:2.0.0-beta.9")
 	modImplementation include("net.kyori:adventure-platform-fabric:5.14.1")
 }

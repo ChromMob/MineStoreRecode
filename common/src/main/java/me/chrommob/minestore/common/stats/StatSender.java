@@ -31,7 +31,6 @@ public class StatSender {
     private final int CORE_COUNT;
     private final String SYSTEM_ARCHITECTURE;
     private final Gson gson = new Gson();
-    private Thread thread;
 
     public StatSender(MineStoreCommon common) {
         this.common = common;

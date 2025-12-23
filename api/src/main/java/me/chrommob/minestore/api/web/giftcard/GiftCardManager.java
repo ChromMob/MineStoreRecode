@@ -96,7 +96,7 @@ public class GiftCardManager extends FeatureManager {
         private String currency;
 
         public ValidateGiftCardResponse(double startBalance, double currentBalance, String currency) {
-            this.success = false;
+            this.success = true;
             this.startBalance = startBalance;
             this.currentBalance = currentBalance;
             this.currency = currency;

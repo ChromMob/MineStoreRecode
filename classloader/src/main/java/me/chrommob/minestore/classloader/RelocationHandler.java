@@ -1,7 +1,5 @@
 package me.chrommob.minestore.classloader;
 
-import me.chrommob.minestore.classloader.MineStoreClassLoader;
-
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

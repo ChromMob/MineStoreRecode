@@ -39,7 +39,9 @@ public class MineStoreFabric implements MineStorePlugin {
 		Registries.PLATFORM_VERSION.set(server.getVersion());
 		Registries.USER_GETTER.set(new FabricUserGetter(server));
 		Registries.COMMAND_EXECUTER.set(new CommandExecuterFabric(server));
-	}
+        Registries.IP.set(new InetSocketAddress(server.getServerIp(), server.getServerPort()));
+        Registries.HOSTNAME.set(server.getServerMotd());
+    }
 
 	private static final UUID NIL_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
@@ -59,13 +61,10 @@ public class MineStoreFabric implements MineStorePlugin {
 			}
 		};
 
-		Registries.COMMAND_MANAGER.set(new FabricServerCommandManager(
+		Registries.COMMAND_MANAGER.set(new FabricServerCommandManager<>(
 				ExecutionCoordinator.asyncCoordinator(),
 				senderMapper
 		));
-
-		Registries.IP.set(new InetSocketAddress(server.getServerIp(), server.getServerPort()));
-		Registries.HOSTNAME.set(server.getServerMotd());
 
 		common = new MineStoreCommon();
 		common.registerEssentialCommands();
