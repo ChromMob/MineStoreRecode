@@ -5,15 +5,15 @@ import me.chrommob.config.ConfigWrapper;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 public abstract class MineStoreAddon {
-    private File directory;
+    private ApiData apiData;
 
-    public void  setDirectory(File directory) {
-        this.directory = directory;
+    public void setApiData(ApiData apiData) {
+        this.apiData = apiData;
     }
-
     abstract public void onEnable();
     abstract public String getName();
 
@@ -25,7 +25,7 @@ public abstract class MineStoreAddon {
         return Collections.emptyList();
     }
 
-    public File getDataFolder() {
-        return directory;
+    public ApiData getApiData() {
+        return apiData;
     }
 }

@@ -26,7 +26,6 @@ public class MineStoreScheduler {
     public void addTask(MineStoreScheduledTask task) {
         tasks.add(task);
         task.lastExecuteAt = 0;
-        task.nextExecuteAt = System.currentTimeMillis();
     }
 
     public void removeTask(MineStoreScheduledTask mineStoreScheduledTask) {

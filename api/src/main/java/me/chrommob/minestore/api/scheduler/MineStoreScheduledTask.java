@@ -8,7 +8,7 @@ public class MineStoreScheduledTask {
     protected String name;
     protected Consumer<MineStoreScheduledTask> runnable;
     protected long lastExecuteAt;
-    protected long nextExecuteAt;
+    protected long nextExecuteAt = System.nanoTime();
 
     public MineStoreScheduledTask(String name, Consumer<MineStoreScheduledTask> runnable) {
         this.name = name + "-" + UUID.randomUUID();

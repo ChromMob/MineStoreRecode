@@ -5,10 +5,12 @@ import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
 import me.chrommob.minestore.api.event.types.MineStoreReloadEvent;
+import me.chrommob.minestore.api.generic.ApiData;
 import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.api.stats.BuildConstats;
 import me.chrommob.minestore.classloader.MineStoreClassLoader;
 import me.chrommob.minestore.common.api.ApiHandler;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
@@ -154,6 +156,9 @@ public class MineStoreCommon {
         payNowManager = new PayNowManager(this);
         guiData = new GuiData(this);
         version = MineStoreVersion.getMineStoreVersion(ConfigKeys.STORE_URL.getValue());
+        for (MineStoreAddon addon : addons) {
+            addon.getApiData().setMineStoreVersion(version);
+        }
         placeHolderData = new PlaceHolderData(this);
         SubscriptionUtil.init(this);
         if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
@@ -181,6 +186,7 @@ public class MineStoreCommon {
             resetDebugLog();
         }
         verificationManager = new VerificationManager(this, lastVerificationResult, message);
+        handleError();
         if (!verificationManager.isValid()) {
             return;
         }
@@ -281,7 +287,8 @@ public class MineStoreCommon {
                     MineStoreAddon addon = (MineStoreAddon) cls.getConstructor().newInstance();
                     ConfigWrapper configWrapper = new ConfigWrapper("config", addon.getConfigKeys());
                     configManager.addConfig(configWrapper);
-                    addon.setDirectory(loadedAddonFolder);
+                    ApiData apiData = new ApiData(loadedAddonFolder, new MineStoreVersion(BuildConstats.VERSION), version);
+                    addon.setApiData(apiData);
                     annotationParser.parse(addon.getCommands());
                     addons.add(addon);
                     addonConfigs.put(addon, configManager);
@@ -321,11 +328,12 @@ public class MineStoreCommon {
         log("[VerificationManager] Error rate reached: " + percent +  "%, restarting... in 16 seconds...");
         stopFeatures();
         MineStoreScheduledTask retryTask = getRetryTask();
+        retryTask.delay(16_000);
         Registries.MINESTORE_SCHEDULER.get().addTask(retryTask);
     }
 
     private @NotNull MineStoreScheduledTask getRetryTask() {
-        MineStoreScheduledTask retryTask = new MineStoreScheduledTask("retry", (task) -> {
+        return new MineStoreScheduledTask("retry", (task) -> {
             VerificationResult verificationResult = verify();
             if (!verificationResult.isValid()) {
                 retryCount++;
@@ -344,8 +352,6 @@ public class MineStoreCommon {
             task.delay(delay);
             log("[VerificationManager] Retrying in " + delay / 1000 + " seconds...");
         });
-        retryTask.delay(16_000);
-        return retryTask;
     }
 
     private void stopFeatures() {
@@ -426,7 +432,7 @@ public class MineStoreCommon {
         version = MineStoreVersion.getMineStoreVersion(ConfigKeys.STORE_URL.getValue());
         if (!initialized) {
             init(true);
-            log("Reloaded MineStore!");
+            log("Enabled MineStore!");
             return;
         }
         if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
