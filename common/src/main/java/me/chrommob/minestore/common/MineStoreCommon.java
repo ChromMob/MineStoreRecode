@@ -186,8 +186,8 @@ public class MineStoreCommon {
             resetDebugLog();
         }
         verificationManager = new VerificationManager(this, lastVerificationResult, message);
-        handleError();
         if (!verificationManager.isValid()) {
+            handleError();
             return;
         }
         if (!reload) {
@@ -315,6 +315,7 @@ public class MineStoreCommon {
     }
 
     long retryCount = 0;
+    private MineStoreScheduledTask retryTask;
     public void handleError() {
         if (verificationManager == null) {
             return;
@@ -327,7 +328,10 @@ public class MineStoreCommon {
         int percent = (int) (verificationManager.getErrorRate() * 100);
         log("[VerificationManager] Error rate reached: " + percent +  "%, restarting... in 16 seconds...");
         stopFeatures();
-        MineStoreScheduledTask retryTask = getRetryTask();
+        if (retryTask != null) {
+            Registries.MINESTORE_SCHEDULER.get().removeTask(retryTask);
+        }
+        retryTask = getRetryTask();
         retryTask.delay(16_000);
         Registries.MINESTORE_SCHEDULER.get().addTask(retryTask);
     }
@@ -340,11 +344,13 @@ public class MineStoreCommon {
             } else {
                 retryCount = 0;
                 reload();
+                retryTask = null;
                 Registries.MINESTORE_SCHEDULER.get().removeTask(task);
                 return;
             }
             if (retryCount > 5) {
                 log("[VerificationManager] Too many failed attempts, stopping...");
+                retryTask = null;
                 Registries.MINESTORE_SCHEDULER.get().removeTask(task);
                 return;
             }
@@ -371,6 +377,10 @@ public class MineStoreCommon {
             Registries.MINESTORE_SCHEDULER.get().removeTask(webListener.mineStoreScheduledTask);
         if (payNowManager != null) {
             Registries.MINESTORE_SCHEDULER.get().removeTask(payNowManager.mineStoreScheduledTask);
+        }
+        if (retryTask != null) {
+            Registries.MINESTORE_SCHEDULER.get().removeTask(retryTask);
+            retryTask = null;
         }
     }
 

@@ -53,7 +53,7 @@ project(":fabric:plugin").name = "fabric-plugin"
 project(":fabric:impl").projectDir = file("fabric/impl")
 project(":fabric:impl").name = "fabric-impl"
 
-project(":addon").name = "MineStore-ExampleAddon"
+project(":addon").name = "VirtualCurrencyAddon"
 
 //project(":sponge").name = "MineStore-Sponge"
 //project(":fabric").name = "MineStore-Fabric"

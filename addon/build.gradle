@@ -29,6 +29,7 @@ repositories {
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
     compileOnly 'com.github.ChromMob:MineStoreRecode:master-SNAPSHOT'
+    implementation 'org.xerial:sqlite-jdbc:3.44.1.0'
 }
 
 configurations.configureEach {
