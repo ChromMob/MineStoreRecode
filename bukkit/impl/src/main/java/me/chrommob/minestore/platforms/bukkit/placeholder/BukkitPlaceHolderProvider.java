@@ -2,6 +2,7 @@ package me.chrommob.minestore.platforms.bukkit.placeholder;
 
 import me.chrommob.minestore.api.interfaces.placeholder.CommonPlaceHolderProvider;
 import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
+import me.chrommob.minestore.api.stats.BuildConstats;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -36,7 +37,7 @@ public class BukkitPlaceHolderProvider extends PlaceholderExpansion implements C
 
     @Override
     public @NotNull String getVersion() {
-        return "1.0.0";
+        return BuildConstats.VERSION;
     }
 
     @Override
