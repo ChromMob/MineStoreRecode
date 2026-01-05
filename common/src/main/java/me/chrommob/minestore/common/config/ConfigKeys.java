@@ -5,13 +5,35 @@ import me.chrommob.minestore.common.config.lang.en_US;
 import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigKey;
 import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigWrapper;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.*;
+import java.util.function.Function;
 
 public final class ConfigKeys {
     private ConfigKeys() {}
 
     public static final ConfigKey<Boolean> DEBUG = new ConfigKey<>("debug", false, Collections.singletonList("Only enable this if you are asked to by the MineStore developer."));
     public static final ConfigKey<Boolean> COMMAND_EXEC_LOGGING = new ConfigKey<>("command-execution-logging", true, Collections.singletonList("If this is enabled every command executed by minestore will be logged to the console."));
+
+    private static final Function<String, String> URL_ENCODER = s -> {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    };
+
+    private static final Function<String, String> URL_DECODER = s -> {
+        try {
+            return URLDecoder.decode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    };
 
     public static final ConfigKey<String> LANG;
     public static final ConfigKey<String> STORE_URL;
@@ -38,14 +60,14 @@ public final class ConfigKeys {
         private API_KEYS() {}
 
         public static final ConfigKey<Boolean> ENABLED = new ConfigKey<>("key-enabled", false, Collections.singletonList("API key is not required only on very old versions of MineStore, so enable this."));
-        public static final ConfigKey<String> KEY = new ConfigKey<>("key", "123456789", Collections.singletonList("The API key that is used by the plugin."));
+        public static final ConfigKey<String> KEY = new ConfigKey<>("key", "123456789", Collections.singletonList("The API key that is used by the plugin."), URL_DECODER, URL_ENCODER);
     }
 
     public static final class WEBLISTENER_KEYS {
         private WEBLISTENER_KEYS() {}
 
         public static final ConfigKey<Boolean> ENABLED = new ConfigKey<>("secret-enabled", false, Collections.singletonList("Secret key is not required only on very old versions of MineStore, so enable this."));
-        public static final ConfigKey<String> KEY = new ConfigKey<>("secret-key", "extraSecretKey", Collections.singletonList("The secret key that is used to authenticate the getting of commands."));
+        public static final ConfigKey<String> KEY = new ConfigKey<>("secret-key", "extraSecretKey", Collections.singletonList("The secret key that is used to authenticate the getting of commands."), URL_DECODER, URL_ENCODER);
     }
 
     public static final class PAYNOW_KEYS {
