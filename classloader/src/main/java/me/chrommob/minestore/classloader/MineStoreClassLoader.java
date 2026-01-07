@@ -2,7 +2,6 @@ package me.chrommob.minestore.classloader;
 
 import me.chrommob.minestore.classloader.dependency.MineStoreDependencies;
 import me.chrommob.minestore.classloader.dependency.MineStorePluginDependency;
-import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
 import me.chrommob.minestore.classloader.repository.RepositoryRegistry;
 
 import java.io.File;
@@ -21,6 +20,12 @@ public class MineStoreClassLoader extends URLClassLoader {
     private final Set<MineStoreDependencies> loadedDependencies = new HashSet<>();
     static {
         ClassLoader.registerAsParallelCapable();
+    }
+
+    private static final Set<String> forceChildrenFirst = new HashSet<>();
+    static {
+        forceChildrenFirst.add("org.objectweb.asm");
+        forceChildrenFirst.add("me.lucko.jarrelocator");
     }
 
     public static final Map<String, String> defaultRelocations = new HashMap<>();
@@ -119,13 +124,12 @@ public class MineStoreClassLoader extends URLClassLoader {
 
     @Override
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        // Delegate core Java classes to parent
-        if (name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("sun.")) {
-            return super.loadClass(name, resolve);
-        }
-
         // First, check if already loaded
         Class<?> c = findLoadedClass(name);
+
+        if (c == null && forceChildrenFirst.stream().anyMatch(name::startsWith)) {
+            return findClass(name);
+        }
 
         // Try to load it from parent first
         if (c == null) {

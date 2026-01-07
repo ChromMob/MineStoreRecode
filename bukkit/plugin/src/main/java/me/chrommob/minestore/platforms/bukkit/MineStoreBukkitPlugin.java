@@ -5,7 +5,6 @@ import me.chrommob.minestore.classloader.MineStoreClassLoader;
 import me.chrommob.minestore.classloader.MineStorePlugin;
 import me.chrommob.minestore.classloader.dependency.MineStoreDependencies;
 import me.chrommob.minestore.classloader.dependency.MineStorePluginDependency;
-import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
 import me.chrommob.minestore.classloader.repository.RepositoryRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 
