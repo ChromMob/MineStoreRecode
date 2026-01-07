@@ -10,13 +10,15 @@ import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.api.stats.BuildConstats;
+import me.chrommob.minestore.api.web.WebContext;
 import me.chrommob.minestore.classloader.MineStoreClassLoader;
 import me.chrommob.minestore.common.api.ApiHandler;
 import me.chrommob.minestore.common.authHolder.AuthHolder;
 import me.chrommob.minestore.common.commandGetters.WebListener;
-import me.chrommob.minestore.common.commandHolder.storage.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.CommandStorage;
+import me.chrommob.minestore.common.commandHolder.storage.CommandDumper;
 import me.chrommob.minestore.common.commandHolder.storage.NewCommandDumper;
 import me.chrommob.minestore.common.commands.*;
 import me.chrommob.minestore.common.config.ConfigKeys;
@@ -28,9 +30,7 @@ import me.chrommob.minestore.common.gui.payment.PaymentHandler;
 import me.chrommob.minestore.common.paynow.PayNowManager;
 import me.chrommob.minestore.common.placeholder.PlaceHolderData;
 import me.chrommob.minestore.common.playerInfo.LuckPermsPlayerInfoProvider;
-import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.stats.StatSender;
-import me.chrommob.minestore.common.subsription.SubscriptionUtil;
 import me.chrommob.minestore.common.verification.VerificationManager;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import me.chrommob.minestore.libs.me.chrommob.config.ConfigManager.ConfigManager;
@@ -60,6 +60,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class MineStoreCommon {
+    private ApiHandler apiHandler;
     private ConfigManager configManager;
     private PluginConfig pluginConfig;
     private DatabaseManager databaseManager;
@@ -143,6 +144,7 @@ public class MineStoreCommon {
     private boolean initialized = false;
 
     public void init(boolean reload) {
+        apiHandler = new ApiHandler(new AuthData(ConfigKeys.STORE_URL.getValue(), ConfigKeys.API_KEYS.ENABLED.getValue(), ConfigKeys.API_KEYS.KEY.getValue()));
         registerAddons();
         statsSender = new StatSender(this);
         new MineStoreLoadEvent().call();
@@ -155,12 +157,11 @@ public class MineStoreCommon {
         webListener = new WebListener(this);
         payNowManager = new PayNowManager(this);
         guiData = new GuiData(this);
-        version = MineStoreVersion.getMineStoreVersion(ConfigKeys.STORE_URL.getValue());
+        version = MineStoreVersion.getMineStoreVersion();
         for (MineStoreAddon addon : addons) {
             addon.getApiData().setMineStoreVersion(version);
         }
         placeHolderData = new PlaceHolderData(this);
-        SubscriptionUtil.init(this);
         if (ConfigKeys.MYSQL_KEYS.ENABLED.getValue()) {
             if (databaseManager == null) {
                 databaseManager = new DatabaseManager(this);
@@ -187,7 +188,7 @@ public class MineStoreCommon {
         }
         verificationManager = new VerificationManager(this, lastVerificationResult, message);
         if (!verificationManager.isValid()) {
-            handleError();
+            handleError(new WebContext("Verification failed, retrying..."));
             return;
         }
         if (!reload) {
@@ -225,7 +226,6 @@ public class MineStoreCommon {
         }
 
         retryCount = 0;
-        new ApiHandler(new AuthData(ConfigKeys.STORE_URL.getValue(), ConfigKeys.API_KEYS.KEY.getValue()));
         new MineStoreEnableEvent().call();
     }
 
@@ -316,13 +316,19 @@ public class MineStoreCommon {
 
     long retryCount = 0;
     private MineStoreScheduledTask retryTask;
-    public void handleError() {
+    public void handleError(WebContext error) {
         if (verificationManager == null) {
             return;
         }
         verificationManager.safeIncrementError();
         if (verificationManager.getErrorRate() < 0.15) {
             debug(this.getClass(), "[VerificationManager] Error rate is: " + verificationManager.getErrorRate() + ", continuing...");
+            return;
+        }
+        if (error.isCloudflare()) {
+            log("[VerificationManager] Cloudflare blocked the request, not bothering to retry...");
+            stopFeatures();
+            verificationManager = new VerificationManager(this, new VerificationResult(false, Collections.singletonList("Cloudflare blocked the request, add cloudflare rule."), VerificationResult.TYPE.WEBSTORE), null);
             return;
         }
         int percent = (int) (verificationManager.getErrorRate() * 100);
@@ -436,10 +442,11 @@ public class MineStoreCommon {
         for (MineStoreAddon addon : addons) {
             addonConfigs.get(addon).reloadConfig("config");
         }
+        apiHandler = new ApiHandler(new AuthData(ConfigKeys.STORE_URL.getValue(), ConfigKeys.API_KEYS.ENABLED.getValue(), ConfigKeys.API_KEYS.KEY.getValue()));
         new MineStoreReloadEvent().call();
         log("Reloading...");
         pluginConfig.reload();
-        version = MineStoreVersion.getMineStoreVersion(ConfigKeys.STORE_URL.getValue());
+        version = MineStoreVersion.getMineStoreVersion();
         if (!initialized) {
             init(true);
             log("Enabled MineStore!");
@@ -512,7 +519,13 @@ public class MineStoreCommon {
         if (Registries.USER_GETTER.get() == null) {
             return new VerificationResult(false, Collections.singletonList("UserGetter is not registered."), VerificationResult.TYPE.SUPPORT);
         }
-        VerificationResult guiDataVerification = guiData.load();
+        VerificationResult guiDataVerification = VerificationResult.valid();
+        try {
+            guiData.load();
+        } catch (WebContext e) {
+            debug(GuiData.class, e);
+            guiDataVerification = new VerificationResult(false, Collections.singletonList("Failed to load GUI data."), VerificationResult.TYPE.API_KEY);
+        }
         if (!guiDataVerification.isValid()) {
             return guiDataVerification;
         }
@@ -678,25 +691,25 @@ public class MineStoreCommon {
     }
 
     private void resetDebugLog() {
-        try {
-            debugLogWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!Registries.CONFIG_FILE.get().getParentFile().exists()) {
+            new File(Registries.CONFIG_FILE.get().getParentFile(), "lang").mkdirs();
         }
-        try {
-            Files.deleteIfExists(Paths.get(debugLogFile.getAbsolutePath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        debugLogFile = new File(Registries.CONFIG_FILE.get().getParentFile(), "debug.log");
+        File logFolder = new File(Registries.CONFIG_FILE.get().getParentFile(), "logs");
+        debugLogFile = new File(logFolder, "debug.log");
         if (debugLogFile.exists()) {
+            File store = getDebugBackupFile(debugLogFile);
+            store.mkdirs();
+            try {
+                Files.copy(debugLogFile.toPath(), store.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException ignored) {
+            }
             debugLogFile.delete();
         }
         try {
             debugLogFile.createNewFile();
             debugLogWriter = new BufferedWriter(new FileWriter(debugLogFile));
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
@@ -716,5 +729,9 @@ public class MineStoreCommon {
 
     public MineStoreAddon getInternalAddon() {
         return internalAddon;
+    }
+
+    public ApiHandler apiHandler() {
+        return apiHandler;
     }
 }

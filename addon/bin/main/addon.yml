@@ -1,2 +1,5 @@
-main-class: me.chrommob.minestore.ConditionalExecuteAddon
-name: ConditionalExecuteAddon
+main-class: me.chrommob.minestore.virtualcurrency.VirtualCurrencyAddon
+name: MineStore-PowerTools
+version: "1.0.0"
+description: Ultimate MineStore API showcase addon featuring virtual currency, gift cards, coupons, and more
+authors: [ChromMob]

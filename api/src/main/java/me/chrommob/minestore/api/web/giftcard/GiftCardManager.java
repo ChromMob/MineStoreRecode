@@ -2,17 +2,14 @@ package me.chrommob.minestore.api.web.giftcard;
 
 import com.google.gson.JsonObject;
 import me.chrommob.minestore.api.generic.ParamBuilder;
-import me.chrommob.minestore.api.web.FeatureManager;
-import me.chrommob.minestore.api.web.Result;
-import me.chrommob.minestore.api.web.WebApiRequest;
-import me.chrommob.minestore.api.web.Wrapper;
+import me.chrommob.minestore.api.web.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.function.Function;
 
 public class GiftCardManager extends FeatureManager {
-    public GiftCardManager(Wrapper<Function<WebApiRequest<?>, Result<?, ? extends Exception>>> requestHandler) {
+    public GiftCardManager(Wrapper<Function<WebRequest<?>, Result<?, WebContext>>> requestHandler) {
         super(requestHandler);
     }
 
@@ -27,15 +24,20 @@ public class GiftCardManager extends FeatureManager {
      * @return The response of the gift card creation request.
      */
     public CreateGiftCardResponse createGiftCard(String name, String description, double amount, LocalDateTime expiry, @Nullable String tiedUsername) {
-        WebApiRequest<JsonObject> request = new WebApiRequest<>("createGiftCard", WebApiRequest.Type.POST, new ParamBuilder()
-                .append("code", name)
-                .append("balance", String.valueOf(amount))
-                .appendDate("expire", expiry)
-                .append("note", description)
-                .append("username", tiedUsername), JsonObject.class, true);
-        Result<JsonObject, Exception> result = request(request);
-        if (result.value() == null) {
-            return new GiftCardManager.CreateGiftCardResponse(false, result.error().getMessage());
+        WebRequest<JsonObject> request = new WebRequest.Builder<>(JsonObject.class)
+                .requiresApiKey(true)
+                .type(WebRequest.Type.POST)
+                .path("createGiftCard")
+                .paramBuilder(new ParamBuilder()
+                        .append("code", name)
+                        .append("balance", String.valueOf(amount))
+                        .appendDate("expire", expiry)
+                        .append("note", description)
+                        .append("username", tiedUsername))
+                .build();
+        Result<JsonObject, WebContext> result = request(request);
+        if (result.isError()) {
+            return new GiftCardManager.CreateGiftCardResponse(false, result.context().getMessage());
         }
         boolean success = result.value().get("status").getAsBoolean();
         if (!success) {
@@ -70,15 +72,20 @@ public class GiftCardManager extends FeatureManager {
     }
 
     public ValidateGiftCardResponse validateGiftCard(String code) {
-        WebApiRequest<JsonObject> request = new WebApiRequest<>("cart/getGift", WebApiRequest.Type.POST, new ParamBuilder()
-                .append("gift", code), JsonObject.class, false);
-        Result<JsonObject, Exception> result = request(request);
-        if (result.value() == null) {
-            return new ValidateGiftCardResponse(result.error().getMessage());
+        WebRequest<JsonObject> request = new WebRequest.Builder<>(JsonObject.class)
+                .requiresApiKey(true)
+                .type(WebRequest.Type.POST)
+                .path("cart/getGift")
+                .paramBuilder(new ParamBuilder()
+                        .append("gift", code))
+                .build();
+        Result<JsonObject, WebContext> result = request(request);
+        if (result.isError()) {
+            return new ValidateGiftCardResponse(result.context().getMessage());
         }
         boolean success = result.value().get("status").getAsBoolean();
         if (!success) {
-            return new ValidateGiftCardResponse(result.error().getMessage());
+            return new ValidateGiftCardResponse(result.context().getMessage());
         }
         return new ValidateGiftCardResponse(result.value().get("start_balance").getAsDouble(), result.value().get("end_balance").getAsDouble(), result.value().get("currency").getAsString());
     }

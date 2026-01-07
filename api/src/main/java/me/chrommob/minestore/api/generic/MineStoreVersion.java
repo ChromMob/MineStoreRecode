@@ -1,12 +1,9 @@
 package me.chrommob.minestore.api.generic;
 
-import me.chrommob.minestore.api.Registries;
-
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import me.chrommob.minestore.api.web.Result;
+import me.chrommob.minestore.api.web.WebApiAccessor;
+import me.chrommob.minestore.api.web.WebContext;
+import me.chrommob.minestore.api.web.WebRequest;
 
 public class MineStoreVersion {
     private final int major;
@@ -83,29 +80,22 @@ public class MineStoreVersion {
         return dummy;
     }
 
-    public static MineStoreVersion getMineStoreVersion(String storeUrl) {
-        if (storeUrl.endsWith("/")) {
-            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
+    public static MineStoreVersion getMineStoreVersion() {
+        WebRequest<String> request = new WebRequest.Builder<>(String.class).path("getVersion").build();
+        Result<String, WebContext> res = WebApiAccessor.request(request);
+        if (res.isError()) {
+            return dummy();
         }
-        storeUrl = storeUrl + "/api/getVersion";
+        String version = res.value();
+        if (version == null) {
+            return dummy();
+        }
+        String[] split = version.split("\\.");
         try {
-            HttpsURLConnection urlConnection = (HttpsURLConnection) new URL(storeUrl).openConnection();
-            InputStream in = urlConnection.getInputStream();
-            BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
-            String line;
-            if ((line = reader.readLine()) != null) {
-                String[] split = line.split("\\.");
-                try {
-                    Integer.parseInt(split[0]);
-                } catch (NumberFormatException e) {
-                    return MineStoreVersion.dummy();
-                }
-                return new MineStoreVersion(line);
-            }
-        } catch (IOException e) {
-            Registries.LOGGER.get().log("Failed to get MineStore version!");
-            Registries.LOGGER.get().log(e.getMessage());
+            Integer.parseInt(split[0]);
+        } catch (NumberFormatException e) {
+            return dummy();
         }
-        return MineStoreVersion.dummy();
+        return new MineStoreVersion(version);
     }
 }

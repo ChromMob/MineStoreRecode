@@ -5,52 +5,44 @@ import java.net.URL;
 
 public class AuthData {
     private final String storeUrl;
+    private final boolean apiKeyEnabled;
     private final String apiKey;
 
-    public AuthData(String storeUrl, String apiKey) {
+    public AuthData(String storeUrl, boolean apiKeyEnabled, String apiKey) {
         this.storeUrl = storeUrl;
+        this.apiKeyEnabled = apiKeyEnabled;
         this.apiKey = apiKey;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof AuthData) {
-            AuthData authData = (AuthData) obj;
-            return authData.storeUrl.equals(this.storeUrl) && authData.apiKey.equals(this.apiKey);
+    public URL createUrl(String url, String path, String query) {
+        if (!url.endsWith("/")) {
+            url += "/";
         }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return storeUrl.hashCode() + apiKey.hashCode();
+        if (path != null) {
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            if (!path.endsWith("/")) {
+                path += "/";
+            }
+        } else {
+            path = "";
+        }
+        try {
+            return new URL(url + path + query);
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 
     public URL createUrl(String path, String query) {
-        if (path.startsWith("/")) {
-            path = path.substring(1);
+        if (!apiKeyEnabled) {
+            return createNonKeyUrl(path, query);
         }
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        try {
-            return new URL(storeUrl + "api/" + apiKey + "/" + path + query);
-        } catch (MalformedURLException e) {
-            return null;
-        }
+        return createUrl(storeUrl + "api/" + apiKey + "/", path, query);
     }
 
     public URL createNonKeyUrl(String path, String query) {
-        if (path.startsWith("/")) {
-            path = path.substring(1);
-        }
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        try {
-            return new URL(storeUrl + "api/" + path + query);
-        } catch (MalformedURLException e) {
-            return null;
-        }
+        return createUrl(storeUrl + "api/", path, query);
     }
 }

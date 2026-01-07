@@ -8,7 +8,7 @@ import me.chrommob.minestore.api.web.profile.ProfileManager;
 import java.util.function.Function;
 
 public class WebApiAccessor {
-    private static final Wrapper<Function<WebApiRequest<?>, Result<?, ? extends Exception>>> requestHandler = new Wrapper<>(null);
+    private static final Wrapper<Function<WebRequest<?>, Result<?, WebContext>>> requestHandler = new Wrapper<>(null);
 
     private static final GiftCardManager giftCardManager = new GiftCardManager(requestHandler);
     private static final ProfileManager profileManager = new ProfileManager(requestHandler);
@@ -31,7 +31,11 @@ public class WebApiAccessor {
         return paymentManager;
     }
 
-    public static void registerRequestHandler(Function<WebApiRequest<?>, Result<?, ? extends Exception>> function) {
+    public static void registerRequestHandler(Function<WebRequest<?>, Result<?, WebContext>> function) {
         requestHandler.set(function);
+    }
+
+    public static <T> Result<T, WebContext> request(WebRequest<T> request) {
+        return (Result<T, WebContext>) requestHandler.get().apply(request);
     }
 }

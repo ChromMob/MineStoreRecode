@@ -1,28 +1,21 @@
 package me.chrommob.minestore.common.gui.data;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.web.Result;
+import me.chrommob.minestore.api.web.WebContext;
+import me.chrommob.minestore.api.web.WebRequest;
 import me.chrommob.minestore.common.MineStoreCommon;
-import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.GuiOpenener;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
-import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
-import me.chrommob.minestore.common.verification.VerificationResult;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 public class GuiData {
-    private MineStoreCommon plugin;
+    private final MineStoreCommon plugin;
     public GuiData(MineStoreCommon plugin) {
         this.plugin = plugin;
         guiOpenener = new GuiOpenener(this);
@@ -32,101 +25,39 @@ public class GuiData {
 
     private final GuiOpenener guiOpenener;
     private ParsedGui parsedGui;
-    private Thread thread = null;
 
-    public VerificationResult load() {
-        List<String> messages = new ArrayList<>();
-        String finalUrl;
-        String storeUrl = ConfigKeys.STORE_URL.getValue();
-        if (storeUrl.endsWith("/")) {
-            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
-        }
-        finalUrl = storeUrl + "/api/"
-                + (ConfigKeys.API_KEYS.ENABLED.getValue()
-                        ? ConfigKeys.API_KEYS.KEY.getValue() + "/gui/packages_new"
-                        : "gui/packages_new");
-        URL packageURL;
-        try {
-            packageURL = new URL(finalUrl);
-        } catch (Exception e) {
-            plugin.debug(this.getClass(), e);
-            messages.add("Store URL: " + finalUrl);
-            messages.add("STORE URL format is invalid!");
-            return new VerificationResult(false, messages, VerificationResult.TYPE.STORE_URL);
-        }
-        try {
-            plugin.debug(this.getClass(), "[GuiData] Loading data from " + finalUrl);
-            HttpsURLConnection urlConnection = (HttpsURLConnection) packageURL.openConnection();
-            InputStream in = urlConnection.getInputStream();
-
-            BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
-
-            String line;
-
-            if (urlConnection.getResponseCode() != 200) {
-                switch (urlConnection.getResponseCode()) {
-                    case 403:
-                        messages.add("Probably Cloudflare protection.");
-                        break;
-                    case 404:
-                        messages.add("The server returned a 404 error.");
-                        break;
-                    default:
-                        messages.add("The server returned an error with code: " + urlConnection.getResponseCode() + "!");
-                        break;
-                }
-                messages.add("Error: " + urlConnection.getResponseMessage());
-                return new VerificationResult(false, messages, VerificationResult.TYPE.WEBSTORE);
+    public void load() throws WebContext {
+        if (MineStoreCommon.version().requires(3, 0, 0)) {
+            TypeToken<List<NewCategory>> listType = new TypeToken<List<NewCategory>>() {
+            };
+            WebRequest<List<NewCategory>> request = new WebRequest.Builder<>(listType).path("gui/packages_new").requiresApiKey(true).type(WebRequest.Type.GET).build();
+            Result<List<NewCategory>, WebContext> res = plugin.apiHandler().request(request);
+            if (res.isError()) {
+                throw res.context();
             }
-
-            while ((line = reader.readLine()) != null) {
-                try {
-                    Type listType;
-                    if (MineStoreCommon.version().requires(3,0,0)) {
-                        listType = new TypeToken<List<NewCategory>>() {
-                        }.getType();
-                    } else {
-                        listType = new TypeToken<List<Category>>() {
-                        }.getType();
-                    }
-                    if (line.equals("[]")) {
-                        parsedResponse = new ArrayList<>();
-                        return VerificationResult.valid();
-                    }
-                    parsedResponse = gson.fromJson(line, listType);
-                } catch (JsonSyntaxException e) {
-                    plugin.debug(this.getClass(), e);
-                    messages.add("API key is invalid!");
-                    parsedResponse = null;
-                    return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
-                }
+            parsedResponse = res.value();
+        } else {
+            TypeToken<List<Category>> listType = new TypeToken<List<Category>>() {
+            };
+            WebRequest<List<Category>> request = new WebRequest.Builder<>(listType).path("gui/packages_new").requiresApiKey(true).type(WebRequest.Type.GET).build();
+            Result<List<Category>, WebContext> res = plugin.apiHandler().request(request);
+            if (res.isError()) {
+                throw res.context();
             }
-        } catch (ClassCastException e) {
-            messages.add("STORE URL has to start with https://");
-            plugin.debug(this.getClass(), e);
-            return new VerificationResult(false, messages, VerificationResult.TYPE.STORE_URL);
-        } catch (IOException e) {
-            plugin.debug(this.getClass(), e);
-            messages.add("API key is invalid!");
-            return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
-        }
-        if (parsedResponse == null) {
-            messages.add("Parsed response is null!");
-            messages.add("API key is invalid!");
-            return new VerificationResult(false, messages, VerificationResult.TYPE.API_KEY);
+            parsedResponse = res.value();
         }
         parsedGui = new ParsedGui(parsedResponse, plugin);
-        return VerificationResult.valid();
     }
 
     public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("guiData", new Runnable() {
         @Override
         public void run() {
-            if (!load().isValid()) {
-                plugin.debug(this.getClass(), "[GuiData] Error loading data!");
-                plugin.handleError();
-            } else {
+            try {
+                load();
                 plugin.notError();
+            } catch (WebContext e) {
+                plugin.debug(this.getClass(), "[GuiData] Error loading data!");
+                plugin.handleError(e);
             }
         }
     }, 1000 * 60 * 5);

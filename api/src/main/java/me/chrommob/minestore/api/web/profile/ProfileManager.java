@@ -1,20 +1,18 @@
 package me.chrommob.minestore.api.web.profile;
 
 import com.google.gson.annotations.SerializedName;
-import me.chrommob.minestore.api.web.Result;
-import me.chrommob.minestore.api.web.WebApiRequest;
-import me.chrommob.minestore.api.web.Wrapper;
-import me.chrommob.minestore.api.web.FeatureManager;
+import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.web.*;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class ProfileManager extends FeatureManager {
-    public ProfileManager(Wrapper<Function<WebApiRequest<?>, Result<?, ? extends Exception>>> requestHandler) {
+    public ProfileManager(Wrapper<Function<WebRequest<?>, Result<?, WebContext>>> requestHandler) {
         super(requestHandler);
     }
 
@@ -37,16 +35,16 @@ public class ProfileManager extends FeatureManager {
             return;
         }
         fetching.add(username);
-        CompletableFuture.runAsync(() -> {
-            Result<Profile, Exception> result = request(new WebApiRequest<>("profile/" + username, WebApiRequest.Type.GET, Profile.class, true));
-            if (result.value() == null) {
+        Registries.MINESTORE_SCHEDULER.get().runDelayed(new MineStoreScheduledTask("profile/" + username, () -> {
+            Result<Profile, WebContext> result = request(new WebRequest.Builder<>(Profile.class).path("profile/" + username).requiresApiKey(true).build());
+            if (result.isError()) {
                 return;
             }
             Profile profile = result.value();
             profile.fetched();
             profiles.put(username, profile);
             fetching.remove(username);
-        });
+        }, 0));
     }
 
     public static class Profile {

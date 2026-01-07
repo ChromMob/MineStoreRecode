@@ -1,40 +1,37 @@
 package me.chrommob.minestore.common.placeholder;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.generic.ParamBuilder;
 import me.chrommob.minestore.api.placeholder.PlaceHolderManager;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.web.Result;
 import me.chrommob.minestore.api.web.WebApiAccessor;
+import me.chrommob.minestore.api.web.WebContext;
+import me.chrommob.minestore.api.web.WebRequest;
 import me.chrommob.minestore.api.web.profile.ProfileManager;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.placeholder.json.*;
-import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.jetbrains.annotations.NotNull;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
-import java.net.URL;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.GZIPInputStream;
 
 public class PlaceHolderData {
     private final MineStoreVersion pagesSupportedSince = new MineStoreVersion(3, 3, 5);
     private DonationGoal donationGoal = new DonationGoal(0, 0);
-    private MineStoreCommon plugin;
+    private final MineStoreCommon plugin;
     private List<TopDonator> topDonators = new ArrayList<>();
     private List<LastDonator> lastDonators = new ArrayList<>();
     private PaginatedJson<LastDonator> lastDonatorJson;
@@ -53,7 +50,7 @@ public class PlaceHolderData {
 
     private final Map<Integer, Long> fetchingLast = new ConcurrentHashMap<>();
     private void fetchLastDonator(int index) {
-        CompletableFuture.runAsync(() -> {
+        Registries.MINESTORE_SCHEDULER.get().runDelayed(new MineStoreScheduledTask("lastDonator", () -> {
             if (!MineStoreCommon.version().requires(pagesSupportedSince)) {
                 return;
             }
@@ -69,47 +66,34 @@ public class PlaceHolderData {
                 return;
             }
             fetchingLast.put(page, System.currentTimeMillis());
-            String finalLastDonatorsUrl;
-            String storeUrl = ConfigKeys.STORE_URL.getValue();
-            if (storeUrl.endsWith("/")) {
-                storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
-            }
-            finalLastDonatorsUrl = storeUrl + "/api/"
-                    + (ConfigKeys.API_KEYS.ENABLED.getValue()
-                    ? ConfigKeys.API_KEYS.KEY.getValue() + "/getTotalPayments/"
-                    : "getTotalPayments/");
-            finalLastDonatorsUrl = finalLastDonatorsUrl + "?page=" + page;
             plugin.debug(this.getClass(), "Fetching last donors page " + page);
-            try {
-                HttpsURLConnection urlConnection = (HttpsURLConnection) new URL(finalLastDonatorsUrl).openConnection();
-                StringBuilder response = getResponse(urlConnection);
-
-                plugin.debug(this.getClass(), "Received: " + response);
-                if (urlConnection.getResponseCode() != 200) {
-                    plugin.debug(this.getClass(), "Failed to fetch last donors page " + page);
-                    return;
-                }
-
-                Type jsonType = new TypeToken<PaginatedJson<LastDonator>>(){}.getType();
-                PaginatedJson<LastDonator> lastDonatorJson = gson.fromJson(response.toString(), jsonType);
-                int pageIndex = --page * lastDonatorJson.getPerPage();
-                for (LastDonator lastDonator : lastDonatorJson.getList()) {
-                    if (lastDonatorsDeque.has(pageIndex)) {
-                        pageIndex++;
-                        continue;
-                    }
-                    lastDonatorsDeque.set(pageIndex, lastDonator, false);
-                    pageIndex++;
-                }
-            } catch (Exception e) {
-                plugin.debug(this.getClass(), e);
+            ParamBuilder paramBuilder = new ParamBuilder();
+            paramBuilder.append("page", String.valueOf(page));
+            TypeToken<PaginatedJson<LastDonator>> jsonType = new TypeToken<PaginatedJson<LastDonator>>(){};
+            WebRequest<PaginatedJson<LastDonator>> request = new WebRequest.Builder<>(jsonType).path("getTotalPayments").type(WebRequest.Type.GET).paramBuilder(paramBuilder).requiresApiKey(true).build();
+            Result<PaginatedJson<LastDonator>, WebContext> res = plugin.apiHandler().request(request);
+            if (res.isError()) {
+                plugin.debug(this.getClass(), "Failed to fetch last donors page " + page);
+                plugin.debug(this.getClass(), res.context());
+                return;
             }
-        });
+
+            PaginatedJson<LastDonator> lastDonatorJson = res.value();
+            int pageIndex = --page * lastDonatorJson.getPerPage();
+            for (LastDonator lastDonator : lastDonatorJson.getList()) {
+                if (lastDonatorsDeque.has(pageIndex)) {
+                    pageIndex++;
+                    continue;
+                }
+                lastDonatorsDeque.set(pageIndex, lastDonator, false);
+                pageIndex++;
+            }
+        }, 0));
     }
 
     private final Map<Integer, Long> fetchingTop = new HashMap<>();
     private void fetchTopDonator(int index, boolean force) {
-        CompletableFuture.runAsync(() -> {
+        Registries.MINESTORE_SCHEDULER.get().runDelayed(new MineStoreScheduledTask("topDonator", () -> {
             if (!MineStoreCommon.version().requires(pagesSupportedSince)) {
                 return;
             }
@@ -126,38 +110,25 @@ public class PlaceHolderData {
             }
             fetchingTop.put(page, System.currentTimeMillis());
             indexesFetchedLately.put(System.currentTimeMillis(), page);
-            String finalTopDonatorsUrl;
-            String storeUrl = ConfigKeys.STORE_URL.getValue();
-            if (storeUrl.endsWith("/")) {
-                storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
-            }
-            finalTopDonatorsUrl = storeUrl + "/api/"
-                    + (ConfigKeys.API_KEYS.ENABLED.getValue()
-                    ? ConfigKeys.API_KEYS.KEY.getValue() + "/top_donators/"
-                    : "top_donators/");
-            finalTopDonatorsUrl = finalTopDonatorsUrl + "?page=" + page;
             plugin.debug(this.getClass(), "Fetching top donors page " + page);
-            try {
-                HttpsURLConnection urlConnection = (HttpsURLConnection) new URL(finalTopDonatorsUrl).openConnection();
-                StringBuilder response = getResponse(urlConnection);
-
-                plugin.debug(this.getClass(), "Received: " + response);
-                if (urlConnection.getResponseCode() != 200) {
-                    plugin.debug(this.getClass(), "Failed to fetch top donors page " + page);
-                    return;
-                }
-
-                Type jsonType = new TypeToken<PaginatedJson<TopDonator>>(){}.getType();
-                PaginatedJson<TopDonator> topDonatorJson = gson.fromJson(response.toString(), jsonType);
-                int pageIndex = --page * topDonatorJson.getPerPage();
-                for (TopDonator topDonator : topDonatorJson.getList()) {
-                    topDonatorsMap.put(pageIndex, topDonator);
-                    pageIndex++;
-                }
-            } catch (Exception e) {
-                plugin.debug(this.getClass(), e);
+            ParamBuilder paramBuilder = new ParamBuilder();
+            paramBuilder.append("page", String.valueOf(page));
+            TypeToken<PaginatedJson<TopDonator>> jsonType = new TypeToken<PaginatedJson<TopDonator>>(){};
+            WebRequest<PaginatedJson<TopDonator>> request = new WebRequest.Builder<>(jsonType).path("top_donators").type(WebRequest.Type.GET).paramBuilder(paramBuilder).requiresApiKey(true).build();
+            Result<PaginatedJson<TopDonator>, WebContext> res = plugin.apiHandler().request(request);
+            if (res.isError()) {
+                plugin.debug(this.getClass(), "Failed to fetch top donors page " + page);
+                plugin.debug(this.getClass(), res.context());
+                return;
             }
-        });
+
+            PaginatedJson<TopDonator> topDonatorJson = res.value();
+            int pageIndex = --page * topDonatorJson.getPerPage();
+            for (TopDonator topDonator : topDonatorJson.getList()) {
+                topDonatorsMap.put(pageIndex, topDonator);
+                pageIndex++;
+            }
+        }, 0));
     }
 
     private void refetchAllTopDonators() {
@@ -167,22 +138,6 @@ public class PlaceHolderData {
         for (int indexesFetchedLately : toFetch) {
             fetchTopDonator(indexesFetchedLately, true);
         }
-    }
-
-    private static @NotNull StringBuilder getResponse(HttpsURLConnection urlConnection) throws IOException {
-        InputStream in = urlConnection.getInputStream();
-        if ("gzip".equals(urlConnection.getContentEncoding())) {
-            in = new GZIPInputStream(in);
-        }
-
-        BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
-
-        StringBuilder response = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            response.append(line);
-        }
-        return response;
     }
 
     private LastDonator getLastDonator(int index) {
@@ -301,23 +256,21 @@ public class PlaceHolderData {
         return bd.toPlainString();
     }
 
-    private void handleUrl(URI apiUrl) throws IOException {
+    private void handleUrl(URI apiUrl) throws WebContext {
         plugin.debug(this.getClass(), "Loading placeholder data from " + apiUrl);
-        URL url = apiUrl.toURL();
-        HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-        try {
-            StringBuilder response = getResponse(urlConnection);
-            plugin.debug(this.getClass(), "Received: " + response);
-            if (apiUrl.equals(apiUrls[0])) {
-                handleDonationGoal(response);
-            } else if (apiUrl.equals(apiUrls[1])) {
-                handleLastDonators(response);
-            } else if (apiUrl.equals(apiUrls[2])) {
-                handleTopDonators(response);
-            }
-        } catch (IOException e) {
-            plugin.debug(this.getClass(), urlConnection.getResponseCode() + " " + urlConnection.getResponseMessage());
-            throw e;
+        WebRequest<String> request = new WebRequest.Builder<>(String.class).customUrl(apiUrl.toString()).type(WebRequest.Type.GET).build();
+        Result<String, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            throw res.context();
+        }
+        StringBuilder response = new StringBuilder(res.value());
+        plugin.debug(this.getClass(), "Received: " + response);
+        if (apiUrl.equals(apiUrls[0])) {
+            handleDonationGoal(response);
+        } else if (apiUrl.equals(apiUrls[1])) {
+            handleLastDonators(response);
+        } else if (apiUrl.equals(apiUrls[2])) {
+            handleTopDonators(response);
         }
     }
 
@@ -435,7 +388,7 @@ public class PlaceHolderData {
                 plugin.debug(this.getClass(), "Loading placeholder data from " + apiUrl);
                 handleUrl(apiUrl);
             }
-        } catch (IOException e) {
+        } catch (WebContext e) {
             plugin.debug(this.getClass(), e);
             errors.add("API KEY is invalid!");
             return new VerificationResult(false, errors, VerificationResult.TYPE.API_KEY);
@@ -455,13 +408,13 @@ public class PlaceHolderData {
             try {
                 handleUrl(apiUrl);
                 plugin.notError();
-            } catch (Exception e) {
+            } catch (WebContext e) {
                 plugin.debug(this.getClass(), e);
                 urlIndex++;
                 if (urlIndex >= apiUrls.length) {
                     urlIndex = 0;
                 }
-                plugin.handleError();
+                plugin.handleError(e);
             }
         }
     }, 1000 * 20);

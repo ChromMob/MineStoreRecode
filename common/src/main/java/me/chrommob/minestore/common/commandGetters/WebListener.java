@@ -1,85 +1,71 @@
 package me.chrommob.minestore.common.commandGetters;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import io.leangen.geantyref.TypeToken;
+import com.google.gson.reflect.TypeToken;
 import me.chrommob.minestore.api.event.MineStoreEvent;
 import me.chrommob.minestore.api.event.types.MineStorePurchaseEvent;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.scheduler.SafeScheduledTask;
+import me.chrommob.minestore.api.web.Result;
+import me.chrommob.minestore.api.web.WebContext;
+import me.chrommob.minestore.api.web.WebRequest;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
-import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
-import me.chrommob.minestore.api.scheduler.SafeScheduledTask;
 import me.chrommob.minestore.common.verification.VerificationResult;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
-import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class WebListener {
     private final MineStoreVersion arraySupportedSince = new MineStoreVersion(3, 2, 5);
     private final MineStoreCommon plugin;
-    private final Gson gson = new Gson();
     private boolean wasEmpty = false;
-    private URL queueUrl;
-    private URL executedUrl;
-    private URL deliveredUrl;
-    private URL checkUrl;
-    private URL paymentUrl;
     private final Set<String> toPostExecuted = new HashSet<>();
     public final MineStoreScheduledTask mineStoreScheduledTask;
 
     private List<ParsedResponse> fetchData() {
         List<ParsedResponse> parsedResponses = new ArrayList<>();
         try {
-            HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
-            urlConnection.setUseCaches(false);
-            urlConnection.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
-            urlConnection.setRequestProperty("Pragma", "no-cache");
-            urlConnection.setRequestProperty("Expires", "0");
-            InputStream in = urlConnection.getInputStream();
-            BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
-            StringBuilder responseString = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                responseString.append(line);
-            }
-            plugin.debug(this.getClass(), "Received: " + responseString);
-            if (responseString.toString().equals("{}")) {
-                return new ArrayList<>();
-            }
-            try {
-                if (MineStoreCommon.version().requires(arraySupportedSince)) {
-                    Type listType = new TypeToken<List<GsonReponse>>(){}.getType();
-                    List<GsonReponse> list = gson.fromJson(responseString.toString(), listType);
-                    for (GsonReponse response : list) {
+            if (MineStoreCommon.version().requires(arraySupportedSince)) {
+                TypeToken<List<GsonReponse>> listType = new TypeToken<List<GsonReponse>>() {
+                };
+                WebRequest<List<GsonReponse>> request = new WebRequest.Builder<>(listType).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/queue").requiresApiKey(false).type(WebRequest.Type.GET).build();
+                Result<List<GsonReponse>, WebContext> res = plugin.apiHandler().request(request);
+                if (!res.isError()) {
+                    for (GsonReponse response : res.value()) {
                         parsedResponses.add(parseGson(response));
                     }
                 } else {
-                    GsonReponse response = gson.fromJson(responseString.toString(), GsonReponse.class);
-                    if (response != null && response.username() != null) {
-                        ParsedResponse parsedResponse = parseGson(response);
-                        parsedResponses.add(parsedResponse);
+                    if (res.context().getCause() == null) {
+                        throw res.context();
+                    }
+                    if (!(res.context().getCause() instanceof JsonSyntaxException)) {
+                        throw res.context();
                     }
                 }
-            } catch (JsonSyntaxException e) {
-                plugin.debug(this.getClass(), e);
-                wasEmpty = true;
+            } else {
+                WebRequest<GsonReponse> request = new WebRequest.Builder<>(GsonReponse.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/queue").requiresApiKey(false).type(WebRequest.Type.GET).build();
+                Result<GsonReponse, WebContext> res = plugin.apiHandler().request(request);
+                if (res.isError()) {
+                    throw res.context();
+                }
+                GsonReponse response = res.value();
+                if (response != null && response.username() != null) {
+                    ParsedResponse parsedResponse = parseGson(response);
+                    parsedResponses.add(parsedResponse);
+                }
             }
-            plugin.notError();
-        } catch (IOException e) {
+        } catch (WebContext e) {
             plugin.debug(this.getClass(), e);
-            plugin.handleError();
+            plugin.handleError(e);
         }
         return parsedResponses;
     }
@@ -159,100 +145,24 @@ public class WebListener {
     }
 
     public VerificationResult load() {
-        String finalQueueUrl;
-        String finalExecutedUrl;
-        String finalDeliveredUrl;
-        String finalCheckUrl;
-        String finalPaymentUrl;
-        String storeUrl = ConfigKeys.STORE_URL.getValue();
-        if (storeUrl.endsWith("/")) {
-            storeUrl = storeUrl.substring(0, storeUrl.length() - 1);
-        }
-        if (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue()) {
-            finalQueueUrl = storeUrl + "/api/servers/" + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/commands/queue";
-            finalExecutedUrl = storeUrl + "/api/servers/" + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue()
-                    + "/commands/executed/";
-            finalDeliveredUrl = storeUrl + "/api/servers/" + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue()
-                    + "/commands/delivered/";
-            finalCheckUrl = storeUrl + "/api/servers/" + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/commands/validated/";
-            finalPaymentUrl = storeUrl + "/api/rest/v2/" + ConfigKeys.API_KEYS.KEY.getValue() + "/payment/create";
-        } else {
-            finalQueueUrl = storeUrl + "/api/servers/commands/queue";
-            finalExecutedUrl = storeUrl + "/api/servers/commands/executed/";
-            finalDeliveredUrl = storeUrl + "/api/servers/commands/delivered/";
-            finalCheckUrl = storeUrl + "/api/servers/commands/validated/";
-            finalPaymentUrl = storeUrl + "/api/rest/v2/payment/create";
-        }
-        try {
-            queueUrl = new URL(finalQueueUrl);
-            executedUrl = new URL(finalExecutedUrl);
-            deliveredUrl = new URL(finalDeliveredUrl);
-            checkUrl = new URL(finalCheckUrl);
-            paymentUrl = new URL(finalPaymentUrl);
-        } catch (Exception e) {
-            plugin.debug(this.getClass(), e);
-            return new VerificationResult(false, Collections.singletonList("Store URL is not a valid URL!"), VerificationResult.TYPE.STORE_URL);
-        }
-        try {
-            HttpsURLConnection urlConnection = (HttpsURLConnection) queueUrl.openConnection();
-            InputStream in = urlConnection.getInputStream();
-
-            BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(in));
-            StringBuilder responseString = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                responseString.append(line);
+        WebRequest<String> request = new WebRequest.Builder<>(String.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/queue").requiresApiKey(false).type(WebRequest.Type.GET).build();
+        Result<String, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.debug(this.getClass(), res.context());
+            if (res.context().isCloudflare()) {
+                return new VerificationResult(false, Collections.singletonList("Cloudflare blocked the request, add cloudflare rule."), VerificationResult.TYPE.WEBSTORE);
             }
-            try {
-                if (MineStoreCommon.version().requires(arraySupportedSince)) {
-                    Type listType = new TypeToken<List<GsonReponse>>(){}.getType();
-                    List<GsonReponse> list = gson.fromJson(responseString.toString(), listType);
-                    if (list.isEmpty()) {
-                        wasEmpty = true;
-                    }
-                    return VerificationResult.valid();
-                }
-                gson.fromJson(responseString.toString(), GsonReponse.class);
-            } catch (JsonSyntaxException e) {
-                if (responseString.toString().equals("{}")) {
-                    wasEmpty = true;
-                } else {
-                    plugin.debug(this.getClass(), e);
-                    List<String> messages = new ArrayList<>();
-                    messages.add(e.getMessage());
-                    messages.add("SECRET KEY: " + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue());
-                    return new VerificationResult(false, messages, VerificationResult.TYPE.SECRET_KEY);
-                }
-            }
-        } catch (IOException e) {
-            plugin.debug(this.getClass(), e);
-            List<String> messages = new ArrayList<>();
-            messages.add(e.getMessage());
-            messages.add("SECRET KEY: " + ConfigKeys.WEBLISTENER_KEYS.KEY.getValue());
-            return new VerificationResult(false, messages, VerificationResult.TYPE.SECRET_KEY);
-        } catch (ClassCastException e) {
-            plugin.log("STORE URL has to start with https://");
-            plugin.debug(this.getClass(), e);
-            return new VerificationResult(false, Collections.singletonList("STORE URL has to start with https://"), VerificationResult.TYPE.STORE_URL);
+            return new VerificationResult(false, Collections.singletonList("Failed to fetch queue."), VerificationResult.TYPE.SECRET_KEY);
         }
         return VerificationResult.valid();
     }
 
     private void postDelivered(String id) {
-        try {
-            URL url = new URL(deliveredUrl + id);
-            plugin.debug(this.getClass(), "Posting to: " + url);
-            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setDoOutput(true);
-            urlConnection.connect();
-            try (final OutputStream os = urlConnection.getOutputStream()) {
-                os.write(id.getBytes());
-            }
-            urlConnection.getInputStream();
-            urlConnection.disconnect();
-        } catch (IOException e) {
-            plugin.debug(this.getClass(), e);
+        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/delivered/" + id).type(WebRequest.Type.POST).build();
+        Result<Void, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.log("Failed to post delivered: " + id);
+            plugin.debug(this.getClass(), res.context());
         }
     }
 
@@ -260,46 +170,31 @@ public class WebListener {
         if (ids.length == 0) {
             return;
         }
-        try {
-            plugin.debug(this.getClass(), "Posting to: " + deliveredUrl);
-            HttpsURLConnection urlConnection = (HttpsURLConnection) deliveredUrl.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setRequestProperty("Content-Type", "application/json");
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(true);
-            urlConnection.connect();
-            JsonObject jsonObject = new JsonObject();
-            JsonArray idsArrayJson = new JsonArray();
-            for (int id : ids) {
-                idsArrayJson.add(id);
-            }
-            jsonObject.add("ids", idsArrayJson);
-            String json = jsonObject.toString();
-            try (final OutputStream os = urlConnection.getOutputStream()) {
-                os.write(json.getBytes());
-            }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            StringBuilder responseString = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                responseString.append(line);
-            }
-            urlConnection.disconnect();
-            PostResponse postResponse = gson.fromJson(responseString.toString(), PostResponse.class);
-            if (postResponse.status) {
-                for (PostResponse.Result result : postResponse.results) {
-                    if (result.status) {
-                        continue;
-                    }
-                    plugin.log("Failed to confirm the delivery of command with id: " + result.id + " with error: " + result.error);
+        JsonObject jsonObject = new JsonObject();
+        JsonArray idsArrayJson = new JsonArray();
+        for (int id : ids) {
+            idsArrayJson.add(id);
+        }
+        jsonObject.add("ids", idsArrayJson);
+        String json = jsonObject.toString();
+        WebRequest<PostResponse> request = new WebRequest.Builder<>(PostResponse.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/delivered").type(WebRequest.Type.POST).strBody(json).build();
+        Result<PostResponse, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.log("Failed to post delivered");
+            plugin.debug(this.getClass(), res.context());
+        }
+        PostResponse postResponse = res.value();
+        if (postResponse.status) {
+            for (PostResponse.Result result : postResponse.results) {
+                if (result.status) {
+                    continue;
                 }
-            } else {
-                plugin.log("Failed to confirm the delivery of commands!");
-                plugin.log(postResponse.error);
-                plugin.log(json);
+                plugin.log("Failed to confirm the delivery of command with id: " + result.id + " with error: " + result.error);
             }
-        } catch (IOException e) {
-            plugin.debug(this.getClass(), e);
+        } else {
+            plugin.log("Failed to confirm the delivery of commands!");
+            plugin.log(postResponse.error);
+            plugin.log(json);
         }
     }
 
@@ -308,69 +203,45 @@ public class WebListener {
     }
 
     private void postExecutedAsync(Set<String> ids) {
-        try {
-            plugin.debug(this.getClass(), "Posting to: " + executedUrl);
-            HttpsURLConnection urlConnection = (HttpsURLConnection) executedUrl.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setRequestProperty("Content-Type", "application/json");
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(true);
-            urlConnection.connect();
-            int[] idsArray = new int[ids.size()];
-            int i = 0;
-            for (String id : ids) {
-                idsArray[i++] = Integer.parseInt(id);
-            }
-            JsonObject jsonObject = new JsonObject();
-            JsonArray idsArrayJson = new JsonArray();
-            for (int id : idsArray) {
-                idsArrayJson.add(id);
-            }
-            jsonObject.add("ids", idsArrayJson);
-            String json = jsonObject.toString();
-            try (final OutputStream os = urlConnection.getOutputStream()) {
-                os.write(json.getBytes());
-            }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            StringBuilder responseString = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                responseString.append(line);
-            }
-            urlConnection.disconnect();
-            PostResponse postResponse = gson.fromJson(responseString.toString(), PostResponse.class);
-            if (postResponse.status) {
-                for (PostResponse.Result result : postResponse.results) {
-                    if (result.status) {
-                        continue;
-                    }
-                    plugin.log("Failed to confirm the execution of command with id: " + result.id + " with error: " + result.error);
+        int[] idsArray = new int[ids.size()];
+        int i = 0;
+        for (String id : ids) {
+            idsArray[i++] = Integer.parseInt(id);
+        }
+        JsonObject jsonObject = new JsonObject();
+        JsonArray idsArrayJson = new JsonArray();
+        for (int id : idsArray) {
+            idsArrayJson.add(id);
+        }
+        jsonObject.add("ids", idsArrayJson);
+        String json = jsonObject.toString();
+        WebRequest<PostResponse> request = new WebRequest.Builder<>(PostResponse.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/executed").type(WebRequest.Type.POST).strBody(json).build();
+        Result<PostResponse, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.log("Failed to post executed");
+            plugin.debug(this.getClass(), res.context());
+        }
+        PostResponse postResponse = res.value();
+        if (postResponse.status) {
+            for (PostResponse.Result result : postResponse.results) {
+                if (result.status) {
+                    continue;
                 }
-            } else {
-                plugin.log("Failed to confirm the execution of commands!");
-                plugin.log(postResponse.error);
-                plugin.log(json);
+                plugin.log("Failed to confirm the execution of command with id: " + result.id + " with error: " + result.error);
             }
-        } catch (IOException e) {
-            plugin.debug(this.getClass(), e);
+        } else {
+            plugin.log("Failed to confirm the execution of commands!");
+            plugin.log(postResponse.error);
+            plugin.log(json);
         }
     }
 
     private void postExecutedAsync(String id) {
-        try {
-            URL url = new URL(executedUrl + id);
-            plugin.debug(this.getClass(), "Posting to: " + url);
-            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setDoOutput(true);
-            urlConnection.connect();
-            try (final OutputStream os = urlConnection.getOutputStream()) {
-                os.write(id.getBytes());
-            }
-            urlConnection.getInputStream();
-            urlConnection.disconnect();
-        } catch (IOException e) {
-            plugin.debug(this.getClass(), e);
+        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/executed/" + id).type(WebRequest.Type.POST).strBody(id).build();
+        Result<Void, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.log("Failed to post executed: " + id);
+            plugin.debug(this.getClass(), res.context());
         }
     }
 
@@ -403,28 +274,13 @@ public class WebListener {
             }
             jsonObject.add("ids", idsArrayJson);
             String json = jsonObject.toString();
-            try {
-                HttpsURLConnection urlConnection = (HttpsURLConnection) checkUrl.openConnection();
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-                urlConnection.setDoInput(true);
-                urlConnection.setDoOutput(true);
-                urlConnection.connect();
-                OutputStream os = urlConnection.getOutputStream();
-                os.write(json.getBytes());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                StringBuilder responseString = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    responseString.append(line);
-                }
-                urlConnection.disconnect();
-                plugin.debug(this.getClass(), "Received: " + responseString);
-                return gson.fromJson(responseString.toString(), CheckResponse.class);
-            } catch (IOException e) {
-                plugin.debug(this.getClass(), e);
+            WebRequest<CheckResponse> request = new WebRequest.Builder<>(CheckResponse.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/validated").type(WebRequest.Type.POST).strBody(json).build();
+            Result<CheckResponse, WebContext> res = plugin.apiHandler().request(request);
+            if (res.isError()) {
+                plugin.debug(this.getClass(), res.context());
                 return CheckResponse.empty();
             }
+            return res.value();
         }).exceptionally(e -> {
             plugin.debug(getClass(), e);
             return CheckResponse.empty();
@@ -439,28 +295,13 @@ public class WebListener {
             jsonObject.addProperty("item_id", itemId);
             jsonObject.addProperty("virtual_currency", true);
             String json = jsonObject.toString();
-            try {
-                HttpsURLConnection urlConnection = (HttpsURLConnection) paymentUrl.openConnection();
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-                urlConnection.setDoInput(true);
-                urlConnection.setDoOutput(true);
-                urlConnection.connect();
-                OutputStream os = urlConnection.getOutputStream();
-                os.write(json.getBytes());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                StringBuilder responseString = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    responseString.append(line);
-                }
-                urlConnection.disconnect();
-                plugin.debug(this.getClass(), "Received: " + responseString);
-                return gson.fromJson(responseString.toString(), PaymentCreationResponse.class);
-            } catch (IOException e) {
-                plugin.debug(this.getClass(), e);
+            WebRequest<PaymentCreationResponse> request = new WebRequest.Builder<>(PaymentCreationResponse.class).path("rest/v2/payment/create").type(WebRequest.Type.POST).strBody(json).requiresApiKey(true).build();
+            Result<PaymentCreationResponse, WebContext> res = plugin.apiHandler().request(request);
+            if (res.isError()) {
+                plugin.debug(this.getClass(), res.context());
                 return null;
             }
+            return res.value();
         });
     }
 }

@@ -1,15 +1,12 @@
 package me.chrommob.minestore.api.web.payment;
 
 import me.chrommob.minestore.api.generic.ParamBuilder;
-import me.chrommob.minestore.api.web.FeatureManager;
-import me.chrommob.minestore.api.web.Result;
-import me.chrommob.minestore.api.web.WebApiRequest;
-import me.chrommob.minestore.api.web.Wrapper;
+import me.chrommob.minestore.api.web.*;
 
 import java.util.function.Function;
 
 public class PaymentManager extends FeatureManager {
-    public PaymentManager(Wrapper<Function<WebApiRequest<?>, Result<?, ? extends Exception>>> requestHandler) {
+    public PaymentManager(Wrapper<Function<WebRequest<?>, Result<?, WebContext>>> requestHandler) {
         super(requestHandler);
     }
 
@@ -17,7 +14,7 @@ public class PaymentManager extends FeatureManager {
         ParamBuilder paramBuilder = new ParamBuilder();
         paramBuilder.append("execute_commands", String.valueOf(executeCommands));
         paramBuilder.append("note", note);
-        Result<Void, Exception> result = request(new WebApiRequest<>("payment/markAsPaid/" + paymentId, WebApiRequest.Type.POST, paramBuilder, Void.class, true));
-        return result.error() == null;
+        Result<Void, WebContext> result = request(new WebRequest.Builder<>(Void.class).path("payment/markAsPaid/" + paymentId).requiresApiKey(true).type(WebRequest.Type.POST).paramBuilder(paramBuilder).build());
+        return !result.isError();
     }
 }

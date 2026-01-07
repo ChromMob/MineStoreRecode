@@ -76,9 +76,10 @@ public class MineStorePluginDependency {
 
     public Optional<byte[]> download(MineStorePluginRepository repository) {
         String path = repository.getUrl() + "/" + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar";
+        HttpsURLConnection urlConnection = null;
         try {
             URL url = new URL(path);
-            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection = (HttpsURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setRequestProperty("User-Agent", "MineStore");
             urlConnection.setDoOutput(true);
@@ -98,6 +99,10 @@ public class MineStorePluginDependency {
             }
         } catch (Exception e) {
             return Optional.empty();
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
     }
 

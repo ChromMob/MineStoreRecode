@@ -2,10 +2,7 @@ package me.chrommob.minestore.api.web.coupon;
 
 import com.google.gson.annotations.SerializedName;
 import me.chrommob.minestore.api.generic.ParamBuilder;
-import me.chrommob.minestore.api.web.Result;
-import me.chrommob.minestore.api.web.WebApiRequest;
-import me.chrommob.minestore.api.web.Wrapper;
-import me.chrommob.minestore.api.web.FeatureManager;
+import me.chrommob.minestore.api.web.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -14,7 +11,7 @@ import java.util.function.Function;
 
 public class CouponManager extends FeatureManager {
 
-    public CouponManager(Wrapper<Function<WebApiRequest<?>, Result<?, ? extends Exception>>> requestHandler) {
+    public CouponManager(Wrapper<Function<WebRequest<?>, Result<?, WebContext>>> requestHandler) {
         super(requestHandler);
     }
 
@@ -38,23 +35,28 @@ public class CouponManager extends FeatureManager {
      * @throws IllegalArgumentException if required fields are missing or invalid.
      */
     public CreateCouponResponse createCoupon(String name, int type, int discount, Integer available, Integer limitPerUser, Integer minBasket, int applyType, String[] applyCategories, String[] applyItems, String note, LocalDateTime startAt, LocalDateTime expireAt, String username) {
-        WebApiRequest<CreateCouponResponse> request = new WebApiRequest<>("createCoupon", WebApiRequest.Type.POST, new ParamBuilder()
-                .append("name", name)
-                .append("type", String.valueOf(type))
-                .append("discount", String.valueOf(discount))
-                .append("available", available == null ? null : String.valueOf(available))
-                .append("limit_per_user", limitPerUser == null ? null : String.valueOf(limitPerUser))
-                .append("min_basket", minBasket == null ? null : String.valueOf(minBasket))
-                .append("apply_type", String.valueOf(applyType))
-                .append("apply_categories", applyCategories == null ? null : Arrays.toString(applyCategories))
-                .append("apply_items", applyItems == null ? null : Arrays.toString(applyItems))
-                .append("note", note)
-                .appendDate("start_at", startAt)
-                .appendDate("expire_at", expireAt)
-                .append("username", username), CreateCouponResponse.class, true);
-        Result<CreateCouponResponse, Exception> result = request(request);
-        if (result.value() == null) {
-            return new CreateCouponResponse(result.error().getMessage());
+        WebRequest<CreateCouponResponse> request = new WebRequest.Builder<>(CreateCouponResponse.class)
+                .requiresApiKey(true)
+                .type(WebRequest.Type.POST)
+                .path("createCoupon")
+                .paramBuilder(new ParamBuilder()
+                        .append("name", name)
+                        .append("type", String.valueOf(type))
+                        .append("discount", String.valueOf(discount))
+                        .append("available", available == null ? null : String.valueOf(available))
+                        .append("limit_per_user", limitPerUser == null ? null : String.valueOf(limitPerUser))
+                        .append("min_basket", minBasket == null ? null : String.valueOf(minBasket))
+                        .append("apply_type", String.valueOf(applyType))
+                        .append("apply_categories", applyCategories == null ? null : Arrays.toString(applyCategories))
+                        .append("apply_items", applyItems == null ? null : Arrays.toString(applyItems))
+                        .append("note", note)
+                        .appendDate("start_at", startAt)
+                        .appendDate("expire_at", expireAt)
+                        .append("username", username))
+                .build();
+        Result<CreateCouponResponse, WebContext> result = request(request);
+        if (result.isError()) {
+            return new CreateCouponResponse(result.context().getMessage());
         };
         return result.value();
     }

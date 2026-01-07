@@ -5,15 +5,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.api.stats.BuildConstats;
+import me.chrommob.minestore.api.web.Result;
+import me.chrommob.minestore.api.web.WebContext;
+import me.chrommob.minestore.api.web.WebRequest;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
-import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -84,102 +83,54 @@ public class StatSender {
 
     private void sendData(String json) {
         common.debug(this.getClass(), "Sending stat json: " + json);
-        HttpsURLConnection connection = null;
-        try {
-            connection = (HttpsURLConnection) new java.net.URL("https://api.chrommob.fun/minestore/data").openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.getOutputStream().write(json.getBytes());
-            connection.getOutputStream().flush();
-            connection.getOutputStream().close();
-            connection.getInputStream().close();
-        } catch (IOException e) {
-            common.log(e.getMessage());
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).customUrl("https://api.chrommob.fun/minestore/data").type(WebRequest.Type.POST).strBody(json).header("Content-Type", "application/json").build();
+        Result<Void, WebContext> res = common.apiHandler().request(request);
+        if (res.isError()) {
+            common.log("Failed to send stat data");
+            common.debug(this.getClass(), res.context());
         }
     }
 
     private void sendStoreData(String json) {
         common.debug(this.getClass(), "Sending store json: " + json);
-        HttpsURLConnection connection = null;
-        try {
-            connection = (HttpsURLConnection) new java.net.URL("https://api.chrommob.fun/minestore/playerCountData").openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.getOutputStream().write(json.getBytes());
-            connection.getOutputStream().flush();
-            connection.getOutputStream().close();
-            connection.getInputStream().close();
-        } catch (IOException e) {
-            common.log(e.getMessage());
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).customUrl("https://api.chrommob.fun/minestore/playerCountData").type(WebRequest.Type.POST).strBody(json).header("Content-Type", "application/json").build();
+        Result<Void, WebContext> res = common.apiHandler().request(request);
+        if (res.isError()) {
+            common.log("Failed to send store data");
+            common.debug(this.getClass(), res.context());
         }
     }
 
     private int getPlayerCount(String ip, int port) {
         String url = "https://yamcsrvstatus.chrommob.fun/api/" + ip + ":" + port;
-        HttpsURLConnection connection = null;
-        try {
-            connection = (HttpsURLConnection) new java.net.URL(url).openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            StringBuilder response = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-            }
-            JsonObject jsonObject = gson.fromJson(response.toString(), JsonObject.class);
-            return jsonObject.getAsJsonObject("players").get("online").getAsInt();
-        } catch (Exception e) {
+        WebRequest<JsonObject> request = new WebRequest.Builder<>(JsonObject.class).customUrl(url).type(WebRequest.Type.GET).build();
+        Result<JsonObject, WebContext> res = common.apiHandler().request(request);
+        if (res.isError()) {
+            common.log("Failed to get player count");
+            common.debug(this.getClass(), res.context());
             return 0;
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
         }
+        JsonObject json = res.value();
+        if (!json.has("players") || !json.get("players").isJsonObject() || !json.get("players").getAsJsonObject().has("online") || !json.get("players").getAsJsonObject().get("online").isJsonPrimitive()) {
+            return 0;
+        }
+        return json.get("players").getAsJsonObject().get("online").getAsInt();
     }
 
     private int getPlayerCount(String storeUrl) {
-        storeUrl = storeUrl.endsWith("/") ? storeUrl : storeUrl + "/";
-        String apiUrl = storeUrl + "api/settings/get";
-        HttpsURLConnection connection = null;
-        try {
-            connection = (HttpsURLConnection) new java.net.URL(apiUrl).openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            StringBuilder response = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-            }
-            JsonObject jsonObject = gson.fromJson(response.toString(), JsonObject.class);
-            String ip = jsonObject.getAsJsonObject("server").get("ip").getAsString();
-            int port = jsonObject.getAsJsonObject("server").get("port").getAsInt();
-            return getPlayerCount(ip, port);
-        } catch (Exception e) {
-            return -1;
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+        WebRequest<JsonObject> request = new WebRequest.Builder<>(JsonObject.class).path("settings/get").type(WebRequest.Type.GET).build();
+        Result<JsonObject, WebContext> res = common.apiHandler().request(request);
+        if (res.isError()) {
+            common.log("Failed to get player count");
+            common.debug(this.getClass(), res.context());
+            return 0;
         }
+        JsonObject jsonObject = res.value();
+        if (!jsonObject.has("server") || !jsonObject.get("server").isJsonObject() || !jsonObject.get("server").getAsJsonObject().has("ip") || !jsonObject.get("server").getAsJsonObject().has("port")) {
+            return 0;
+        }
+        String ip = jsonObject.getAsJsonObject("server").get("ip").getAsString();
+        int port = jsonObject.getAsJsonObject("server").get("port").getAsInt();
+        return getPlayerCount(ip, port);
     }
 }

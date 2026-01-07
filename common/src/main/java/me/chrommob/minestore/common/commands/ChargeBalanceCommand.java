@@ -1,12 +1,14 @@
 package me.chrommob.minestore.common.commands;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.ParamBuilder;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
+import me.chrommob.minestore.api.web.Result;
+import me.chrommob.minestore.api.web.WebContext;
+import me.chrommob.minestore.api.web.WebRequest;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import org.incendo.cloud.annotations.Argument;
@@ -15,8 +17,6 @@ import org.incendo.cloud.annotations.Permission;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -61,37 +61,18 @@ public class ChargeBalanceCommand {
         ResponseData responseData = getResponseData(username, amount, paymentInternalId, generatedSignature);
         plugin.paymentHandler().handlePayment(responseData);
 
-        try {
-            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setRequestProperty("Content-Type", "application/json");
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(true);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(urlConnection.getOutputStream()));
-            String json = gson.toJson(responseData);
-            plugin.debug(this.getClass(), "Sending payment: " + json);
-            writer.write(json);
-            writer.flush();
-            writer.close();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            StringBuilder responseString = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                responseString.append(line);
-            }
+        WebRequest<Received> request = new WebRequest.Builder<>(Received.class).path("payment/handle/").requiresApiKey(true).type(WebRequest.Type.POST).strBody(responseData.toString()).build();
+        Result<Received, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.log("Failed to charge balance!");
+            plugin.debug(this.getClass(), res.context());
+            return;
+        }
+        Received received = res.value();
 
-            plugin.debug(this.getClass(), "Received: " + responseString);
-            urlConnection.disconnect();
-
-            Received received = gson.fromJson(responseString.toString(), Received.class);
-
-            if (!received.status) {
-                plugin.log("Failed to charge balance!");
-                plugin.log(received.message);
-            }
-
-        } catch (IOException | JsonSyntaxException e) {
-            plugin.debug(this.getClass(), e);
+        if (!received.status) {
+            plugin.log("Failed to charge balance!");
+            plugin.log(received.message);
         }
     }
 

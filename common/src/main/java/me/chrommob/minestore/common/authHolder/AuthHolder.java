@@ -4,13 +4,13 @@ import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.commands.ParsedResponse;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
+import me.chrommob.minestore.api.web.Result;
+import me.chrommob.minestore.api.web.WebContext;
+import me.chrommob.minestore.api.web.WebRequest;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.config.ConfigKeys;
-import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,23 +64,13 @@ public final class AuthHolder {
 
     private void postAuthCompleted(ParsedResponse parsedResponse) {
         plugin.debug(this.getClass(), "Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
-        try {
-            HttpsURLConnection urlConnection;
-            String link = url + parsedResponse.authId();
-            URL url = new URL(link);
-            urlConnection = (HttpsURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setRequestProperty("Content-Type", "application/json");
-            urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
-            urlConnection.setDoOutput(true);
-            try (final OutputStream os = urlConnection.getOutputStream()) {
-                // get current time in milliseconds
-                os.write(5);
-            }
-            urlConnection.getInputStream();
-        } catch (Exception e) {
-            this.plugin.debug(this.getClass(), "Error while posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
+        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).path("game_auth/confirm/" + parsedResponse.authId()).requiresApiKey(true).type(WebRequest.Type.POST).body(new byte[1]).build();
+        Result<Void, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.log("Failed to post auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
+            plugin.debug(this.getClass(), res.context());
         }
+        plugin.debug(this.getClass(), "Posted auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
     }
 
     private boolean isExpired(AuthUser authUser) {

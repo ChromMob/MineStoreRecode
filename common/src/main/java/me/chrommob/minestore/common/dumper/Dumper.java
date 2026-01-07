@@ -1,42 +1,35 @@
 package me.chrommob.minestore.common.dumper;
 
 import com.google.gson.Gson;
+import me.chrommob.minestore.api.web.Result;
+import me.chrommob.minestore.api.web.WebContext;
+import me.chrommob.minestore.api.web.WebRequest;
 import me.chrommob.minestore.common.MineStoreCommon;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
 
 public class Dumper {
     private final Gson gson = new Gson();
 
     public String dump(String log, MineStoreCommon plugin) {
-        try {
-            String dumpLink = "https://paste.chrommob.fun/";
-            String postLink = dumpLink + "post";
-            URL url = new URL(postLink);
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            DumpData dumpData = new DumpData(log, plugin);
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-            connection.getOutputStream().write(gson.toJson(dumpData).getBytes());
-            connection.getOutputStream().flush();
-            connection.getOutputStream().close();
-            connection.connect();
-            if (connection.getResponseCode() == 201) {
-                return dumpLink + connection.getHeaderField("Location");
-            } else {
-                if (connection.getResponseCode() == 413) {
-                    return dump(false, plugin);
-                }
-                return connection.getResponseMessage() + " (" + connection.getResponseCode() + ")";
-            }
-        } catch (IOException e) {
+        String dumpLink = "https://paste.chrommob.fun/";
+        WebRequest<String> request = new WebRequest.Builder<>(String.class).customUrl("https://paste.chrommob.fun/post").type(WebRequest.Type.POST).strBody(gson.toJson(new DumpData(log, plugin))).build();
+        Result<String, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.log("Failed to dump log");
+            plugin.debug(this.getClass(), res.context());
             return null;
+        }
+
+        if (res.context().responseCode() == 201) {
+            return dumpLink + res.context().responseString();
+        } else {
+            if (res.context().responseCode() == 413) {
+                return dump(false, plugin);
+            }
+            return res.context().responseString() + " (" + res.context().responseCode() + ")";
         }
     }
 

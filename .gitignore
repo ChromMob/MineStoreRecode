@@ -5,6 +5,8 @@
 *.ipr
 *.iws
 
+**/**.jarjar
+
 **/org.eclipse.**
 **/.project
 **/.classpath
@@ -105,6 +107,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+**/bin/**
 
 .gradle
 build/

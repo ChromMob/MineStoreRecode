@@ -39,6 +39,13 @@ public final class ConfigKeys {
     public static final ConfigKey<String> STORE_URL;
 
     private static final Map<String, ConfigWrapper> langMap = new HashMap<>();
+    private static final Function<String, String> URL_STANDARDIZER = s -> {
+        if (s.endsWith("/")) {
+            return s;
+        } else {
+            return s + "/";
+        }
+    };
 
     static {
         langMap.put("cs_CZ", new cs_CZ());
@@ -53,7 +60,7 @@ public final class ConfigKeys {
         storeUrlComment.add("Set the store URL that is used by the plugin.");
         storeUrlComment.add("The URL must start with https:// and end with /");
 
-        STORE_URL = new ConfigKey<>("store-url", "https://store.example.com", storeUrlComment);
+        STORE_URL = new ConfigKey<>("store-url", "https://store.example.com/", storeUrlComment, null, URL_STANDARDIZER);
     }
 
     public static final class API_KEYS {
