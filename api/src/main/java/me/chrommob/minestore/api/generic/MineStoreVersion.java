@@ -9,6 +9,7 @@ public class MineStoreVersion {
     private final int major;
     private final int minor;
     private final int patch;
+    private final String specifier;
 
     public enum Comparison {
         EQUAL,
@@ -19,13 +20,26 @@ public class MineStoreVersion {
         String[] split = version.split("\\.");
         this.major = Integer.parseInt(split[0]);
         this.minor = Integer.parseInt(split[1]);
-        this.patch = Integer.parseInt(split[2]);
+        String[] specStrings = splitNumberAndText(split[2]);
+        this.patch = Integer.parseInt(specStrings[0]);
+        this.specifier = specStrings[1];
+    }
+
+    private String[] splitNumberAndText(String input) {
+        String[] res = new String[2];
+        int index = 0;
+        for (char c = input.charAt(index); index < input.length() && Character.isDigit(c); index++) {
+        }
+        res[0] = input.substring(0, index);
+        res[1] = input.substring(index, input.length());
+        return res;
     }
 
     public MineStoreVersion(int major, int minor, int patch) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
+        this.specifier = "";
     }
 
     public Comparison compare(MineStoreVersion version) {
@@ -72,7 +86,7 @@ public class MineStoreVersion {
 
     @Override
     public String toString() {
-        return this.major + "." + this.minor + "." + this.patch;
+        return this.major + "." + this.minor + "." + this.patch + specifier;
     }
 
     private static final MineStoreVersion dummy = new MineStoreVersion(0, 0, 0);
