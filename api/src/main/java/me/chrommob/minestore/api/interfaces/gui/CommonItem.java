@@ -1,10 +1,12 @@
 package me.chrommob.minestore.api.interfaces.gui;
 
+import me.chrommob.minestore.api.event.types.GuiClickEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CommonItem {
     private int sorting = 0;
@@ -13,35 +15,38 @@ public class CommonItem {
     private final List<Component> lore;
     private String material;
     private boolean isBackground = false;
-
     private int amount = 1;
+    private final Consumer<GuiClickEvent> clickHandler;
 
     public CommonItem(Component name, String material, List<Component> lore, int amount) {
-        this.name = name;
-        this.material = material;
-        this.lore = lore;
-        this.amount = amount;
+        this(name, material, lore, amount, null);
     }
 
     public CommonItem(Component name, String material, List<Component> lore) {
-        this.name = name;
-        this.material = material;
-        this.lore = lore;
+        this(name, material, lore, 1, null);
     }
 
     public CommonItem(Component name, String material, List<Component> lore, boolean isBackground) {
-        this.name = name;
-        this.material = material;
-        this.lore = lore;
+        this(name, material, lore, 1, null);
         this.isBackground = isBackground;
     }
 
     public CommonItem(Component name, String material, List<Component> lore, boolean isFeatured, int sorting) {
+        this(name, material, lore, 1, null);
+        this.isFeatured = isFeatured;
+        this.sorting = sorting;
+    }
+
+    public CommonItem(Component name, String material, List<Component> lore, int amount, Consumer<GuiClickEvent> clickHandler) {
         this.name = name;
         this.material = material;
         this.lore = lore;
-        this.isFeatured = isFeatured;
-        this.sorting = sorting;
+        this.amount = amount;
+        this.clickHandler = clickHandler;
+    }
+
+    public CommonItem(Component name, String material, List<Component> lore, Consumer<GuiClickEvent> clickHandler) {
+        this(name, material, lore, 1, clickHandler);
     }
 
     public Component getName() {
@@ -95,5 +100,18 @@ public class CommonItem {
     public int getAmount() {
         return amount;
     }
-}
 
+    public boolean hasClickHandler() {
+        return clickHandler != null;
+    }
+
+    public Consumer<GuiClickEvent> getClickHandler() {
+        return clickHandler;
+    }
+
+    public void invokeClickHandler(GuiClickEvent event) {
+        if (clickHandler != null) {
+            clickHandler.accept(event);
+        }
+    }
+}

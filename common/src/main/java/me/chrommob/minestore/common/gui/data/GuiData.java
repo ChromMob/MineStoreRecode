@@ -2,15 +2,20 @@ package me.chrommob.minestore.common.gui.data;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.api.web.Result;
 import me.chrommob.minestore.api.web.WebContext;
 import me.chrommob.minestore.api.web.WebRequest;
 import me.chrommob.minestore.common.MineStoreCommon;
+import me.chrommob.minestore.common.gui.BuyGuiItems;
 import me.chrommob.minestore.common.gui.GuiOpenener;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
 import me.chrommob.minestore.common.gui.data.json.old.NewCategory;
+import me.chrommob.minestore.common.gui.data.parsed.ParsedCategory;
 import me.chrommob.minestore.common.gui.data.parsed.ParsedGui;
+import me.chrommob.minestore.common.gui.data.parsed.ParsedPackage;
+import me.chrommob.minestore.common.gui.data.parsed.ParsedSubCategory;
 
 import java.util.List;
 
@@ -25,6 +30,7 @@ public class GuiData {
 
     private final GuiOpenener guiOpenener;
     private ParsedGui parsedGui;
+    private BuyGuiItems buyGuiItems;
 
     public void load() throws WebContext {
         if (MineStoreCommon.version().requires(3, 0, 0)) {
@@ -47,6 +53,45 @@ public class GuiData {
             parsedResponse = res.value();
         }
         parsedGui = new ParsedGui(parsedResponse, plugin);
+        buyGuiItems = new BuyGuiItems(this);
+        attachHandlers();
+    }
+
+    private void attachHandlers() {
+        if (parsedGui == null || parsedGui.getInventory() == null) {
+            return;
+        }
+
+        buyGuiItems.attachBackHandler(parsedGui.getInventory());
+
+        for (ParsedCategory category : parsedGui.getCategories()) {
+            buyGuiItems.attachCategoryHandlers(parsedGui.getInventory(), category);
+
+            if (category.hasSubcategories()) {
+                for (ParsedSubCategory sub : category.getSubCategories()) {
+                    CommonInventory subInv = sub.getInventory();
+                    buyGuiItems.attachSubcategoryHandlers(subInv, sub);
+                    buyGuiItems.attachBackHandler(subInv);
+
+                    for (ParsedPackage pkg : sub.getPackages()) {
+                        buyGuiItems.attachPackageHandlers(subInv, sub, pkg);
+                    }
+                }
+                for (ParsedCategory newCat : category.getNewCategories()) {
+                    CommonInventory newCatInv = newCat.getInventory();
+                    buyGuiItems.attachCategoryHandlers(newCatInv, newCat);
+                    buyGuiItems.attachBackHandler(newCatInv);
+
+                    for (ParsedPackage pkg : newCat.getPackages()) {
+                        buyGuiItems.attachPackageHandlers(newCatInv, newCat, pkg);
+                    }
+                }
+            } else {
+                for (ParsedPackage pkg : category.getPackages()) {
+                    buyGuiItems.attachPackageHandlers(category.getInventory(), category, pkg);
+                }
+            }
+        }
     }
 
     public final MineStoreScheduledTask mineStoreScheduledTask = new MineStoreScheduledTask("guiData", new Runnable() {

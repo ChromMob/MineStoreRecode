@@ -1,25 +1,19 @@
 package me.chrommob.minestore.platforms.bukkit.user;
 
-import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.event.types.GuiCloseEvent;
+import me.chrommob.minestore.api.event.types.GuiOpenEvent;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
-import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class UserBukkit extends CommonUser {
@@ -109,54 +103,22 @@ public class UserBukkit extends CommonUser {
         if (player == null) {
             return;
         }
-        Inventory bukkitInventory = Bukkit.createInventory(null, inventory.getSize(),
-                serializer.serialize(inventory.getTitle()));
-        player.openInventory(bukkitInventory);
-        List<ItemStack> bukkitItems = new ArrayList<>();
-        for (CommonItem item : inventory.getItems()) {
-            Material material;
-            if (item.getMaterial() == null) {
-                if (item.isBackground()) {
-                    material = Material.WHITE_STAINED_GLASS_PANE;
-                } else {
-                    material = Material.CHEST;
-                }
-            } else {
-                material = Material.matchMaterial(item.getMaterial());
-            }
-            if (material == null) {
-                if (item.isBackground()) {
-                    material = Material.WHITE_STAINED_GLASS_PANE;
-                    item.setMaterial("STAINED_GLASS_PANE");
-                } else {
-                    material = Material.CHEST;
-                    item.setMaterial("CHEST");
-                }
-            }
-            ItemStack bukkitItem = new ItemStack(material, item.getAmount());
-            ItemMeta meta = bukkitItem.getItemMeta();
-            if (meta == null) continue;
-            LegacyComponentSerializer serializer = BukkitComponentSerializer.legacy();
-            List<String> lore = new ArrayList<>();
-            for (Component line : item.getLore()) {
-                lore.add(serializer.serialize(line));
-            }
-            meta.setDisplayName(serializer.serialize(item.getName()));
-            meta.setLore(lore);
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            if (item.isFeatured()) {
-                meta.addEnchant(getDurabilityEnchantment(), 1, true);
-                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            }
-            bukkitItem.setItemMeta(meta);
-            bukkitItems.add(bukkitItem);
-        }
-        bukkitInventory.setContents(bukkitItems.toArray(new ItemStack[0]));
-        player.openInventory(bukkitInventory);
+        MineStoreInventoryHolder holder = new MineStoreInventoryHolder(inventory, serializer);
+        player.openInventory(holder.getInventory());
+        new GuiOpenEvent(this, inventory).call();
     }
 
     @Override
     public void closeInventory() {
+        if (player == null) {
+            return;
+        }
+        InventoryView view = player.getOpenInventory();
+        InventoryHolder holder = view.getTopInventory().getHolder();
+        if (holder instanceof MineStoreInventoryHolder) {
+            CommonInventory inventory = ((MineStoreInventoryHolder) holder).getCommonInventory();
+            new GuiCloseEvent(this, inventory).call();
+        }
         player.closeInventory();
     }
 }

@@ -21,6 +21,10 @@ public class BuyCommand {
             commonUser.sendMessage("[MineStore] You can't use this command from console!");
             return;
         }
-        plugin.runOnMainThread(() -> plugin.guiData().getGuiInfo().handleInventoryClick(commonUser, null));
+        plugin.runOnMainThread(() -> {
+            if (plugin.guiData().getParsedGui() != null) {
+                commonUser.openInventory(plugin.guiData().getParsedGui().getInventory());
+            }
+        });
     }
 }

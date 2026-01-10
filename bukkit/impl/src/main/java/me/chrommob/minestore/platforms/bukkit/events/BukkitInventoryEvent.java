@@ -1,89 +1,53 @@
 package me.chrommob.minestore.platforms.bukkit.events;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.event.types.GuiClickEvent;
+import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
-import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
-import net.kyori.adventure.text.Component;
+import me.chrommob.minestore.platforms.bukkit.user.MineStoreInventoryHolder;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.util.ArrayList;
-import java.util.List;
+import org.bukkit.inventory.InventoryHolder;
 
 public class BukkitInventoryEvent implements Listener {
-    private final MineStoreCommon plugin;
-    public BukkitInventoryEvent(JavaPlugin plugin, MineStoreCommon pl) {
-        this.plugin = pl;
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
-    }
+    private final MineStoreCommon common;
 
-    static final MethodHandle getView;
-    static final MethodHandle getTitle;
-    static {
-        MethodHandle getView1 = null;
-        MethodHandle getTitle1 = null;
-        try {
-            getView1 = MethodHandles.lookup().findVirtual(InventoryClickEvent.class, "getView", MethodType.methodType(InventoryView.class));
-            getTitle1 = MethodHandles.lookup().findVirtual(InventoryView.class, "getTitle", MethodType.methodType(String.class));
-        } catch (NoSuchMethodException | IllegalAccessException ignored) {
-        }
-        getView = getView1;
-        getTitle = getTitle1;
+    public BukkitInventoryEvent(org.bukkit.plugin.java.JavaPlugin plugin, MineStoreCommon common) {
+        this.common = common;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (getView == null || getTitle == null) {
+        InventoryHolder holder = event.getView().getTopInventory().getHolder();
+
+        if (!(holder instanceof MineStoreInventoryHolder)) {
+            return;
+        }
+
+        event.setCancelled(true);
+
+        CommonInventory inventory = ((MineStoreInventoryHolder) holder).getCommonInventory();
+        CommonUser user = Registries.USER_GETTER.get().get(event.getWhoClicked().getUniqueId()).commonUser();
+
+        int rawSlot = event.getRawSlot();
+        if (rawSlot < 0 || rawSlot >= inventory.getItems().size()) {
+            return;
+        }
+
+        CommonItem clickedItem = inventory.getItems().get(rawSlot);
+        if (clickedItem == null || !clickedItem.hasClickHandler()) {
+            return;
+        }
+
+        GuiClickEvent guiEvent = new GuiClickEvent(user, clickedItem, inventory);
+        clickedItem.invokeClickHandler(guiEvent);
+
+        if (guiEvent.isCancelled()) {
             event.setCancelled(true);
-            return;
         }
-        String eventTitle;
-        try {
-            Object view = getView.invoke(event);
-            eventTitle = getTitle.invoke(view).toString();
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return;
-        }
-        if (eventTitle == null) return;
-        if (event.getCurrentItem() == null) return;
-        boolean isMineStoreGui = false;
-        if (plugin.guiData() == null || plugin.guiData().getGuiInfo() == null || plugin.guiData().getGuiInfo().getTitles() == null) return;
-        for (Component title : plugin.guiData().getGuiInfo().getTitles()) {
-            String titleString = BukkitComponentSerializer.legacy().serialize(title);
-            if (eventTitle.equals(titleString)) {
-                isMineStoreGui = true;
-                event.setCancelled(true);
-                break;
-            }
-        }
-        if (!isMineStoreGui) {
-            for (Component title : plugin.guiData().getGuiInfo().getCustomTitles()) {
-                String titleString = BukkitComponentSerializer.legacy().serialize(title);
-                if (eventTitle.equals(titleString)) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-        }
-        if (!isMineStoreGui) return;
-        if (event.getCurrentItem() == null) return;
-        if (event.getCurrentItem().getItemMeta() == null) return;
-        Component name = BukkitComponentSerializer.legacy().deserialize(event.getCurrentItem().getItemMeta().getDisplayName());
-        List<Component> lore = new ArrayList<>();
-        if (event.getCurrentItem().getItemMeta().getLore() != null) {
-            for (String line : event.getCurrentItem().getItemMeta().getLore()) {
-                lore.add(BukkitComponentSerializer.legacy().deserialize(line));
-            }
-        }
-        CommonItem item = new CommonItem(name, event.getCurrentItem().getType().toString(), lore);
-        plugin.guiData().getGuiInfo().handleInventoryClick(Registries.USER_GETTER.get().get(event.getWhoClicked().getUniqueId()).commonUser(), item);
     }
 }

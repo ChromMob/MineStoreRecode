@@ -1,5 +1,6 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
+import me.chrommob.minestore.api.event.types.GuiClickEvent;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.MineStoreCommon;
@@ -12,6 +13,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ParsedCategory {
     private final ParsedCategory root;
@@ -109,14 +111,23 @@ public class ParsedCategory {
     }
 
     public CommonItem getItem() {
-        if (this.item != null) {
+        return getItem(null);
+    }
+
+    public CommonItem getItem(Consumer<GuiClickEvent> handler) {
+        if (this.item != null && handler == null) {
             return this.item;
         }
         MiniMessage miniMessage = plugin.miniMessage();
         String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getValueAsString();
         configName = configName.replace("%category%", this.name);
         Component name = miniMessage.deserialize(configName);
-        return new CommonItem(name, material, new ArrayList<>());
+        CommonItem item = new CommonItem(name, material, new ArrayList<>(), handler);
+        if (handler == null) {
+            // Only cache if no handler provided
+            return item;
+        }
+        return item;
     }
 
     public boolean hasSubcategories() {
@@ -127,28 +138,21 @@ public class ParsedCategory {
         if (this.inventory != null) {
             return this.inventory;
         }
+        List<CommonItem> items = new ArrayList<>();
         if (hasSubcategories()) {
             if (!subcategories.isEmpty()) {
-                List<CommonItem> items = new ArrayList<>();
                 for (ParsedSubCategory subcategory : subcategories) {
                     items.add(subcategory.getItem());
                 }
-                CommonInventory inventory = new CommonInventory(displayName, 54, items);
-                plugin.guiData().getGuiInfo().formatInventory(inventory, false);
-                return inventory;
             } else {
-                List<CommonItem> items = new ArrayList<>();
                 for (ParsedCategory subcategory : newCategories) {
                     items.add(subcategory.getItem());
                 }
-                CommonInventory inventory = new CommonInventory(displayName, 54, items);
-                plugin.guiData().getGuiInfo().formatInventory(inventory, false);
-                return inventory;
             }
-        }
-        List<CommonItem> items = new ArrayList<>();
-        for (ParsedPackage pack : packages) {
-            items.add(pack.getItem());
+        } else {
+            for (ParsedPackage pack : packages) {
+                items.add(pack.getItem());
+            }
         }
         CommonInventory inventory = new CommonInventory(displayName, 54, items);
         plugin.guiData().getGuiInfo().formatInventory(inventory, false);
@@ -172,5 +176,9 @@ public class ParsedCategory {
 
     public ParsedCategory getRoot() {
         return root;
+    }
+
+    public List<ParsedPackage> getPackages() {
+        return packages;
     }
 }

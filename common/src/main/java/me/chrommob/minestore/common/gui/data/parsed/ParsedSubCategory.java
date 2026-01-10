@@ -80,4 +80,8 @@ public class ParsedSubCategory {
         plugin.guiData().getGuiInfo().formatInventory(inventory, false);
         return inventory;
     }
+
+    public List<ParsedPackage> getPackages() {
+        return packages;
+    }
 }
