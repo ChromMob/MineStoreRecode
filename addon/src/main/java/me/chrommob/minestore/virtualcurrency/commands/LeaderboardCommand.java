@@ -1,6 +1,7 @@
 package me.chrommob.minestore.virtualcurrency.commands;
 
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
+import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.virtualcurrency.VirtualCurrencyAddon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -12,13 +13,17 @@ public class LeaderboardCommand {
     @Command("currency top")
     @Permission("currency.top")
     public void showLeaderboard(AbstractUser sender) {
+        showLeaderboard(sender.commonUser());
+    }
+
+    public static void showLeaderboard(CommonUser user) {
         int limit = VirtualCurrencyAddon.getTopLimit();
         java.util.List<String[]> topPlayers = VirtualCurrencyAddon.getDatabaseManager().getTopBalances(limit);
 
-        sender.commonUser().sendMessage(Component.text("=== Richest Players ===").color(NamedTextColor.GOLD));
+        user.sendMessage(Component.text("=== Richest Players ===").color(NamedTextColor.GOLD));
 
         if (topPlayers.isEmpty()) {
-            sender.commonUser().sendMessage(Component.text("No players found.").color(NamedTextColor.GRAY));
+            user.sendMessage(Component.text("No players found.").color(NamedTextColor.GRAY));
             return;
         }
 
@@ -26,8 +31,6 @@ public class LeaderboardCommand {
         for (String[] player : topPlayers) {
             String username = player[0];
             double balance = Double.parseDouble(player[1]);
-            double totalEarned = Double.parseDouble(player[2]);
-            int transactions = Integer.parseInt(player[3]);
 
             NamedTextColor rankColor;
             switch (rank) {
@@ -44,7 +47,7 @@ public class LeaderboardCommand {
                     rankColor = NamedTextColor.WHITE;
             }
 
-            sender.commonUser().sendMessage(Component.text("#" + rank + " ").color(rankColor)
+            user.sendMessage(Component.text("#" + rank + " ").color(rankColor)
                     .append(Component.text(username).color(NamedTextColor.AQUA))
                     .append(Component.text(": ").color(NamedTextColor.GRAY))
                     .append(Component.text(balance).color(NamedTextColor.GREEN))
