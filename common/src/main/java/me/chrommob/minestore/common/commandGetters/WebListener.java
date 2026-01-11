@@ -287,7 +287,6 @@ public class WebListener {
         });
     }
 
-    //https://v3.minestorecms.com/api/rest/v2/payment/create?username=superuser123456&item_id=1&virtual_currency=true
     public CompletableFuture<PaymentCreationResponse> createPayment(String username, int itemId) {
         return CompletableFuture.supplyAsync(() -> {
             JsonObject jsonObject = new JsonObject();
@@ -295,7 +294,8 @@ public class WebListener {
             jsonObject.addProperty("item_id", itemId);
             jsonObject.addProperty("virtual_currency", true);
             String json = jsonObject.toString();
-            WebRequest<PaymentCreationResponse> request = new WebRequest.Builder<>(PaymentCreationResponse.class).path("rest/v2/payment/create").type(WebRequest.Type.POST).strBody(json).requiresApiKey(true).build();
+            String path = "rest/v2/" + ConfigKeys.API_KEYS.KEY.getValue() + "/payment/create";
+            WebRequest<PaymentCreationResponse> request = new WebRequest.Builder<>(PaymentCreationResponse.class).path(path).type(WebRequest.Type.POST).strBody(json).requiresApiKey(false).build();
             Result<PaymentCreationResponse, WebContext> res = plugin.apiHandler().request(request);
             if (res.isError()) {
                 plugin.debug(this.getClass(), res.context());

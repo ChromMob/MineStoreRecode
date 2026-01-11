@@ -11,6 +11,7 @@ import me.chrommob.minestore.api.web.WebRequest;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.URL;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 public class ApiHandler {
@@ -37,6 +38,9 @@ public class ApiHandler {
             urlConnection = (HttpsURLConnection) url.openConnection();
             urlConnection.setRequestMethod(request.getType().name().toUpperCase());
             urlConnection.setRequestProperty("Content-Type", "application/json");
+            for (Map.Entry<String, String> header : request.getHeaders().entrySet()) {
+                urlConnection.setRequestProperty(header.getKey(), header.getValue());
+            }
             if (request.getBody() != null) {
                 urlConnection.setDoOutput(true);
                 try (OutputStream os = urlConnection.getOutputStream()) {
