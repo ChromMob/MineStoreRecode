@@ -9,7 +9,6 @@ import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
@@ -74,16 +73,6 @@ public class UserBukkit extends CommonUser {
             return false;
         }
         return player.isOnline();
-    }
-
-    private Enchantment getDurabilityEnchantment() {
-        Enchantment enchantment;
-        if (Enchantment.getByName("DURABILITY") != null) {
-            enchantment = Enchantment.getByName("DURABILITY");
-        } else {
-            enchantment = Enchantment.getByName("UNBREAKING");
-        }
-        return enchantment;
     }
 
     @Override

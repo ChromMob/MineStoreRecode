@@ -5,7 +5,6 @@ import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 

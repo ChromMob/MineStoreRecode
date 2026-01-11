@@ -7,30 +7,28 @@ import me.chrommob.minestore.common.gui.data.parsed.ParsedPackage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public class ConfirmationInv {
     private final CommonItem background;
-    private final CommonItem confirmationItem = new CommonItem(Component.text("Confirm").color(NamedTextColor.GREEN), "GREEN_WOOL", Collections.emptyList(), false);
-    private final CommonItem denyItem = new CommonItem(Component.text("Deny").color(NamedTextColor.RED), "BARRIER", Collections.emptyList(), false);
+    private final CommonItem confirmationItem = new CommonItem(Component.text("Confirm").color(NamedTextColor.GREEN), "GREEN_WOOL", Collections.emptyList());
+    private final CommonItem denyItem = new CommonItem(Component.text("Deny").color(NamedTextColor.RED), "BARRIER", Collections.emptyList());
 
     private final ParsedPackage parsedPackage;
 
     public ConfirmationInv(ParsedPackage parsedPackage, MineStoreCommon plugin) {
         this.parsedPackage = parsedPackage;
-        background = new CommonItem(Component.text(" "), plugin.pluginConfig().getKey("buy-gui").getKey("back").getKey("item").getValueAsString(), Collections.emptyList(), true);
+        background = new CommonItem(Component.text(" "), "AIR", Collections.emptyList());
     }
 
     public CommonInventory getInventory() {
-        List<CommonItem> items = new ArrayList<>();
+        CommonItem[] items = new CommonItem[27];
         for (int i = 0; i < 27; i++) {
-            items.add(background);
+            items[i] = background;
         }
-        items.set(4, parsedPackage.getItem());
-        items.set(20, confirmationItem);
-        items.set(24, denyItem);
+        items[4] = parsedPackage.getItem();
+        items[20] = confirmationItem;
+        items[24] = denyItem;
 
         return new CommonInventory(Component.text("Confirmation").color(NamedTextColor.GREEN), 27, items);
     }

@@ -9,44 +9,45 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CommonItem {
-    private int sorting = 0;
-    private boolean isFeatured = false;
     private final Component name;
     private final List<Component> lore;
-    private String material;
-    private boolean isBackground = false;
-    private int amount = 1;
+    private final String material;
+    private final int amount;
     private final Consumer<GuiClickEvent> clickHandler;
+    private final List<EnchantmentData> enchantments;
 
-    public CommonItem(Component name, String material, List<Component> lore, int amount) {
-        this(name, material, lore, amount, null);
-    }
-
-    public CommonItem(Component name, String material, List<Component> lore) {
-        this(name, material, lore, 1, null);
-    }
-
-    public CommonItem(Component name, String material, List<Component> lore, boolean isBackground) {
-        this(name, material, lore, 1, null);
-        this.isBackground = isBackground;
-    }
-
-    public CommonItem(Component name, String material, List<Component> lore, boolean isFeatured, int sorting) {
-        this(name, material, lore, 1, null);
-        this.isFeatured = isFeatured;
-        this.sorting = sorting;
-    }
-
-    public CommonItem(Component name, String material, List<Component> lore, int amount, Consumer<GuiClickEvent> clickHandler) {
+    public CommonItem(Component name, String material, List<Component> lore,
+                      List<EnchantmentData> enchantments, int amount,
+                      Consumer<GuiClickEvent> clickHandler) {
         this.name = name;
         this.material = material;
         this.lore = lore;
         this.amount = amount;
         this.clickHandler = clickHandler;
+        this.enchantments = enchantments;
     }
 
-    public CommonItem(Component name, String material, List<Component> lore, Consumer<GuiClickEvent> clickHandler) {
-        this(name, material, lore, 1, clickHandler);
+    public CommonItem(Component name, String material, List<Component> lore,
+                      List<EnchantmentData> enchantments, Consumer<GuiClickEvent> clickHandler) {
+        this(name, material, lore, enchantments, 1, clickHandler);
+    }
+
+    public CommonItem(Component name, String material, List<Component> lore,
+                      Consumer<GuiClickEvent> clickHandler) {
+        this(name, material, lore, null, 1, clickHandler);
+    }
+
+    public CommonItem(Component name, String material, List<Component> lore, int amount) {
+        this(name, material, lore, null, amount, null);
+    }
+
+    public CommonItem(Component name, String material, List<Component> lore) {
+        this(name, material, lore, null, 1, null);
+    }
+
+    public CommonItem(CommonItem other, Consumer<GuiClickEvent> clickHandler) {
+        this(other.getName(), other.getMaterial(), other.getLore(),
+             other.getEnchantments(), other.getAmount(), clickHandler);
     }
 
     public Component getName() {
@@ -73,28 +74,39 @@ public class CommonItem {
             lore2.append(serializer.serialize(line));
         }
         boolean lore3 = lore.toString().equalsIgnoreCase(lore2.toString());
-        if (this.material == null) {
-            material = "CHEST";
+        String thisMaterial = this.material;
+        if (thisMaterial == null) {
+            thisMaterial = "CHEST";
         }
-        this.material = this.material.replace("minecraft:", "");
-        boolean material = this.material.equalsIgnoreCase(item.material);
-        return name && lore3 && material;
+        thisMaterial = thisMaterial.replace("minecraft:", "");
+        boolean material = thisMaterial.equalsIgnoreCase(item.material);
+        boolean handler = this.clickHandler == item.clickHandler;
+        return name && lore3 && material && handler;
     }
 
-    public boolean isFeatured() {
-        return isFeatured;
+    @Override
+    public int hashCode() {
+        @NotNull LegacyComponentSerializer serializer = LegacyComponentSerializer.legacyAmpersand();
+        int result = serializer.serialize(name).toLowerCase().hashCode();
+        StringBuilder loreStr = new StringBuilder();
+        for (Component line : lore) {
+            loreStr.append(serializer.serialize(line));
+        }
+        result = 31 * result + loreStr.toString().toLowerCase().hashCode();
+        String mat = material;
+        if (mat == null) mat = "CHEST";
+        mat = mat.replace("minecraft:", "").toLowerCase();
+        result = 31 * result + mat.hashCode();
+        result = 31 * result + (clickHandler != null ? clickHandler.hashCode() : 0);
+        return result;
     }
 
-    public int getSorting() {
-        return sorting;
+    public boolean hasEnchantments() {
+        return enchantments != null && !enchantments.isEmpty();
     }
 
-    public void setMaterial(String chest) {
-        this.material = chest;
-    }
-
-    public boolean isBackground() {
-        return isBackground;
+    public List<EnchantmentData> getEnchantments() {
+        return enchantments;
     }
 
     public int getAmount() {

@@ -1,6 +1,5 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
-import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
@@ -12,11 +11,10 @@ import java.util.List;
 public class ParsedGui {
     private final MineStoreCommon plugin;
     private final List<ParsedCategory> categories = new ArrayList<>();
-    private final CommonInventory inventory;
+
     public ParsedGui(List<?> categories, MineStoreCommon plugin) {
         this.plugin = plugin;
         if (categories.isEmpty()) {
-            this.inventory = this.getInventory();
             return;
         }
         Object first = categories.get(0);
@@ -29,7 +27,6 @@ public class ParsedGui {
                 this.categories.add(new ParsedCategory((NewCategory) category, plugin));
             }
         }
-        this.inventory = this.getInventory();
     }
 
     public ParsedCategory getByItem(CommonItem item) {
@@ -39,19 +36,6 @@ public class ParsedGui {
             }
         }
         return null;
-    }
-
-    public CommonInventory getInventory() {
-        if (this.inventory != null) {
-            return this.inventory;
-        }
-        List<CommonItem> items = new ArrayList<>();
-        for (ParsedCategory category : this.categories) {
-            items.add(category.getItem());
-        }
-        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("title").getValueAsString()), 54, items);
-        plugin.guiData().getGuiInfo().formatInventory(inventory, true);
-        return inventory;
     }
 
     public List<ParsedCategory> getCategories() {

@@ -3,6 +3,7 @@ package me.chrommob.minestore.virtualcurrency.gui;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
+import me.chrommob.minestore.api.interfaces.gui.EnchantmentData;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.virtualcurrency.VirtualCurrencyAddon;
 import net.kyori.adventure.text.Component;
@@ -10,6 +11,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class LeaderboardGui {
@@ -29,7 +31,7 @@ public class LeaderboardGui {
                 .color(NamedTextColor.GOLD)
                 .append(Component.text(" (" + page + ")").color(NamedTextColor.GRAY));
 
-        List<CommonItem> items = new ArrayList<>();
+        CommonItem[] items = new CommonItem[PAGE_SIZE];
 
         int totalPlayers = VirtualCurrencyAddon.getDatabaseManager().getTotalPlayers();
         int totalPages = (int) Math.ceil((double) totalPlayers / ITEMS_PER_PAGE);
@@ -47,28 +49,29 @@ public class LeaderboardGui {
             double balance = Double.parseDouble(player[1]);
 
             CommonItem playerItem = createPlayerItem(username, balance, offset + slot + 1);
-            items.add(playerItem);
+            items[slot] = playerItem;
             slot++;
         }
 
-        for (int i = items.size(); i < ITEMS_PER_PAGE + 6; i++) {
-            CommonItem filler = createFillerItem();
-            items.add(filler);
+        for (int i = items.length - 1; i >= 0; i--) {
+            if (items[i] == null) {
+                items[i] = createFillerItem();
+            }
         }
 
         int buttonSlot = ITEMS_PER_PAGE;
 
         if (page > 1) {
             CommonItem prevItem = createPrevItem(page);
-            items.set(buttonSlot, prevItem);
+            items[buttonSlot] = prevItem;
         }
 
         CommonItem backItem = createBackItem();
-        items.set(buttonSlot + 1, backItem);
+        items[buttonSlot + 1] = backItem;
 
         if (page < totalPages) {
             CommonItem nextItem = createNextItem(page);
-            items.set(buttonSlot + 2, nextItem);
+            items[buttonSlot + 2] = nextItem;
         }
 
         return new CommonInventory(title, PAGE_SIZE, items);
@@ -105,22 +108,26 @@ public class LeaderboardGui {
                 .append(Component.text(" " + VirtualCurrencyAddon.getCurrencySymbol()).color(NamedTextColor.GRAY)));
 
         String material;
+        List<EnchantmentData> enchantments = null;
         switch (rank) {
             case 1:
                 material = "GOLD_BLOCK";
+                enchantments = Collections.singletonList(new EnchantmentData("unbreaking", 1));
                 break;
             case 2:
                 material = "IRON_BLOCK";
+                enchantments = Collections.singletonList(new EnchantmentData("unbreaking", 1));
                 break;
             case 3:
                 material = "COPPER_BLOCK";
+                enchantments = Collections.singletonList(new EnchantmentData("unbreaking", 1));
                 break;
             default:
                 material = "PLAYER_HEAD";
                 break;
         }
 
-        return new CommonItem(name, material, lore, 1);
+        return new CommonItem(name, material, lore, enchantments, 1, null);
     }
 
     private static CommonItem createPrevItem(int page) {

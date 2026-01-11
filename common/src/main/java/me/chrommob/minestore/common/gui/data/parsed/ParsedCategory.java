@@ -1,7 +1,6 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
 import me.chrommob.minestore.api.event.types.GuiClickEvent;
-import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.gui.data.json.old.Category;
@@ -18,16 +17,15 @@ import java.util.function.Consumer;
 public class ParsedCategory {
     private final ParsedCategory root;
     private final MineStoreCommon plugin;
-    private int id;
-    private String name;
-    private Component displayName;
-    private String url;
-    private String material;
+    private final int id;
+    private final String name;
+    private final Component displayName;
+    private final String url;
+    private final String material;
     private final List<ParsedSubCategory> subcategories = new ArrayList<>();
     private final List<ParsedCategory> newCategories = new ArrayList<>();
     private final List<ParsedPackage> packages = new ArrayList<>();
     private final CommonItem item;
-    private final CommonInventory inventory;
 
     public ParsedCategory(Category category, MineStoreCommon plugin) {
         this.plugin = plugin;
@@ -49,8 +47,7 @@ public class ParsedCategory {
                 }
             }
         }
-        this.item = this.getItem();
-        this.inventory = this.getInventory();
+        this.item = createItem();
         this.root = null;
     }
 
@@ -78,32 +75,17 @@ public class ParsedCategory {
                 }
             }
         }
-        this.item = this.getItem();
-        this.inventory = this.getInventory();
+        this.item = createItem();
         this.root = root;
     }
 
-    public Object getByItem(CommonItem item) {
-        if (!newCategories.isEmpty()) {
-            for (ParsedCategory category : this.newCategories) {
-                if (category.getItem() != null && category.getItem().equals(item)) {
-                    return category;
-                }
-            }
-        }
-        if (!subcategories.isEmpty()) {
-            for (ParsedSubCategory subCategory : this.subcategories) {
-                if (subCategory.getItem() != null && subCategory.getItem().equals(item)) {
-                    return subCategory;
-                }
-            }
-        }
-        for (ParsedPackage pack : this.packages) {
-            if (pack.getItem().equals(item)) {
-                return pack;
-            }
-        }
-        return null;
+    private CommonItem createItem() {
+        MiniMessage miniMessage = plugin.miniMessage();
+        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getValueAsString();
+        configName = configName.replace("%category%", this.name);
+        Component name = miniMessage.deserialize(configName);
+        String itemMaterial = material != null ? material : "CHEST";
+        return new CommonItem(name, itemMaterial, new ArrayList<>());
     }
 
     public String getUrl() {
@@ -111,67 +93,23 @@ public class ParsedCategory {
     }
 
     public CommonItem getItem() {
-        return getItem(null);
+        return item;
     }
 
     public CommonItem getItem(Consumer<GuiClickEvent> handler) {
-        if (this.item != null && handler == null) {
-            return this.item;
-        }
-        MiniMessage miniMessage = plugin.miniMessage();
-        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("name").getValueAsString();
-        configName = configName.replace("%category%", this.name);
-        Component name = miniMessage.deserialize(configName);
-        CommonItem item = new CommonItem(name, material, new ArrayList<>(), handler);
-        if (handler == null) {
-            // Only cache if no handler provided
-            return item;
-        }
-        return item;
+        return new CommonItem(item, handler);
+    }
+
+    public List<ParsedSubCategory> getSubCategories() {
+        return subcategories;
+    }
+
+    public List<ParsedCategory> getNewCategories() {
+        return newCategories;
     }
 
     public boolean hasSubcategories() {
         return !subcategories.isEmpty() || !newCategories.isEmpty();
-    }
-
-    public CommonInventory getInventory() {
-        if (this.inventory != null) {
-            return this.inventory;
-        }
-        List<CommonItem> items = new ArrayList<>();
-        if (hasSubcategories()) {
-            if (!subcategories.isEmpty()) {
-                for (ParsedSubCategory subcategory : subcategories) {
-                    items.add(subcategory.getItem());
-                }
-            } else {
-                for (ParsedCategory subcategory : newCategories) {
-                    items.add(subcategory.getItem());
-                }
-            }
-        } else {
-            for (ParsedPackage pack : packages) {
-                items.add(pack.getItem());
-            }
-        }
-        CommonInventory inventory = new CommonInventory(displayName, 54, items);
-        plugin.guiData().getGuiInfo().formatInventory(inventory, false);
-        return inventory;
-    }
-
-    public List<ParsedSubCategory> getSubCategories() {
-        if (hasSubcategories()) {
-            return subcategories;
-        } else {
-            return new ArrayList<>();
-        }
-    }
-    public List<ParsedCategory> getNewCategories() {
-        if (hasSubcategories()) {
-            return newCategories;
-        } else {
-            return new ArrayList<>();
-        }
     }
 
     public ParsedCategory getRoot() {
@@ -180,5 +118,25 @@ public class ParsedCategory {
 
     public List<ParsedPackage> getPackages() {
         return packages;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Component getDisplayName() {
+        return displayName;
+    }
+
+    public int getSorting() {
+        return 0;
+    }
+
+    public boolean isFeatured() {
+        return false;
     }
 }

@@ -23,7 +23,7 @@ public class BuyCommand {
         }
         plugin.runOnMainThread(() -> {
             if (plugin.guiData().getParsedGui() != null) {
-                commonUser.openInventory(plugin.guiData().getParsedGui().getInventory());
+                commonUser.openInventory(plugin.guiData().getOrCreateRootInventory());
             }
         });
     }

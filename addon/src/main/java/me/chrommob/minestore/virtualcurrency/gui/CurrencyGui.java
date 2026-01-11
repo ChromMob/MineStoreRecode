@@ -1,6 +1,5 @@
 package me.chrommob.minestore.virtualcurrency.gui;
 
-import me.chrommob.minestore.api.event.types.GuiClickEvent;
 import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.virtualcurrency.VirtualCurrencyAddon;
@@ -10,7 +9,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class CurrencyGui {
 
@@ -27,23 +25,22 @@ public class CurrencyGui {
                 .decorate(TextDecoration.BOLD)
                 .color(NamedTextColor.GOLD);
 
-        List<CommonItem> items = new ArrayList<>();
+        CommonItem[] items = new CommonItem[27];
 
         CommonItem balanceItem = createBalanceItem(balance, playerName);
-        items.add(balanceItem);
+        items[0] = balanceItem;
 
         CommonItem rankItem = createRankItem(rank, totalPlayers);
-        items.add(rankItem);
+        items[1] = rankItem;
 
         CommonItem leaderboardItem = createLeaderboardItem();
-        items.add(leaderboardItem);
+        items[2] = leaderboardItem;
 
         CommonItem closeItem = createCloseItem();
-        items.add(closeItem);
+        items[3] = closeItem;
 
-        for (int i = items.size(); i < 27; i++) {
-            CommonItem filler = createFillerItem();
-            items.add(filler);
+        for (int i = 4; i < items.length; i++) {
+            items[i] = createFillerItem();
         }
 
         return new CommonInventory(title, 27, items);
@@ -114,7 +111,7 @@ public class CurrencyGui {
 
         List<Component> lore = new ArrayList<>();
 
-        return new CommonItem(name, "GRAY_STAINED_GLASS_PANE", lore, true);
+        return new CommonItem(name, "GRAY_STAINED_GLASS_PANE", lore);
     }
 
     private static String formatBalance(double balance) {

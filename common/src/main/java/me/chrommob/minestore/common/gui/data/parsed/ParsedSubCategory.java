@@ -1,6 +1,5 @@
 package me.chrommob.minestore.common.gui.data.parsed;
 
-import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.gui.CommonItem;
 import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.gui.data.json.old.Package;
@@ -13,13 +12,12 @@ import java.util.List;
 
 public class ParsedSubCategory {
     private final MineStoreCommon plugin;
-    private ParsedCategory root;
-    private String name;
-    private String url;
-    private String material;
-    private List<ParsedPackage> packages = new ArrayList<>();
+    private final ParsedCategory root;
+    private final String name;
+    private final String url;
+    private final String material;
+    private final List<ParsedPackage> packages = new ArrayList<>();
     private final CommonItem item;
-    private final CommonInventory inventory;
 
     public ParsedSubCategory(SubCategory subCategory, List<Package> packages, ParsedCategory root, MineStoreCommon plugin) {
         this.plugin = plugin;
@@ -36,8 +34,16 @@ public class ParsedSubCategory {
                 this.packages.add(new ParsedPackage(pack, this, plugin));
             }
         }
-        this.item = this.getItem();
-        this.inventory = this.getInventory();
+        this.item = createItem();
+    }
+
+    private CommonItem createItem() {
+        MiniMessage miniMessage = plugin.miniMessage();
+        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("subcategory").getKey("name").getValueAsString();
+        configName = configName.replace("%subcategory%", this.name);
+        Component name = miniMessage.deserialize(configName);
+        String itemMaterial = material != null ? material : "CHEST";
+        return new CommonItem(name, itemMaterial, new ArrayList<>());
     }
 
     public ParsedPackage getByItem(CommonItem item) {
@@ -57,31 +63,23 @@ public class ParsedSubCategory {
         return root;
     }
 
-    public CommonItem getItem() {
-        if (item != null) {
-            return item;
-        }
-        MiniMessage miniMessage = plugin.miniMessage();
-        String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("subcategory").getKey("name").getValueAsString();
-        configName = configName.replace("%subcategory%", this.name);
-        Component name = miniMessage.deserialize(configName);
-        return new CommonItem(name, material, new ArrayList<>());
+    public ParsedCategory getParent() {
+        return root;
     }
 
-    public CommonInventory getInventory() {
-        if (inventory != null) {
-            return inventory;
-        }
-        List<CommonItem> items = new ArrayList<>();
-        for (ParsedPackage pack : this.packages) {
-            items.add(pack.getItem());
-        }
-        CommonInventory inventory = new CommonInventory(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("title").getValueAsString().replace("%subcategory%", name)), 54, items);
-        plugin.guiData().getGuiInfo().formatInventory(inventory, false);
-        return inventory;
+    public CommonItem getItem() {
+        return item;
     }
 
     public List<ParsedPackage> getPackages() {
         return packages;
+    }
+
+    public int getSorting() {
+        return 0;
+    }
+
+    public boolean isFeatured() {
+        return false;
     }
 }

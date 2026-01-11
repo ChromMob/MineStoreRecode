@@ -218,11 +218,11 @@ public class CommandStorage {
         String command = parsedResponse.command();
         String username = parsedResponse.username();
         int requestId = parsedResponse.commandId();
-        if (ConfigKeys.COMMAND_EXEC_LOGGING.getValue()) {
-            plugin.log("Executing command: " + command);
-        }
         MineStoreExecuteEvent event = new MineStoreExecuteEvent(username, command, requestId);
         event.call();
+        if (!event.isCancelled() &&ConfigKeys.COMMAND_EXEC_LOGGING.getValue()) {
+            plugin.log("Executing command: " + command);
+        }
         Registries.COMMAND_EXECUTER.get().execute(event);
     }
 

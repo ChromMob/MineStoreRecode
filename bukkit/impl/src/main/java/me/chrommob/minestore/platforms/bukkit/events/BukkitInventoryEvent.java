@@ -22,7 +22,7 @@ public class BukkitInventoryEvent implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        InventoryHolder holder = event.getView().getTopInventory().getHolder();
+        InventoryHolder holder = event.getInventory().getHolder();
 
         if (!(holder instanceof MineStoreInventoryHolder)) {
             return;
@@ -34,11 +34,11 @@ public class BukkitInventoryEvent implements Listener {
         CommonUser user = Registries.USER_GETTER.get().get(event.getWhoClicked().getUniqueId()).commonUser();
 
         int rawSlot = event.getRawSlot();
-        if (rawSlot < 0 || rawSlot >= inventory.getItems().size()) {
+        if (rawSlot < 0 || rawSlot >= inventory.size()) {
             return;
         }
 
-        CommonItem clickedItem = inventory.getItems().get(rawSlot);
+        CommonItem clickedItem = inventory.getItem(rawSlot);
         if (clickedItem == null || !clickedItem.hasClickHandler()) {
             return;
         }

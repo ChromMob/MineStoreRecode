@@ -15,6 +15,13 @@ public class GuiOpenener {
     private final GuiData guiData;
     private final CommonItem backItem;
 
+    private static final int[] AUTO_POSITIONS = {
+        10, 11, 12, 13, 14, 15, 16,
+        19, 20, 21, 22, 23, 24, 25,
+        28, 29, 30, 31, 32, 33, 34,
+        37, 38, 39, 40, 41, 42, 43
+    };
+
     public GuiOpenener(GuiData guiData) {
         this.guiData = guiData;
         this.backItem = new CommonItem(
@@ -24,69 +31,51 @@ public class GuiOpenener {
         );
     }
 
-    public void formatInventory(CommonInventory inventory, boolean isRoot) {
-        List<CommonItem> items = inventory.getItems();
-        if (inventory.hasSorting()) {
-            items.sort(Comparator.comparingInt(CommonItem::getSorting));
-        }
-        if (inventory.hasFeatured()) {
-            items.sort(Comparator.comparing(CommonItem::isFeatured).reversed());
+    public void formatInventory(CommonInventory inventory, SortedItem[] sortedItems, boolean isRoot) {
+        int size = inventory.getSize();
+
+        List<SortedItem> sortedList = new ArrayList<>();
+        for (SortedItem item : sortedItems) {
+            sortedList.add(item);
         }
 
-        CommonItem glassPane = new CommonItem(Component.text(" "), ConfigKeys.BUY_GUI_KEYS.CATEGORY_KEYS.ITEM.getValue(), Collections.emptyList(), true);
-        CommonItem air = new CommonItem(Component.text(" "), "AIR", Collections.emptyList(), true);
-        boolean enabled = ConfigKeys.BUY_GUI_KEYS.CATEGORY_KEYS.ENABLED.getValue();
+        sortedList.sort(Comparator.comparing(SortedItem::isFeatured).reversed()
+            .thenComparingInt(SortedItem::getSorting));
 
-        List<CommonItem> newItems = new ArrayList<>();
-        for (int i = 0; i < 54; i++) {
-            if (enabled) {
-                newItems.add(glassPane);
-            } else {
-                newItems.add(air);
+        CommonItem[] newItems = new CommonItem[size];
+
+        for (SortedItem sorted : sortedList) {
+            int slot = findNextAvailableSlot(newItems, size);
+            if (slot != -1) {
+                newItems[slot] = sorted.getItem();
             }
         }
 
-        int index = 0;
-        for (int i = 10; i < 17; i++) {
-            if (index >= items.size()) {
-                break;
+        CommonItem glassPane = new CommonItem(Component.text(" "), ConfigKeys.BUY_GUI_KEYS.CATEGORY_KEYS.ITEM.getValue(), Collections.emptyList());
+        CommonItem air = new CommonItem(Component.text(" "), "AIR", Collections.emptyList());
+        boolean backgroundEnabled = ConfigKeys.BUY_GUI_KEYS.CATEGORY_KEYS.ENABLED.getValue();
+        CommonItem background = backgroundEnabled ? glassPane : air;
+
+        for (int i = 0; i < size; i++) {
+            if (newItems[i] == null) {
+                newItems[i] = background;
             }
-            newItems.set(i, items.get(index));
-            index++;
-        }
-        if (index < items.size()) {
-            for (int i = 19; i < 26; i++) {
-                if (index >= items.size()) {
-                    break;
-                }
-                newItems.set(i, items.get(index));
-                index++;
-            }
-        }
-        if (index < items.size()) {
-            for (int i = 28; i < 35; i++) {
-                if (index >= items.size()) {
-                    break;
-                }
-                newItems.set(i, items.get(index));
-                index++;
-            }
-        }
-        if (index < items.size()) {
-            for (int i = 37; i < 44; i++) {
-                if (index >= items.size()) {
-                    break;
-                }
-                newItems.set(i, items.get(index));
-                index++;
-            }
-        }
-        if (!isRoot) {
-            newItems.set(53, backItem);
         }
 
-        items.clear();
-        items.addAll(newItems);
+        if (!isRoot && ConfigKeys.BUY_GUI_KEYS.BACK_KEYS.ENABLED.getValue()) {
+            newItems[53] = backItem;
+        }
+
+        inventory.setItems(newItems);
+    }
+
+    private int findNextAvailableSlot(CommonItem[] items, int size) {
+        for (int slot : AUTO_POSITIONS) {
+            if (slot < size && items[slot] == null) {
+                return slot;
+            }
+        }
+        return -1;
     }
 
     public CommonItem getBackItem() {

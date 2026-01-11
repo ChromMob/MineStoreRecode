@@ -3,14 +3,14 @@ package me.chrommob.minestore.api.interfaces.gui;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class CommonInventory {
     private final Component title;
     private final int size;
-    private List<CommonItem> items;
+    private CommonItem[] items;
 
-    public CommonInventory(Component title, int size, List<CommonItem> items) {
+    public CommonInventory(Component title, int size, CommonItem[] items) {
         this.title = title;
         this.size = size;
         this.items = items;
@@ -24,37 +24,36 @@ public class CommonInventory {
         return size;
     }
 
-    public List<CommonItem> getItems() {
+    public CommonItem[] getItems() {
         return items;
     }
 
-    public void setItems(List<CommonItem> items) {
+    public void setItems(CommonItem[] items) {
         this.items = items;
     }
 
-    public CommonInventory clone() {
-        return new CommonInventory(title, size, items);
+    public int size() {
+        return items.length;
     }
 
-    public boolean hasSorting() {
-        if (items.isEmpty()) {
-            return false;
+    public CommonItem getItem(int slot) {
+        if (slot < 0 || slot >= items.length) {
+            return null;
         }
-        int sorting = items.get(0).getSorting();
-        for (CommonItem item : items) {
-            if (item.getSorting() != sorting) {
-                return true;
-            }
-        }
-        return false;
+        return items[slot];
     }
 
-    public boolean hasFeatured() {
+    public void setItem(int slot, CommonItem item) {
+        if (slot >= 0 && slot < items.length) {
+            items[slot] = item;
+        }
+    }
+
+    public void forEach(Consumer<CommonItem> action) {
         for (CommonItem item : items) {
-            if (item.isFeatured()) {
-                return true;
+            if (item != null) {
+                action.accept(item);
             }
         }
-        return false;
     }
 }

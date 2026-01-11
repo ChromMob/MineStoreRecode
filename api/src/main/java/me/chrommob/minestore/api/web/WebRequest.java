@@ -126,4 +126,8 @@ public class WebRequest<T> {
     public byte[] getBody() {
         return body;
     }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
 }

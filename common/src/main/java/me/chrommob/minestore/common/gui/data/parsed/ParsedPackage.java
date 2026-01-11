@@ -67,7 +67,8 @@ public class ParsedPackage {
         String configName = plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("name").getValueAsString();
         configName = configName.replace("%package%", this.name);
         Component name = miniMessage.deserialize(configName);
-        return new CommonItem(name, material, lore, featured == 1, sorting);
+        String itemMaterial = material != null ? material : "CHEST";
+        return new CommonItem(name, itemMaterial, lore);
     }
 
     public int getId() {
@@ -88,5 +89,13 @@ public class ParsedPackage {
 
     public Object getRoot() {
         return root;
+    }
+
+    public int getSorting() {
+        return sorting;
+    }
+
+    public boolean isFeatured() {
+        return featured == 1;
     }
 }
