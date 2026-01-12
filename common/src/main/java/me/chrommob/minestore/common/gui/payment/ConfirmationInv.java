@@ -22,15 +22,15 @@ public class ConfirmationInv {
     }
 
     public CommonInventory getInventory() {
-        CommonItem[] items = new CommonItem[27];
+        CommonInventory inventory = new CommonInventory(Component.text("Confirmation").color(NamedTextColor.GREEN), 27);
         for (int i = 0; i < 27; i++) {
-            items[i] = background;
+            inventory.setItem(i, background);
         }
-        items[4] = parsedPackage.getItem();
-        items[20] = confirmationItem;
-        items[24] = denyItem;
+        inventory.setItem(4, parsedPackage.getItem());
+        inventory.setItem(20, confirmationItem);
+        inventory.setItem(24, denyItem);
 
-        return new CommonInventory(Component.text("Confirmation").color(NamedTextColor.GREEN), 27, items);
+        return inventory;
     }
 
     public ParsedPackage getItem() {

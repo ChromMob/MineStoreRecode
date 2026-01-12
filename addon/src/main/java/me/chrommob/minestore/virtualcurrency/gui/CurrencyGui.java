@@ -25,25 +25,17 @@ public class CurrencyGui {
                 .decorate(TextDecoration.BOLD)
                 .color(NamedTextColor.GOLD);
 
-        CommonItem[] items = new CommonItem[27];
+        CommonInventory inventory = new CommonInventory(title, 27);
+        inventory.setItem(0, createBalanceItem(balance, playerName));
+        inventory.setItem(1, createRankItem(rank, totalPlayers));
+        inventory.setItem(2, createLeaderboardItem());
+        inventory.setItem(3, createCloseItem());
 
-        CommonItem balanceItem = createBalanceItem(balance, playerName);
-        items[0] = balanceItem;
-
-        CommonItem rankItem = createRankItem(rank, totalPlayers);
-        items[1] = rankItem;
-
-        CommonItem leaderboardItem = createLeaderboardItem();
-        items[2] = leaderboardItem;
-
-        CommonItem closeItem = createCloseItem();
-        items[3] = closeItem;
-
-        for (int i = 4; i < items.length; i++) {
-            items[i] = createFillerItem();
+        for (int i = 4; i < 27; i++) {
+            inventory.setItem(i, createFillerItem());
         }
 
-        return new CommonInventory(title, 27, items);
+        return inventory;
     }
 
     private static CommonItem createBalanceItem(double balance, String playerName) {
@@ -108,9 +100,7 @@ public class CurrencyGui {
 
     private static CommonItem createFillerItem() {
         Component name = Component.empty();
-
         List<Component> lore = new ArrayList<>();
-
         return new CommonItem(name, "GRAY_STAINED_GLASS_PANE", lore);
     }
 

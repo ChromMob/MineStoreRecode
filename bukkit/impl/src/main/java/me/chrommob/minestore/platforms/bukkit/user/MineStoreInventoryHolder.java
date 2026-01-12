@@ -29,9 +29,9 @@ public class MineStoreInventoryHolder implements InventoryHolder {
     }
 
     private Inventory constructInventory(CommonInventory common, LegacyComponentSerializer serializer) {
-        Inventory inv = Bukkit.createInventory(this, common.getSize(), serializer.serialize(common.getTitle()));
+        Inventory inv = Bukkit.createInventory(this, common.size(), serializer.serialize(common.getTitle()));
 
-        ItemStack[] items = new ItemStack[common.getSize()];
+        ItemStack[] items = new ItemStack[common.size()];
         CommonItem[] commonItems = common.getItems();
         for (int i = 0; i < items.length; i++) {
             if (i < commonItems.length && commonItems[i] != null) {

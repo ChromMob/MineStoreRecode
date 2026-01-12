@@ -32,7 +32,7 @@ public class GuiOpenener {
     }
 
     public void formatInventory(CommonInventory inventory, SortedItem[] sortedItems, boolean isRoot) {
-        int size = inventory.getSize();
+        int size = inventory.size();
 
         List<SortedItem> sortedList = new ArrayList<>();
         for (SortedItem item : sortedItems) {
@@ -66,7 +66,9 @@ public class GuiOpenener {
             newItems[53] = backItem;
         }
 
-        inventory.setItems(newItems);
+        for (int i = 0; i < newItems.length; i++) {
+            inventory.setItem(i, newItems[i]);
+        }
     }
 
     private int findNextAvailableSlot(CommonItem[] items, int size) {

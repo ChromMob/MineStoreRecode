@@ -74,7 +74,12 @@ public class LeaderboardGui {
             items[buttonSlot + 2] = nextItem;
         }
 
-        return new CommonInventory(title, PAGE_SIZE, items);
+        CommonInventory inventory = new CommonInventory(title, PAGE_SIZE);
+        for (int i = 0; i < items.length; i++) {
+            inventory.setItem(i, items[i]);
+        }
+
+        return inventory;
     }
 
     private static CommonItem createPlayerItem(String username, double balance, int rank) {
@@ -182,7 +187,7 @@ public class LeaderboardGui {
     private static CommonItem createFillerItem() {
         Component name = Component.empty();
         List<Component> lore = new ArrayList<>();
-        return new CommonItem(name, "GRAY_STAINED_GLASS_PANE", lore, true);
+        return new CommonItem(name, "GRAY_STAINED_GLASS_PANE", lore);
     }
 
     private static String formatBalance(double balance) {

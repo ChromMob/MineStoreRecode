@@ -10,30 +10,18 @@ public class CommonInventory {
     private final int size;
     private CommonItem[] items;
 
-    public CommonInventory(Component title, int size, CommonItem[] items) {
+    public CommonInventory(Component title, int size) {
         this.title = title;
         this.size = size;
-        this.items = items;
+        this.items = new CommonItem[size];
     }
 
     public @NotNull Component getTitle() {
         return title;
     }
 
-    public int getSize() {
-        return size;
-    }
-
-    public CommonItem[] getItems() {
-        return items;
-    }
-
-    public void setItems(CommonItem[] items) {
-        this.items = items;
-    }
-
     public int size() {
-        return items.length;
+        return size;
     }
 
     public CommonItem getItem(int slot) {
@@ -47,6 +35,10 @@ public class CommonInventory {
         if (slot >= 0 && slot < items.length) {
             items[slot] = item;
         }
+    }
+
+    public CommonItem[] getItems() {
+        return items.clone();
     }
 
     public void forEach(Consumer<CommonItem> action) {

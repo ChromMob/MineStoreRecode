@@ -92,8 +92,7 @@ public class GuiData {
         SortedItem[] items = sortedItems.toArray(new SortedItem[0]);
         CommonInventory inventory = new CommonInventory(
             plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("title").getValueAsString()),
-            54,
-            new CommonItem[0]
+            54
         );
         guiOpenener.formatInventory(inventory, items, true);
         return inventory;
@@ -153,7 +152,7 @@ public class GuiData {
         }
 
         SortedItem[] items = sortedItems.toArray(new SortedItem[0]);
-        CommonInventory inventory = new CommonInventory(category.getDisplayName(), 54, new CommonItem[0]);
+        CommonInventory inventory = new CommonInventory(category.getDisplayName(), 54);
         guiOpenener.formatInventory(inventory, items, false);
 
         return inventory;
@@ -182,8 +181,7 @@ public class GuiData {
         SortedItem[] items = sortedItems.toArray(new SortedItem[0]);
         CommonInventory inventory = new CommonInventory(
             plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("title").getValueAsString().replace("%subcategory%", sub.getUrl())),
-            54,
-            new CommonItem[0]
+            54
         );
         guiOpenener.formatInventory(inventory, items, false);
 
