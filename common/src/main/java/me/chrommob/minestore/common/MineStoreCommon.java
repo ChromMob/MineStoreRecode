@@ -183,6 +183,10 @@ public class MineStoreCommon {
         Component message = null;
         if (!lastVerificationResult.isValid()) {
             String dump = dumper().dump(readDebugLog(), this);
+            if (dump == null) {
+                dump = "Log could not be uploaded due to network failure.";
+            }
+
             message = Component.text("If you need assitance with debugging please send the following log to the support: ").append(Component.text(dump).clickEvent(ClickEvent.openUrl(dump)));
             resetDebugLog();
         }
@@ -442,7 +446,21 @@ public class MineStoreCommon {
         for (MineStoreAddon addon : addons) {
             addonConfigs.get(addon).reloadConfig("config");
         }
+
+        String storeUrl = ConfigKeys.STORE_URL.getValue();
+        if (storeUrl != null && !storeUrl.startsWith("https://")) {
+            if (storeUrl.contains("://")) {
+                String[] prefix = storeUrl.split("://");
+                storeUrl = "https://" + prefix[1];
+            } else {
+                storeUrl = "https://" + storeUrl;
+            }
+            ConfigKeys.STORE_URL.setValue(storeUrl);
+            pluginConfig.saveConfig();
+        }
+
         apiHandler = new ApiHandler(new AuthData(ConfigKeys.STORE_URL.getValue(), ConfigKeys.API_KEYS.ENABLED.getValue(), ConfigKeys.API_KEYS.KEY.getValue()));
+
         new MineStoreReloadEvent().call();
         log("Reloading...");
         pluginConfig.reload();
