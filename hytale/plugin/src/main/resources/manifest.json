@@ -1,0 +1,13 @@
+{
+  "Group": "MineStoreCMS",
+  "Name": "Plugin",
+  "Version": "3.7.6",
+  "Authors": [
+    {
+      "Name": "ChromMob"
+    }
+  ],
+  "Website": "https://minestorecms.com",
+  "Main": "me.chrommob.minestore.platforms.hytale.MineStoreHytalePlugin",
+  "ServerVersion": "*"
+}

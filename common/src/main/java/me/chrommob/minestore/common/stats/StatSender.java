@@ -69,7 +69,7 @@ public class StatSender {
             int playerCount = Registries.USER_GETTER.get().getAllPlayers().size();
             StatJson statJson = new StatJson(SERVERUUID, JAVA_VERSION, PLATFORM_TYPE, PLATFORM_NAME, PLATFORM_VERSION, PLUGIN_VERSION, CORE_COUNT, SYSTEM_ARCHITECTURE, MineStoreCommon.version() == MineStoreVersion.dummy() ? "Pre 3.0.0" : MineStoreCommon.version().toString());
             statJson.setPlayerCount(playerCount);
-            int storePlayerCount = getPlayerCount(ConfigKeys.STORE_URL.getValue());
+            int storePlayerCount = getPlayerCount();
             String json;
             if (storePlayerCount != -1) {
                 WebStoreJson webStoreJson = new WebStoreJson(STORE_UUID, storePlayerCount);
@@ -117,7 +117,7 @@ public class StatSender {
         return json.get("players").getAsJsonObject().get("online").getAsInt();
     }
 
-    private int getPlayerCount(String storeUrl) {
+    private int getPlayerCount() {
         WebRequest<JsonObject> request = new WebRequest.Builder<>(JsonObject.class).path("settings/get").type(WebRequest.Type.GET).build();
         Result<JsonObject, WebContext> res = common.apiHandler().request(request);
         if (res.isError()) {
@@ -130,7 +130,10 @@ public class StatSender {
             return 0;
         }
         String ip = jsonObject.getAsJsonObject("server").get("ip").getAsString();
-        int port = jsonObject.getAsJsonObject("server").get("port").getAsInt();
+        int port = 25565;
+        try {
+            port = jsonObject.getAsJsonObject("server").get("port").getAsInt();
+        } catch (Exception ignored) {}
         return getPlayerCount(ip, port);
     }
 }

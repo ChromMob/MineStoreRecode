@@ -18,9 +18,8 @@ public class Dumper {
         WebRequest<String> request = new WebRequest.Builder<>(String.class).customUrl("https://paste.chrommob.fun/post").type(WebRequest.Type.POST).strBody(gson.toJson(new DumpData(log, plugin))).build();
         Result<String, WebContext> res = plugin.apiHandler().request(request);
         if (res.isError()) {
-            plugin.log("Failed to dump log");
             plugin.debug(this.getClass(), res.context());
-            return null;
+            return "Failed to dump log";
         }
 
         if (res.context().responseCode() == 201) {

@@ -24,6 +24,10 @@ allprojects {
             mavenContent { snapshotsOnly() }
         }
         maven {
+            name = "hytale-release"
+            url = "https://maven.hytale.com/release"
+        }
+        maven {
             name = 'paper-repo'
             url = 'https://repo.papermc.io/repository/maven-public/'
         }
@@ -59,7 +63,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.7.6'
+    version = '3.7.7'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")
@@ -175,6 +179,7 @@ tasks.clean.dependsOn(clearResources)
 
 tasks.register("copyJar", Copy) {
     dependsOn(":common:shadowJar")
+    dependsOn(":hytale:hytale-impl:shadowJar")
     dependsOn(":bukkit:bukkit-impl:shadowJar")
     dependsOn(":bukkit:impl:kyori:compat:shadowJar")
     dependsOn(":bukkit:impl:kyori:native:shadowJar")
@@ -186,6 +191,11 @@ tasks.register("copyJar", Copy) {
     doFirst {
         delete("src/main/resources/jars/**.jar")
     }
+
+    from(project(":hytale:hytale-impl").tasks.named("shadowJar")) {
+        rename { "MineStore-Hytale.jarjar" }
+    }
+
     from(project(":bukkit:bukkit-impl").tasks.named("shadowJar")) {
         rename { "MineStore-Bukkit.jarjar" }
     }
@@ -226,6 +236,7 @@ dependencies {
     implementation project(path: ':bungee:bungee-plugin', configuration: 'shadow')
     implementation project(path: ':bukkit:bukkit-plugin', configuration: 'shadow')
     implementation project(path: ':velocity:velocity-plugin', configuration: 'shadow')
+    implementation project(path: ':hytale:hytale-plugin', configuration: 'shadow')
     //implementation project(path: ':fabric:fabric-plugin', configuration: 'shadow')
 //    implementation project(path: ':MineStore-Sponge', configuration: 'shadow')
 }

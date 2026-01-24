@@ -40,6 +40,9 @@ public final class ConfigKeys {
 
     private static final Map<String, ConfigWrapper> langMap = new HashMap<>();
     private static final Function<String, String> URL_STANDARDIZER = s -> {
+        if (!s.startsWith("https://")) {
+            s =  "https://" + s;
+        }
         if (s.endsWith("/")) {
             return s;
         } else {

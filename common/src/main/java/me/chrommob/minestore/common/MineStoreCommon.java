@@ -169,19 +169,12 @@ public class MineStoreCommon {
         }
         if (!reload)
             registerEssentialCommands();
-        String storeUrl = ConfigKeys.STORE_URL.getValue();
-        if (!storeUrl.startsWith("https://")) {
-            if (storeUrl.contains("://")) {
-                String[] prefix = storeUrl.split("://");
-                storeUrl = "https://" + prefix[1];
-            } else
-                storeUrl = "https://" + storeUrl;
-            ConfigKeys.STORE_URL.setValue(storeUrl);
-            pluginConfig.saveConfig();
-        }
         VerificationResult lastVerificationResult = verify();
         Component message = null;
         if (!lastVerificationResult.isValid()) {
+            for (String er : lastVerificationResult.messages()) {
+                Registries.LOGGER.get().log(er);
+            }
             String dump = dumper().dump(readDebugLog(), this);
             message = Component.text("If you need assitance with debugging please send the following log to the support: ").append(Component.text(dump).clickEvent(ClickEvent.openUrl(dump)));
             resetDebugLog();
@@ -501,7 +494,7 @@ public class MineStoreCommon {
         if (Registries.PLAYER_JOIN_LISTENER.get() == null) {
             return new VerificationResult(false, Collections.singletonList("PlayerEventListener is not registered."), VerificationResult.TYPE.SUPPORT);
         }
-        if (Registries.COMMAND_MANAGER.get() == null) {
+        if (Registries.COMMAND_MANAGER.get() == null && !Registries.PLATFORM.get().equals("hytale")) {
             return new VerificationResult(false, Collections.singletonList("CommandManager is not registered."), VerificationResult.TYPE.SUPPORT);
         }
         if (configManager == null) {

@@ -3,7 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         mavenLocal()
         maven {
-            url "https://jitpack.io"
+            url = "https://jitpack.io"
         }
         maven {
             name = 'Fabric'
@@ -16,6 +16,7 @@ pluginManagement {
 rootProject.name = 'MineStore'
 
 include "common"
+include "hytale:plugin", "hytale:impl"
 include "bukkit:impl:kyori:compat", "bukkit:impl:kyori:native"
 include "bukkit:impl", "bukkit:plugin"
 include "velocity:impl", "velocity:plugin"
@@ -28,6 +29,12 @@ include "classloader"
 project(":bukkit:impl:kyori:compat").projectDir = file("bukkit/impl/kyori/compat")
 
 project(":bukkit:impl:kyori:native").projectDir = file("bukkit/impl/kyori/native")
+
+project(":hytale:impl").projectDir = file("hytale/impl")
+project(":hytale:impl").name = "hytale-impl"
+
+project(":hytale:plugin").projectDir = file("hytale/plugin")
+project(":hytale:plugin").name = "hytale-plugin"
 
 project(":bukkit:plugin").projectDir = file("bukkit/plugin")
 project(":bukkit:plugin").name = "bukkit-plugin"
