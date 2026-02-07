@@ -64,7 +64,7 @@ public final class AuthHolder {
 
     private void postAuthCompleted(ParsedResponse parsedResponse) {
         plugin.debug(this.getClass(), "Posting auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
-        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).path("game_auth/confirm/" + parsedResponse.authId()).requiresApiKey(true).type(WebRequest.Type.POST).body(new byte[1]).build();
+        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).path("game_auth/confirm/" + parsedResponse.authId()).requiresApiKey(false).type(WebRequest.Type.POST).body(new byte[1]).build();
         Result<Void, WebContext> res = plugin.apiHandler().request(request);
         if (res.isError()) {
             plugin.log("Failed to post auth completed for " + parsedResponse.username() + " with id " + parsedResponse.authId());
