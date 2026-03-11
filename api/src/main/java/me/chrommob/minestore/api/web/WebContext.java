@@ -15,6 +15,7 @@ public class WebContext extends Exception {
         super("Error occurred while making request to MineStore API!" + System.lineSeparator()
                 +"URL: " + url + System.lineSeparator()
                 + "Method: " + request.getType().name() + System.lineSeparator()
+                + "Request headers: " + request.getHeaders() + System.lineSeparator()
                 + "Request: " + request.getParams() + System.lineSeparator()
                 + "Body: " + (request.getBody() == null ? "null" : new String(request.getBody())) + System.lineSeparator()
                 + "Response code: " + responseCode + System.lineSeparator()
@@ -32,6 +33,7 @@ public class WebContext extends Exception {
         super("Error occurred while making request to MineStore API!" + System.lineSeparator()
                 +"URL: " + url + System.lineSeparator()
                 + "Method: " + request.getType().name() + System.lineSeparator()
+                + "Request headers: " + request.getHeaders() + System.lineSeparator()
                 + "Request: " + request.getParams() + System.lineSeparator()
                 + "Body: " + (request.getBody() == null ? "null" : new String(request.getBody())) + System.lineSeparator()
                 + "Response code: " + responseCode + System.lineSeparator()
@@ -49,6 +51,7 @@ public class WebContext extends Exception {
         super("Error occurred while making request to MineStore API!" + System.lineSeparator()
                 +"URL: " + url + System.lineSeparator()
                 + "Method: " + request.getType().name() + System.lineSeparator()
+                + "Request headers: " + request.getHeaders() + System.lineSeparator()
                 + "Request: " + request.getParams() + System.lineSeparator()
                 + "Body: " + (request.getBody() == null ? "null" : new String(request.getBody())) + System.lineSeparator()
                 + "Response code: " + responseCode + System.lineSeparator()
@@ -66,6 +69,7 @@ public class WebContext extends Exception {
         super("Error occurred while making request to MineStore API!" + System.lineSeparator()
                 + "URL: " + url + System.lineSeparator()
                 + "Method: " + request.getType().name() + System.lineSeparator()
+                + "Request headers: " + request.getHeaders() + System.lineSeparator()
                 + "Request: " + request.getParams() + System.lineSeparator()
                 + "Body: " + (request.getBody() == null ? "null" : new String(request.getBody())), cause);
         this.isCloudflare = false;
