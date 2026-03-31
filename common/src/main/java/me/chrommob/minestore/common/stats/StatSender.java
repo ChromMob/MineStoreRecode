@@ -86,7 +86,10 @@ public class StatSender {
         WebRequest<Void> request = new WebRequest.Builder<>(Void.class).customUrl("https://api.chrommob.fun/minestore/data").type(WebRequest.Type.POST).strBody(json).header("Content-Type", "application/json").build();
         Result<Void, WebContext> res = common.apiHandler().request(request);
         if (res.isError()) {
-            common.log("Failed to send stat data");
+            if (res.context().responseCode() == 429)
+                common.log("Stat rate limited, one secret key is used over multiple servers.");
+            else
+                common.log("Failed to send stat data");
             common.debug(this.getClass(), res.context());
         }
     }
@@ -96,7 +99,10 @@ public class StatSender {
         WebRequest<Void> request = new WebRequest.Builder<>(Void.class).customUrl("https://api.chrommob.fun/minestore/playerCountData").type(WebRequest.Type.POST).strBody(json).header("Content-Type", "application/json").build();
         Result<Void, WebContext> res = common.apiHandler().request(request);
         if (res.isError()) {
-            common.log("Failed to send store data");
+            if (res.context().responseCode() == 429)
+                common.log("Store rate limited, one secret key is used over multiple servers.");
+            else
+                common.log("Failed to send store data");
             common.debug(this.getClass(), res.context());
         }
     }
