@@ -3,6 +3,7 @@ package me.chrommob.minestore.common.stats;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
 import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
@@ -120,7 +121,13 @@ public class StatSender {
         if (!json.has("players") || !json.get("players").isJsonObject() || !json.get("players").getAsJsonObject().has("online") || !json.get("players").getAsJsonObject().get("online").isJsonPrimitive()) {
             return 0;
         }
-        return json.get("players").getAsJsonObject().get("online").getAsInt();
+        JsonPrimitive jsonPrimitive = json.get("players").getAsJsonObject().get("online").getAsJsonPrimitive();
+        if (jsonPrimitive.isNumber()) {
+            return jsonPrimitive.getAsInt();
+        }
+        common.log("Failed to get player count. Invalid response: " + jsonPrimitive);
+        common.debug(this.getClass(), res.context());
+        return 0;
     }
 
     private int getPlayerCount() {
