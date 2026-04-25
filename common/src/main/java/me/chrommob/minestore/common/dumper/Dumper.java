@@ -19,7 +19,7 @@ public class Dumper {
         Result<String, WebContext> res = plugin.apiHandler().request(request);
         if (res.isError()) {
             plugin.debug(this.getClass(), res.context());
-            return "Failed to dump log";
+            return null;
         }
 
         if (res.context().responseCode() == 201) {

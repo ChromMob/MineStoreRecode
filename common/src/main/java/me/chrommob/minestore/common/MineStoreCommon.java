@@ -176,7 +176,11 @@ public class MineStoreCommon {
                 Registries.LOGGER.get().log(er);
             }
             String dump = dumper().dump(readDebugLog(), this);
-            message = Component.text("If you need assitance with debugging please send the following log to the support: ").append(Component.text(dump).clickEvent(ClickEvent.openUrl(dump)));
+            if (dump != null) {
+                message = Component.text("If you need assitance with debugging please send the following log to the support: ").append(Component.text(dump).clickEvent(ClickEvent.openUrl(dump)));
+            } else {
+                message = Component.text("Failed to dump log, send debug.log from plugins/MineStore/logs folder to the support.");
+            }
             resetDebugLog();
         }
         verificationManager = new VerificationManager(this, lastVerificationResult, message);
