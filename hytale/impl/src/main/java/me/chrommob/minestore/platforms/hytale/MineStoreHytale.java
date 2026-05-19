@@ -30,7 +30,7 @@ public class MineStoreHytale implements MineStorePlugin {
         Registries.SCHEDULER.set(runnable -> Registries.MINESTORE_SCHEDULER.get().runDelayed(new MineStoreScheduledTask("hytale", runnable, 0)));
         Registries.USER_GETTER.set(new HytaleUserGetter());
         Registries.HOSTNAME.set(HytaleServer.get().getConfig().getMotd());
-        Registries.IP.set(InetSocketAddress.createUnresolved("0.0.0.0", HytaleServer.DEFAULT_PORT));
+        Registries.IP.set(new InetSocketAddress("0.0.0.0", HytaleServer.DEFAULT_PORT));
         Registries.PLAYER_JOIN_LISTENER.set(new HytalePlayerJoinListener());
         Registries.COMMAND_EXECUTER.set(new HytaleCommandExecuter());
         common.init(false);
