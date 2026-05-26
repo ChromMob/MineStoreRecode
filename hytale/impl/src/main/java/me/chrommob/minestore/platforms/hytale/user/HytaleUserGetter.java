@@ -7,10 +7,7 @@ import me.chrommob.minestore.api.interfaces.commands.CommonConsoleUser;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.interfaces.user.UserGetter;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class HytaleUserGetter implements UserGetter {
     private final Universe universe = Universe.get();
@@ -29,7 +26,7 @@ public class HytaleUserGetter implements UserGetter {
 
     @Override
     public Set<AbstractUser> getAllPlayers() {
-        List<PlayerRef> players = universe.getPlayers();
+        Collection<PlayerRef> players = universe.getPlayers();
         Set<AbstractUser> users = new HashSet<>();
         for (PlayerRef player : players) {
             users.add(new AbstractUser(player == null ? new CommonConsoleUser() : new HytaleUser(player), player));

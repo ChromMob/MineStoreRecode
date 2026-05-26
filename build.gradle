@@ -28,6 +28,10 @@ allprojects {
             url = "https://maven.hytale.com/release"
         }
         maven {
+            name = "hytale-pre-release"
+            url = "https://maven.hytale.com/pre-release"
+        }
+        maven {
             name = 'paper-repo'
             url = 'https://repo.papermc.io/repository/maven-public/'
         }
@@ -63,7 +67,7 @@ allprojects {
     def targetJavaVersion = 8
     def encoding = 'UTF-8'
     group = 'me.chrommob'
-    version = '3.8.3'
+    version = '3.8.4'
     shadowJar {
         setArchiveFileName("${project.name}-${project.version}.jar")
         destinationDirectory = file("${projectDir}/build/libs/")

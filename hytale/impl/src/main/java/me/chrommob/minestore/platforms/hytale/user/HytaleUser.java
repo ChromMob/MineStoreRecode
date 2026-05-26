@@ -13,6 +13,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -69,7 +70,11 @@ public class HytaleUser extends CommonUser {
                 res.complete(false);
                 return;
             }
-            res.complete(playerR.hasPermission(s));
+            try {
+                res.complete((Boolean) playerR.getClass().getDeclaredMethod("hasPermission", String.class).invoke(playerR, s));
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                res.complete(player.hasPermission(s));
+            }
         });
         return res.join();
     }
