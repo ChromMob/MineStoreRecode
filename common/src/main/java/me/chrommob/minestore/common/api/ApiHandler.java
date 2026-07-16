@@ -79,6 +79,9 @@ public class ApiHandler {
                 }
                 try {
                     if (request.getTypeToken() == null) {
+                        if (request.getClazz() == Void.class) {
+                            return new Result<V,WebContext>(null, new WebContext(request, url.toString(), responseCode, responseString.toString(), urlConnection.getHeaderFields()), false);
+                        }
                         return new Result<>(gson.fromJson(responseString.toString(), request.getClazz()), new WebContext(request, url.toString(), responseCode, responseString.toString(), urlConnection.getHeaderFields()), false);
                     }
                     return new Result<>(gson.fromJson(responseString.toString(), request.getTypeToken().getType()), new WebContext(request, url.toString(), responseCode, responseString.toString(), urlConnection.getHeaderFields()), false);

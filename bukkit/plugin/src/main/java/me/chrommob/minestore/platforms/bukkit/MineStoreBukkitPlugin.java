@@ -75,9 +75,9 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
 
         dependencies.add(new MineStorePluginDependency("", "MineStore-Bukkit", "", relocations, null));
 
-        MineStorePluginDependency cloudPaper = MineStorePluginDependency.fromGradle("org.incendo:cloud-paper:2.0.0-beta.15", RepositoryRegistry.MAVEN.getRepository());
-        MineStorePluginDependency cloudBukkit = MineStorePluginDependency.fromGradle("org.incendo:cloud-bukkit:2.0.0-beta.15", RepositoryRegistry.MAVEN.getRepository());
-        MineStorePluginDependency cloudBrigadier = MineStorePluginDependency.fromGradle("org.incendo:cloud-brigadier:2.0.0-beta.15", RepositoryRegistry.MAVEN.getRepository());
+        MineStorePluginDependency cloudPaper = MineStorePluginDependency.fromGradle("org.incendo:cloud-paper:2.0.0-beta.17", RepositoryRegistry.MAVEN.getRepository());
+        MineStorePluginDependency cloudBukkit = MineStorePluginDependency.fromGradle("org.incendo:cloud-bukkit:2.0.0-beta.17", RepositoryRegistry.MAVEN.getRepository());
+        MineStorePluginDependency cloudBrigadier = MineStorePluginDependency.fromGradle("org.incendo:cloud-brigadier:2.0.0-beta.17", RepositoryRegistry.MAVEN.getRepository());
 
         dependencies.add(cloudPaper);
         dependencies.add(cloudBukkit);
