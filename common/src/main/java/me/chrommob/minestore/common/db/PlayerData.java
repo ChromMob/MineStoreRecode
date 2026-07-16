@@ -2,16 +2,17 @@ package me.chrommob.minestore.common.db;
 
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerData {
     private final CommonUser user;
     private final UUID uuid;
     private final String name;
-    private final String prefix;
-    private final String suffix;
-    private final double balance;
-    private final String playerGroup;
+    private String prefix;
+    private String suffix;
+    private double balance;
+    private String playerGroup;
     private boolean firstJoin;
 
     public PlayerData(CommonUser user) {
@@ -26,11 +27,17 @@ public class PlayerData {
     }
 
     public boolean hasChanged() {
+        return hasChanged(true, true, true, true);
+    }
+
+    public boolean hasChanged(boolean syncBalance, boolean syncPrefix, boolean syncSuffix, boolean syncPlayerGroup) {
         if (firstJoin) {
-            firstJoin = false;
             return true;
         }
-        return !user.getPrefix().equals(prefix) || !user.getSuffix().equals(suffix) || user.getBalance() != balance || !user.getGroup().equals(playerGroup);
+        return (syncPrefix && !Objects.equals(user.getPrefix(), prefix))
+                || (syncSuffix && !Objects.equals(user.getSuffix(), suffix))
+                || (syncBalance && Double.compare(user.getBalance(), balance) != 0)
+                || (syncPlayerGroup && !Objects.equals(user.getGroup(), playerGroup));
     }
 
     public UUID getUuid() {
@@ -42,18 +49,27 @@ public class PlayerData {
     }
 
     public String getPrefix() {
-        return prefix;
+        return user.getPrefix();
     }
 
     public String getSuffix() {
-        return suffix;
+        return user.getSuffix();
     }
 
     public double getBalance() {
-        return balance;
+        return user.getBalance();
     }
 
     public String getPlayerGroup() {
-        return playerGroup;
+        return user.getGroup();
+    }
+
+    public void markSynced(boolean syncBalance, boolean syncPrefix, boolean syncSuffix, boolean syncPlayerGroup,
+                           double balance, String prefix, String suffix, String playerGroup) {
+        firstJoin = false;
+        if (syncBalance) this.balance = balance;
+        if (syncPrefix) this.prefix = prefix;
+        if (syncSuffix) this.suffix = suffix;
+        if (syncPlayerGroup) this.playerGroup = playerGroup;
     }
 }

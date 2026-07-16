@@ -14,7 +14,9 @@ import me.chrommob.minestore.common.verification.VerificationResult;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -127,9 +129,13 @@ public class DatabaseManager {
     public final MineStoreScheduledTask updaterTask = new MineStoreScheduledTask("updatePlayerData", this::update, 1000 * 10);
 
     private void update() {
+        boolean syncBalance = ConfigKeys.MYSQL_KEYS.SYNC_BALANCE.getValue();
+        boolean syncPrefix = ConfigKeys.MYSQL_KEYS.SYNC_PREFIX.getValue();
+        boolean syncSuffix = ConfigKeys.MYSQL_KEYS.SYNC_SUFFIX.getValue();
+        boolean syncPlayerGroup = ConfigKeys.MYSQL_KEYS.SYNC_PLAYER_GROUP.getValue();
         Set<PlayerData> changed = ConcurrentHashMap.newKeySet();
         for (PlayerData data : playerData.values()) {
-            if (data.hasChanged()) {
+            if (data.hasChanged(syncBalance, syncPrefix, syncSuffix, syncPlayerGroup)) {
                 changed.add(data);
             }
         }
@@ -137,28 +143,60 @@ public class DatabaseManager {
         if (changed.isEmpty()) {
             return;
         }
+        List<String> syncedColumns = new ArrayList<>();
+        if (syncPrefix) syncedColumns.add("prefix");
+        if (syncSuffix) syncedColumns.add("suffix");
+        if (syncBalance) syncedColumns.add("balance");
+        if (syncPlayerGroup) syncedColumns.add("player_group");
+        String update = createUpsertQuery(syncedColumns);
         try (Connection conn = hikari.getConnection()) {
             for (PlayerData data : changed) {
                 plugin.debug(this.getClass(), "Updating " + data.getName());
-                String update = "INSERT INTO playerdata (uuid, username, prefix, suffix, balance, player_group) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE username = ?, prefix = ?, suffix = ?, balance = ?, player_group = ?";
+                String prefix = syncPrefix ? data.getPrefix() : "";
+                String suffix = syncSuffix ? data.getSuffix() : "";
+                double balance = syncBalance ? data.getBalance() : 0;
+                String playerGroup = syncPlayerGroup ? data.getPlayerGroup() : "";
                 try (PreparedStatement ps = conn.prepareStatement(update)) {
-                    ps.setString(1, data.getUuid().toString());
-                    ps.setString(2, data.getName());
-                    ps.setString(3, data.getPrefix());
-                    ps.setString(4, data.getSuffix());
-                    ps.setDouble(5, data.getBalance());
-                    ps.setString(6, data.getPlayerGroup());
-                    ps.setString(7, data.getName());
-                    ps.setString(8, data.getPrefix());
-                    ps.setString(9, data.getSuffix());
-                    ps.setDouble(10, data.getBalance());
-                    ps.setString(11, data.getPlayerGroup());
+                    int parameter = 1;
+                    ps.setString(parameter++, data.getUuid().toString());
+                    ps.setString(parameter++, data.getName());
+                    parameter = setSyncedValues(ps, parameter, syncBalance, syncPrefix, syncSuffix,
+                            syncPlayerGroup, balance, prefix, suffix, playerGroup);
+                    ps.setString(parameter++, data.getName());
+                    setSyncedValues(ps, parameter, syncBalance, syncPrefix, syncSuffix,
+                            syncPlayerGroup, balance, prefix, suffix, playerGroup);
                     ps.executeUpdate();
+                    data.markSynced(syncBalance, syncPrefix, syncSuffix, syncPlayerGroup,
+                            balance, prefix, suffix, playerGroup);
                 }
             }
         } catch (SQLException e) {
             plugin.debug(this.getClass(), e);
         }
+    }
+
+    static String createUpsertQuery(List<String> syncedColumns) {
+        StringBuilder columns = new StringBuilder("uuid, username");
+        StringBuilder values = new StringBuilder("?, ?");
+        StringBuilder updates = new StringBuilder("username = ?");
+        for (String column : syncedColumns) {
+            columns.append(", ").append(column);
+            values.append(", ?");
+            updates.append(", ").append(column).append(" = ?");
+        }
+        return "INSERT INTO playerdata (" + columns + ") VALUES (" + values
+                + ") ON DUPLICATE KEY UPDATE " + updates;
+    }
+
+    private int setSyncedValues(PreparedStatement ps, int parameter,
+                                boolean syncBalance, boolean syncPrefix, boolean syncSuffix,
+                                boolean syncPlayerGroup, double balance, String prefix,
+                                String suffix, String playerGroup) throws SQLException {
+        if (syncPrefix) ps.setString(parameter++, prefix);
+        if (syncSuffix) ps.setString(parameter++, suffix);
+        if (syncBalance) ps.setDouble(parameter++, balance);
+        if (syncPlayerGroup) ps.setString(parameter++, playerGroup);
+        return parameter;
     }
 
     private void createTable() {

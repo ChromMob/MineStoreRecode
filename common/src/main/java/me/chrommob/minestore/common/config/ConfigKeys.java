@@ -136,6 +136,10 @@ public final class ConfigKeys {
         private MYSQL_KEYS() {}
 
         public static final ConfigKey<Boolean> ENABLED = new ConfigKey<>("enabled", false, Collections.singletonList("If this is enabled the plugin will use MySQL database to sync data with MineStore website."));
+        public static final ConfigKey<Boolean> SYNC_BALANCE = new ConfigKey<>("sync-balance", true, Collections.singletonList("If this is enabled the plugin will sync player balances to the MySQL database."));
+        public static final ConfigKey<Boolean> SYNC_PREFIX = new ConfigKey<>("sync-prefix", true, Collections.singletonList("If this is enabled the plugin will sync player prefixes to the MySQL database."));
+        public static final ConfigKey<Boolean> SYNC_SUFFIX = new ConfigKey<>("sync-suffix", true, Collections.singletonList("If this is enabled the plugin will sync player suffixes to the MySQL database."));
+        public static final ConfigKey<Boolean> SYNC_PLAYER_GROUP = new ConfigKey<>("sync-player-group", true, Collections.singletonList("If this is enabled the plugin will sync player groups to the MySQL database."));
         public static final ConfigKey<String> IP = new ConfigKey<>("ip", "localhost", Collections.singletonList("The IP of the MySQL database."));
         public static final ConfigKey<Integer> PORT = new ConfigKey<>("port", 3306, Collections.singletonList("The port of the MySQL database."));
         public static final ConfigKey<String> DATABASE = new ConfigKey<>("database", "minestore", Collections.singletonList("The name of the MySQL database."));

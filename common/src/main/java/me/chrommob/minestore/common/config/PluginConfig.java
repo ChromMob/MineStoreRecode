@@ -74,6 +74,10 @@ public class PluginConfig extends ConfigWrapper {
 
         List<ConfigKey<?>> mysqlKeys = new ArrayList<>();
         mysqlKeys.add(ConfigKeys.MYSQL_KEYS.ENABLED);
+        mysqlKeys.add(ConfigKeys.MYSQL_KEYS.SYNC_BALANCE);
+        mysqlKeys.add(ConfigKeys.MYSQL_KEYS.SYNC_PREFIX);
+        mysqlKeys.add(ConfigKeys.MYSQL_KEYS.SYNC_SUFFIX);
+        mysqlKeys.add(ConfigKeys.MYSQL_KEYS.SYNC_PLAYER_GROUP);
         mysqlKeys.add(ConfigKeys.MYSQL_KEYS.IP);
         mysqlKeys.add(ConfigKeys.MYSQL_KEYS.PORT);
         mysqlKeys.add(ConfigKeys.MYSQL_KEYS.DATABASE);

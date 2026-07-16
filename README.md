@@ -35,6 +35,11 @@ store-command:
 mysql:
   # If this config option is set to true, the plugin will use MySQL database to store data.
   enabled: true
+  # Choose which player data fields are synchronized. Existing database values are left unchanged when disabled.
+  sync-balance: true
+  sync-prefix: true
+  sync-suffix: true
+  sync-player-group: true
   # This is the host of the MySQL database. This config option is required if MySQL is enabled.
   ip: localhost
   # This is the port of the MySQL database. This config option is required if MySQL is enabled.
