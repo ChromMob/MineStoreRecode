@@ -128,9 +128,11 @@ public class MineStoreCommon {
                     /* Command sender type */ AbstractUser.class);
         });
     }
+    private static final DateTimeFormatter DEBUG_LOG_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("uuuu-MM-dd_HH-mm-ss-SSS");
 
     private File getDebugBackupFile(File debugLogFile) {
-        String formattedTime = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String formattedTime = LocalDateTime.now().format(DEBUG_LOG_TIME_FORMAT);
         File file =  new File(debugLogFile.getParentFile(), "debug" + formattedTime + ".log");
         for (int i = 0; file.exists(); i++) {
             file = new File(file.getParentFile(), "debug" + formattedTime + "-" + i + ".log");

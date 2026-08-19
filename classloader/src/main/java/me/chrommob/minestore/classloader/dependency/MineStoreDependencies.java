@@ -77,7 +77,7 @@ public class MineStoreDependencies {
             }
             if (dependency.getRepository() == null) {
                 try {
-                    boolean same = dependency.verify(File.separator + "jars" + File.separator + dependency.getName() + ".jarjar", file);
+                    boolean same = dependency.verify("/jars/" + dependency.getName() + ".jarjar", file);
                     if (!same) {
                         System.out.println("Copying " + dependency.getName() + ".jarjar to " + file.getAbsolutePath());
                         InputStream in = getClass().getResourceAsStream("/jars/" + dependency.getName() + ".jarjar");
