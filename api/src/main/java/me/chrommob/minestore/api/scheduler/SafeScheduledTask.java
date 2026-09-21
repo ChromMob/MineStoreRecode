@@ -10,7 +10,7 @@ public class SafeScheduledTask {
             long delay = 10000; // fallback delay
             try {
                 delay = handler.run();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 Registries.LOGGER.get().log("Error in executing: " + baseName + " scheduler");
                 if (e.getMessage() != null) {
                     Registries.LOGGER.get().log(e.getMessage());

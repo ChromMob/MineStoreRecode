@@ -3,6 +3,7 @@ package me.chrommob.minestore.api.scheduler;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 public class MineStoreScheduler {
     private static final int DELAY = 100;
-    private final Set<MineStoreScheduledTask> delayed = new HashSet<>();
-    private final Set<MineStoreScheduledTask> tasks = new HashSet<>();
+    private final Set<MineStoreScheduledTask> delayed = ConcurrentHashMap.newKeySet();
+    private final Set<MineStoreScheduledTask> tasks = ConcurrentHashMap.newKeySet();
     private final Queue<MineStoreScheduledTask> toExecute = new ConcurrentLinkedQueue<>();
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 
@@ -34,25 +35,33 @@ public class MineStoreScheduler {
 
     public void start() {
         executor.scheduleAtFixedRate(() -> {
-            Set<MineStoreScheduledTask> tasks = new HashSet<>(this.tasks);
-            for (MineStoreScheduledTask task : tasks) {
-                if (task.shouldRun()) {
-                    toExecute.add(task);
-                    task.markExecuted();
+            try {
+                Set<MineStoreScheduledTask> tasks = new HashSet<>(this.tasks);
+                for (MineStoreScheduledTask task : tasks) {
+                    if (task.shouldRun()) {
+                        toExecute.add(task);
+                        task.markExecuted();
+                    }
                 }
-            }
-            Set<MineStoreScheduledTask> delayed = new HashSet<>(this.delayed);
-            for (MineStoreScheduledTask task : delayed) {
-                if (task.shouldRun()) {
-                    toExecute.add(task);
-                    this.delayed.remove(task);
+                Set<MineStoreScheduledTask> delayed = new HashSet<>(this.delayed);
+                for (MineStoreScheduledTask task : delayed) {
+                    if (task.shouldRun()) {
+                        toExecute.add(task);
+                        this.delayed.remove(task);
+                    }
                 }
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
             }
         }, DELAY, DELAY, TimeUnit.MILLISECONDS);
         executor.scheduleAtFixedRate(() -> {
-            MineStoreScheduledTask task;
-            while ((task = toExecute.poll()) != null) {
-                task.runnable.accept(task);
+            try {
+                MineStoreScheduledTask task;
+                while ((task = toExecute.poll()) != null) {
+                    task.runnable.accept(task);
+                }
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
             }
         }, DELAY, DELAY, TimeUnit.MILLISECONDS);
     }
