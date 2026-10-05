@@ -1,0 +1,65 @@
+name: Build MineStoreRecode
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Build finalJar
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew finalJar --console=plain --stacktrace 2>&1 | tee build-console.log
+          echo "--- finalJar outputs ---"
+          ls -la build/libs
+
+      - name: Publish numbered release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VER=$(grep -oP "^\s*version\s*=\s*'\K[^']+" build.gradle | head -1)
+          N=${{ github.run_number }}
+          JAR=$(ls build/libs/MineStore-"${VER}"*.jar | head -1)
+          cp "${JAR}" "MineStore-${VER}.jar"
+          TAG="v${VER}-b$(printf '%03d' "${N}")"
+          SHA="${GITHUB_SHA::7}"
+          MSG=$(git log -1 --pretty=%s)
+          AUTHOR=$(git log -1 --pretty=%an)
+          {
+            echo "Build #${N} · ${SHA} · ${AUTHOR}"
+            echo
+            echo "${MSG}"
+            echo
+            echo "CI run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > release-notes.md
+          echo "Publishing ${TAG} (build #${N}) from ${SHA}"
+          gh release create "${TAG}" "MineStore-${VER}.jar" build-console.log \
+            --title "MineStore ${VER} · build #${N}" \
+            --notes-file release-notes.md \
+            --latest
