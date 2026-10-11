@@ -36,14 +36,18 @@ public class ProfileManager extends FeatureManager {
         }
         fetching.add(username);
         Registries.MINESTORE_SCHEDULER.get().runDelayed(new MineStoreScheduledTask("profile/" + username, () -> {
-            Result<Profile, WebContext> result = request(new WebRequest.Builder<>(Profile.class).path("profile/" + username).requiresApiKey(true).build());
-            if (result.isError()) {
-                return;
+            try {
+                Result<Profile, WebContext> result = request(new WebRequest.Builder<>(Profile.class).path("profile/" + username).requiresApiKey(true).build());
+                if (result.isError() || result.value() == null) {
+                    return;
+                }
+                Profile profile = result.value();
+                profile.fetched();
+                profiles.put(username, profile);
+            } finally {
+                // Always allow a new attempt, otherwise one failed request blocks this profile until restart.
+                fetching.remove(username);
             }
-            Profile profile = result.value();
-            profile.fetched();
-            profiles.put(username, profile);
-            fetching.remove(username);
         }, 0));
     }
 

@@ -22,6 +22,11 @@ public class PaymentHandler {
 
     public CompletableFuture<Boolean> createPayment(String username, int itemId) {
         return plugin.webListener().createPayment(username, itemId).thenApply(paymentCreationResponse -> {
+            if (paymentCreationResponse == null) {
+                // The request failed (details in the debug log); returning false tells the player.
+                plugin.log("Failed to create payment for " + username + ": the store did not respond");
+                return false;
+            }
             if (!paymentCreationResponse.isSuccess()) {
                 plugin.log("Failed to create payment: " + paymentCreationResponse.getMessage());
                 return false;

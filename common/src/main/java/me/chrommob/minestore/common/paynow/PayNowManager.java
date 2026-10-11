@@ -96,14 +96,14 @@ public class PayNowManager {
         }
         JsonObject responseJson = res.value();
 
-        if (!responseJson.has("gameserver")) {
+        if (responseJson == null || !responseJson.has("gameserver") || !responseJson.get("gameserver").isJsonObject()) {
             mineStoreCommon.log("PayNow API did not return a GameServer object, this may be a transient issue, please try again or contact support.");
             return;
         }
 
         JsonObject gameServer = responseJson.get("gameserver").getAsJsonObject();
-        String gsName = gameServer.get("name").getAsString();
-        String gsId = gameServer.get("id").getAsString();
+        String gsName = gameServer.has("name") ? gameServer.get("name").getAsString() : "unknown";
+        String gsId = gameServer.has("id") ? gameServer.get("id").getAsString() : "unknown";
 
         mineStoreCommon.log("Successfully connected to PayNow using the token for \"" + gsName + "\" (" + gsId + ")");
     }, 0);
@@ -172,6 +172,10 @@ public class PayNowManager {
             return response;
         }
         JsonObject json = res.value();
+        if (json == null) {
+            response.message = "Empty response";
+            return response;
+        }
         if (!json.has("status")) {
             response.message = "No status field";
             return response;
