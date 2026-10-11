@@ -196,7 +196,7 @@ public class MineStoreCommon {
         }
         verificationManager = new VerificationManager(this, lastVerificationResult, message);
         if (!verificationManager.isValid()) {
-            handleError(new WebContext("Verification failed, retrying..."));
+            restartAfterError(new WebContext("Verification failed, retrying..."), "Verification failed");
             return;
         }
         if (!reload) {
@@ -324,23 +324,28 @@ public class MineStoreCommon {
 
     long retryCount = 0;
     private MineStoreScheduledTask retryTask;
+    // A single error right after startup or a reload should not restart everything.
+    private static final int MIN_ERROR_RATE_SAMPLES = 10;
     public void handleError(WebContext error) {
         if (verificationManager == null) {
             return;
         }
         verificationManager.safeIncrementError();
-        if (verificationManager.getErrorRate() < 0.15) {
+        if (verificationManager.getSampleCount() < MIN_ERROR_RATE_SAMPLES || verificationManager.getErrorRate() < 0.15) {
             debug(this.getClass(), "[VerificationManager] Error rate is: " + verificationManager.getErrorRate() + ", continuing...");
             return;
         }
+        restartAfterError(error, "Error rate reached: " + (int) (verificationManager.getErrorRate() * 100) + "%");
+    }
+
+    private void restartAfterError(WebContext error, String reason) {
         if (error.isCloudflare()) {
             log("[VerificationManager] Cloudflare blocked the request, not bothering to retry...");
             stopFeatures();
             verificationManager = new VerificationManager(this, new VerificationResult(false, Collections.singletonList("Cloudflare blocked the request, add cloudflare rule."), VerificationResult.TYPE.WEBSTORE), null);
             return;
         }
-        int percent = (int) (verificationManager.getErrorRate() * 100);
-        log("[VerificationManager] Error rate reached: " + percent +  "%, restarting... in 16 seconds...");
+        log("[VerificationManager] " + reason + ", restarting... in 16 seconds...");
         stopFeatures();
         if (retryTask != null) {
             Registries.MINESTORE_SCHEDULER.get().removeTask(retryTask);

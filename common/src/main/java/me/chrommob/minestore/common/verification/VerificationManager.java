@@ -36,7 +36,7 @@ public class VerificationManager {
             }
             errorCount--;
         }
-        errorRate = (float) errorCount / successCount;
+        updateErrorRate();
     }
 
     public void safeIncrementSuccess() {
@@ -47,11 +47,20 @@ public class VerificationManager {
             }
             successCount--;
         }
-        errorRate =  (float) errorCount / successCount;
+        updateErrorRate();
+    }
+
+    // Share of failed requests; errors / successes was infinite on the first error before any success.
+    private void updateErrorRate() {
+        errorRate = (float) errorCount / (errorCount + successCount);
     }
 
     public float getErrorRate() {
         return errorRate;
+    }
+
+    public int getSampleCount() {
+        return errorCount + successCount;
     }
 
     private Component getMessage(VerificationResult.TYPE type) {
