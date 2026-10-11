@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.lang.reflect.Type;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,22 +43,51 @@ public class NewCommandDumper {
             }
             return new HashMap<>();
         }
-        Map<String, List<StoredCommand>> commands = new HashMap<>();
+        Map<String, List<StoredCommand>> commands = null;
         try (FileReader reader = new FileReader(dumpedFile)) {
             Type listType = new TypeToken<Map<String, List<StoredCommand>>>() {
             }.getType();
             commands = gson.fromJson(reader, listType);
         } catch (Exception e) {
+            // Move the unreadable file aside, otherwise the next update overwrites the pending purchases for good.
+            File backup = new File(dumpedFile.getParentFile(), dumpedFile.getName() + ".corrupt-" + System.currentTimeMillis());
+            if (dumpedFile.renameTo(backup)) {
+                plugin.log("Failed to read pending commands from " + dumpedFile.getName() + "! The file was moved to " + backup.getName() + " so they can be recovered.");
+            } else {
+                plugin.log("Failed to read pending commands from " + dumpedFile.getName() + "! Back the file up before it is overwritten.");
+            }
             plugin.debug(this.getClass(), e);
         }
-        return commands;
+        // An empty file deserializes to null.
+        return commands == null ? new HashMap<>() : commands;
+    }
+
+    // Keeps the old file as a backup after its commands moved to pendingCommands.json, so they are not imported twice.
+    public void markMigrated() {
+        if (!dumpedFile.exists()) {
+            return;
+        }
+        File migrated = new File(dumpedFile.getParentFile(), dumpedFile.getName() + ".migrated");
+        if (!dumpedFile.renameTo(migrated)) {
+            plugin.log("Could not rename " + dumpedFile.getName() + " after importing its commands.");
+        }
     }
 
     public void update(Map<String, List<StoredCommand>> commands) {
         String json = gson.toJson(commands);
-        try (FileWriter writer = new FileWriter(dumpedFile, false)) {
-            writer.write(json);
+        // Write to a temporary file and swap it in, so a crash mid-write cannot corrupt the stored commands.
+        File tempFile = new File(dumpedFile.getParentFile(), dumpedFile.getName() + ".tmp");
+        try {
+            try (FileWriter writer = new FileWriter(tempFile, false)) {
+                writer.write(json);
+            }
+            try {
+                Files.move(tempFile.toPath(), dumpedFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(tempFile.toPath(), dumpedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (Exception e) {
+            plugin.log("Failed to save pending commands to " + dumpedFile.getName() + ", they are only kept in memory until the next restart!");
             plugin.debug(this.getClass(), e);
         }
     }

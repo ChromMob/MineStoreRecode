@@ -17,6 +17,11 @@ dependencies {
 
     compileOnly("org.incendo:cloud-annotations:2.0.0-SNAPSHOT")
     compileOnly("org.incendo:cloud-core:2.0.0-SNAPSHOT")
+
+    // The server provides the compileOnly libraries at runtime, tests need them on their own classpath.
+    testImplementation("org.incendo:cloud-annotations:2.0.0-SNAPSHOT")
+    testImplementation("org.incendo:cloud-core:2.0.0-SNAPSHOT")
+    testImplementation "net.kyori:adventure-text-minimessage:4.18.0"
 }
 
 shadowJar {

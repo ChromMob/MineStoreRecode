@@ -17,6 +17,7 @@ import me.chrommob.minestore.common.MineStoreCommon;
 import me.chrommob.minestore.common.commandGetters.dataTypes.GsonReponse;
 import me.chrommob.minestore.common.commandGetters.dataTypes.PostResponse;
 import me.chrommob.minestore.common.commandHolder.type.CheckResponse;
+import me.chrommob.minestore.common.commandHolder.type.PendingCommand;
 import me.chrommob.minestore.common.config.ConfigKeys;
 import me.chrommob.minestore.common.gui.payment.PaymentCreationResponse;
 import me.chrommob.minestore.common.verification.VerificationResult;
@@ -27,9 +28,9 @@ import java.util.concurrent.CompletableFuture;
 public class WebListener {
     private final MineStoreVersion arraySupportedSince = new MineStoreVersion(3, 2, 5);
     private final MineStoreCommon plugin;
-    private boolean wasEmpty = false;
-    private final Set<String> toPostExecuted = new HashSet<>();
     public final MineStoreScheduledTask mineStoreScheduledTask;
+    // Commands saved before a crash or restart are run on the first poll.
+    private boolean ranWaiting = false;
 
     private List<ParsedResponse> fetchData() {
         List<ParsedResponse> parsedResponses = new ArrayList<>();
@@ -70,78 +71,127 @@ public class WebListener {
         return parsedResponses;
     }
 
-    private void handleExecuted() {
-        if (toPostExecuted.isEmpty()) {
-            return;
-        }
-        Set<String> toPostExecutedCopy = new HashSet<>(toPostExecuted);
-        toPostExecuted.clear();
-        if (MineStoreCommon.version().requires(arraySupportedSince)) {
-            postExecutedAsync(toPostExecutedCopy);
-            return;
-        }
-        for (String id : toPostExecutedCopy) {
-            postExecutedAsync(id);
-        }
-    }
-
     public WebListener(MineStoreCommon plugin) {
         this.plugin = plugin;
         mineStoreScheduledTask = SafeScheduledTask.wrap("weblistener", () -> {
-            handleExecuted();
             plugin.debug(this.getClass(), "Running...");
-            List<ParsedResponse> parsedResponses = fetchData();
-            if (wasEmpty || parsedResponses.isEmpty()) {
-                plugin.debug(this.getClass(), wasEmpty ? "Issue while parsing json" : "Parsed responses is empty");
-                wasEmpty = false;
-                return 9500;
+            if (!MineStoreCommon.version().requires("3.0.0")) {
+                return legacyPoll();
             }
-            Set<Integer> toPostDelivered = new HashSet<>();
-            List<ParsedResponse> commands = new ArrayList<>();
-            for (ParsedResponse parsedResponse : parsedResponses) {
-                if (parsedResponse.type() != ParsedResponse.TYPE.COMMAND) {
-                    continue;
-                }
-                MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStoreEvent.COMMAND_TYPE.ONLINE : MineStoreEvent.COMMAND_TYPE.OFFLINE);
-                event.call();
-                ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStoreEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
-                commands.add(new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id()));
-                plugin.debug(this.getClass(), "Got command: " + "\"" + parsedResponse.command() + "\""
-                        + " with id: " + parsedResponse.commandId() + " for player: "
-                        + parsedResponse.username() + " requires online: "
-                        + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
-                        ? "true"
-                        : "false"));
-            }
-            plugin.commandStorage().listener(commands);
-            for (ParsedResponse parsedResponse : parsedResponses) {
-                toPostDelivered.add(parsedResponse.commandId());
-                if (parsedResponse.type() == ParsedResponse.TYPE.AUTH) {
-                    plugin.debug(this.getClass(), "Got auth for player: " + parsedResponse.username() + " with id: "
-                            + parsedResponse.authId());
-                    plugin.authHolder().listener(parsedResponse);
-                }
-                if (MineStoreCommon.version().requires("3.0.0")) {
-                    if (!MineStoreCommon.version().requires(arraySupportedSince)) {
-                        postDelivered(String.valueOf(parsedResponse.commandId()));
-                    }
-                    if (parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.OFFLINE) {
-                        postExecuted(String.valueOf(parsedResponse.commandId()));
-                    }
-                } else {
-                    postExecuted(String.valueOf(parsedResponse.commandId()));
-                }
-            }
-            if (MineStoreCommon.version().requires(arraySupportedSince)) {
-                int[] toPostDeliveredArray = new int[toPostDelivered.size()];
-                int i = 0;
-                for (Integer id : toPostDelivered) {
-                    toPostDeliveredArray[i++] = id;
-                }
-                postDelivered(toPostDeliveredArray);
-            }
-            return 500;
+            return poll();
         });
+    }
+
+    private long poll() {
+        if (!ranWaiting) {
+            ranWaiting = true;
+            plugin.commandStorage().runWaiting();
+        }
+        List<ParsedResponse> parsedResponses = fetchData();
+        List<ParsedResponse> commands = new ArrayList<>();
+        Set<Integer> authIds = new HashSet<>();
+        for (ParsedResponse parsedResponse : parsedResponses) {
+            if (parsedResponse.type() == ParsedResponse.TYPE.AUTH) {
+                plugin.debug(this.getClass(), "Got auth for player: " + parsedResponse.username() + " with id: "
+                        + parsedResponse.authId());
+                plugin.authHolder().listener(parsedResponse);
+                authIds.add(parsedResponse.commandId());
+                continue;
+            }
+            commands.add(applyPurchaseEvent(parsedResponse));
+        }
+        // Saved before confirming the delivery, the store never hands out a delivered command again.
+        List<PendingCommand> received = plugin.commandStorage().receive(commands);
+        confirmDelivered(authIds);
+        plugin.commandStorage().run(received);
+        // Also confirms commands executed since the last poll, e.g. by a player joining.
+        confirmExecuted();
+        return parsedResponses.isEmpty() ? 9500 : 500;
+    }
+
+    // Store versions before 3.0.0 only know "executed", which is confirmed on receipt.
+    private long legacyPoll() {
+        List<ParsedResponse> parsedResponses = fetchData();
+        if (parsedResponses.isEmpty()) {
+            return 9500;
+        }
+        List<ParsedResponse> commands = new ArrayList<>();
+        for (ParsedResponse parsedResponse : parsedResponses) {
+            if (parsedResponse.type() == ParsedResponse.TYPE.AUTH) {
+                plugin.authHolder().listener(parsedResponse);
+            } else {
+                commands.add(applyPurchaseEvent(parsedResponse));
+            }
+        }
+        plugin.commandStorage().legacyListener(commands);
+        for (ParsedResponse parsedResponse : parsedResponses) {
+            postExecuted(parsedResponse.commandId());
+        }
+        return 500;
+    }
+
+    private ParsedResponse applyPurchaseEvent(ParsedResponse parsedResponse) {
+        MineStorePurchaseEvent event = new MineStorePurchaseEvent(parsedResponse.username(), parsedResponse.command(), parsedResponse.commandId(), parsedResponse.commandType() == ParsedResponse.COMMAND_TYPE.ONLINE ? MineStoreEvent.COMMAND_TYPE.ONLINE : MineStoreEvent.COMMAND_TYPE.OFFLINE);
+        event.call();
+        ParsedResponse.COMMAND_TYPE commandType = event.commandType() == MineStoreEvent.COMMAND_TYPE.ONLINE ? ParsedResponse.COMMAND_TYPE.ONLINE : ParsedResponse.COMMAND_TYPE.OFFLINE;
+        plugin.debug(this.getClass(), "Got command: " + "\"" + parsedResponse.command() + "\""
+                + " with id: " + parsedResponse.commandId() + " for player: "
+                + parsedResponse.username() + " requires online: "
+                + (parsedResponse.commandType().equals(ParsedResponse.COMMAND_TYPE.ONLINE)
+                ? "true"
+                : "false"));
+        return new ParsedResponse(ParsedResponse.TYPE.COMMAND, commandType, event.command(), event.username(), event.id());
+    }
+
+    /**
+     * Confirms the delivery of auth requests and of every saved command whose delivery is not confirmed yet.
+     * Commands stay unconfirmed on a temporary failure and are confirmed again on the next poll.
+     */
+    private void confirmDelivered(Set<Integer> authIds) {
+        List<PendingCommand> undelivered = plugin.commandStorage().undelivered();
+        if (MineStoreCommon.version().requires(arraySupportedSince)) {
+            Set<Integer> ids = new HashSet<>(authIds);
+            for (PendingCommand command : undelivered) {
+                ids.add(command.id());
+            }
+            if (!ids.isEmpty() && postDelivered(ids)) {
+                plugin.commandStorage().markDelivered(undelivered);
+            }
+            return;
+        }
+        for (int authId : authIds) {
+            postDelivered(authId);
+        }
+        for (PendingCommand command : undelivered) {
+            if (postDelivered(command.id())) {
+                plugin.commandStorage().markDelivered(Collections.singletonList(command));
+            }
+        }
+    }
+
+    /**
+     * Confirms executed commands; they are removed from the saved commands once the store accepted it.
+     */
+    private void confirmExecuted() {
+        List<PendingCommand> executed = plugin.commandStorage().executedUnconfirmed();
+        if (executed.isEmpty()) {
+            return;
+        }
+        if (MineStoreCommon.version().requires(arraySupportedSince)) {
+            Set<Integer> ids = new HashSet<>();
+            for (PendingCommand command : executed) {
+                ids.add(command.id());
+            }
+            if (postExecuted(ids)) {
+                plugin.commandStorage().remove(executed);
+            }
+            return;
+        }
+        for (PendingCommand command : executed) {
+            if (postExecuted(command.id())) {
+                plugin.commandStorage().remove(Collections.singletonList(command));
+            }
+        }
     }
 
     public VerificationResult load() {
@@ -157,19 +207,27 @@ public class WebListener {
         return VerificationResult.valid();
     }
 
-    private void postDelivered(String id) {
+    /**
+     * @return false when the request failed temporarily and should be sent again.
+     */
+    private boolean postDelivered(int id) {
         WebRequest<Void> request = new WebRequest.Builder<>(Void.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/delivered/" + id).type(WebRequest.Type.POST).build();
         Result<Void, WebContext> res = plugin.apiHandler().request(request);
         if (res.isError()) {
-            plugin.log("Failed to post delivered: " + id);
             plugin.debug(this.getClass(), res.context());
+            if (isTransient(res.context())) {
+                plugin.log("Failed to post delivered: " + id + ", retrying on the next poll");
+                return false;
+            }
+            plugin.log("Failed to post delivered: " + id);
         }
+        return true;
     }
 
-    private void postDelivered(int[] ids) {
-        if (ids.length == 0) {
-            return;
-        }
+    /**
+     * @return false when the request failed temporarily and should be sent again.
+     */
+    private boolean postDelivered(Set<Integer> ids) {
         JsonObject jsonObject = new JsonObject();
         JsonArray idsArrayJson = new JsonArray();
         for (int id : ids) {
@@ -180,37 +238,25 @@ public class WebListener {
         WebRequest<PostResponse> request = new WebRequest.Builder<>(PostResponse.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/delivered").type(WebRequest.Type.POST).strBody(json).build();
         Result<PostResponse, WebContext> res = plugin.apiHandler().request(request);
         if (res.isError()) {
-            plugin.log("Failed to post delivered");
             plugin.debug(this.getClass(), res.context());
-        }
-        PostResponse postResponse = res.value();
-        if (postResponse.status) {
-            for (PostResponse.Result result : postResponse.results) {
-                if (result.status) {
-                    continue;
-                }
-                plugin.log("Failed to confirm the delivery of command with id: " + result.id + " with error: " + result.error);
+            if (isTransient(res.context())) {
+                plugin.log("Failed to post delivered, retrying on the next poll");
+                return false;
             }
-        } else {
-            plugin.log("Failed to confirm the delivery of commands!");
-            plugin.log(postResponse.error);
-            plugin.log(json);
+            plugin.log("Failed to post delivered");
+            return true;
         }
+        logPostResponse("delivery", res.value(), json);
+        return true;
     }
 
-    public void postExecuted(String id) {
-        toPostExecuted.add(id);
-    }
-
-    private void postExecutedAsync(Set<String> ids) {
-        int[] idsArray = new int[ids.size()];
-        int i = 0;
-        for (String id : ids) {
-            idsArray[i++] = Integer.parseInt(id);
-        }
+    /**
+     * @return false when the request failed temporarily and should be sent again.
+     */
+    private boolean postExecuted(Set<Integer> ids) {
         JsonObject jsonObject = new JsonObject();
         JsonArray idsArrayJson = new JsonArray();
-        for (int id : idsArray) {
+        for (int id : ids) {
             idsArrayJson.add(id);
         }
         jsonObject.add("ids", idsArrayJson);
@@ -218,31 +264,65 @@ public class WebListener {
         WebRequest<PostResponse> request = new WebRequest.Builder<>(PostResponse.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/executed").type(WebRequest.Type.POST).strBody(json).build();
         Result<PostResponse, WebContext> res = plugin.apiHandler().request(request);
         if (res.isError()) {
-            plugin.log("Failed to post executed");
             plugin.debug(this.getClass(), res.context());
-        }
-        PostResponse postResponse = res.value();
-        if (postResponse.status) {
-            for (PostResponse.Result result : postResponse.results) {
-                if (result.status) {
-                    continue;
-                }
-                plugin.log("Failed to confirm the execution of command with id: " + result.id + " with error: " + result.error);
+            if (isTransient(res.context())) {
+                plugin.log("Failed to post executed, retrying on the next poll");
+                return false;
             }
-        } else {
-            plugin.log("Failed to confirm the execution of commands!");
+            plugin.log("Failed to post executed");
+            return true;
+        }
+        logPostResponse("execution", res.value(), json);
+        return true;
+    }
+
+    /**
+     * @return false when the request failed temporarily and should be sent again.
+     */
+    private boolean postExecuted(int id) {
+        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/executed/" + id).type(WebRequest.Type.POST).strBody(String.valueOf(id)).build();
+        Result<Void, WebContext> res = plugin.apiHandler().request(request);
+        if (res.isError()) {
+            plugin.debug(this.getClass(), res.context());
+            if (isTransient(res.context())) {
+                plugin.log("Failed to post executed: " + id + ", retrying on the next poll");
+                return false;
+            }
+            plugin.log("Failed to post executed: " + id);
+        }
+        return true;
+    }
+
+    private void logPostResponse(String action, PostResponse postResponse, String json) {
+        if (postResponse == null) {
+            plugin.log("Failed to confirm the " + action + " of commands: empty response");
+            plugin.log(json);
+            return;
+        }
+        if (!postResponse.status) {
+            plugin.log("Failed to confirm the " + action + " of commands!");
             plugin.log(postResponse.error);
             plugin.log(json);
+            return;
+        }
+        if (postResponse.results == null) {
+            return;
+        }
+        for (PostResponse.Result result : postResponse.results) {
+            if (result.status) {
+                continue;
+            }
+            plugin.log("Failed to confirm the " + action + " of command with id: " + result.id + " with error: " + result.error);
         }
     }
 
-    private void postExecutedAsync(String id) {
-        WebRequest<Void> request = new WebRequest.Builder<>(Void.class).path("servers/" + (ConfigKeys.WEBLISTENER_KEYS.ENABLED.getValue() ? ConfigKeys.WEBLISTENER_KEYS.KEY.getValue() + "/" : "") + "commands/executed/" + id).type(WebRequest.Type.POST).strBody(id).build();
-        Result<Void, WebContext> res = plugin.apiHandler().request(request);
-        if (res.isError()) {
-            plugin.log("Failed to post executed: " + id);
-            plugin.debug(this.getClass(), res.context());
-        }
+    /**
+     * Network failures, rate limits and server errors may succeed on a later attempt;
+     * any other failure (e.g. a rejected request) would fail the same way again.
+     */
+    private static boolean isTransient(WebContext context) {
+        int responseCode = context.responseCode();
+        return responseCode == -1 || responseCode == 429 || responseCode >= 500;
     }
 
     private ParsedResponse parseGson(GsonReponse response) {
@@ -278,12 +358,12 @@ public class WebListener {
             Result<CheckResponse, WebContext> res = plugin.apiHandler().request(request);
             if (res.isError()) {
                 plugin.debug(this.getClass(), res.context());
-                return CheckResponse.empty();
+                return CheckResponse.failed();
             }
             return res.value();
         }).exceptionally(e -> {
             plugin.debug(getClass(), e);
-            return CheckResponse.empty();
+            return CheckResponse.failed();
         });
     }
 

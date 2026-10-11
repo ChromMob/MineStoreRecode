@@ -3,8 +3,13 @@ package me.chrommob.minestore.common.commandHolder.type;
 import java.util.List;
 
 public class CheckResponse {
-    public static CheckResponse empty() {
-        return new CheckResponse(false, null);
+    /**
+     * Response used when the validation request itself failed, so the store never judged the commands.
+     */
+    public static CheckResponse failed() {
+        CheckResponse response = new CheckResponse(false, null);
+        response.requestFailed = true;
+        return response;
     }
 
     public CheckResponse(boolean status, List<CheckResponses> results) {
@@ -15,6 +20,7 @@ public class CheckResponse {
     private boolean status;
     private List<CheckResponses> results;
     private String error;
+    private transient boolean requestFailed;
     public static class CheckResponses {
         private int cmd_id;
         private boolean status;
@@ -43,5 +49,9 @@ public class CheckResponse {
 
     public String error() {
         return error;
+    }
+
+    public boolean isRequestFailed() {
+        return requestFailed;
     }
 }
