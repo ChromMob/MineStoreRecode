@@ -53,9 +53,10 @@ public class ChargeBalanceCommand {
     public void onCharge(AbstractUser user, @Argument("username") String username, @Argument("amount") String amount, @Argument("payment_internal_id") String paymentInternalId, @Argument("signature") String signature) {
         String secretKey = ConfigKeys.API_KEYS.KEY.getValue();
         String generatedSignature = getSignature(amount, paymentInternalId, username, secretKey);
-        boolean verifySignature = generatedSignature.equals(signature);
+        boolean verifySignature = generatedSignature != null && generatedSignature.equals(signature);
         if (!verifySignature) {
             plugin.log("Failed to verify signature: " + generatedSignature + " != " + signature);
+            return;
         }
 
         ResponseData responseData = getResponseData(username, amount, paymentInternalId, generatedSignature);
