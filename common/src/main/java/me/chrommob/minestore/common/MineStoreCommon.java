@@ -207,7 +207,7 @@ public class MineStoreCommon {
             log("Command registration is not allowed at this point. Please restart the server.");
             for (AbstractUser user : Registries.USER_GETTER.get().getAllPlayers()) {
                 if (!user.commonUser().hasPermission("minestore.admin")) {
-                    return;
+                    continue;
                 }
                 user.commonUser().sendMessage("[MineStore] Command registration is not allowed at this point. Please restart the server.");
             }
