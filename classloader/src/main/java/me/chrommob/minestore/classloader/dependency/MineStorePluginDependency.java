@@ -13,6 +13,16 @@ import java.util.Map;
 import java.util.Optional;
 
 public class MineStorePluginDependency {
+    private static final int CONNECT_TIMEOUT_MILLIS = 10_000;
+    private static final int READ_TIMEOUT_MILLIS = 30_000;
+
+    public enum Verification {
+        VALID,
+        MISMATCH,
+        // The checksums could not be fetched.
+        UNKNOWN
+    }
+
     private final String group;
     private final String name;
     private final String version;
@@ -80,6 +90,8 @@ public class MineStorePluginDependency {
         try {
             URL url = new URL(path);
             urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
+            urlConnection.setReadTimeout(READ_TIMEOUT_MILLIS);
             urlConnection.setRequestMethod("GET");
             urlConnection.setRequestProperty("User-Agent", "MineStore");
             urlConnection.setDoOutput(true);
@@ -109,6 +121,8 @@ public class MineStorePluginDependency {
     private Optional<String> getFromURL(String url) {
         try {
             URLConnection connection = new URL(url).openConnection();
+            connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
+            connection.setReadTimeout(READ_TIMEOUT_MILLIS);
             connection.setRequestProperty("User-Agent", "MineStore");
             connection.setDoOutput(true);
             InputStream in = connection.getInputStream();
@@ -184,18 +198,19 @@ public class MineStorePluginDependency {
         }
     }
 
-    public boolean verify(File file, MineStorePluginRepository repository) {
-        String sha = repository.getUrl() + File.separator + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar.sha1";
-        String md5 = repository.getUrl() + File.separator + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar.md5";
+    public Verification verify(File file, MineStorePluginRepository repository) {
+        // URLs always use '/', File.separator would be a backslash on Windows.
+        String sha = repository.getUrl() + "/" + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar.sha1";
+        String md5 = repository.getUrl() + "/" + group.replace('.', '/') + "/" + name + "/" + version + "/" + name + "-" + version + ".jar.md5";
         Optional<String> sha1 = getFromURL(sha);
         Optional<String> md52 = getFromURL(md5);
         if (!sha1.isPresent() || !md52.isPresent()) {
-            return false;
+            return Verification.UNKNOWN;
         }
         if (!sha1.get().equals(getSha(file))) {
-            return false;
+            return Verification.MISMATCH;
         }
-        return md52.get().equals(getMd5(file));
+        return md52.get().equals(getMd5(file)) ? Verification.VALID : Verification.MISMATCH;
     }
 
     public boolean verify(String newFile, File oldFile) {

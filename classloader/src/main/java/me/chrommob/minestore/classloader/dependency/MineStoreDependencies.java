@@ -6,7 +6,7 @@ import me.chrommob.minestore.classloader.repository.MineStorePluginRepository;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
@@ -27,53 +27,48 @@ public class MineStoreDependencies {
 
     public boolean downloadToFolder(File folder, Set<File> used, RelocationHandler relocationHandler, boolean offlineMode) {
         for (MineStorePluginDependency dependency : dependencies) {
-            File file = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? ".jar" : "-" + dependency.getVersion() + ".jar"));
+            File file = jarFile(folder, dependency);
+            File relocated = relocatedFile(folder, dependency);
             if (file.exists() && dependency.getRepository() != null) {
-                if (offlineMode || dependency.verify(file, dependency.getRepository())) {
+                MineStorePluginDependency.Verification verification = offlineMode ? MineStorePluginDependency.Verification.UNKNOWN : dependency.verify(file, dependency.getRepository());
+                if (verification == MineStorePluginDependency.Verification.UNKNOWN) {
+                    // Checksums are unreachable (offline or mirror down), so start from the cache instead of failing.
+                    System.out.println("Could not verify " + file.getName() + ", using the cached jar");
+                }
+                if (verification != MineStorePluginDependency.Verification.MISMATCH) {
                     used.add(file);
-                    File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
                     if (dependency.hasRelocations()) {
-                        if (!relocated.exists()) {
-                            boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
-                            if (res) {
-                                file = relocated;
-                            }
-                            used.add(file);
-                        } else {
-                            used.add(relocated);
+                        if (!relocated.exists() && !relocate(relocationHandler, file, relocated, dependency.getRelocations())) {
+                            return false;
                         }
+                        used.add(relocated);
                     }
                     continue;
                 }
             }
             if (!offlineMode && dependency.getRepository() != null) {
                 Optional<byte[]> optional = dependency.download(dependency.getRepository());
-                if (optional.isPresent()) {
-                    try {
-                        file.createNewFile();
-                        FileOutputStream fileOutputStream = new FileOutputStream(file);
-                        fileOutputStream.write(optional.get());
-                        fileOutputStream.close();
-                        used.add(file);
-                        File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
-                        if (dependency.hasRelocations()) {
-                            if (relocated.exists()) {
-                                relocated.delete();
-                            }
-                            boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
-                            if (res) {
-                                file = relocated;
-                                used.add(file);
-                            }
-                        }
-                        continue;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
+                if (!optional.isPresent()) {
                     System.out.println("Could not download " + dependency.getName() + " with version " + dependency.getVersion() + " from " + dependency.getRepository().getUrl());
                     return false;
                 }
+                try {
+                    // Write next to the target and move it in, so a crash never leaves a truncated jar in the cache.
+                    File temp = new File(folder, file.getName() + ".tmp");
+                    Files.write(temp.toPath(), optional.get());
+                    Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    e.printStackTrace(System.err);
+                    return false;
+                }
+                used.add(file);
+                if (dependency.hasRelocations()) {
+                    if (!relocate(relocationHandler, file, relocated, dependency.getRelocations())) {
+                        return false;
+                    }
+                    used.add(relocated);
+                }
+                continue;
             }
             if (dependency.getRepository() == null) {
                 try {
@@ -91,21 +86,12 @@ public class MineStoreDependencies {
                     }
                     used.add(file);
                     if (dependency.hasRelocations()) {
-                        File relocated = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
-                        if (!same) {
-                            boolean res = relocationHandler.relocate(file, relocated, dependency.getRelocations());
-                            if (res) {
-                                file = relocated;
-                                used.add(file);
-                                continue;
-                            }
-                        } else {
-                            used.add(relocated);
-                            continue;
+                        if ((!same || !relocated.exists()) && !relocate(relocationHandler, file, relocated, dependency.getRelocations())) {
+                            return false;
                         }
-                    } else {
-                        continue;
+                        used.add(relocated);
                     }
+                    continue;
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
                 }
@@ -116,6 +102,34 @@ public class MineStoreDependencies {
         return true;
     }
 
+    private File jarFile(File folder, MineStorePluginDependency dependency) {
+        return new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? ".jar" : "-" + dependency.getVersion() + ".jar"));
+    }
+
+    // The name includes a hash of the relocation map, so a jar relocated with a different map is never reused.
+    private File relocatedFile(File folder, MineStorePluginDependency dependency) {
+        String relocationHash = Integer.toHexString(new TreeMap<>(dependency.getRelocations()).toString().hashCode());
+        return new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "" : "-" + dependency.getVersion()) + "-relocated-" + relocationHash + ".jar");
+    }
+
+    // Relocates into a temp file and moves it in, so a failed relocation never leaves a broken jar that is reused.
+    private boolean relocate(RelocationHandler relocationHandler, File file, File relocated, Map<String, String> relocations) {
+        File temp = new File(relocated.getParentFile(), relocated.getName() + ".tmp");
+        temp.delete();
+        if (!relocationHandler.relocate(file, temp, relocations)) {
+            temp.delete();
+            return false;
+        }
+        try {
+            Files.move(temp.toPath(), relocated.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+            temp.delete();
+            return false;
+        }
+    }
+
     public List<URI> getDependencyJars(File folder, Set<File> used, RelocationHandler relocationHandler) {
         if (!folder.exists()) {
             folder.mkdirs();
@@ -124,15 +138,12 @@ public class MineStoreDependencies {
         System.out.println("Downloading dependencies...");
         boolean download = downloadToFolder(folder, used, relocationHandler, offlineMode);
         if (!download) {
-            System.out.println("Could not download dependencies!");
-            return Collections.emptyList();
+            // Continuing would start a plugin with missing classes, and the cleanup afterwards would delete the cached jars.
+            throw new IllegalStateException("MineStore could not load its dependencies (see the messages above), the plugin will not start.");
         }
         List<URI> uris = new ArrayList<>();
         for (MineStorePluginDependency dependency : dependencies) {
-            File file = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? ".jar" : "-" + dependency.getVersion() + ".jar"));
-            if (dependency.hasRelocations()) {
-                file = new File(folder, dependency.getName() + (dependency.getVersion().isEmpty() ? "-relocated.jar" : "-" + dependency.getVersion() + "-relocated.jar"));
-            }
+            File file = dependency.hasRelocations() ? relocatedFile(folder, dependency) : jarFile(folder, dependency);
             uris.add(file.toURI());
         }
         return Collections.unmodifiableList(uris);

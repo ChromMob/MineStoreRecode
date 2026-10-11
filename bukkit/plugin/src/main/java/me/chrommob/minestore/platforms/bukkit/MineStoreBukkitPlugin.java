@@ -35,7 +35,10 @@ public class MineStoreBukkitPlugin extends JavaPlugin implements MineStoreBootst
             plugin = mainClass.getDeclaredConstructor(JavaPlugin.class).newInstance(this);
             plugin.onEnable();
         } catch (Exception e) {
+            getLogger().severe("MineStore failed to start: " + e.getMessage());
             e.printStackTrace();
+            // Don't show as enabled while doing nothing.
+            getServer().getPluginManager().disablePlugin(this);
         }
     }
 
