@@ -57,8 +57,11 @@ public class PlaceHolderData {
             if (lastDonatorJson == null) {
                 return;
             }
-            int page = (index + 1) / lastDonatorJson.getPerPage();
-            page++;
+            if (lastDonatorJson.getPerPage() <= 0) {
+                return;
+            }
+            // Indexes are 0-based, so index / perPage is the 0-based page.
+            int page = index / lastDonatorJson.getPerPage() + 1;
             if (page > lastDonatorJson.getLastPage()) {
                 return;
             }
@@ -100,8 +103,11 @@ public class PlaceHolderData {
             if (topDonatorJson == null) {
                 return;
             }
-            int page = (index + 1) / topDonatorJson.getPerPage();
-            page++;
+            if (topDonatorJson.getPerPage() <= 0) {
+                return;
+            }
+            // Indexes are 0-based, so index / perPage is the 0-based page.
+            int page = index / topDonatorJson.getPerPage() + 1;
             if (page > topDonatorJson.getLastPage()) {
                 return;
             }
@@ -211,6 +217,9 @@ public class PlaceHolderData {
         PlaceHolderManager.getInstance().registerPlaceHolder("donation_goal_bar_(\\d+)", (name, param) -> {
             param = param.replaceFirst("donation_goal_bar_", "");
             int amount = Integer.parseInt(param);
+            if (amount <= 0) {
+                return "";
+            }
             Component component = Component.text("");
             if (donationGoal.getDonationGoalPercentage() > 100) {
                 for (int i = 0; i < amount; i++) {
@@ -226,9 +235,9 @@ public class PlaceHolderData {
                 LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
                 return serializer.serialize(component);
             }
-            int step = 100 / amount;
             for (int i = 0; i < amount; i++) {
-                if ((i + 1) * step <= donationGoal.getDonationGoalPercentage()) {
+                // Exact share per segment, integer 100 / amount fills bars early when amount doesn't divide 100.
+                if ((i + 1) * 100.0 / amount <= donationGoal.getDonationGoalPercentage()) {
                     component = component.append(Component.text("█").color(NamedTextColor.GREEN));
                     continue;
                 }
@@ -405,15 +414,13 @@ public class PlaceHolderData {
         @Override
         public void run() {
             URI apiUrl = apiUrls[urlIndex];
+            // Move to the next URL every run, otherwise only the donation goal is ever refreshed.
+            urlIndex = (urlIndex + 1) % apiUrls.length;
             try {
                 handleUrl(apiUrl);
                 plugin.notError();
             } catch (WebContext e) {
                 plugin.debug(this.getClass(), e);
-                urlIndex++;
-                if (urlIndex >= apiUrls.length) {
-                    urlIndex = 0;
-                }
                 plugin.handleError(e);
             }
         }
