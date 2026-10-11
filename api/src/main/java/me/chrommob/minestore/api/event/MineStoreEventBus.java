@@ -1,8 +1,11 @@
 package me.chrommob.minestore.api.event;
 
+import me.chrommob.minestore.api.Registries;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
+import me.chrommob.minestore.api.interfaces.logger.LoggerCommon;
 
-import java.util.HashSet;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,11 +55,28 @@ public class MineStoreEventBus {
                 Set<Consumer<? extends MineStoreEvent>> consumers = addonListeners.listeners.get(event.getClass());
                 if (consumers != null) {
                     for (Consumer<? extends MineStoreEvent> consumer : consumers) {
-                        ((Consumer<T>) consumer).accept(event);
+                        // Isolate listeners so one failing addon cannot stop the others (e.g. command delivery on join).
+                        try {
+                            ((Consumer<T>) consumer).accept(event);
+                        } catch (Throwable throwable) {
+                            logError("Error while passing " + event.getClass().getSimpleName() + " to " + addonListeners.addon.getName(), throwable);
+                        }
                     }
                 }
             }
         }
+    }
+
+    private static void logError(String message, Throwable throwable) {
+        LoggerCommon logger = Registries.LOGGER.get();
+        if (logger == null) {
+            System.err.println(message);
+            throwable.printStackTrace();
+            return;
+        }
+        StringWriter stackTrace = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(stackTrace));
+        logger.log(message + System.lineSeparator() + stackTrace);
     }
 
     static class AddonListeners {
@@ -67,7 +87,8 @@ public class MineStoreEventBus {
         }
 
         public void registerListener(Class<? extends MineStoreEvent> event, Consumer<? extends MineStoreEvent> listener) {
-            listeners.computeIfAbsent(event, k -> new HashSet<>())
+            // Concurrent, listeners are registered while events fire on other threads.
+            listeners.computeIfAbsent(event, k -> ConcurrentHashMap.newKeySet())
                     .add(listener);
         }
 

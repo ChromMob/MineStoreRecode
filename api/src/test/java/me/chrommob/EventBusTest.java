@@ -96,6 +96,31 @@ public class EventBusTest {
     }
 
     @Test
+    public void testFailingListenerDoesNotStopOthers() {
+        MineStoreAddon failingAddon = new MineStoreAddon() {
+            @Override
+            public void onEnable() {
+
+            }
+
+            @Override
+            public String getName() {
+                return "FailingAddon";
+            }
+        };
+        boolean[] called = {false};
+        MineStoreEventBus.registerListener(failingAddon, IsolationEvent.class, event -> {
+            throw new IllegalStateException("listener failure");
+        });
+        MineStoreEventBus.registerListener(addon, IsolationEvent.class, event -> called[0] = true);
+        new IsolationEvent().call();
+        Assert.assertTrue(called[0]);
+    }
+
+    private static class IsolationEvent extends MineStoreEvent {
+    }
+
+    @Test
     public void testAPI() {
         GiftCardManager.CreateGiftCardResponse response = WebApiAccessor.giftCardManager().createGiftCard("test", "test", 100, LocalDateTime.now().plusDays(1), "");
         System.out.println(response.isSuccess());
