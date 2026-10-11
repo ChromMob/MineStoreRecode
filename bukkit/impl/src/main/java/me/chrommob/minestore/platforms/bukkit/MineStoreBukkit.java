@@ -18,7 +18,6 @@ import me.chrommob.minestore.platforms.bukkit.webCommand.CommandExecuterBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -77,7 +76,8 @@ public final class MineStoreBukkit implements MineStorePlugin {
         }
         common.log("Using " + (legacy ? "legacy" : "modern") + " command manager.");
         if (legacy) {
-            final Function<CommandSender, AbstractUser> cToA = commandSender -> (commandSender instanceof ConsoleCommandSender)
+            // Anything that isn't a player (console, RCON, command blocks) acts as console, like the modern path.
+            final Function<CommandSender, AbstractUser> cToA = commandSender -> !(commandSender instanceof HumanEntity)
                     ? new AbstractUser(new CommonConsoleUser(), commandSender)
                     : Registries.USER_GETTER.get().get(((HumanEntity) commandSender).getUniqueId());
             final Function<AbstractUser, CommandSender> aToC = abstractUser -> (CommandSender) abstractUser.platformObject();
