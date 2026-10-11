@@ -14,6 +14,7 @@ import me.chrommob.minestore.common.config.ConfigKeys;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class AuthHolder {
@@ -78,8 +79,9 @@ public final class AuthHolder {
     }
 
     public void confirmAuth(AuthUser authUser) {
-        toPost.put(authUser.user().getName(), authUser.parsedResponse());
-        authUsers.remove(authUser.user().getName());
+        String name = authUser.user().getName().toLowerCase();
+        toPost.put(name, authUser.parsedResponse());
+        authUsers.remove(name);
     }
 
     public AuthUser getAuthUser(String username) {
@@ -95,11 +97,19 @@ public final class AuthHolder {
         if (!abstractUser.commonUser().isOnline() || abstractUser.commonUser() instanceof CommonConsoleUser) {
             return;
         }
-        AuthUser authUser = authUsers.getOrDefault(parsedResponse.username(), null);
+        String name = parsedResponse.username().toLowerCase();
+        AuthUser authUser = authUsers.get(name);
         if (authUser == null) {
-            authUsers.put(parsedResponse.username().toLowerCase(), new AuthUser(plugin, abstractUser.commonUser(), parsedResponse, System.currentTimeMillis()));
-        } else {
-            authUser.setTime(System.currentTimeMillis());
+            authUsers.put(name, new AuthUser(plugin, abstractUser.commonUser(), parsedResponse, System.currentTimeMillis()));
+            return;
         }
+        if (Objects.equals(authUser.parsedResponse().authId(), parsedResponse.authId())) {
+            // The same request delivered again.
+            authUser.setTime(System.currentTimeMillis());
+            return;
+        }
+        // A second request while one is pending: /ms auth could confirm someone else's login, so drop both.
+        authUsers.remove(name);
+        abstractUser.commonUser().sendMessage(plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("auth").getKey("cancelled-message").getValueAsString()));
     }
 }

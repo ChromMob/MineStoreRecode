@@ -23,6 +23,7 @@ public class en_US extends ConfigWrapper {
         authKeys.add(new ConfigKey<>("success-message", "<dark_green>You have successfully logged in to our store!</dark_green>"));
         authKeys.add(new ConfigKey<>("failure-message", "<dark_red>You do not have pending auth!</dark_red>"));
         authKeys.add(new ConfigKey<>("timeout-message", "<dark_red>You have failed to log in to our store!</dark_red>"));
+        authKeys.add(new ConfigKey<>("cancelled-message", "<dark_red>More than one login request was made for your account, so it was cancelled. Please log in to the store again.</dark_red>"));
         keys.add(new ConfigKey<>("auth", authKeys));
 
         List<ConfigKey<?>> storeCommandKeys = new ArrayList<>();

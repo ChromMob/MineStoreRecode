@@ -19,6 +19,7 @@ public class cs_CZ extends ConfigWrapper {
         authKeys.add(new ConfigKey<>("success-message", "<dark_green>Uspesne jsi se prihlasil!</dark_green>"));
         authKeys.add(new ConfigKey<>("failure-message", "<dark_red>Nemas zadnou zadost o prihlaseni!</dark_red>"));
         authKeys.add(new ConfigKey<>("timeout-message", "<dark_red>Zadost o prihlaseni vyprsela!</dark_red>"));
+        authKeys.add(new ConfigKey<>("cancelled-message", "<dark_red>Pro tvuj ucet prislo vice zadosti o prihlaseni, proto byly zruseny. Prihlas se do obchodu znovu.</dark_red>"));
         keys.add(new ConfigKey<>("auth", authKeys));
 
         List<ConfigKey<String>> storeCommandKeys = new ArrayList<>();
