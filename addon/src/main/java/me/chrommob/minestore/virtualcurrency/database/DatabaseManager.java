@@ -112,12 +112,31 @@ public class DatabaseManager {
             stmt.setDouble(7, amount);
             stmt.setDouble(8, amount);
             stmt.setDouble(9, amount);
-            stmt.setDouble(10, amount);
+            stmt.setDouble(10, -amount);
             stmt.setDouble(11, amount);
             stmt.setLong(12, System.currentTimeMillis());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to add balance", e);
+        }
+    }
+
+    /**
+     * Debits only when the balance covers the amount. It is a single statement, so two debits
+     * at the same time cannot both pass the check and overdraw the account.
+     */
+    public boolean takeBalance(String username, double amount) {
+        String sql = "UPDATE player_balances SET balance = balance - ?, total_spent = total_spent + ?, " +
+                "transaction_count = transaction_count + 1, last_seen = ? WHERE username = ? AND balance >= ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setDouble(1, amount);
+            stmt.setDouble(2, amount);
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.setString(4, username.toLowerCase());
+            stmt.setDouble(5, amount);
+            return stmt.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to take balance", e);
         }
     }
 

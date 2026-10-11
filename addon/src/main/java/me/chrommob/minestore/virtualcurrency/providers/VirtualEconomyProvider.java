@@ -17,11 +17,6 @@ public class VirtualEconomyProvider implements PlayerEconomyProvider {
         if (amount <= 0) {
             return false;
         }
-        double currentBalance = getBalance(commonUser);
-        if (currentBalance < amount) {
-            return false;
-        }
-        VirtualCurrencyAddon.getDatabaseManager().addBalance(commonUser.getName(), -amount);
-        return true;
+        return VirtualCurrencyAddon.getDatabaseManager().takeBalance(commonUser.getName(), amount);
     }
 }

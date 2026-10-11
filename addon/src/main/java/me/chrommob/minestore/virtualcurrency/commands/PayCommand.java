@@ -32,8 +32,7 @@ public class PayCommand {
             return;
         }
 
-        Double senderBalance = VirtualCurrencyAddon.getDatabaseManager().getBalance(senderName);
-        if (senderBalance == null || senderBalance < amount) {
+        if (!VirtualCurrencyAddon.getDatabaseManager().takeBalance(senderName, amount)) {
             sender.commonUser().sendMessage(Component.text("Insufficient balance!").color(NamedTextColor.RED));
             return;
         }
@@ -42,7 +41,6 @@ public class PayCommand {
             VirtualCurrencyAddon.getDatabaseManager().setBalance(target, 0.0);
         }
 
-        VirtualCurrencyAddon.getDatabaseManager().addBalance(senderName, -amount);
         VirtualCurrencyAddon.getDatabaseManager().addBalance(target, amount);
 
         double newBalance = VirtualCurrencyAddon.getDatabaseManager().getBalance(senderName);
