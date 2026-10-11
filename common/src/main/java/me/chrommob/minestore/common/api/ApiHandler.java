@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 public class ApiHandler {
+    // Every MineStore task shares one scheduler thread, so a request must never block it indefinitely.
+    private static final int CONNECT_TIMEOUT_MILLIS = 10_000;
+    private static final int READ_TIMEOUT_MILLIS = 30_000;
     private final Gson gson = new Gson();
     private final AuthData authData;
     public ApiHandler(AuthData authData) {
@@ -36,6 +39,8 @@ public class ApiHandler {
         HttpsURLConnection urlConnection = null;
         try {
             urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
+            urlConnection.setReadTimeout(READ_TIMEOUT_MILLIS);
             urlConnection.setRequestMethod(request.getType().name().toUpperCase());
             urlConnection.setRequestProperty("Content-Type", "application/json");
             for (Map.Entry<String, String> header : request.getHeaders().entrySet()) {
