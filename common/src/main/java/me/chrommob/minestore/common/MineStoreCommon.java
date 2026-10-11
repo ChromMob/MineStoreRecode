@@ -11,6 +11,7 @@ import me.chrommob.minestore.api.generic.ApiData;
 import me.chrommob.minestore.api.generic.AuthData;
 import me.chrommob.minestore.api.generic.MineStoreAddon;
 import me.chrommob.minestore.api.generic.MineStoreVersion;
+import me.chrommob.minestore.api.interfaces.playerInfo.DefaultPlayerInfoProvider;
 import me.chrommob.minestore.api.interfaces.user.AbstractUser;
 import me.chrommob.minestore.api.scheduler.MineStoreScheduledTask;
 import me.chrommob.minestore.api.stats.BuildConstats;
@@ -571,7 +572,8 @@ public class MineStoreCommon {
             if (!databaseVerification.isValid()) {
                 return databaseVerification;
             }
-            if (Registries.PLAYER_INFO_PROVIDER.get() == null) {
+            // The registry starts with a default provider, so it is never null; replace only that default.
+            if (Registries.PLAYER_INFO_PROVIDER.get() instanceof DefaultPlayerInfoProvider) {
                 LuckPermsPlayerInfoProvider luckPermsPlayerInfoProvider = new LuckPermsPlayerInfoProvider(this);
                 if (luckPermsPlayerInfoProvider.isInstalled()) {
                     Registries.PLAYER_INFO_PROVIDER.set(luckPermsPlayerInfoProvider);

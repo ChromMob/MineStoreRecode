@@ -5,6 +5,7 @@ import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.common.MineStoreCommon;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.user.User;
 
 public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
     private final LuckPerms luckPerms;
@@ -31,14 +32,21 @@ public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
         return luckPerms != null;
     }
 
+    // Null for players LuckPerms has not loaded, e.g. offline players or the console fallback user.
+    private User user(CommonUser commonUser) {
+        return luckPerms.getUserManager().getUser(commonUser.getUUID());
+    }
+
     @Override
     public String getGroup(CommonUser commonUser) {
-        return luckPerms.getUserManager().getUser(commonUser.getUUID()).getPrimaryGroup();
+        User user = user(commonUser);
+        return user == null ? "" : user.getPrimaryGroup();
     }
 
     @Override
     public String getPrefix(CommonUser commonUser) {
-        String prefix = luckPerms.getUserManager().getUser(commonUser.getUUID()).getCachedData().getMetaData().getPrefix();
+        User user = user(commonUser);
+        String prefix = user == null ? null : user.getCachedData().getMetaData().getPrefix();
         if (prefix == null) {
             prefix = "";
         }
@@ -47,7 +55,8 @@ public class LuckPermsPlayerInfoProvider implements PlayerInfoProvider {
 
     @Override
     public String getSuffix(CommonUser commonUser) {
-        String suffix = luckPerms.getUserManager().getUser(commonUser.getUUID()).getCachedData().getMetaData().getSuffix();
+        User user = user(commonUser);
+        String suffix = user == null ? null : user.getCachedData().getMetaData().getSuffix();
         if (suffix == null) {
             suffix = "";
         }
