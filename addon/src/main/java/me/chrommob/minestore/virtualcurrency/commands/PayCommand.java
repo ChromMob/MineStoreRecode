@@ -22,6 +22,11 @@ public class PayCommand {
     public void payPlayer(AbstractUser sender, @Argument(value = "player", suggestions = "playerNames") String target, @Argument(value = "amount", suggestions = "commonAmounts") Double amount) {
         String senderName = sender.commonUser().getName();
 
+        if (!VirtualCurrencyAddon.isPayEnabled()) {
+            sender.commonUser().sendMessage(Component.text("Paying other players is disabled!").color(NamedTextColor.RED));
+            return;
+        }
+
         if (target.equalsIgnoreCase(senderName)) {
             sender.commonUser().sendMessage(Component.text("You cannot pay yourself!").color(NamedTextColor.RED));
             return;

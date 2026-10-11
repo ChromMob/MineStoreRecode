@@ -25,7 +25,12 @@ public class HistoryCommand {
     @Permission("currency.history")
     public void viewHistory(AbstractUser sender, @Argument(value = "player", suggestions = "playerNames") String player, @Argument(value = "limit", suggestions = "commonLimits") Integer limit) {
         String targetPlayer = player != null ? player : sender.commonUser().getName();
-        int historyLimit = limit != null ? Math.min(limit, 50) : 10;
+        if (!targetPlayer.equalsIgnoreCase(sender.commonUser().getName()) && !sender.commonUser().hasPermission("currency.history.others")) {
+            sender.commonUser().sendMessage(Component.text("You don't have permission to view other players' history!").color(NamedTextColor.RED));
+            return;
+        }
+        // SQLite treats a negative LIMIT as unlimited.
+        int historyLimit = limit != null ? Math.max(1, Math.min(limit, 50)) : 10;
 
         if (VirtualCurrencyAddon.getDatabaseManager().getBalance(targetPlayer) == null) {
             sender.commonUser().sendMessage(Component.text("Player '")
