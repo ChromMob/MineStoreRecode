@@ -118,14 +118,9 @@ public final class MineStoreBukkit implements MineStorePlugin {
                     .buildOnEnable(plugin));
         }
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
-            VaultPlayerInfoProvider vaultPlayerInfoProvider = new VaultPlayerInfoProvider(plugin, common);
-            if (vaultPlayerInfoProvider.isInstalled()) {
-                Registries.PLAYER_INFO_PROVIDER.set(vaultPlayerInfoProvider);
-            }
-            VaultEconomyProvider vaultEconomyProvider = new VaultEconomyProvider(plugin, common);
-            if (vaultEconomyProvider.isInstalled()) {
-                Registries.PLAYER_ECONOMY_PROVIDER.set(vaultEconomyProvider);
-            }
+            // The providers look up the chat/economy plugin on use, so ones that enable after MineStore still work.
+            Registries.PLAYER_INFO_PROVIDER.set(new VaultPlayerInfoProvider(plugin));
+            Registries.PLAYER_ECONOMY_PROVIDER.set(new VaultEconomyProvider(plugin));
         }
         if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             Registries.PLACE_HOLDER_PROVIDER.set(new BukkitPlaceHolderProvider(common));
