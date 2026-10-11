@@ -44,7 +44,7 @@ public class BukkitUserGetter implements UserGetter {
 
     @Override
     public AbstractUser get(String username) {
-        Player player = mineStoreBukkit.getServer().getPlayer(username);
+        Player player = mineStoreBukkit.getServer().getPlayerExact(username);
         return get(player);
     }
 

@@ -22,6 +22,6 @@ public class CommandExecuterBukkit extends CommandExecuterCommon {
 
     @Override
     public boolean isOnline(String username) {
-        return plugin.getServer().getPlayer(username) != null;
+        return plugin.getServer().getPlayerExact(username) != null;
     }
 }
