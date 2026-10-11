@@ -171,16 +171,14 @@ public class IndexedBlockDeque<T> implements Iterable<T>, Deque<T> {
         }
 
         index -= rootSize;
+        // Back blocks fill from slot 0, so only the last one has free space, at its end.
         int backSize = back.size() * BLOCK_SIZE;
-        NormalBlock first = getFirst(back);
-        if (first != null) {
-            backSize -= first.space();
+        NormalBlock lastBack = getLast(back);
+        if (lastBack != null) {
+            backSize -= lastBack.space();
         }
         if (index < backSize) {
             int blockLocation = index / BLOCK_SIZE;
-            if (first != null) {
-                index += first.space();
-            }
             NormalBlock block = back.get(blockLocation);
             if (block != null) {
                 return new MutableWrapper(block, index % BLOCK_SIZE, false);
