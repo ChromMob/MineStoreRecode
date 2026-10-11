@@ -47,6 +47,11 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
     }
 
     private void onEnable(MinecraftServer server) {
+        // Loading failed in onInitialize, throwing here would crash the whole server.
+        if (plugin == null) {
+            System.err.println("[MineStore] MineStore failed to load, it is disabled. See the error above.");
+            return;
+        }
         try {
             plugin.getClass().getMethod("setServer", MinecraftServer.class).invoke(plugin, server);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -56,6 +61,9 @@ public class MineStoreFabricPlugin implements MineStoreBootstrapper, ModInitiali
     }
 
     private void onDisable(MinecraftServer server) {
+        if (plugin == null) {
+            return;
+        }
         plugin.onDisable();
     }
 
