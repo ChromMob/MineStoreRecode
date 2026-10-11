@@ -73,6 +73,11 @@ public class DatabaseManager {
         database = ConfigKeys.MYSQL_KEYS.DATABASE.getValue();
         username = ConfigKeys.MYSQL_KEYS.USERNAME.getValue();
         password = ConfigKeys.MYSQL_KEYS.PASSWORD.getValue();
+        // load() runs on every reload and verification retry, so release the previous pool first.
+        if (hikari != null) {
+            hikari.close();
+            hikari = null;
+        }
         if (tryType(DatabaseType.MARIADB) || tryType(DatabaseType.MYSQL)) {
             HikariConfig config = new HikariConfig();
             config.setDriverClassName(driverClass);
