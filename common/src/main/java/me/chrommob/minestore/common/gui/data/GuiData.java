@@ -25,10 +25,12 @@ import me.chrommob.minestore.common.gui.payment.ConfirmationInv;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class GuiData {
     private final MineStoreCommon plugin;
@@ -36,9 +38,20 @@ public class GuiData {
     private final BuyGuiItems buyGuiItems;
     private final Gson gson = new Gson();
 
-    private List<?> parsedResponse;
-    private ParsedGui parsedGui;
-    private final Map<String, CommonInventory> inventoryCache = new HashMap<>();
+    // Replaced as a whole on every load, so the main thread never reads caches that are being cleared
+    // or caches a menu built from the previous data.
+    private volatile GuiState state = new GuiState(null);
+
+    private static final class GuiState {
+        private final ParsedGui parsedGui;
+        private final Map<String, CommonInventory> inventoryCache = new ConcurrentHashMap<>();
+        // First page of a paginated inventory -> all of its pages.
+        private final Map<CommonInventory, List<CommonInventory>> inventoryPages = new ConcurrentHashMap<>();
+
+        private GuiState(ParsedGui parsedGui) {
+            this.parsedGui = parsedGui;
+        }
+    }
 
     public GuiData(MineStoreCommon plugin) {
         this.plugin = plugin;
@@ -47,6 +60,7 @@ public class GuiData {
     }
 
     public void load() throws WebContext {
+        List<?> parsedResponse;
         if (MineStoreCommon.version().requires(3, 0, 0)) {
             TypeToken<List<NewCategory>> listType = new TypeToken<List<NewCategory>>() {};
             WebRequest<List<NewCategory>> request = new WebRequest.Builder<>(listType).path("gui/packages_new").requiresApiKey(true).type(WebRequest.Type.GET).build();
@@ -64,24 +78,28 @@ public class GuiData {
             }
             parsedResponse = res.value();
         }
-        parsedGui = new ParsedGui(parsedResponse, plugin);
-        inventoryCache.clear();
+        state = new GuiState(new ParsedGui(parsedResponse, plugin));
+    }
+
+    // Not computeIfAbsent: building an inventory can need other cached inventories of the same map.
+    private CommonInventory getOrCreate(GuiState state, String cacheKey, Supplier<CommonInventory> creator) {
+        CommonInventory inventory = state.inventoryCache.get(cacheKey);
+        if (inventory != null) {
+            return inventory;
+        }
+        inventory = creator.get();
+        CommonInventory existing = state.inventoryCache.putIfAbsent(cacheKey, inventory);
+        return existing != null ? existing : inventory;
     }
 
     public CommonInventory getOrCreateRootInventory() {
-        String cacheKey = "root";
-        if (inventoryCache.containsKey(cacheKey)) {
-            return inventoryCache.get(cacheKey);
-        }
-
-        CommonInventory inventory = createRootInventory();
-        inventoryCache.put(cacheKey, inventory);
-        return inventory;
+        GuiState state = this.state;
+        return getOrCreate(state, "root", () -> createRootInventory(state));
     }
 
-    private CommonInventory createRootInventory() {
+    private CommonInventory createRootInventory(GuiState state) {
         List<SortedItem> sortedItems = new ArrayList<>();
-        for (ParsedCategory category : parsedGui.getCategories()) {
+        for (ParsedCategory category : state.parsedGui.getCategories()) {
             CommonItem itemWithHandler = createItemWithHandler(
                 category.getItem(),
                 createCategoryClickHandler(category, null)
@@ -90,12 +108,11 @@ public class GuiData {
             sortedItems.add(sortedItem);
         }
         SortedItem[] items = sortedItems.toArray(new SortedItem[0]);
-        CommonInventory inventory = new CommonInventory(
+        return registerPages(state, guiOpenener.createPages(
             plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("category").getKey("title").getValueAsString()),
-            54
-        );
-        guiOpenener.formatInventory(inventory, items, true);
-        return inventory;
+            items,
+            true
+        ));
     }
 
     private CommonItem createItemWithHandler(CommonItem baseItem, Consumer<GuiClickEvent> handler) {
@@ -110,17 +127,11 @@ public class GuiData {
     }
 
     public CommonInventory getOrCreateCategoryInventory(ParsedCategory category) {
-        String cacheKey = "category:" + category.getId();
-        if (inventoryCache.containsKey(cacheKey)) {
-            return inventoryCache.get(cacheKey);
-        }
-
-        CommonInventory inventory = createCategoryInventory(category, null);
-        inventoryCache.put(cacheKey, inventory);
-        return inventory;
+        GuiState state = this.state;
+        return getOrCreate(state, "category:" + category.getId(), () -> createCategoryInventory(state, category));
     }
 
-    private CommonInventory createCategoryInventory(ParsedCategory category, CommonInventory parentInventory) {
+    private CommonInventory createCategoryInventory(GuiState state, ParsedCategory category) {
         List<SortedItem> sortedItems = new ArrayList<>();
 
         if (category.hasSubcategories()) {
@@ -152,24 +163,15 @@ public class GuiData {
         }
 
         SortedItem[] items = sortedItems.toArray(new SortedItem[0]);
-        CommonInventory inventory = new CommonInventory(category.getDisplayName(), 54);
-        guiOpenener.formatInventory(inventory, items, false);
-
-        return inventory;
+        return registerPages(state, guiOpenener.createPages(category.getDisplayName(), items, false));
     }
 
     public CommonInventory getOrCreateSubCategoryInventory(ParsedSubCategory sub) {
-        String cacheKey = "subcategory:" + sub.getUrl();
-        if (inventoryCache.containsKey(cacheKey)) {
-            return inventoryCache.get(cacheKey);
-        }
-
-        CommonInventory inventory = createSubCategoryInventory(sub);
-        inventoryCache.put(cacheKey, inventory);
-        return inventory;
+        GuiState state = this.state;
+        return getOrCreate(state, "subcategory:" + sub.getUrl(), () -> createSubCategoryInventory(state, sub));
     }
 
-    private CommonInventory createSubCategoryInventory(ParsedSubCategory sub) {
+    private CommonInventory createSubCategoryInventory(GuiState state, ParsedSubCategory sub) {
         List<SortedItem> sortedItems = new ArrayList<>();
         for (ParsedPackage pkg : sub.getPackages()) {
             CommonItem itemWithHandler = createItemWithHandler(
@@ -179,13 +181,24 @@ public class GuiData {
             sortedItems.add(new SortedItem(itemWithHandler, pkg.getSorting(), pkg.isFeatured()));
         }
         SortedItem[] items = sortedItems.toArray(new SortedItem[0]);
-        CommonInventory inventory = new CommonInventory(
+        return registerPages(state, guiOpenener.createPages(
             plugin.miniMessage().deserialize(plugin.pluginConfig().getLang().getKey("buy-gui").getKey("package").getKey("title").getValueAsString().replace("%subcategory%", sub.getUrl())),
-            54
-        );
-        guiOpenener.formatInventory(inventory, items, false);
+            items,
+            false
+        ));
+    }
 
-        return inventory;
+    private CommonInventory registerPages(GuiState state, List<CommonInventory> pages) {
+        CommonInventory first = pages.get(0);
+        state.inventoryPages.put(first, pages);
+        return first;
+    }
+
+    // The back button is on every page of the inventory.
+    private void attachBackHandler(CommonInventory inventory, CommonInventory parentInventory) {
+        for (CommonInventory page : state.inventoryPages.getOrDefault(inventory, Collections.singletonList(inventory))) {
+            buyGuiItems.attachBackHandler(page, parentInventory);
+        }
     }
 
     private Consumer<GuiClickEvent> createCategoryClickHandler(ParsedCategory category, CommonInventory parentInventory) {
@@ -204,11 +217,11 @@ public class GuiData {
     private void openNewCategory(CommonUser user, ParsedCategory category, CommonInventory parentInventory) {
         CommonInventory inv = getOrCreateCategoryInventory(category);
         if (category.getNewCategories().isEmpty()) {
-            buyGuiItems.attachBackHandler(inv, parentInventory);
+            attachBackHandler(inv, parentInventory);
             user.openInventory(inv);
             return;
         }
-        buyGuiItems.attachBackHandler(inv, parentInventory);
+        attachBackHandler(inv, parentInventory);
         user.openInventory(inv);
     }
 
@@ -234,7 +247,7 @@ public class GuiData {
 
     private void openSubcategories(CommonUser user, ParsedCategory category) {
         CommonInventory inv = getOrCreateCategoryInventory(category);
-        buyGuiItems.attachBackHandler(inv, getOrCreateRootInventory());
+        attachBackHandler(inv, getOrCreateRootInventory());
         user.openInventory(inv);
     }
 
@@ -244,13 +257,13 @@ public class GuiData {
 
     private void openPackages(CommonUser user, ParsedCategory category, CommonInventory parentInventory) {
         CommonInventory inv = getOrCreateCategoryInventory(category);
-        buyGuiItems.attachBackHandler(inv, parentInventory);
+        attachBackHandler(inv, parentInventory);
         user.openInventory(inv);
     }
 
     private void openPackages(CommonUser user, ParsedSubCategory sub, CommonInventory parentInventory) {
         CommonInventory inv = getOrCreateSubCategoryInventory(sub);
-        buyGuiItems.attachBackHandler(inv, parentInventory);
+        attachBackHandler(inv, parentInventory);
         user.openInventory(inv);
     }
 
@@ -315,7 +328,7 @@ public class GuiData {
     }, 1000 * 60 * 5);
 
     public ParsedGui getParsedGui() {
-        return parsedGui;
+        return state.parsedGui;
     }
 
     public GuiOpenener getGuiInfo() {

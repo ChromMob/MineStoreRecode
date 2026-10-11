@@ -21,6 +21,8 @@ public class GuiOpenener {
         28, 29, 30, 31, 32, 33, 34,
         37, 38, 39, 40, 41, 42, 43
     };
+    private static final int PREVIOUS_PAGE_SLOT = 48;
+    private static final int NEXT_PAGE_SLOT = 50;
 
     public GuiOpenener(GuiData guiData) {
         this.guiData = guiData;
@@ -29,6 +31,42 @@ public class GuiOpenener {
             guiData.getPlugin().pluginConfig().getKey("buy-gui").getKey("back").getKey("item").getValueAsString(),
             Collections.singletonList(guiData.getPlugin().miniMessage().deserialize(guiData.getPlugin().pluginConfig().getLang().getKey("buy-gui").getKey("back").getKey("description").getValueAsString()))
         );
+    }
+
+    /**
+     * Spreads the items over as many 54 slot inventories as needed (28 items each), linked with previous/next buttons.
+     * The first page is the one to open.
+     */
+    public List<CommonInventory> createPages(Component title, SortedItem[] sortedItems, boolean isRoot) {
+        List<SortedItem> sortedList = new ArrayList<>();
+        Collections.addAll(sortedList, sortedItems);
+        sortedList.sort(Comparator.comparing(SortedItem::isFeatured).reversed()
+            .thenComparingInt(SortedItem::getSorting));
+
+        int pageCount = Math.max(1, (sortedList.size() + AUTO_POSITIONS.length - 1) / AUTO_POSITIONS.length);
+        List<CommonInventory> pages = new ArrayList<>();
+        for (int page = 0; page < pageCount; page++) {
+            List<SortedItem> pageItems = sortedList.subList(page * AUTO_POSITIONS.length, Math.min(sortedList.size(), (page + 1) * AUTO_POSITIONS.length));
+            CommonInventory inventory = new CommonInventory(title, 54);
+            formatInventory(inventory, pageItems.toArray(new SortedItem[0]), isRoot);
+            pages.add(inventory);
+        }
+        for (int page = 0; page < pageCount; page++) {
+            if (page > 0) {
+                pages.get(page).setItem(PREVIOUS_PAGE_SLOT, pageButton("Previous page", pages.get(page - 1)));
+            }
+            if (page < pageCount - 1) {
+                pages.get(page).setItem(NEXT_PAGE_SLOT, pageButton("Next page", pages.get(page + 1)));
+            }
+        }
+        return pages;
+    }
+
+    private CommonItem pageButton(String name, CommonInventory target) {
+        return new CommonItem(Component.text(name), "ARROW", Collections.emptyList(), event -> {
+            event.getUser().closeInventory();
+            event.getUser().openInventory(target);
+        });
     }
 
     public void formatInventory(CommonInventory inventory, SortedItem[] sortedItems, boolean isRoot) {
