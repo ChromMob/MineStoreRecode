@@ -28,7 +28,8 @@ public class MineStoreVersion {
     private String[] splitNumberAndText(String input) {
         String[] res = new String[2];
         int index = 0;
-        for (char c = input.charAt(index); index < input.length() && Character.isDigit(c); index++) {
+        while (index < input.length() && Character.isDigit(input.charAt(index))) {
+            index++;
         }
         res[0] = input.substring(0, index);
         res[1] = input.substring(index, input.length());
@@ -104,12 +105,11 @@ public class MineStoreVersion {
         if (version == null) {
             return dummy();
         }
-        String[] split = version.split("\\.");
         try {
-            Integer.parseInt(split[0]);
-        } catch (NumberFormatException e) {
+            return new MineStoreVersion(version);
+        } catch (RuntimeException e) {
+            // Unparseable versions (e.g. missing parts) are treated like a missing version instead of failing startup.
             return dummy();
         }
-        return new MineStoreVersion(version);
     }
 }
