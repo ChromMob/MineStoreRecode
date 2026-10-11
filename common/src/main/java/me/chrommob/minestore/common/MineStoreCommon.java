@@ -1,9 +1,11 @@
 package me.chrommob.minestore.common;
 
 import me.chrommob.minestore.api.Registries;
+import me.chrommob.minestore.api.event.MineStoreEventBus;
 import me.chrommob.minestore.api.event.types.MineStoreDisableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreEnableEvent;
 import me.chrommob.minestore.api.event.types.MineStoreLoadEvent;
+import me.chrommob.minestore.api.event.types.MineStorePlayerJoinEvent;
 import me.chrommob.minestore.api.event.types.MineStoreReloadEvent;
 import me.chrommob.minestore.api.generic.ApiData;
 import me.chrommob.minestore.api.generic.AuthData;
@@ -79,7 +81,7 @@ public class MineStoreCommon {
     private final PaymentHandler paymentHandler = new PaymentHandler(this);
     private final Dumper dumper = new Dumper();
     private static MineStoreVersion version;
-    private VerificationManager verificationManager;
+    private volatile VerificationManager verificationManager;
 
     private final MineStoreVersion subscriptionCommandSince = new MineStoreVersion(3, 0, 8);
     private final MineStoreVersion chargeBalanceSince = new MineStoreVersion(3, 2, 5);
@@ -126,6 +128,13 @@ public class MineStoreCommon {
             annotationParser = new AnnotationParser(
                     /* Manager */ Registries.COMMAND_MANAGER.get(),
                     /* Command sender type */ AbstractUser.class);
+        });
+        // Registered once, so admins only see the current verification state and not every past one.
+        MineStoreEventBus.registerListener(internalAddon, MineStorePlayerJoinEvent.class, event -> {
+            VerificationManager manager = verificationManager;
+            if (manager != null) {
+                manager.onJoin(event.getUsername());
+            }
         });
     }
     private static final DateTimeFormatter DEBUG_LOG_TIME_FORMAT =
