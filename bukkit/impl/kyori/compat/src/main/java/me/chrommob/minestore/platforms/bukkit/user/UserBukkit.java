@@ -6,7 +6,6 @@ import me.chrommob.minestore.api.interfaces.gui.CommonInventory;
 import me.chrommob.minestore.api.interfaces.user.CommonUser;
 import me.chrommob.minestore.platforms.bukkit.MineStoreBukkit;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
@@ -18,7 +17,6 @@ import java.util.UUID;
 public class UserBukkit extends CommonUser {
     private final Player player;
     private final String name;
-    private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacyAmpersand();
 
     public UserBukkit(Player player) {
         this.player = player;
@@ -92,7 +90,7 @@ public class UserBukkit extends CommonUser {
         if (player == null) {
             return;
         }
-        MineStoreInventoryHolder holder = new MineStoreInventoryHolder(inventory, serializer);
+        MineStoreInventoryHolder holder = new MineStoreInventoryHolder(inventory);
         player.openInventory(holder.getInventory());
         new GuiOpenEvent(this, inventory).call();
     }

@@ -18,24 +18,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MineStoreInventoryHolder implements InventoryHolder {
+    // Bukkit only renders § color codes in titles, names and lore. Hex colors need 1.16+.
+    private static final LegacyComponentSerializer SERIALIZER = Material.getMaterial("NETHERITE_PICKAXE") != null
+        ? LegacyComponentSerializer.builder().character(LegacyComponentSerializer.SECTION_CHAR).hexColors().useUnusualXRepeatedCharacterHexFormat().build()
+        : LegacyComponentSerializer.legacySection();
+
     private final CommonInventory inventory;
     private final Inventory bukkitInventory;
-    private final LegacyComponentSerializer serializer;
 
-    public MineStoreInventoryHolder(CommonInventory inventory, LegacyComponentSerializer serializer) {
+    public MineStoreInventoryHolder(CommonInventory inventory) {
         this.inventory = inventory;
-        this.serializer = serializer;
-        this.bukkitInventory = constructInventory(inventory, serializer);
+        this.bukkitInventory = constructInventory(inventory);
     }
 
-    private Inventory constructInventory(CommonInventory common, LegacyComponentSerializer serializer) {
-        Inventory inv = Bukkit.createInventory(this, common.size(), serializer.serialize(common.getTitle()));
+    private Inventory constructInventory(CommonInventory common) {
+        Inventory inv = Bukkit.createInventory(this, common.size(), SERIALIZER.serialize(common.getTitle()));
 
         ItemStack[] items = new ItemStack[common.size()];
         CommonItem[] commonItems = common.getItems();
         for (int i = 0; i < items.length; i++) {
             if (i < commonItems.length && commonItems[i] != null) {
-                items[i] = convertToBukkit(commonItems[i], serializer);
+                items[i] = convertToBukkit(commonItems[i]);
             } else {
                 items[i] = new ItemStack(Material.AIR);
             }
@@ -48,14 +51,14 @@ public class MineStoreInventoryHolder implements InventoryHolder {
         CommonItem[] commonItems = inventory.getItems();
         for (int i = 0; i < commonItems.length; i++) {
             if (commonItems[i] != null) {
-                bukkitInventory.setItem(i, convertToBukkit(commonItems[i], serializer));
+                bukkitInventory.setItem(i, convertToBukkit(commonItems[i]));
             } else {
                 bukkitInventory.setItem(i, new ItemStack(Material.AIR));
             }
         }
     }
 
-    private ItemStack convertToBukkit(CommonItem item, LegacyComponentSerializer serializer) {
+    private ItemStack convertToBukkit(CommonItem item) {
         String itemMaterial = item.getMaterial();
         if (itemMaterial == null || itemMaterial.isEmpty()) {
             itemMaterial = "AIR";
@@ -67,10 +70,10 @@ public class MineStoreInventoryHolder implements InventoryHolder {
         ItemStack stack = new ItemStack(material, item.getAmount());
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(serializer.serialize(item.getName()));
+            meta.setDisplayName(SERIALIZER.serialize(item.getName()));
             List<String> lore = new ArrayList<>();
             for (Component line : item.getLore()) {
-                lore.add(serializer.serialize(line));
+                lore.add(SERIALIZER.serialize(line));
             }
             meta.setLore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
