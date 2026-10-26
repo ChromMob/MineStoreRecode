@@ -24,11 +24,9 @@ public class AutoSetupCommand {
     public void onAutoSetup(AbstractUser abstractUser, @Argument("storeUrl") @Quoted String storeUrl, @Argument("apiKey") String apiKey, @Argument("secretKey") String secretKey) {
         CommonUser user = abstractUser.commonUser();
         user.sendMessage("Auto setup started!");
-        user.sendMessage("Store URL: " + storeUrl);
-        if (!storeUrl.endsWith("/")) {
-            storeUrl += "/";
-        }
-        ConfigKeys.STORE_URL.setValue(storeUrl);
+        // Normalized like a value read from the config: setValue would keep a URL without https://.
+        ConfigKeys.STORE_URL.loadValue(storeUrl);
+        user.sendMessage("Store URL: " + ConfigKeys.STORE_URL.getValue());
         ConfigKeys.API_KEYS.KEY.setValue(apiKey);
         ConfigKeys.API_KEYS.ENABLED.setValue(true);
         ConfigKeys.WEBLISTENER_KEYS.ENABLED.setValue(true);
