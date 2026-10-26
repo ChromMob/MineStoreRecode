@@ -456,10 +456,11 @@ public class MineStoreCommon {
         for (MineStoreAddon addon : addons) {
             addonConfigs.get(addon).reloadConfig("config");
         }
-        apiHandler = new ApiHandler(new AuthData(ConfigKeys.STORE_URL.getValue(), ConfigKeys.API_KEYS.ENABLED.getValue(), ConfigKeys.API_KEYS.KEY.getValue()));
         new MineStoreReloadEvent().call();
         log("Reloading...");
         pluginConfig.reload();
+        // Built after the config is read, so edits to the store URL or API key apply on this reload.
+        apiHandler = new ApiHandler(new AuthData(ConfigKeys.STORE_URL.getValue(), ConfigKeys.API_KEYS.ENABLED.getValue(), ConfigKeys.API_KEYS.KEY.getValue()));
         version = MineStoreVersion.getMineStoreVersion();
         if (!initialized) {
             init(true);
