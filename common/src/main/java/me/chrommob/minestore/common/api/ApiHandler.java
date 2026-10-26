@@ -10,6 +10,7 @@ import me.chrommob.minestore.api.web.WebRequest;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -35,6 +36,10 @@ public class ApiHandler {
             }
         } else {
             url = authData.createUrl(request.getCustomUrl(), request.getPath(), request.getParams());
+        }
+        // AuthData returns null when the URL is malformed, e.g. a store URL without https://.
+        if (url == null) {
+            return new Result<>(null, new WebContext(request, null, new MalformedURLException("Could not create a valid URL for " + request.getPath() + ", check store-url in config.yml")), true);
         }
         HttpsURLConnection urlConnection = null;
         try {
